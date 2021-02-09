@@ -1,7 +1,13 @@
 (defvar *passed-check* false)
 (defvar *dep-map*
   (list
+   ;; Sanity checking the JS/DOM.
+   (list (list '*node 'prototype 'insert-before) "function")
+   (list (list '*element 'prototype 'remove) "function")
+   (list (list 'document 'query-selector) "function")
+   (list (list 'document 'create-text-node) "function")
    (list (list 'document 'create-node-iterator) "function")
+   (list (list '*reflect) "object")
    (list (list '*weak-map) "function")
    (list (list '*proxy) "function")))
 

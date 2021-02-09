@@ -2,7 +2,9 @@ import s2 from "../dist/main.js";
 
 const obj = {};
 
-const [element, proxy] = s2(obj, document.getElementById("menu"));
+const [node, proxy] = s2(obj, document.getElementById("menu"));
+
+document.body.appendChild(element);
 
 window.obj = obj;
 window.p = proxy;
