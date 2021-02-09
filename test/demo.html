@@ -5,3 +5,13 @@
 <style>
   * { margin: 0; padding: 0; border: none; }
 </style>
+<template id="menu">
+  <slot name="options" data-template="#option"></slot>
+  <slot name="submit" data-template="#submit"></slot>
+</template>
+<template id="option">
+  <button data-text="label" data-event-click="choose"></button>
+</template>
+<template id="submit">
+  <button data-text="label" data-event-click="done"></button>
+</template>
