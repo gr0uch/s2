@@ -1,6 +1,6 @@
 # s2
 
-**s2 is a metaprogramming function that enables entire user interfaces to be mapped as data structures.**
+**s2 is a metaprogramming function that enables user interfaces to be mapped as data structures.**
 
 It works by returning a `Proxy` so that plain JS objects (data + functions), can map directly to elements. It uses `Proxy` objects to bind data to the DOM, HTML `<template>` & `<slot>` tags, and `data-` attributes to bind data and events.
 
@@ -13,7 +13,7 @@ Import the module:
 import s2 from "s2/dist/main.js";
 ```
 
-Trivial example of composing templates, binding text and event:
+Trivial example of composing templates, binding text and events:
 
 ```html
 <template id="menu">
@@ -41,6 +41,12 @@ const [node, binding] = s2({
 document.body.appendChild(node);
 ```
 
+Here are the data attributes it will look for:
+
+```
+data-text, data-event-*, data-unsafe-html
+```
+
 
 ## Caveats
 
@@ -49,7 +55,7 @@ s2 relies on Proxy objects throughout, so one can not use references to the orig
 
 ## Web Components
 
-s2 is agnostic about most of [Web Components](https://developer.mozilla.org/en-US/docs/Web/Web_Components), since the specification doesn't play well with server-side rendered HTML.
+s2 is agnostic about most of [Web Components](https://developer.mozilla.org/en-US/docs/Web/Web_Components), since the specification doesn't play well with server-side rendered HTML without some non-trivial work. It aims to focus on orthogonal functionality like data binding.
 
 Although s2 uses `<template>` and `<slot>` elements, it does so in a different context. For example, it is not possible to use the `slot` attribute to fill content in a slot, since s2 binds the slot to data rather than elements.
 

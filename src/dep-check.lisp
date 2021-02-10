@@ -7,6 +7,7 @@
    (list (list 'document 'query-selector) "function")
    (list (list 'document 'create-text-node) "function")
    (list (list 'document 'create-node-iterator) "function")
+   (list (list '*symbol) "function")
    (list (list '*reflect) "object")
    (list (list '*weak-map) "function")
    (list (list '*proxy) "function")))
