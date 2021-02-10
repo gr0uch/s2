@@ -9,9 +9,6 @@
 ;; A map of targets to contexts.
 (defvar *target-context-map* (new (*weak-map)))
 
-;; A map of templates to contexts.
-(defvar *template-context-map* (new (*weak-map)))
-
 ;; A map of targets to hash maps keyed by event names and valued by listeners.
 (defvar *target-event-map* (new (*weak-map)))
 
@@ -24,6 +21,7 @@
 
 
 (defun setter (target key value receiver)
+  (chain console (log "set" arguments))
   (let* ((context (chain *target-context-map* (get target)))
          (is-setter (eq (length arguments) 4))
          (is-delete (eq (length arguments) 2)))
@@ -33,14 +31,48 @@
              (type (@ descriptor type)))
         (when (eq type *symbol-text*) (setf (@ node text-content) value))
         (when (eq type *symbol-html*) (setf (@ node inner-h-t-m-l) value))
-        (when (eq type *symbol-event*) (set-event target value descriptor))))
+        (when (eq type *symbol-event*)
+          (set-event target value descriptor receiver))
+        (when (eq type *symbol-slot*)
+          (let ((proxy (set-slot target key value descriptor)))
+            (when proxy
+              (return-from
+               setter (chain *reflect (set target key proxy receiver))))))))
 
     (when is-delete (delete (getprop target key)))
-    (when is-setter (chain *reflect set (apply nil arguments))))
+    (when is-setter (chain *reflect (set target key value receiver))))
   t)
 
 
-(defun set-event (target value descriptor)
+(defun set-slot (target key value descriptor)
+  (let* ((anchor (@ descriptor anchor))
+         (slot (@ descriptor slot))
+         (template (@ descriptor template))
+         (hash (chain *target-node-map* (get target)))
+         (nodes (getprop hash key)))
+    (when nodes
+      (loop
+       for item in nodes do
+       (if (chain *array (is-array item))
+           (loop for node in item do
+                 (chain node (remove)))
+         (chain item (remove))))
+      (delete (getprop hash key)))
+    (when value
+      (if (chain *array (is-array value))
+          (progn
+            ;; TODO: unhandled case
+            )
+        (let* ((result (create-proxy value template))
+               (node (@ result 0))
+               (proxy (@ result 1)))
+          (setf (getprop hash key)
+                (chain *array prototype slice (call (@ node child-nodes))))
+          (chain (@ anchor parent-node) (insert-before node anchor))
+          proxy)))))
+
+
+(defun set-event (target value descriptor receiver)
   (let* ((node (@ descriptor node))
          (event (@ descriptor event))
          (hash (chain *target-event-map* (get target)))
@@ -49,7 +81,7 @@
       (chain node (remove-event-listener
                    event listener (@ listener options))))
     (when value
-      (let ((bound-listener (chain value (bind target))))
+      (let ((bound-listener (chain value (bind receiver))))
         (setf (@ bound-listener options) (@ value options))
         (chain node (add-event-listener
                      event bound-listener (@ bound-listener options)))
@@ -64,12 +96,12 @@
      while (setf node (chain iter (next-node))) do
      (when (eq (@ node tag-name) *tag-slot*)
        (let ((key (@ node name))
-             (marker (chain document (create-text-node "")))
+             (anchor (chain document (create-text-node "")))
              (template-node
               (chain document (query-selector (@ node dataset template)))))
-         (chain node parent-node (insert-before marker node))
+         (chain node parent-node (insert-before anchor node))
          (setf (getprop context key)
-               (create node marker
+               (create anchor anchor
                        slot node
                        template template-node
                        type *symbol-slot*))
@@ -86,9 +118,12 @@
         (when (chain key (starts-with "event"))
           (setf result
                 (create node node
+                        ;; Slice off "event", all events are lowercase.
                         event (chain key (slice 5) (to-lower-case))
                         type *symbol-event*)))
-        (when result (setf (getprop context value) result)))))
+        (when result
+          (delete (getprop (@ node dataset) key))
+          (setf (getprop context value) result)))))
     context))
 
 
@@ -98,18 +133,12 @@
          (iter nil)
          (node nil)
          (proxy (new (*proxy obj *proxy-handler*)))
-         (context (chain *template-context-map* (get template))))
-
-    ;; Building up context object for the first time takes work to
-    ;; iterate through all nodes, better to skip this if possible.
-    (when (not context)
-      (setf context (create-context clone))
-      (chain *template-context-map* (set template context)))
+         (context (create-context clone)))
 
     (chain *target-context-map* (set obj context))
     (chain *target-event-map* (set obj (create)))
     (chain *target-node-map* (set obj (create)))
-    (chain console (log "x" obj context))
+
     ;; Initialization
     (loop
      for key of obj do

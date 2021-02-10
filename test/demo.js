@@ -1,10 +1,10 @@
 import s2 from "../dist/main.js";
 
 const template = document.getElementById("menu");
-const [node, binding] = s2({
+const [node, proxy] = s2({
   title: "Hello, <em>world!</em>",
   easterEgg() {
-    console.log("henlo", this.title);
+    console.log("henlo", this);
   },
   counter: {
     count: 0,
@@ -15,4 +15,4 @@ const [node, binding] = s2({
 }, template);
 document.body.appendChild(node);
 
-window.p = binding;
+window.p = proxy;

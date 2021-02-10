@@ -30,7 +30,7 @@ Binding data:
 
 ```js
 const template = document.getElementById("menu");
-const [node, binding] = s2({
+const [node, proxy] = s2({
   counter: {
     count: 0,
     increment() {
@@ -39,6 +39,12 @@ const [node, binding] = s2({
   }
 }, template);
 document.body.appendChild(node);
+```
+
+Finally: *any changes on the proxy object will reflect in the DOM!*
+
+```js
+proxy.counter.count = 1337; // DOM updates
 ```
 
 Here are the data attributes it will look for:
