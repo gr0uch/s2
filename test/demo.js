@@ -7,6 +7,9 @@ const [node, proxy] = s2({
     console.log("henlo", this);
   },
   counter: {
+    label: {
+      text: 'c',
+    },
     count: 0,
     increment() {
       this.count++;

@@ -13,15 +13,33 @@
 (defvar *target-event-map* (new (*weak-map)))
 
 ;; A map of targets to hash maps keyed by key names and valued by an array of Nodes.
+;; This is used to keep track of delimiters for slots.
 (defvar *target-node-map* (new (*weak-map)))
 
-(defvar *proxy-handler*
-  (create set setter
-          delete-property setter))
+;; A map of proxies to arrays of Nodes.
+;; This is used to keep track of delimiters for individual proxy objects.
+(defvar *proxy-node-map* (new (*weak-map)))
+
+(defvar *proxy-object* (create set set-property delete-property set-property))
+(defvar *proxy-array* (create set set-index delete-property set-index))
 
 
-(defun setter (target key value receiver)
-  (chain console (log "set" arguments))
+(defun set-index (target key value receiver)
+  (chain console (log "i" arguments))
+  (let* ((is-setter (eq (length arguments) 4))
+         (is-delete (eq (length arguments) 2)))
+
+    ;; TODO: array logic!
+
+    (when is-delete
+      ;; (let ((nodes (chain *proxy-node-map* (get (getprop target key)))))
+      ;;   (remove-between-delimiters (@ nodes 0) (@ nodes 1)))
+      (delete (getprop target key)))
+    (when is-setter (chain *reflect (set target key value receiver))))
+  t)
+
+
+(defun set-property (target key value receiver)
   (let* ((context (chain *target-context-map* (get target)))
          (is-setter (eq (length arguments) 4))
          (is-delete (eq (length arguments) 2)))
@@ -37,11 +55,21 @@
           (let ((proxy (set-slot target key value descriptor)))
             (when proxy
               (return-from
-               setter (chain *reflect (set target key proxy receiver))))))))
+               set-property
+               (chain *reflect (set target key proxy receiver))))))))
 
     (when is-delete (delete (getprop target key)))
     (when is-setter (chain *reflect (set target key value receiver))))
   t)
+
+
+(defun remove-between-delimiters (start-node end-node)
+  (let ((node start-node))
+    (loop while (not (chain node (is-same-node end-node))) do
+          (let ((old-node node))
+            (setf node (@ node next-sibling))
+            (chain old-node (remove))))
+    (chain end-node (remove))))
 
 
 (defun set-slot (target key value descriptor)
@@ -50,26 +78,31 @@
          (template (@ descriptor template))
          (hash (chain *target-node-map* (get target)))
          (nodes (getprop hash key)))
+    ;; TODO: use slot empty state
     (when nodes
-      (loop
-       for item in nodes do
-       (if (chain *array (is-array item))
-           (loop for node in item do
-                 (chain node (remove)))
-         (chain item (remove))))
+      (remove-between-delimiters (@ nodes 0) (@ nodes 1))
       (delete (getprop hash key)))
     (when value
-      (if (chain *array (is-array value))
-          (progn
-            ;; TODO: unhandled case
-            )
-        (let* ((result (create-proxy value template))
+      (let ((parent-node (@ anchor parent-node))
+            (start-node (create-anchor))
+            (end-node (create-anchor)))
+        (setf (getprop hash key) (list start-node end-node))
+        (if (chain *array (is-array value))
+          (let* ((result (create-array value template))
+                 (nodes (@ result 0))
+                 (proxy (@ result 1)))
+            (chain parent-node (insert-before start-node anchor))
+            (loop for node in nodes do
+                  (chain parent-node (insert-before node anchor)))
+            (chain parent-node (insert-before end-node anchor))
+            proxy)
+        (let* ((result (create-binding value template))
                (node (@ result 0))
                (proxy (@ result 1)))
-          (setf (getprop hash key)
-                (chain *array prototype slice (call (@ node child-nodes))))
-          (chain (@ anchor parent-node) (insert-before node anchor))
-          proxy)))))
+          (chain parent-node (insert-before start-node anchor))
+          (chain parent-node (insert-before node anchor))
+          (chain parent-node (insert-before end-node anchor))
+          proxy))))))
 
 
 (defun set-event (target value descriptor receiver)
@@ -96,7 +129,7 @@
      while (setf node (chain iter (next-node))) do
      (when (eq (@ node tag-name) *tag-slot*)
        (let ((key (@ node name))
-             (anchor (chain document (create-text-node "")))
+             (anchor (create-anchor))
              (template-node
               (chain document (query-selector (@ node dataset template)))))
          (chain node parent-node (insert-before anchor node))
@@ -124,32 +157,54 @@
         (when result
           (delete (getprop (@ node dataset) key))
           (setf (getprop context value) result)))))
+
     context))
 
 
-(defun create-proxy (obj template)
+(defun create-array (array template)
+  (let* ((nodes (list))
+         (proxies (list))
+         (proxy nil))
+    (loop
+     for item in array do
+     (let ((result (create-binding item template)))
+       (chain nodes (push (@ result 0)))
+       (chain proxies (push (@ result 1)))))
+    (setf proxy (new (*proxy proxies *proxy-array*)))
+    (list nodes proxy)))
+
+
+(defun create-anchor ()
+  (chain document (create-text-node "")))
+
+
+(defun create-binding (obj template)
   (let* ((root (or (@ template content) template))
          (clone (chain root (clone-node t)))
-         (iter nil)
-         (node nil)
-         (proxy (new (*proxy obj *proxy-handler*)))
-         (context (create-context clone)))
+         (proxy (new (*proxy obj *proxy-object*)))
+         (context (create-context clone))
+         (start-node (create-anchor))
+         (end-node (create-anchor))
+         (nodes (list start-node end-node)))
+
+    ;; Each proxy should contain references to its own delimiters.
+    (chain clone (insert-before start-node (@ clone first-child)))
+    (chain clone (append-child end-node))
+    (chain *proxy-node-map* (set proxy nodes))
 
     (chain *target-context-map* (set obj context))
     (chain *target-event-map* (set obj (create)))
     (chain *target-node-map* (set obj (create)))
 
     ;; Initialization
-    (loop
-     for key of obj do
-     (setf (getprop proxy key) (getprop obj key))))
+    (chain *object (assign proxy obj))
 
-  (list clone proxy))
+    (list clone proxy)))
 
 
 (defun main (origin template)
   (dep-check)
-  (create-proxy origin template))
+  (create-binding origin template))
 
 
 (export :default main)
