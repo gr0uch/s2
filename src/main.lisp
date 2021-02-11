@@ -84,8 +84,8 @@
       (delete (getprop hash key)))
     (when value
       (let ((parent-node (@ anchor parent-node))
-            (start-node (create-anchor))
-            (end-node (create-anchor)))
+            (start-node (create-anchor 0 key))
+            (end-node (create-anchor 1 key)))
         (setf (getprop hash key) (list start-node end-node))
         (if (chain *array (is-array value))
           (let* ((result (create-array value template))
@@ -128,12 +128,12 @@
     (loop
      while (setf node (chain iter (next-node))) do
      (when (eq (@ node tag-name) *tag-slot*)
-       (let ((key (@ node name))
-             (anchor (create-anchor))
-             (template-node
-              (chain document (query-selector (@ node dataset template)))))
+       (let* ((slot-name (@ node name))
+              (anchor (create-anchor 2 slot-name))
+              (template-node
+               (chain document (query-selector (@ node dataset template)))))
          (chain node parent-node (insert-before anchor node))
-         (setf (getprop context key)
+         (setf (getprop context slot-name)
                (create anchor anchor
                        slot node
                        template template-node
@@ -174,8 +174,10 @@
     (list nodes proxy)))
 
 
-(defun create-anchor ()
-  (chain document (create-text-node "")))
+(defun create-anchor (type key)
+  (let ((comment (+ (if (eq type 0) "start" (if (eq type 1) "end" "anchor"))
+                    " " key)))
+    (chain document (create-comment comment))))
 
 
 (defun create-binding (obj template)
@@ -183,8 +185,8 @@
          (clone (chain root (clone-node t)))
          (proxy (new (*proxy obj *proxy-object*)))
          (context (create-context clone))
-         (start-node (create-anchor))
-         (end-node (create-anchor))
+         (start-node (create-anchor 0 "proxy"))
+         (end-node (create-anchor 1 "proxy"))
          (nodes (list start-node end-node)))
 
     ;; Each proxy should contain references to its own delimiters.
