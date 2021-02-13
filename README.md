@@ -13,8 +13,9 @@ The result is that *UI code effectively disappears*, it is folded into the data.
 
 ## TODO (INTERNAL)
 
-- [ ] Set array slots
+- [x] Set array slots
 - [ ] Set slot empty state
+- [ ] Mount/unmount functions
 - [ ] Set class
 - [ ] Set attribute
 - [ ] Automated testing

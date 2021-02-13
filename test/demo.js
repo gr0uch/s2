@@ -4,6 +4,7 @@ s2.debug = true;
 cleanupTemplates();
 
 const template = document.getElementById("menu");
+
 const [node, proxy] = s2({
   title: "Hello, <em>world!</em>",
   easterEgg() {
@@ -11,15 +12,27 @@ const [node, proxy] = s2({
   },
   counter: {
     things: [{ text: 'a' }, { text: 'b' }, { text: 'c' }],
+    'try': [
+        { run, code: `p.counter.things.reverse()` },
+        { run, code: `p.counter.things.push({ text: 'd' })` },
+        { run, code: `p.counter.things.unshift({ text: 'z' })` },
+        { run, code: `p.counter.things.splice(1, 1, { text: 'x' }, { text: 'y' })` },
+        { run, code: `p.counter.things.sort((a, b) => a.text < b.text)` },
+    ],
     count: 0,
     increment() {
       this.count++;
     },
   },
 }, template);
+
 document.body.appendChild(node);
 
 window.p = proxy;
+
+function run() {
+  eval(this.code);
+}
 
 function cleanupTemplates() {
   document.querySelectorAll('template').forEach(template => {

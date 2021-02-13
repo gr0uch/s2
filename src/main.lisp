@@ -32,9 +32,12 @@
 
 ;; The logic contained here is the most difficult. The flow is like:
 ;; - Deletion: just delete the proxy at the index.
-;; - Setter: can be split into two main categories.
-;;   - Insert/replace
-;;   - Swap
+;; - Setter: depends on whether the value is a new object or a proxy
+;;   that already exists in the array.
+;;   - Insert/replace: insert if the index doesn't exist yet.
+;;   - Swap: swap indexes of proxies only.
+;;     - The target location may or may not have a proxy.
+;;     - The target location's proxy may or may not be the same proxy.
 (defun set-index (target key value receiver)
   (when (@ main debug) (chain console (log "i" arguments)))
   (let* ((numkey (chain *number (parse-int key 10)))

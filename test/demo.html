@@ -16,7 +16,11 @@
   button { height: calc(var(--line) * 3 / 2); font-size: inherit; font-family: inherit; background: #579; color: #def; padding: 0 calc(var(--line) / 2); cursor: pointer; }
   button:hover { filter: brightness(120%); }
   button:active { background: #f57; }
-  pre { margin: var(--line) 0; padding: calc(var(--line) / 2) var(--line); background: rgba(0,0,0,0.04); }
+  pre { padding: calc(var(--line) / 4) calc(var(--line) / 2); background: rgba(0,0,0,0.04); }
+  .try { margin: var(--line) 0; display: flex; align-items: center; }
+  .try button { background: #8c9; }
+  .try pre { flex: 1; }
+  .try > * { margin: 0; }
 </style>
 <template id="menu">
   <h1 data-unsafe-html="title" data-event-click="easterEgg"></h1>
@@ -28,15 +32,17 @@
     <slot name="things" data-template="#things"></slot>
   </ul>
   Some things to try:
-  <pre>p.counter.things.reverse()
-p.counter.things.push({ text: 'd' })
-p.counter.things.unshift({ text: 'z' })
-p.counter.things.splice(1, 1, { text: 'x' }, { text: 'y' })
-p.counter.things.sort((a, b) => a.text < b.text)</pre>
+  <slot name="try" data-template="#try"></slot>
   <div class="counter">
     Count:
     <span data-text="count"></span>
     <button data-event-click="increment">Increment</button>
+  </div>
+</template>
+<template id="try">
+  <div class="try">
+    <button data-event-click="run">Run</button>
+    <pre data-text="code"></pre>
   </div>
 </template>
 <template id="things">
