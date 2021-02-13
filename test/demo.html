@@ -3,17 +3,42 @@
 <title>s2 test</title>
 <script type="module" src="./demo.js" defer></script>
 <style>
+  :root {
+    --line: 1.5em;
+  }
   * { margin: 0; padding: 0; border: none; }
+  body { font-size: 18px; font-family: sans-serif; color: #123; background: #def; line-height: var(--line); margin: calc(var(--line) * 2); }
+  h1 { margin: calc(var(--line) / -3) calc(var(--line) / -3) calc(var(--line) * 2 / 3); background: #123; color: #def; padding: calc(var(--line) * 1 / 2) calc(var(--line) / 3); font-weight: bold; font-size: 3em; }
+  ul { margin: var(--line); list-style-type: square; }
+  ul li { font-size: 1.5em; line-height: var(--line); }
+  .counter { margin: calc(var(--line) * 2) 0; }
+  .counter span { font-weight: bold; display: inline-block; margin-right: calc(var(--line) / 2); }
+  button { height: calc(var(--line) * 3 / 2); font-size: inherit; font-family: inherit; background: #579; color: #def; padding: 0 calc(var(--line) / 2); cursor: pointer; }
+  button:hover { filter: brightness(120%); }
+  button:active { background: #f57; }
+  pre { margin: var(--line) 0; padding: calc(var(--line) / 2) var(--line); background: rgba(0,0,0,0.04); }
 </style>
 <template id="menu">
   <h1 data-unsafe-html="title" data-event-click="easterEgg"></h1>
   <slot name="counter" data-template="#counter">Empty <strong>state</strong></slot>
 </template>
 <template id="counter">
-  <slot name="label" data-template="#label"></slot>
-  <span data-text="count"></span>
-  <button data-event-click="increment">Increment</button>
+  Here is a list of things:
+  <ul>
+    <slot name="things" data-template="#things"></slot>
+  </ul>
+  Some things to try:
+  <pre>p.counter.things.reverse()
+p.counter.things.push({ text: 'd' })
+p.counter.things.unshift({ text: 'z' })
+p.counter.things.splice(1, 1, { text: 'x' }, { text: 'y' })
+p.counter.things.sort((a, b) => a.text < b.text)</pre>
+  <div class="counter">
+    Count:
+    <span data-text="count"></span>
+    <button data-event-click="increment">Increment</button>
+  </div>
 </template>
-<template id="label">
-  <span data-text="text"></span>
+<template id="things">
+  <li data-text="text"></li>
 </template>

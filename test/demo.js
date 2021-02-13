@@ -1,17 +1,16 @@
 import s2 from "../dist/main.js";
 
+s2.debug = true;
 cleanupTemplates();
 
 const template = document.getElementById("menu");
 const [node, proxy] = s2({
   title: "Hello, <em>world!</em>",
   easterEgg() {
-    console.log("henlo", this);
+    this.title = "Fak!";
   },
   counter: {
-    label: {
-      text: 'c',
-    },
+    things: [{ text: 'a' }, { text: 'b' }, { text: 'c' }],
     count: 0,
     increment() {
       this.count++;

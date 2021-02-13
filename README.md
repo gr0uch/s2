@@ -1,6 +1,6 @@
 # s2
 
-**s2 is a metaprogramming function that enables user interfaces to be mapped as data structures.**
+**s2 is a metaprogramming function that enables web user interfaces to be mapped as data structures.**
 
 It works by returning a `Proxy` so that plain JS objects (data + functions), can map directly to elements. It uses `Proxy` objects to bind data to the DOM, HTML `<template>` & `<slot>` tags, and `data-` attributes to bind data and events.
 
@@ -8,7 +8,7 @@ The result is that *UI code effectively disappears*, it is folded into the data.
 
 >Even the simplest procedural logic is hard for humans to verify, but quite complex data structures are fairly easy to model and reason about... Data is more tractable than program logic. It follows that where you see a choice between complexity in data structures and complexity in code, choose the former. More: in evolving a design, you should actively seek ways to shift complexity from code to data.
 
--- Eric Raymond, [Basics of the Unix Philosophy](http://www.catb.org/~esr/writings/taoup/html/ch01s06.html)
+— Eric Raymond, [Basics of the Unix Philosophy](http://www.catb.org/~esr/writings/taoup/html/ch01s06.html)
 
 
 ## TODO (INTERNAL)
@@ -69,7 +69,6 @@ Here are the data attributes it will look for:
 - `data-event-*`
 - `data-class` (TBD)
 - `data-attribute-*` (TBD)
-```
 
 
 ## Caveats
@@ -100,4 +99,4 @@ Uses `parenscript-builder`, need to build the `psbuild` binary and put it here t
 
 ## License
 
-BSD 3-Clause
+[BSD 3-Clause](https://github.com/gr0uch/s2/blob/master/LICENSE)

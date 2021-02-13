@@ -20,22 +20,110 @@
 ;; This is used to keep track of delimiters for individual proxy objects.
 (defvar *proxy-node-map* (new (*weak-map)))
 
+;; A map of array proxies to templates.
+(defvar *proxy-template-map* (new (*weak-map)))
+
+;; A map of array proxies to anchors.
+(defvar *proxy-anchor-map* (new (*weak-map)))
+
 (defvar *proxy-object* (create set set-property delete-property set-property))
 (defvar *proxy-array* (create set set-index delete-property set-index))
 
 
+;; The logic contained here is the most difficult. The flow is like:
+;; - Deletion: just delete the proxy at the index.
+;; - Setter: can be split into two main categories.
+;;   - Insert/replace
+;;   - Swap
 (defun set-index (target key value receiver)
-  (chain console (log "i" arguments))
-  (let* ((is-setter (eq (length arguments) 4))
+  (when (@ main debug) (chain console (log "i" arguments)))
+  (let* ((numkey (chain *number (parse-int key 10)))
+         (is-index (not (chain *number (is-na-n numkey))))
+         (is-setter (eq (length arguments) 4))
          (is-delete (eq (length arguments) 2)))
 
-    ;; TODO: array logic!
-
     (when is-delete
-      ;; (let ((nodes (chain *proxy-node-map* (get (getprop target key)))))
-      ;;   (remove-between-delimiters (@ nodes 0) (@ nodes 1)))
+      (let ((nodes (chain *proxy-node-map* (get (getprop target key)))))
+        (remove-between-delimiters (@ nodes 0) (@ nodes 1)))
       (delete (getprop target key)))
-    (when is-setter (chain *reflect (set target key value receiver))))
+
+    (when (and is-setter (not is-index))
+      (return-from
+       set-index (chain *reflect (set target key value receiver))))
+
+    (when is-setter
+      (if (not (chain target (includes value)))
+          ;; Inserting or replacing an object.
+          (let* ((anchor (chain *proxy-anchor-map* (get receiver)))
+                 (parent-node (@ anchor parent-node))
+                 (template (chain *proxy-template-map* (get receiver)))
+                 (result (create-binding value template))
+                 (node (@ result 0))
+                 (proxy (@ result 1))
+                 (last-proxy (getprop target key))
+                 (next-proxy nil))
+
+            (loop for i from (+ numkey 1) to (- (length target) 1) do
+                  (setf next-proxy (getprop target i))
+                  (when next-proxy (break)))
+
+            (when last-proxy
+              ;; If last proxy does not exist elsewhere in the array, this means
+              ;; it's a replacement and the old nodes need to be removed.
+              (when (not (chain target
+                                (find (lambda (p i)
+                                        (and (eq p last-proxy)
+                                             (not (eq i numkey)))))))
+                (let ((nodes (chain *proxy-node-map* (get last-proxy))))
+                  (remove-between-delimiters (@ nodes 0) (@ nodes 1)))))
+
+            (if next-proxy
+                (let ((next-anchor
+                       (@ (chain *proxy-node-map* (get next-proxy)) 0)))
+                  (chain parent-node (insert-before node next-anchor)))
+              (chain parent-node (insert-before node anchor)))
+
+            (return-from
+             set-index (chain *reflect (set target key proxy receiver))))
+        ;; Swapping a proxy.
+        (let* ((other-index
+                (chain target (find-index
+                               (lambda (p i) (and (eq p value)
+                                                  (not (eq i numkey)))))))
+               (other-proxy (getprop target key)))
+          (when (and other-proxy (not (eq value other-proxy)))
+            (let* ((other-nodes (chain *proxy-node-map* (get other-proxy)))
+                   (other-start-node (@ other-nodes 0))
+                   (other-end-node (@ other-nodes 1))
+                   (nodes (chain *proxy-node-map* (get value)))
+                   (start-node (@ nodes 0))
+                   (end-node (@ nodes 1))
+                   (anchor (@ nodes 1 next-sibling))
+                   (parent-node (@ anchor parent-node)))
+
+              ;; Move the current proxy to before the other position.
+              (let ((node start-node))
+                (loop while (not (chain node (is-same-node end-node))) do
+                      (let ((old-node node))
+                        (setf node (@ node next-sibling))
+                        (chain parent-node
+                               (insert-before old-node other-start-node))))
+                (chain parent-node (insert-before end-node other-start-node)))
+
+              ;; Move other proxy to after the current position.
+              (let ((node other-start-node))
+                (loop while (not (chain node (is-same-node other-end-node))) do
+                      (let ((old-node node))
+                        (setf node (@ node next-sibling))
+                        (chain parent-node (insert-before old-node anchor))))
+                (chain parent-node (insert-before other-end-node anchor)))
+              ))
+
+          ;; After moving, set the other proxy to the other position.
+          (when (~ other-index)
+            (chain *reflect (set target other-index other-proxy receiver)))
+          ))
+      (chain *reflect (set target key value receiver))))
   t)
 
 
@@ -88,21 +176,22 @@
             (end-node (create-anchor 1 key)))
         (setf (getprop hash key) (list start-node end-node))
         (if (chain *array (is-array value))
-          (let* ((result (create-array value template))
-                 (nodes (@ result 0))
+            (let* ((result (create-array value template))
+                   (nodes (@ result 0))
+                   (proxy (@ result 1)))
+              (chain parent-node (insert-before start-node anchor))
+              (loop for node in nodes do
+                    (chain parent-node (insert-before node anchor)))
+              (chain parent-node (insert-before end-node anchor))
+              (chain *proxy-anchor-map* (set proxy anchor))
+              proxy)
+          (let* ((result (create-binding value template))
+                 (node (@ result 0))
                  (proxy (@ result 1)))
             (chain parent-node (insert-before start-node anchor))
-            (loop for node in nodes do
-                  (chain parent-node (insert-before node anchor)))
+            (chain parent-node (insert-before node anchor))
             (chain parent-node (insert-before end-node anchor))
-            proxy)
-        (let* ((result (create-binding value template))
-               (node (@ result 0))
-               (proxy (@ result 1)))
-          (chain parent-node (insert-before start-node anchor))
-          (chain parent-node (insert-before node anchor))
-          (chain parent-node (insert-before end-node anchor))
-          proxy))))))
+            proxy))))))
 
 
 (defun set-event (target value descriptor receiver)
@@ -171,13 +260,17 @@
        (chain nodes (push (@ result 0)))
        (chain proxies (push (@ result 1)))))
     (setf proxy (new (*proxy proxies *proxy-array*)))
+    (chain *proxy-template-map* (set proxy template))
     (list nodes proxy)))
 
 
 (defun create-anchor (type key)
-  (let ((comment (+ (if (eq type 0) "start" (if (eq type 1) "end" "anchor"))
-                    " " key)))
-    (chain document (create-comment comment))))
+  (if (@ main debug)
+      (let ((comment (+ (if (eq type 0) "start"
+                          (if (eq type 1) "end" "anchor"))
+                        " " key)))
+        (chain document (create-comment comment)))
+    (chain document (create-text-node ""))))
 
 
 (defun create-binding (obj template)
