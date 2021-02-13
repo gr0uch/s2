@@ -45,6 +45,13 @@
          (is-setter (eq (length arguments) 4))
          (is-delete (eq (length arguments) 2)))
 
+    (when (eq key "length")
+      ;; Setting array length should remove extra values.
+      (loop for i from value to (- (length target) 1) do
+            (let ((nodes (chain *proxy-node-map* (get (getprop target i)))))
+              (remove-between-delimiters (@ nodes 0) (@ nodes 1)))
+            (delete (getprop target i))))
+
     (when is-delete
       (let ((nodes (chain *proxy-node-map* (get (getprop target key)))))
         (remove-between-delimiters (@ nodes 0) (@ nodes 1)))

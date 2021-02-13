@@ -18,6 +18,7 @@ const [node, proxy] = s2({
         { run, code: `p.counter.things.unshift({ text: 'z' })` },
         { run, code: `p.counter.things.splice(1, 1, { text: 'x' }, { text: 'y' })` },
         { run, code: `p.counter.things.sort((a, b) => a.text < b.text)` },
+        { run, code: `p.counter.things.length = 2` },
     ],
     count: 0,
     increment() {
