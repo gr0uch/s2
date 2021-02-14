@@ -1,25 +1,27 @@
 import s2 from "../dist/main.js";
+import depCheck from "../dist/dep-check.js";
 
 s2.debug = true;
+depCheck();
 cleanupTemplates();
 
 const template = document.getElementById("menu");
 
 const [node, proxy] = s2({
   title: "Hello, <em>world!</em>",
-  easterEgg() {
-    this.title = "Fak!";
-  },
-  counter: {
+  list: {
     things: [{ text: 'a' }, { text: 'b' }, { text: 'c' }],
     'try': [
-        { run, code: `p.counter.things.reverse()` },
-        { run, code: `p.counter.things.push({ text: 'd' })` },
-        { run, code: `p.counter.things.unshift({ text: 'z' })` },
-        { run, code: `p.counter.things.splice(1, 1, { text: 'x' }, { text: 'y' })` },
-        { run, code: `p.counter.things.sort((a, b) => a.text < b.text)` },
-        { run, code: `p.counter.things.length = 2` },
+        { run, code: `p.list.things.reverse()` },
+        { run, code: `p.list.things.push({ text: 'd' })` },
+        { run, code: `p.list.things.unshift({ text: 'z' })` },
+        { run, code: `p.list.things.splice(1, 1, { text: 'x' }, { text: 'y' })` },
+        { run, code: `p.list.things.sort((a, b) => a.text < b.text)` },
+        { run, code: `p.list.things.length = 2` },
+        { run, code: `delete p.list.things` },
     ],
+  },
+  counter: {
     count: 0,
     increment() {
       this.count++;

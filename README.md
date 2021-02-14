@@ -15,7 +15,7 @@ The result is that *UI code effectively disappears*, it is folded into the data.
 
 - [x] Set array slots
 - [x] Set array length should delete
-- [ ] Set slot empty state
+- [x] Set slot empty state
 - [ ] Mount/unmount functions
 - [ ] Set class
 - [ ] Set attribute
@@ -27,7 +27,7 @@ The result is that *UI code effectively disappears*, it is folded into the data.
 Import the module:
 
 ```js
-import s2 from "s2/dist/main.js";
+import s2 from "https://cdn.jsdelivr.net/gh/gr0uch/s2@latest/dist/main.min.js";
 ```
 
 Trivial example of composing templates, binding text and events:
@@ -58,7 +58,7 @@ const [node, proxy] = s2({
 document.body.appendChild(node);
 ```
 
-Finally: *any changes on the proxy object will reflect in the DOM!*
+Finally: *any changes on the entire proxy object will reflect in the DOM!* This includes nested structures as well.
 
 ```js
 proxy.counter.count = 1337; // DOM updates
@@ -96,7 +96,12 @@ s2 can mean:
 
 ## Development
 
-Uses `parenscript-builder`, need to build the `psbuild` binary and put it here to compile with `make`. I couldn't figure out how to automate including this dependency yet.
+Requirements:
+
+- [`parenscript-builder`](https://github.com/gr0uch/parenscript-builder): see instructions
+- [`terser`](https://github.com/terser/terser): `npm i -g terser` to add this executable to `$PATH`
+
+Need to build the `psbuild` binary from `parenscript-builder` and put it here to compile with `make`. I couldn't figure out how to automate including this dependency yet.
 
 
 ## License

@@ -8,7 +8,7 @@
   }
   * { margin: 0; padding: 0; border: none; }
   body { font-size: 18px; font-family: sans-serif; color: #123; background: #def; line-height: var(--line); margin: calc(var(--line) * 2); }
-  h1 { margin: calc(var(--line) / -3) calc(var(--line) / -3) calc(var(--line) * 2 / 3); background: #123; color: #def; padding: calc(var(--line) * 1 / 2) calc(var(--line) / 3); font-weight: bold; font-size: 3em; }
+  h1 { margin: calc(var(--line) / -3) calc(var(--line) / -3) calc(var(--line) * 2 / 3); background: #123; color: #def; padding: calc(var(--line) * 1 / 2) calc(var(--line) / 3); font-weight: inherit; font-size: 3em; }
   ul { margin: var(--line); list-style-type: square; }
   ul li { font-size: 1.5em; line-height: var(--line); }
   .counter { margin: calc(var(--line) * 2) 0; }
@@ -22,29 +22,37 @@
   .try pre { flex: 1; }
   .try > * { margin: 0; }
 </style>
+
 <template id="menu">
-  <h1 data-unsafe-html="title" data-event-click="easterEgg"></h1>
-  <slot name="counter" data-template="#counter">Empty <strong>state</strong></slot>
+  <h1 data-unsafe-html="title"></h1>
+  <slot name="list" data-template="#list"></slot>
+  <slot name="counter" data-template="#counter"></slot>
 </template>
-<template id="counter">
+
+<template id="list">
   Here is a list of things:
   <ul>
-    <slot name="things" data-template="#things"></slot>
+    <slot name="things" data-template="#things"><li><em>(empty)</em></li></slot>
   </ul>
   Some things to try:
   <slot name="try" data-template="#try"></slot>
+</template>
+
+<template id="counter">
   <div class="counter">
     Count:
     <span data-text="count"></span>
     <button data-event-click="increment">Increment</button>
   </div>
 </template>
+
 <template id="try">
   <div class="try">
     <button data-event-click="run">Run</button>
     <pre data-text="code"></pre>
   </div>
 </template>
+
 <template id="things">
   <li data-text="text"></li>
 </template>
