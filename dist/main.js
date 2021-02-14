@@ -11,6 +11,14 @@ if ('undefined' === typeof SYMBOLTEXT) {
 if ('undefined' === typeof SYMBOLHTML) {
     var SYMBOLHTML = Symbol('html');
 };
+/* (DEFVAR *SYMBOL-CLASS* (*SYMBOL 'CLASS)) */
+if ('undefined' === typeof SYMBOLCLASS) {
+    var SYMBOLCLASS = Symbol('class');
+};
+/* (DEFVAR *SYMBOL-ATTRIBUTE* (*SYMBOL 'ATTRIBUTE)) */
+if ('undefined' === typeof SYMBOLATTRIBUTE) {
+    var SYMBOLATTRIBUTE = Symbol('attribute');
+};
 /* (DEFVAR *SYMBOL-EVENT* (*SYMBOL 'EVENT)) */
 if ('undefined' === typeof SYMBOLEVENT) {
     var SYMBOLEVENT = Symbol('event');
@@ -258,6 +266,9 @@ function setIndex(target, key, value, receiver) {
                (AND (EQ TYPE *SYMBOL-HTML*)
                     (NOT (EQ VALUE (@ NODE INNER-H-T-M-L))))
              (SETF (@ NODE INNER-H-T-M-L) VALUE))
+           (WHEN (EQ TYPE *SYMBOL-CLASS*) (SET-CLASS NODE VALUE))
+           (WHEN (EQ TYPE *SYMBOL-ATTRIBUTE*)
+             (SET-ATTRIBUTE NODE (@ DESCRIPTOR NAME) VALUE))
            (WHEN (EQ TYPE *SYMBOL-EVENT*)
              (SET-EVENT TARGET VALUE DESCRIPTOR RECEIVER))
            (WHEN (EQ TYPE *SYMBOL-SLOT*)
@@ -282,6 +293,12 @@ function setProperty(target, key, value, receiver) {
         if (type13 === SYMBOLHTML && value !== node12.innerHTML) {
             node12.innerHTML = value;
         };
+        if (type13 === SYMBOLCLASS) {
+            setClass(node12, value);
+        };
+        if (type13 === SYMBOLATTRIBUTE) {
+            setAttribute(node12, descriptor.name, value);
+        };
         if (type13 === SYMBOLEVENT) {
             setEvent(target, value, descriptor, receiver);
         };
@@ -302,6 +319,58 @@ function setProperty(target, key, value, receiver) {
     __PS_MV_REG = [];
     return true;
 };
+/* (DEFUN SET-ATTRIBUTE (NODE NAME VALUE)
+     (IF VALUE
+         (CHAIN NODE (SET-ATTRIBUTE NAME VALUE))
+         (CHAIN NODE (REMOVE-ATTRIBUTE NAME)))) */
+function setAttribute(node, name, value) {
+    return value ? node.setAttribute(name, value) : node.removeAttribute(name);
+};
+/* (DEFUN SET-CLASS (NODE VALUE)
+     (IF VALUE
+         (LET* ((CLASS-LIST (@ NODE CLASS-LIST))
+                (PROTOTYPE (CHAIN *OBJECT (GET-PROTOTYPE-OF VALUE)))
+                (ARRAY
+                 (IF (EQ PROTOTYPE (@ *SET PROTOTYPE))
+                     (CHAIN VALUE (VALUES))
+                     (IF (EQ PROTOTYPE (@ *ARRAY PROTOTYPE))
+                         VALUE
+                         (IF (EQ PROTOTYPE (@ *STRING PROTOTYPE))
+                             (CHAIN VALUE (SPLIT  ))
+                             (LIST))))))
+           (LOOP FOR CLS IN (CHAIN CLASS-LIST (VALUES))
+                 DO (WHEN (NOT (CHAIN ARRAY (INCLUDES CLS)))
+                      (CHAIN CLASS-LIST (REMOVE CLS))))
+           (LOOP FOR CLS IN ARRAY
+                 DO (WHEN (NOT (CHAIN CLASS-LIST (CONTAINS CLS)))
+                      (CHAIN CLASS-LIST (ADD CLS)))))
+         (CHAIN NODE (REMOVE-ATTRIBUTE 'CLASS)))
+     NIL) */
+function setClass(node, value) {
+    if (value) {
+        var classList14 = node.classList;
+        var prototype = Object.getPrototypeOf(value);
+        var array = prototype === Set.prototype ? value.values() : (prototype === Array.prototype ? value : (prototype === String.prototype ? value.split(' ') : []));
+        var _js15 = classList14.values();
+        var _js17 = _js15.length;
+        for (var _js16 = 0; _js16 < _js17; _js16 += 1) {
+            var cls = _js15[_js16];
+            if (!array.includes(cls)) {
+                classList14.remove(cls);
+            };
+        };
+        var _js19 = array.length;
+        for (var _js18 = 0; _js18 < _js19; _js18 += 1) {
+            var cls20 = array[_js18];
+            if (!classList14.contains(cls20)) {
+                classList14.add(cls20);
+            };
+        };
+    } else {
+        node.removeAttribute('class');
+    };
+    return null;
+};
 /* (DEFUN REMOVE-BETWEEN-DELIMITERS (START-NODE END-NODE)
      (LET ((NODE START-NODE))
        (LOOP WHILE (NOT (CHAIN NODE (IS-SAME-NODE END-NODE)))
@@ -319,6 +388,7 @@ function removeBetweenDelimiters(startNode, endNode) {
     return endNode.remove();
 };
 /* (DEFUN SET-SLOT (TARGET KEY VALUE DESCRIPTOR)
+     (WHEN (NOT (OR (GETPROP TARGET KEY) VALUE)) (RETURN-FROM SET-SLOT))
      (LET* ((ANCHOR (@ DESCRIPTOR ANCHOR))
             (SLOT (@ DESCRIPTOR SLOT))
             (TEMPLATE (@ DESCRIPTOR TEMPLATE))
@@ -357,12 +427,15 @@ function removeBetweenDelimiters(startNode, endNode) {
        (CHAIN PARENT-NODE (INSERT-BEFORE END-NODE ANCHOR))
        RETURN-VALUE)) */
 function setSlot(target, key, value, descriptor) {
-    var anchor14 = descriptor.anchor;
-    var slot15 = descriptor.slot;
-    var template16 = descriptor.template;
+    if (!(target[key] || value)) {
+        return;
+    };
+    var anchor20 = descriptor.anchor;
+    var slot21 = descriptor.slot;
+    var template22 = descriptor.template;
     var hash = TARGETNODEMAP.get(target);
     var nodes = hash[key];
-    var parentNode17 = anchor14.parentNode;
+    var parentNode23 = anchor20.parentNode;
     var startNode = createAnchor(0, key);
     var endNode = createAnchor(1, key);
     var returnValue = null;
@@ -371,38 +444,38 @@ function setSlot(target, key, value, descriptor) {
         delete hash[key];
     };
     hash[key] = [startNode, endNode];
-    parentNode17.insertBefore(startNode, anchor14);
+    parentNode23.insertBefore(startNode, anchor20);
     if (value) {
         if (Array.isArray(value)) {
-            var result = createArray(value, template16);
-            var nodes18 = result[0];
+            var result = createArray(value, template22);
+            var nodes24 = result[0];
             var proxy = result[1];
-            parentNode17.insertBefore(startNode, anchor14);
-            var _js20 = nodes18.length;
-            for (var _js19 = 0; _js19 < _js20; _js19 += 1) {
-                var node = nodes18[_js19];
-                parentNode17.insertBefore(node, anchor14);
+            parentNode23.insertBefore(startNode, anchor20);
+            var _js26 = nodes24.length;
+            for (var _js25 = 0; _js25 < _js26; _js25 += 1) {
+                var node = nodes24[_js25];
+                parentNode23.insertBefore(node, anchor20);
             };
-            parentNode17.insertBefore(endNode, anchor14);
-            PROXYANCHORMAP.set(proxy, anchor14);
+            parentNode23.insertBefore(endNode, anchor20);
+            PROXYANCHORMAP.set(proxy, anchor20);
             PROXYNODEMAP.set(proxy, hash[key]);
             returnValue = proxy;
         } else {
-            var result21 = createBinding(value, template16);
-            var node22 = result21[0];
-            var proxy23 = result21[1];
-            parentNode17.insertBefore(node22, anchor14);
-            returnValue = proxy23;
+            var result27 = createBinding(value, template22);
+            var node28 = result27[0];
+            var proxy29 = result27[1];
+            parentNode23.insertBefore(node28, anchor20);
+            returnValue = proxy29;
         };
     } else {
-        var _js24 = slot15.childNodes;
-        var _js26 = _js24.length;
-        for (var _js25 = 0; _js25 < _js26; _js25 += 1) {
-            var node27 = _js24[_js25];
-            parentNode17.insertBefore(node27.cloneNode(true), anchor14);
+        var _js30 = slot21.childNodes;
+        var _js32 = _js30.length;
+        for (var _js31 = 0; _js31 < _js32; _js31 += 1) {
+            var node33 = _js30[_js31];
+            parentNode23.insertBefore(node33.cloneNode(true), anchor20);
         };
     };
-    parentNode17.insertBefore(endNode, anchor14);
+    parentNode23.insertBefore(endNode, anchor20);
     __PS_MV_REG = [];
     return returnValue;
 };
@@ -422,18 +495,18 @@ function setSlot(target, key, value, descriptor) {
                    (@ BOUND-LISTENER OPTIONS)))
            (SETF (GETPROP HASH EVENT) BOUND-LISTENER))))) */
 function setEvent(target, value, descriptor, receiver) {
-    var node27 = descriptor.node;
-    var event28 = descriptor.event;
+    var node33 = descriptor.node;
+    var event34 = descriptor.event;
     var hash = TARGETEVENTMAP.get(target);
-    var listener = hash[event28];
+    var listener = hash[event34];
     if (listener) {
-        node27.removeEventListener(event28, listener, listener.options);
+        node33.removeEventListener(event34, listener, listener.options);
     };
     if (value) {
         var boundListener = value.bind(receiver);
         boundListener.options = value.options;
-        node27.addEventListener(event28, boundListener, boundListener.options);
-        return hash[event28] = boundListener;
+        node33.addEventListener(event34, boundListener, boundListener.options);
+        return hash[event34] = boundListener;
     };
 };
 /* (DEFUN CREATE-CONTEXT (CLONE)
@@ -456,20 +529,33 @@ function setEvent(target, value, descriptor, receiver) {
                                     DO (LET ((VALUE
                                               (GETPROP (@ NODE DATASET) KEY))
                                              (RESULT NIL))
-                                         (WHEN (EQ KEY 'TEXT)
+                                         (CASE KEY
+                                           (text
+                                            (SETF RESULT
+                                                    (CREATE NODE NODE TYPE
+                                                     *SYMBOL-TEXT*)))
+                                           (class
+                                            (SETF RESULT
+                                                    (CREATE NODE NODE TYPE
+                                                     *SYMBOL-CLASS*)))
+                                           (unsafeHtml
+                                            (SETF RESULT
+                                                    (CREATE NODE NODE TYPE
+                                                     *SYMBOL-HTML*))))
+                                         (WHEN
+                                             (CHAIN KEY
+                                                    (STARTS-WITH 'ATTRIBUTE))
                                            (SETF RESULT
                                                    (CREATE NODE NODE TYPE
-                                                    *SYMBOL-TEXT*)))
-                                         (WHEN (EQ KEY 'UNSAFE-HTML)
-                                           (SETF RESULT
-                                                   (CREATE NODE NODE TYPE
-                                                    *SYMBOL-HTML*)))
+                                                    *SYMBOL-ATTRIBUTE* NAME
+                                                    (CHAIN KEY (SLICE 9)
+                                                           (TO-LOWER-CASE)))))
                                          (WHEN (CHAIN KEY (STARTS-WITH 'EVENT))
                                            (SETF RESULT
-                                                   (CREATE NODE NODE EVENT
+                                                   (CREATE NODE NODE TYPE
+                                                    *SYMBOL-EVENT* EVENT
                                                     (CHAIN KEY (SLICE 5)
-                                                           (TO-LOWER-CASE))
-                                                    TYPE *SYMBOL-EVENT*)))
+                                                           (TO-LOWER-CASE)))))
                                          (WHEN RESULT
                                            (DELETE
                                             (GETPROP (@ NODE DATASET) KEY))
@@ -497,16 +583,26 @@ function createContext(clone) {
         for (var key in node.dataset) {
             var value = node.dataset[key];
             var result = null;
-            if (key === 'text') {
+            switch (key) {
+            case 'text':
                 result = { node : node, type : SYMBOLTEXT };
-            };
-            if (key === 'unsafeHtml') {
+                break;
+            case 'class':
+                result = { node : node, type : SYMBOLCLASS };
+                break;
+            case 'unsafeHtml':
                 result = { node : node, type : SYMBOLHTML };
+            };
+            if (key.startsWith('attribute')) {
+                result = { node : node,
+                        type : SYMBOLATTRIBUTE,
+                        name : key.slice(9).toLowerCase()
+                      };
             };
             if (key.startsWith('event')) {
                 result = { node : node,
-                        event : key.slice(5).toLowerCase(),
-                        type : SYMBOLEVENT
+                        type : SYMBOLEVENT,
+                        event : key.slice(5).toLowerCase()
                       };
             };
             if (result) {
@@ -531,9 +627,9 @@ function createArray(array, template) {
     var nodes = [];
     var proxies = [];
     var proxy = null;
-    var _js30 = array.length;
-    for (var _js29 = 0; _js29 < _js30; _js29 += 1) {
-        var item = array[_js29];
+    var _js36 = array.length;
+    for (var _js35 = 0; _js35 < _js36; _js35 += 1) {
+        var item = array[_js35];
         var result = createBinding(item, template);
         nodes.push(result[0]);
         proxies.push(result[1]);

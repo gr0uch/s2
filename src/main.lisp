@@ -1,6 +1,8 @@
 (defvar *symbol-slot* (*symbol 'slot))
 (defvar *symbol-text* (*symbol 'text))
 (defvar *symbol-html* (*symbol 'html))
+(defvar *symbol-class* (*symbol 'class))
+(defvar *symbol-attribute* (*symbol 'attribute))
 (defvar *symbol-event* (*symbol 'event))
 (defvar *tag-slot* '*slot*)
 
@@ -153,6 +155,10 @@
         (when (and (eq type *symbol-html*)
                    (not (eq value (@ node inner-h-t-m-l))))
           (setf (@ node inner-h-t-m-l) value))
+        (when (eq type *symbol-class*)
+          (set-class node value))
+        (when (eq type *symbol-attribute*)
+          (set-attribute node (@ descriptor name) value))
         (when (eq type *symbol-event*)
           (set-event target value descriptor receiver))
         (when (eq type *symbol-slot*)
@@ -167,6 +173,32 @@
   t)
 
 
+(defun set-attribute (node name value)
+  (if value
+      (chain node (set-attribute name value))
+    (chain node (remove-attribute name))))
+
+
+(defun set-class (node value)
+  (if value
+      (let* ((class-list (@ node class-list))
+             (prototype (chain *object (get-prototype-of value)))
+             (array
+              (if (eq prototype (@ *set prototype)) (chain value (values))
+                (if (eq prototype (@ *array prototype)) value
+                  (if (eq prototype (@ *string prototype))
+                      (chain value (split " "))
+                    (list))))))
+        (loop for cls in (chain class-list (values)) do
+              (when (not (chain array (includes cls)))
+                (chain class-list (remove cls))))
+        (loop for cls in array do
+              (when (not (chain class-list (contains cls)))
+                (chain class-list (add cls)))))
+    (chain node (remove-attribute 'class)))
+  nil)
+
+
 (defun remove-between-delimiters (start-node end-node)
   (let ((node start-node))
     (loop while (not (chain node (is-same-node end-node))) do
@@ -177,6 +209,9 @@
 
 
 (defun set-slot (target key value descriptor)
+  ;; Skip deletion if already empty.
+  (when (not (or (getprop target key) value)) (return-from set-slot))
+
   (let* ((anchor (@ descriptor anchor))
          (slot (@ descriptor slot))
          (template (@ descriptor template))
@@ -260,16 +295,21 @@
       for key of (@ node dataset) do
       (let ((value (getprop (@ node dataset) key))
             (result nil))
-        (when (eq key 'text)
-          (setf result (create node node type *symbol-text*)))
-        (when (eq key 'unsafe-html)
-          (setf result (create node node type *symbol-html*)))
+        (case
+         key
+         ("text" (setf result (create node node type *symbol-text*)))
+         ("class" (setf result (create node node type *symbol-class*)))
+         ("unsafeHtml" (setf result (create node node type *symbol-html*))))
+        (when (chain key (starts-with 'attribute))
+          (setf result
+                (create node node type *symbol-attribute*
+                        ;; Slice off "attribute", all attributes are lowercase.
+                        name (chain key (slice 9) (to-lower-case)))))
         (when (chain key (starts-with 'event))
           (setf result
-                (create node node
+                (create node node type *symbol-event*
                         ;; Slice off "event", all events are lowercase.
-                        event (chain key (slice 5) (to-lower-case))
-                        type *symbol-event*)))
+                        event (chain key (slice 5) (to-lower-case)))))
         (when result
           (delete (getprop (@ node dataset) key))
           (setf (getprop context value) result)))))

@@ -16,9 +16,9 @@ The result is that *UI code effectively disappears*, it is folded into the data.
 - [x] Set array slots
 - [x] Set array length should delete
 - [x] Set slot empty state
-- [ ] Mount/unmount functions
-- [ ] Set class
-- [ ] Set attribute
+- [x] Set class
+- [x] Set attribute
+- [ ] Mount/unmount functions (animations)
 - [ ] Automated testing
 
 
@@ -69,7 +69,7 @@ Here are the data attributes it will look for:
 
 - `data-text`, `data-unsafe-html`
 - `data-event-*`
-- `data-class` (TBD)
+- `data-class`
 - `data-attribute-*` (TBD)
 
 

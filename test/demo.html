@@ -23,8 +23,11 @@
   .try > * { margin: 0; }
 </style>
 
-<template id="menu">
-  <h1 data-unsafe-html="title"></h1>
+<template id="root">
+  <h1 data-unsafe-html="title"
+      data-class="titleClass"
+      data-attribute-lang="titleLang">
+  </h1>
   <slot name="list" data-template="#list"></slot>
   <slot name="counter" data-template="#counter"></slot>
 </template>

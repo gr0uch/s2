@@ -5,10 +5,12 @@ s2.debug = true;
 depCheck();
 cleanupTemplates();
 
-const template = document.getElementById("menu");
+const template = document.querySelector("#root");
 
 const [node, proxy] = s2({
   title: "Hello, <em>world!</em>",
+  titleClass: "title",
+  titleLang: "en",
   list: {
     things: [{ text: 'a' }, { text: 'b' }, { text: 'c' }],
     'try': [
@@ -19,6 +21,7 @@ const [node, proxy] = s2({
         { run, code: `p.list.things.sort((a, b) => a.text < b.text)` },
         { run, code: `p.list.things.length = 2` },
         { run, code: `delete p.list.things` },
+        { run, code: `p.list.things = [ { text: 'e' }, { text: 'f' } ]` },
     ],
   },
   counter: {
