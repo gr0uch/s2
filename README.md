@@ -8,7 +8,7 @@ The result is that *UI code effectively disappears*, it is folded into the data.
 
 >Even the simplest procedural logic is hard for humans to verify, but quite complex data structures are fairly easy to model and reason about... Data is more tractable than program logic. It follows that where you see a choice between complexity in data structures and complexity in code, choose the former. More: in evolving a design, you should actively seek ways to shift complexity from code to data.
 
-— Eric Raymond, [Basics of the Unix Philosophy](http://www.catb.org/~esr/writings/taoup/html/ch01s06.html)
+— Eric S. Raymond, [Basics of the Unix Philosophy](http://www.catb.org/~esr/writings/taoup/html/ch01s06.html)
 
 
 ## Usage
@@ -22,12 +22,12 @@ import s2 from "https://cdn.jsdelivr.net/gh/gr0uch/s2@latest/dist/main.min.js";
 Trivial example of composing templates, binding text and events:
 
 ```html
-<template id="menu">
+<template id="root">
   <h1>Hello, world!</h1>
-  <slot name="counter" data-template="#counter">Empty</slot>
+  <slot name="counter" data-template="#countbox">Empty</slot>
 </template>
-<template id="counter">
-  <span data=text="count"></span>
+<template id="countbox">
+  <span data-text="count"></span>
   <button data-event-click="increment">Increment</button>
 </template>
 ```
@@ -35,7 +35,7 @@ Trivial example of composing templates, binding text and events:
 Binding data:
 
 ```js
-const template = document.getElementById("menu");
+const template = document.getElementById("root");
 const [node, proxy] = s2({
   counter: {
     count: 0,
@@ -101,7 +101,7 @@ s2 can mean:
 - super solenoid
 - sneaky submarine
 - season 2
-- 2 kilobytes
+- 2 kilobytes compressed
 
 
 ## Development
