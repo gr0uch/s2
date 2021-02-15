@@ -2,7 +2,7 @@
 
 **s2 is a metaprogramming function that enables web user interfaces to be mapped as data structures.**
 
-It works by returning a `Proxy` so that plain JS objects (data + functions), can map directly to elements. It uses `Proxy` objects to bind data to the DOM, HTML `<template>` & `<slot>` tags, and `data-` attributes to bind data and events.
+It works by returning a `Proxy` so that plain JS objects (data + functions), can map directly to elements. It binds data structures to the DOM, using HTML `<template>` & `<slot>` tags, and `data-` attributes to bind data and events.
 
 The result is that *UI code effectively disappears*, it is folded into the data.
 
@@ -47,7 +47,7 @@ const [node, proxy] = s2({
 document.body.appendChild(node);
 ```
 
-Finally: *any changes on the entire proxy object will reflect in the DOM!* This includes nested structures as well.
+Finally: *any changes on the entire proxy object will reflect in the DOM!* **This includes deeply nested structures as well.**
 
 ```js
 proxy.counter.count = 1337; // DOM updates
@@ -83,7 +83,7 @@ import { mount, unmount } from '...';
 
 ## Caveats
 
-s2 relies on Proxy objects throughout, so one can not use references to the original objects and expect it to work. Instead, always get new references by accessing keys via the Proxy.
+s2 relies on Proxy objects throughout, so one can not use references to the original objects and expect it to work. Instead, always get new references by accessing keys via the Proxy. This generally shouldn't be a problem.
 
 
 ## Web Components
