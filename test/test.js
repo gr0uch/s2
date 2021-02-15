@@ -1,6 +1,14 @@
-import s2 from "../dist/main.js";
+import s2, { mount, unmount } from "../dist/main.js";
 import depCheck from "../dist/dep-check.js";
+import test from "./runner.js";
 
+const initialThings = [
+  { text: 'a' },
+  { text: 'b' },
+  { text: 'c' },
+];
+
+test.initialThings = initialThings;
 s2.debug = true;
 depCheck();
 cleanupTemplates();
@@ -12,7 +20,7 @@ const [node, proxy] = s2({
   titleClass: "title",
   titleLang: "en",
   list: {
-    things: [{ text: 'a' }, { text: 'b' }, { text: 'c' }],
+    things: initialThings.slice(),
     'try': [
         { run, code: `p.list.things.reverse()` },
         { run, code: `p.list.things.push({ text: 'd' })` },
@@ -26,15 +34,25 @@ const [node, proxy] = s2({
   },
   counter: {
     count: 0,
-    increment() {
-      this.count++;
+    total: 0,
+    runText: 'Run test',
+    test,
+    [mount]: function(node) {
+      console.log('Mount called', node, this);
     },
+    [unmount]: delayUnmount,
   },
 }, template);
 
 document.body.appendChild(node);
 
 window.p = proxy;
+
+async function delayUnmount(node) {
+  console.log('Unmount called', node, this);
+  node.style.color = '#f35';
+  await new Promise(resolve => setTimeout(resolve, 500));
+}
 
 function run() {
   eval(this.code);

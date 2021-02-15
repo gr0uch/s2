@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2020%2018'%3E%3Ctext%20x='-2'%20y='14'%20style='/*fill:transparent;text-shadow:0 0 0 black;*/'%3E💣%3C/text%3E%3C/svg%3E" type="image/svg+xml" />
+<title>s2 test</title>
+<script type="module" src="./test.js" defer></script>
+<style>
+  :root {
+    --unit: 1.5em;
+  }
+  * { margin: 0; padding: 0; border: none; }
+  body { font-size: 14px; font-family: sans-serif; color: #bbb; background: #222; line-height: var(--unit); margin: calc(var(--unit) * 1); }
+  h1 { margin: calc(var(--unit) / -3) calc(var(--unit) / -3) calc(var(--unit) * 2 / 3); background: #111; color: #fff; padding: calc(var(--unit) * 1 / 2) calc(var(--unit) / 3); font-weight: inherit; font-size: 3em; }
+  ul { margin: var(--unit); list-style-type: square; }
+  ul li { font-size: 1.5em; line-height: var(--unit); }
+  .counter { margin: calc(var(--unit) * 2) 0; }
+  .counter span { font-weight: bold; }
+  .counter button { margin-left: calc(var(--unit) / 2); }
+  button { height: calc(var(--unit) * 3 / 2); font-size: inherit; font-family: inherit; font-weight: bold; background: #579; color: #fff; padding: 0 calc(var(--unit) / 2); cursor: pointer; }
+  button:hover { filter: brightness(120%); }
+  button:active { background: #f57; }
+  pre { padding: calc(var(--unit) / 4) calc(var(--unit) / 2); background: rgba(255,255,255,0.02); }
+  .try { margin: var(--unit) 0; display: flex; align-items: center; }
+  .try button { background: #444; }
+  .try pre { flex: 1; }
+  .try > * { margin: 0; }
+</style>
+
+<template id="root">
+  <h1 data-unsafe-html="title"
+      data-class="titleClass"
+      data-attribute-lang="titleLang">
+  </h1>
+  <slot name="list" data-template="#list"></slot>
+  <slot name="counter" data-template="#counter"></slot>
+</template>
+
+<template id="list">
+  Here is a list of things:
+  <ul>
+    <slot name="things" data-template="#things"><li><em>(empty)</em></li></slot>
+  </ul>
+  Some things to try:
+  <slot name="try" data-template="#try"></slot>
+</template>
+
+<template id="counter">
+  <div class="counter">
+    Count:
+    <span data-text="count"></span>
+    /
+    <span data-text="total"></span>
+    <button data-event-click="test" data-text="runText">Run test</button>
+  </div>
+</template>
+
+<template id="try">
+  <div class="try">
+    <button data-event-click="run">Run</button>
+    <pre data-text="code"></pre>
+  </div>
+</template>
+
+<template id="things">
+  <li data-text="text"></li>
+</template>

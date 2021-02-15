@@ -13,15 +13,17 @@ if ('undefined' === typeof PASSEDCHECK) {
            (LIST (LIST 'DOCUMENT 'CREATE-TEXT-NODE) function)
            (LIST (LIST 'DOCUMENT 'CREATE-COMMENT) function)
            (LIST (LIST 'DOCUMENT 'CREATE-NODE-ITERATOR) function)
+           (LIST (LIST '*NODE-FILTER) function)
            (LIST (LIST '*OBJECT 'PROTOTYPE 'HAS-OWN-PROPERTY) function)
            (LIST (LIST '*NUMBER 'PARSE-INT) function)
            (LIST (LIST '*NUMBER 'IS-NA-N) function)
            (LIST (LIST '*ARRAY 'IS-ARRAY) function)
            (LIST (LIST '*OBJECT 'ASSIGN) function)
-           (LIST (LIST '*SYMBOL) function) (LIST (LIST '*REFLECT) object)
-           (LIST (LIST '*WEAK-MAP) function) (LIST (LIST '*PROXY) function))) */
+           (LIST (LIST '*PROMISE) function) (LIST (LIST '*SYMBOL) function)
+           (LIST (LIST '*REFLECT) object) (LIST (LIST '*WEAK-MAP) function)
+           (LIST (LIST '*PROXY) function))) */
 if ('undefined' === typeof DEPMAP) {
-    var DEPMAP = [[['Node', 'prototype', 'cloneNode'], 'function'], [['Node', 'prototype', 'appendChild'], 'function'], [['Node', 'prototype', 'insertBefore'], 'function'], [['Node', 'prototype', 'nextSibling'], 'property'], [['Element', 'prototype', 'remove'], 'function'], [['document', 'querySelector'], 'function'], [['document', 'createTextNode'], 'function'], [['document', 'createComment'], 'function'], [['document', 'createNodeIterator'], 'function'], [['Object', 'prototype', 'hasOwnProperty'], 'function'], [['Number', 'parseInt'], 'function'], [['Number', 'isNaN'], 'function'], [['Array', 'isArray'], 'function'], [['Object', 'assign'], 'function'], [['Symbol'], 'function'], [['Reflect'], 'object'], [['WeakMap'], 'function'], [['Proxy'], 'function']];
+    var DEPMAP = [[['Node', 'prototype', 'cloneNode'], 'function'], [['Node', 'prototype', 'appendChild'], 'function'], [['Node', 'prototype', 'insertBefore'], 'function'], [['Node', 'prototype', 'nextSibling'], 'property'], [['Element', 'prototype', 'remove'], 'function'], [['document', 'querySelector'], 'function'], [['document', 'createTextNode'], 'function'], [['document', 'createComment'], 'function'], [['document', 'createNodeIterator'], 'function'], [['NodeFilter'], 'function'], [['Object', 'prototype', 'hasOwnProperty'], 'function'], [['Number', 'parseInt'], 'function'], [['Number', 'isNaN'], 'function'], [['Array', 'isArray'], 'function'], [['Object', 'assign'], 'function'], [['Promise'], 'function'], [['Symbol'], 'function'], [['Reflect'], 'object'], [['WeakMap'], 'function'], [['Proxy'], 'function']];
 };
 /* (DEFUN DEP-CHECK ()
      (WHEN *PASSED-CHECK* (RETURN-FROM DEP-CHECK))

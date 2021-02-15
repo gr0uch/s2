@@ -4,7 +4,13 @@
 (defvar *symbol-class* (*symbol 'class))
 (defvar *symbol-attribute* (*symbol 'attribute))
 (defvar *symbol-event* (*symbol 'event))
+(defvar *symbol-mount* (*symbol 'mount))
+(defvar *symbol-unmount* (*symbol 'unmount))
+(defvar *symbol-retain* (*symbol 'retain))
 (defvar *tag-slot* '*slot*)
+
+;; Condensed form of console.log.
+(defmacro console-log (&body forms) `(chain console (log ,@forms)))
 
 ;; A map of targets to contexts.
 (defvar *target-context-map* (new (*weak-map)))
@@ -14,12 +20,15 @@
 
 ;; A map of targets to hash maps keyed by key names and valued by an array of Nodes.
 ;; This is used to keep track of delimiters for slots.
-(defvar *target-node-map* (new (*weak-map)))
+(defvar *target-delimiter-map* (new (*weak-map)))
+
+;; A map of proxies to unmount functions.
+(defvar *proxy-unmount-map* (new (*weak-map)))
 
 ;; A map of proxies to arrays of Nodes.
 ;; This is used to keep track of delimiters for individual proxy objects.
 ;; Also holds delimiters for arrays.
-(defvar *proxy-node-map* (new (*weak-map)))
+(defvar *proxy-delimiter-map* (new (*weak-map)))
 
 ;; A map of array proxies to templates.
 (defvar *proxy-template-map* (new (*weak-map)))
@@ -41,7 +50,7 @@
 ;;     - The target location may or may not have a proxy.
 ;;     - The target location's proxy may or may not be the same proxy.
 (defun set-index (target key value receiver)
-  (when (@ main debug) (chain console (log 'set-index arguments)))
+  (when (@ main debug) (console-log 'set-index arguments))
   (let* ((numkey (chain *number (parse-int key 10)))
          (is-index (not (chain *number (is-na-n numkey))))
          (is-setter (eq (length arguments) 4))
@@ -51,13 +60,18 @@
       ;; Setting array length should remove extra values.
       (loop
        for i from value to (- (length target) 1) do
-       (let ((nodes (chain *proxy-node-map* (get (getprop target i)))))
-         (when nodes (remove-between-delimiters (@ nodes 0) (@ nodes 1))))
+       (let* ((proxy (getprop target i))
+              (nodes (chain *proxy-delimiter-map* (get proxy)))
+              (unmount (chain *proxy-unmount-map* (get proxy))))
+         (when nodes (remove-between-delimiters
+                      (@ nodes 0) (@ nodes 1) unmount proxy)))
        (delete (getprop target i))))
 
-    (when is-delete
-      (let ((nodes (chain *proxy-node-map* (get (getprop target key)))))
-        (remove-between-delimiters (@ nodes 0) (@ nodes 1)))
+    (when (and is-delete (getprop target key))
+      (let* ((proxy (getprop target key))
+             (nodes (chain *proxy-delimiter-map* (get proxy)))
+             (unmount (chain *proxy-unmount-map* (get proxy))))
+        (remove-between-delimiters (@ nodes 0) (@ nodes 1) unmount proxy))
       (delete (getprop target key)))
 
     (when (and is-setter (not is-index))
@@ -87,14 +101,17 @@
                                 (find (lambda (p i)
                                         (and (eq p previous-proxy)
                                              (not (eq i numkey)))))))
-                (let ((nodes (chain *proxy-node-map* (get previous-proxy))))
-                  (remove-between-delimiters (@ nodes 0) (@ nodes 1)))))
+                (let ((nodes (chain *proxy-delimiter-map* (get previous-proxy)))
+                      (unmount (chain *proxy-unmount-map* (get previous-proxy))))
+                  (remove-between-delimiters
+                   (@ nodes 0) (@ nodes 1) unmount proxy))))
 
             (if next-proxy
                 (let ((next-anchor
-                       (@ (chain *proxy-node-map* (get next-proxy)) 0)))
+                       (@ (chain *proxy-delimiter-map* (get next-proxy)) 0)))
                   (chain parent-node (insert-before node next-anchor)))
-              (let ((end-node (@ (chain *proxy-node-map* (get receiver)) 1)))
+              (let ((end-node
+                     (@ (chain *proxy-delimiter-map* (get receiver)) 1)))
                 (chain parent-node (insert-before node end-node))))
 
             (return-from
@@ -106,10 +123,10 @@
                                                   (not (eq i numkey)))))))
                (other-proxy (getprop target key)))
           (when (and other-proxy (not (eq value other-proxy)))
-            (let* ((other-nodes (chain *proxy-node-map* (get other-proxy)))
+            (let* ((other-nodes (chain *proxy-delimiter-map* (get other-proxy)))
                    (other-start-node (@ other-nodes 0))
                    (other-end-node (@ other-nodes 1))
-                   (nodes (chain *proxy-node-map* (get value)))
+                   (nodes (chain *proxy-delimiter-map* (get value)))
                    (start-node (@ nodes 0))
                    (end-node (@ nodes 1))
                    (anchor (@ nodes 1 next-sibling))
@@ -174,7 +191,7 @@
 
 
 (defun set-attribute (node name value)
-  (if value
+  (if (or (eq value nil) (eq value undefined))
       (chain node (set-attribute name value))
     (chain node (remove-attribute name))))
 
@@ -199,12 +216,18 @@
   nil)
 
 
-(defun remove-between-delimiters (start-node end-node)
-  (let ((node start-node))
+(defun remove-between-delimiters (start-node end-node unmount self)
+  (let* ((node start-node)
+         (first-node node))
+    (setf node (@ node next-sibling))
+    (chain first-node (remove))
     (loop while (not (chain node (is-same-node end-node))) do
           (let ((old-node node))
             (setf node (@ node next-sibling))
-            (chain old-node (remove))))
+            (if unmount
+                (chain *promise (resolve (chain unmount (call self old-node)))
+                       (then (lambda () (chain old-node (remove)))))
+              (chain old-node (remove)))))
     (chain end-node (remove))))
 
 
@@ -215,7 +238,7 @@
   (let* ((anchor (@ descriptor anchor))
          (slot (@ descriptor slot))
          (template (@ descriptor template))
-         (hash (chain *target-node-map* (get target)))
+         (hash (chain *target-delimiter-map* (get target)))
          (nodes (getprop hash key))
          (parent-node (@ anchor parent-node))
          (start-node (create-anchor 0 key))
@@ -223,7 +246,20 @@
          (return-value nil))
 
     (when nodes
-      (remove-between-delimiters (@ nodes 0) (@ nodes 1))
+      (let ((previous-value (getprop target key)))
+        (if (chain *array (is-array previous-value))
+            (loop
+             for proxy in previous-value do
+             (let ((unmount (chain *proxy-unmount-map* (get proxy)))
+                   (nodes (chain *proxy-delimiter-map* (get proxy))))
+               (remove-between-delimiters
+                (@ nodes 0) (@ nodes 1) unmount proxy)))
+          (if previous-value
+              (let ((unmount (chain *proxy-unmount-map* (get previous-value)))
+                    (nodes (chain *proxy-delimiter-map* (get previous-value))))
+                (remove-between-delimiters
+                 (@ nodes 0) (@ nodes 1) unmount previous-value))
+            (remove-between-delimiters (@ nodes 0) (@ nodes 1)))))
       (delete (getprop hash key)))
 
     (setf (getprop hash key) (list start-node end-node))
@@ -239,7 +275,7 @@
                     (chain parent-node (insert-before node anchor)))
               (chain parent-node (insert-before end-node anchor))
               (chain *proxy-anchor-map* (set proxy anchor))
-              (chain *proxy-node-map* (set proxy (getprop hash key)))
+              (chain *proxy-delimiter-map* (set proxy (getprop hash key)))
               (setf return-value proxy))
           (let* ((result (create-binding value template))
                  (node (@ result 0))
@@ -271,10 +307,10 @@
         (setf (getprop hash event) bound-listener)))))
 
 
-;; TODO: this can be optimized after the first call.
 (defun create-context (clone)
   (let ((node nil)
-        (iter (chain document (create-node-iterator clone 1)))
+        (iter (chain document (create-node-iterator
+                               clone (@ *node-filter "SHOW_ELEMENT"))))
         (context (create)))
     (loop
      while (setf node (chain iter (next-node))) do
@@ -338,19 +374,23 @@
          (context (create-context clone))
          (start-node (create-anchor 0 'proxy))
          (end-node (create-anchor 1 'proxy))
-         (nodes (list start-node end-node)))
+         (nodes (list start-node end-node))
+         (mount (getprop obj *symbol-mount*))
+         (unmount (getprop obj *symbol-unmount*)))
 
     ;; Each proxy should contain references to its own delimiters.
     (chain clone (insert-before start-node (@ clone first-child)))
     (chain clone (append-child end-node))
-    (chain *proxy-node-map* (set proxy nodes))
+    (chain *proxy-delimiter-map* (set proxy nodes))
 
     (chain *target-context-map* (set obj context))
     (chain *target-event-map* (set obj (create)))
-    (chain *target-node-map* (set obj (create)))
+    (chain *target-delimiter-map* (set obj (create)))
 
     ;; Initialization
     (chain *object (assign proxy obj))
+    (when mount (chain mount (call proxy clone)))
+    (when unmount (chain *proxy-unmount-map* (set proxy unmount)))
 
     (list clone proxy)))
 
@@ -368,4 +408,7 @@
   (create-binding origin template))
 
 
-(export :default main)
+(export
+ :default main
+ :names
+ (*symbol-mount* as mount *symbol-unmount* as unmount))

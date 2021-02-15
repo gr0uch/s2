@@ -11,17 +11,6 @@ The result is that *UI code effectively disappears*, it is folded into the data.
 — Eric Raymond, [Basics of the Unix Philosophy](http://www.catb.org/~esr/writings/taoup/html/ch01s06.html)
 
 
-## TODO (INTERNAL)
-
-- [x] Set array slots
-- [x] Set array length should delete
-- [x] Set slot empty state
-- [x] Set class
-- [x] Set attribute
-- [ ] Mount/unmount functions (animations)
-- [ ] Automated testing
-
-
 ## Usage
 
 Import the module:
@@ -70,7 +59,26 @@ Here are the data attributes it will look for:
 - `data-text`, `data-unsafe-html`
 - `data-event-*`
 - `data-class`
-- `data-attribute-*` (TBD)
+- `data-attribute-*`
+
+
+## Mount and Unmount
+
+Each object may implement a `mount` and `unmount` function. This allows you to do animations and run any code needed on these events. The unmount function is particularly useful for implementing exiting animations, as it will wait for a promise to resolve before removing the node.
+
+```js
+import { mount, unmount } from '...';
+
+{
+  [mount]: function(node) {
+    // `this` will be called in the proxy context.
+  },
+  [unmount]: async function(node) {
+    // Animations can be implemented here while waiting to remove the node.
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  },
+}
+```
 
 
 ## Caveats
@@ -102,6 +110,11 @@ Requirements:
 - [`terser`](https://github.com/terser/terser): `npm i -g terser` to add this executable to `$PATH`
 
 Need to build the `psbuild` binary from `parenscript-builder` and put it here to compile with `make`. I couldn't figure out how to automate including this dependency yet.
+
+
+## Testing
+
+Run a web server like `http-server .` and then navigate to the `/test/` directory. HTTP is required for loading modules.
 
 
 ## License

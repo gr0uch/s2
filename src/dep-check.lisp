@@ -1,4 +1,5 @@
 ;; OPTIONAL MODULE
+;; Use this if you are unsure about compatibility with the browser environment.
 
 (defvar *passed-check* false)
 (defvar *dep-map*
@@ -13,6 +14,7 @@
    (list (list 'document 'create-text-node) "function")
    (list (list 'document 'create-comment) "function")
    (list (list 'document 'create-node-iterator) "function")
+   (list (list '*node-filter) "function")
 
    ;; Sanity checking JS.
    (list (list '*object 'prototype 'has-own-property) "function")
@@ -20,6 +22,7 @@
    (list (list '*number 'is-na-n) "function")
    (list (list '*array 'is-array) "function")
    (list (list '*object 'assign) "function")
+   (list (list '*promise) "function")
    (list (list '*symbol) "function")
    (list (list '*reflect) "object")
    (list (list '*weak-map) "function")
