@@ -1,8 +1,8 @@
 # s²
 
-**s2 is a metaprogramming function that enables web user interfaces to be mapped as data structures.**
+**s2 is a ~2kb metaprogramming function that enables web user interfaces to be mapped as data structures.**
 
-It works by returning a `Proxy` so that plain JS objects (data + functions), can map directly to elements. It binds data structures to the DOM, using HTML `<template>` & `<slot>` tags, and `data-` attributes to bind data and events.
+It returns a `Proxy` so that plain JS objects (data + functions), can map directly to elements. Data structures are bound to the DOM, using HTML `<template>` & `<slot>` tags, and `data-` attributes to bind data and events.
 
 The result is that *UI code effectively disappears*, it is folded into the data.
 
@@ -51,6 +51,7 @@ Finally: *any changes on the entire proxy object will reflect in the DOM!* **Thi
 
 ```js
 proxy.counter.count = 1337; // DOM updates
+proxy.counter.increment = function() { this.count-- } // Overwrite event listener
 delete proxy.counter; // Elements removed
 ```
 
@@ -100,6 +101,7 @@ s2 can mean:
 - super solenoid
 - sneaky submarine
 - season 2
+- 2 kilobytes
 
 
 ## Development

@@ -6,7 +6,6 @@
 (defvar *symbol-event* (*symbol 'event))
 (defvar *symbol-mount* (*symbol 'mount))
 (defvar *symbol-unmount* (*symbol 'unmount))
-(defvar *symbol-retain* (*symbol 'retain))
 (defvar *tag-slot* '*slot*)
 
 ;; Condensed form of console.log.

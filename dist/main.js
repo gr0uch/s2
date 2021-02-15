@@ -31,10 +31,6 @@ if ('undefined' === typeof SYMBOLMOUNT) {
 if ('undefined' === typeof SYMBOLUNMOUNT) {
     var SYMBOLUNMOUNT = Symbol('unmount');
 };
-/* (DEFVAR *SYMBOL-RETAIN* (*SYMBOL 'RETAIN)) */
-if ('undefined' === typeof SYMBOLRETAIN) {
-    var SYMBOLRETAIN = Symbol('retain');
-};
 /* (DEFVAR *TAG-SLOT* '*SLOT*) */
 if ('undefined' === typeof TAGSLOT) {
     var TAGSLOT = 'SLOT';
