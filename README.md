@@ -68,6 +68,7 @@ Here are the data attributes it will look for:
 Each object may implement a `mount` and `unmount` function. This allows you to do animations and run any code needed on these events. The unmount function is particularly useful for implementing exiting animations, as it will wait for a promise to resolve before removing the node.
 
 ```js
+// These named exports are symbols that prevent key collisions.
 import { mount, unmount } from '...';
 
 {
