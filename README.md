@@ -1,4 +1,4 @@
-# s2
+# s²
 
 **s2 is a metaprogramming function that enables web user interfaces to be mapped as data structures.**
 
@@ -104,7 +104,7 @@ s2 can mean:
 
 ## Development
 
-Requirements:
+s2 is written in the Parenscript subset of Common Lisp.
 
 - [`parenscript-builder`](https://github.com/gr0uch/parenscript-builder): see instructions
 - [`terser`](https://github.com/terser/terser): `npm i -g terser` to add this executable to `$PATH`
