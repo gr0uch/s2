@@ -60,9 +60,8 @@ function run() {
 
 function cleanupTemplates() {
   document.querySelectorAll('template').forEach(template => {
-    const { content } = template;
-    const SHOW_TEXT = 0b000000000100;
-    const iter = document.createNodeIterator(content, SHOW_TEXT);
+    const iter = document
+      .createNodeIterator(template.content, NodeFilter.SHOW_TEXT);
     let node;
     while (node = iter.nextNode()) {
       if (!node.nodeValue.trim().length)

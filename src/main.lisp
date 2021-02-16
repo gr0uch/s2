@@ -251,14 +251,15 @@
              for proxy in previous-value do
              (let ((unmount (chain *proxy-unmount-map* (get proxy)))
                    (nodes (chain *proxy-delimiter-map* (get proxy))))
-               (remove-between-delimiters
-                (@ nodes 0) (@ nodes 1) unmount proxy)))
-          (if previous-value
+               (when nodes
+                 (remove-between-delimiters
+                  (@ nodes 0) (@ nodes 1) unmount proxy))))
+          (when previous-value
               (let ((unmount (chain *proxy-unmount-map* (get previous-value)))
                     (nodes (chain *proxy-delimiter-map* (get previous-value))))
                 (remove-between-delimiters
-                 (@ nodes 0) (@ nodes 1) unmount previous-value))
-            (remove-between-delimiters (@ nodes 0) (@ nodes 1)))))
+                 (@ nodes 0) (@ nodes 1) unmount previous-value)))))
+      (remove-between-delimiters (@ nodes 0) (@ nodes 1))
       (delete (getprop hash key)))
 
     (setf (getprop hash key) (list start-node end-node))
@@ -313,11 +314,13 @@
         (context (create)))
     (loop
      while (setf node (chain iter (next-node))) do
-     (when (eq (@ node tag-name) *tag-slot*)
-       (let* ((slot-name (@ node name))
+     (when (or (eq (@ node tag-name) *tag-slot*) (@ node dataset template))
+       (let* ((slot-name (or (@ node dataset key) (@ node name)))
               (anchor (create-anchor 2 slot-name))
               (template-node
                (chain document (query-selector (@ node dataset template)))))
+         (when (eq slot-name undefined)
+           (throw (new (*error "Missing `name` or `data-key` for slot."))))
          (chain node parent-node (insert-before anchor node))
          (setf (getprop context slot-name)
                (create anchor anchor

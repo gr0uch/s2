@@ -444,16 +444,17 @@ function removeBetweenDelimiters(startNode, endNode, unmount, self) {
                (LOOP FOR PROXY IN PREVIOUS-VALUE
                      DO (LET ((UNMOUNT (CHAIN *PROXY-UNMOUNT-MAP* (GET PROXY)))
                               (NODES (CHAIN *PROXY-DELIMITER-MAP* (GET PROXY))))
-                          (REMOVE-BETWEEN-DELIMITERS (@ NODES 0) (@ NODES 1)
-                           UNMOUNT PROXY)))
-               (IF PREVIOUS-VALUE
-                   (LET ((UNMOUNT
-                          (CHAIN *PROXY-UNMOUNT-MAP* (GET PREVIOUS-VALUE)))
-                         (NODES
-                          (CHAIN *PROXY-DELIMITER-MAP* (GET PREVIOUS-VALUE))))
-                     (REMOVE-BETWEEN-DELIMITERS (@ NODES 0) (@ NODES 1) UNMOUNT
-                      PREVIOUS-VALUE))
-                   (REMOVE-BETWEEN-DELIMITERS (@ NODES 0) (@ NODES 1)))))
+                          (WHEN NODES
+                            (REMOVE-BETWEEN-DELIMITERS (@ NODES 0) (@ NODES 1)
+                             UNMOUNT PROXY))))
+               (WHEN PREVIOUS-VALUE
+                 (LET ((UNMOUNT
+                        (CHAIN *PROXY-UNMOUNT-MAP* (GET PREVIOUS-VALUE)))
+                       (NODES
+                        (CHAIN *PROXY-DELIMITER-MAP* (GET PREVIOUS-VALUE))))
+                   (REMOVE-BETWEEN-DELIMITERS (@ NODES 0) (@ NODES 1) UNMOUNT
+                    PREVIOUS-VALUE)))))
+         (REMOVE-BETWEEN-DELIMITERS (@ NODES 0) (@ NODES 1))
          (DELETE (GETPROP HASH KEY)))
        (SETF (GETPROP HASH KEY) (LIST START-NODE END-NODE))
        (CHAIN PARENT-NODE (INSERT-BEFORE START-NODE ANCHOR))
@@ -501,17 +502,18 @@ function setSlot(target, key, value, descriptor) {
                 var proxy = previousValue[_js28];
                 var unmount = PROXYUNMOUNTMAP.get(proxy);
                 var nodes30 = PROXYDELIMITERMAP.get(proxy);
-                removeBetweenDelimiters(nodes30[0], nodes30[1], unmount, proxy);
+                if (nodes30) {
+                    removeBetweenDelimiters(nodes30[0], nodes30[1], unmount, proxy);
+                };
             };
         } else {
             if (previousValue) {
                 var unmount30 = PROXYUNMOUNTMAP.get(previousValue);
                 var nodes31 = PROXYDELIMITERMAP.get(previousValue);
                 removeBetweenDelimiters(nodes31[0], nodes31[1], unmount30, previousValue);
-            } else {
-                removeBetweenDelimiters(nodes[0], nodes[1]);
             };
         };
+        removeBetweenDelimiters(nodes[0], nodes[1]);
         delete hash[key];
     };
     hash[key] = [startNode, endNode];
@@ -587,12 +589,18 @@ function setEvent(target, value, descriptor, receiver) {
                    (CREATE-NODE-ITERATOR CLONE (@ *NODE-FILTER SHOW_ELEMENT))))
            (CONTEXT (CREATE)))
        (LOOP WHILE (SETF NODE (CHAIN ITER (NEXT-NODE)))
-             DO (WHEN (EQ (@ NODE TAG-NAME) *TAG-SLOT*)
-                  (LET* ((SLOT-NAME (@ NODE NAME))
+             DO (WHEN
+                    (OR (EQ (@ NODE TAG-NAME) *TAG-SLOT*)
+                        (@ NODE DATASET TEMPLATE))
+                  (LET* ((SLOT-NAME (OR (@ NODE DATASET KEY) (@ NODE NAME)))
                          (ANCHOR (CREATE-ANCHOR 2 SLOT-NAME))
                          (TEMPLATE-NODE
                           (CHAIN DOCUMENT
                                  (QUERY-SELECTOR (@ NODE DATASET TEMPLATE)))))
+                    (WHEN (EQ SLOT-NAME UNDEFINED)
+                      (THROW
+                          (NEW
+                           (*ERROR Missing `name` or `data-key` for slot.))))
                     (CHAIN NODE PARENT-NODE (INSERT-BEFORE ANCHOR NODE))
                     (SETF (GETPROP CONTEXT SLOT-NAME)
                             (CREATE ANCHOR ANCHOR SLOT NODE TEMPLATE
@@ -640,10 +648,13 @@ function createContext(clone) {
     var iter = document.createNodeIterator(clone, NodeFilter['SHOW_ELEMENT']);
     var context = {  };
     while (node = iter.nextNode()) {
-        if (node.tagName === TAGSLOT) {
-            var slotName = node.name;
+        if (node.tagName === TAGSLOT || node.dataset.template) {
+            var slotName = node.dataset.key || node.name;
             var anchor = createAnchor(2, slotName);
             var templateNode = document.querySelector(node.dataset.template);
+            if (slotName === undefined) {
+                throw new Error('Missing `name` or `data-key` for slot.');
+            };
             node.parentNode.insertBefore(anchor, node);
             context[slotName] = { anchor : anchor,
                                slot : node,
