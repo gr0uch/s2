@@ -270,10 +270,8 @@
             (let* ((result (create-array value template))
                    (nodes (@ result 0))
                    (proxy (@ result 1)))
-              (chain parent-node (insert-before start-node anchor))
               (loop for node in nodes do
                     (chain parent-node (insert-before node anchor)))
-              (chain parent-node (insert-before end-node anchor))
               (chain *proxy-anchor-map* (set proxy anchor))
               (chain *proxy-delimiter-map* (set proxy (getprop hash key)))
               (setf return-value proxy))
@@ -378,11 +376,13 @@
          (end-node (create-anchor 1 'proxy))
          (nodes (list start-node end-node))
          (mount (getprop obj *symbol-mount*))
-         (unmount (getprop obj *symbol-unmount*)))
+         (unmount (getprop obj *symbol-unmount*))
+         (fragment (chain document (create-document-fragment))))
 
     ;; Each proxy should contain references to its own delimiters.
-    (chain clone (insert-before start-node (@ clone first-child)))
-    (chain clone (append-child end-node))
+    (chain fragment (append-child start-node))
+    (chain fragment (append-child clone))
+    (chain fragment (append-child end-node))
     (chain *proxy-delimiter-map* (set proxy nodes))
 
     (chain *target-context-map* (set obj context))
@@ -394,7 +394,7 @@
     (when mount (chain mount (call proxy clone)))
     (when unmount (chain *proxy-unmount-map* (set proxy unmount)))
 
-    (list clone proxy)))
+    (list fragment proxy)))
 
 
 (defun create-anchor (type key)

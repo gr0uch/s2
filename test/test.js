@@ -26,7 +26,7 @@ const [node, proxy] = s2({
         { run, code: `p.list.things.push({ text: 'd' })` },
         { run, code: `p.list.things.unshift({ text: 'z' })` },
         { run, code: `p.list.things.splice(1, 1, { text: 'x' }, { text: 'y' })` },
-        { run, code: `p.list.things.sort((a, b) => a.text < b.text)` },
+        { run, code: `p.list.things.sort(({ text: a }, { text: b }) => b.localeCompare(a))` },
         { run, code: `p.list.things.length = 2` },
         { run, code: `delete p.list.things` },
         { run, code: `p.list.things = [ { text: 'e' }, { text: 'f' } ]` },
@@ -41,6 +41,19 @@ const [node, proxy] = s2({
       console.log('Mount called', node, this);
     },
     [unmount]: delayUnmount,
+  },
+  f: new Array(1000).fill().map(() => ({ f: 'f' })),
+  [mount]: function spam(node) {
+    const t = {};
+    let i, n, c;
+    n = document.createElement('span')
+    n.textContent = 'd';
+    for (i = 0; i < 1000; i++) {
+      c = n.cloneNode(true);
+      node.appendChild(document.createComment('fak'));
+      node.appendChild(c);
+      node.appendChild(document.createComment('u'));
+    }
   },
 }, template);
 
