@@ -83,6 +83,13 @@ import { mount, unmount } from '...';
 ```
 
 
+## Optional Modules
+
+- `dep-check.js`: this is used to check if all of the required APIs are present in the runtime.
+- `render-to-string.js` (TBD)
+- `hydrate.js` (TBD)
+
+
 ## Caveats
 
 s2 relies on Proxy objects throughout, so one can not use references to the original objects and expect it to work. Instead, always get new references by accessing keys via the Proxy. This generally shouldn't be a problem.
