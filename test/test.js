@@ -2,6 +2,7 @@ import s2, { mount, unmount } from "../dist/main.js";
 import depCheck from "../dist/dep-check.js";
 import test from "./runner.js";
 
+const start = performance.now();
 const initialThings = [
   { text: 'a' },
   { text: 'b' },
@@ -44,6 +45,7 @@ const [node, proxy] = s2({
   },
   f: new Array(1000).fill().map(() => ({ f: 'f' })),
   [mount]: function spam(node) {
+    return null;
     const t = {};
     let i, n, c;
     n = document.createElement('span')
@@ -58,6 +60,7 @@ const [node, proxy] = s2({
 }, template);
 
 document.body.appendChild(node);
+console.log(`Mounted in ${performance.now() - start} ms`);
 
 window.p = proxy;
 

@@ -35,6 +35,12 @@
 ;; A map of array proxies to anchors.
 (defvar *proxy-anchor-map* (new (*weak-map)))
 
+;; A map of templates to their processed nodes.
+(defvar *template-processed-map* (new (*weak-map)))
+
+;; A map of templates to the paths of their keys.
+(defvar *template-context-map* (new (*weak-map)))
+
 (defvar *proxy-object* (create set set-property delete-property set-property))
 (defvar *proxy-array* (create set set-index delete-property set-index))
 
@@ -234,7 +240,7 @@
   ;; Skip deletion if already empty.
   (when (not (or (getprop target key) value)) (return-from set-slot))
 
-  (let* ((anchor (@ descriptor anchor))
+  (let* ((anchor (@ descriptor node))
          (slot (@ descriptor slot))
          (template (@ descriptor template))
          (hash (chain *target-delimiter-map* (get target)))
@@ -255,10 +261,10 @@
                  (remove-between-delimiters
                   (@ nodes 0) (@ nodes 1) unmount proxy))))
           (when previous-value
-              (let ((unmount (chain *proxy-unmount-map* (get previous-value)))
-                    (nodes (chain *proxy-delimiter-map* (get previous-value))))
-                (remove-between-delimiters
-                 (@ nodes 0) (@ nodes 1) unmount previous-value)))))
+            (let ((unmount (chain *proxy-unmount-map* (get previous-value)))
+                  (nodes (chain *proxy-delimiter-map* (get previous-value))))
+              (remove-between-delimiters
+               (@ nodes 0) (@ nodes 1) unmount previous-value)))))
       (remove-between-delimiters (@ nodes 0) (@ nodes 1))
       (delete (getprop hash key)))
 
@@ -305,52 +311,94 @@
         (setf (getprop hash event) bound-listener)))))
 
 
-(defun create-context (clone)
-  (let ((node nil)
-        (iter (chain document (create-node-iterator
-                               clone (@ *node-filter "SHOW_ELEMENT"))))
-        (context (create)))
-    (loop
-     while (setf node (chain iter (next-node))) do
-     (when (or (eq (@ node tag-name) *tag-slot*) (@ node dataset template))
-       (let* ((slot-name (or (@ node dataset key) (@ node name)))
-              (anchor (create-anchor 2 slot-name))
-              (template-node
-               (chain document (query-selector (@ node dataset template)))))
-         (when (eq slot-name undefined)
-           (throw (new (*error "Missing `name` or `data-key` for slot."))))
-         (chain node parent-node (insert-before anchor node))
-         (setf (getprop context slot-name)
-               (create anchor anchor
-                       slot node
-                       template template-node
-                       type *symbol-slot*))
-         (chain node (remove)))
-       (continue))
-     (loop
-      for key of (@ node dataset) do
-      (let ((value (getprop (@ node dataset) key))
-            (result nil))
-        (case
-         key
-         ("text" (setf result (create node node type *symbol-text*)))
-         ("class" (setf result (create node node type *symbol-class*)))
-         ("unsafeHtml" (setf result (create node node type *symbol-html*))))
-        (when (chain key (starts-with 'attribute))
-          (setf result
-                (create node node type *symbol-attribute*
-                        ;; Slice off "attribute", all attributes are lowercase.
-                        name (chain key (slice 9) (to-lower-case)))))
-        (when (chain key (starts-with 'event))
-          (setf result
-                (create node node type *symbol-event*
-                        ;; Slice off "event", all events are lowercase.
-                        event (chain key (slice 5) (to-lower-case)))))
-        (when result
-          (delete (getprop (@ node dataset) key))
-          (setf (getprop context value) result)))))
+(defun process-template (template)
+  (let* ((root (or (@ template content) template))
+         (clone (chain root (clone-node t)))
+         (context (create)))
 
-    context))
+    (defun walk (parent-node path)
+      (loop
+       for i from 0 to (- (length (@ parent-node child-nodes)) 1) do
+       (let ((node (getprop (@ parent-node child-nodes) i)))
+         (when (not (eq (@ node node-type) (@ *node "ELEMENT_NODE"))) (continue))
+         (when (length (@ node children))
+           (walk node (chain path (concat i))))
+
+         (when (or (eq (@ node tag-name) *tag-slot*) (@ node dataset template))
+           (let* ((slot-name (or (@ node dataset key) (@ node name)))
+                  (anchor (create-anchor 2 slot-name))
+                  (template-node
+                   (chain document (query-selector
+                                    (@ node dataset template)))))
+             (when (eq slot-name undefined)
+               (throw (new (*error "Missing `name` or `data-key` for slot."))))
+             (chain parent-node (insert-before anchor node))
+             (setf (getprop context slot-name)
+                   (create
+                    path (chain path (concat i))
+                    slot node
+                    template template-node
+                    type *symbol-slot*))
+             (chain node (remove))
+             )
+           (continue))
+
+         (loop
+          for key of (@ node dataset) do
+          (let ((value (getprop (@ node dataset) key))
+                (result nil))
+            (case
+             key
+             ("text" (setf result (create type *symbol-text*)))
+             ("class" (setf result (create type *symbol-class*)))
+             ("unsafeHtml" (setf result (create type *symbol-html*))))
+            (when (chain key (starts-with 'attribute))
+              (setf result
+                    (create
+                     type *symbol-attribute*
+                     ;; Slice off "attribute", all attributes are lowercase.
+                     name (chain key (slice 9) (to-lower-case)))))
+            (when (chain key (starts-with 'event))
+              (setf result
+                    (create
+                     type *symbol-event*
+                     ;; Slice off "event", all events are lowercase.
+                     event (chain key (slice 5) (to-lower-case)))))
+            (when result
+              (delete (getprop (@ node dataset) key))
+              (chain node (remove-attribute key))
+              (setf
+               (@ result path) (chain path (concat i))
+               (getprop context value) result)))))))
+
+    (walk clone (list))
+    (chain *template-processed-map* (set template clone))
+    (chain *template-context-map* (set template context))))
+
+
+;; Note: this has to be fast, because this runs in between DOM node insertions.
+(defun create-context (clone template)
+  (let ((context (chain *template-context-map* (get template)))
+        (cloned-context (create)))
+
+    (loop
+     for key of context do
+     (let* ((descriptor (getprop context key))
+            (path (@ descriptor path))
+            (node (get-path clone path)))
+       (setf (getprop cloned-context key)
+             (chain *object (assign (create node node) descriptor)))))
+
+    cloned-context))
+
+
+(defun get-path (node path)
+  (let ((result node))
+    (loop
+     for i from 0 to (- (length path) 1) do
+     (let ((j (getprop path i)))
+       (setf result (getprop (@ result child-nodes) j))))
+    result))
 
 
 (defun create-array (array template)
@@ -368,16 +416,21 @@
 
 
 (defun create-binding (obj template)
-  (let* ((root (or (@ template content) template))
-         (clone (chain root (clone-node t)))
+  (when (not (chain *template-processed-map* (get template)))
+    (process-template template))
+  (let* ((clone (chain (chain *template-processed-map* (get template))
+                       (clone-node t)))
          (proxy (new (*proxy obj *proxy-object*)))
-         (context (create-context clone))
+         (context (create-context clone template))
          (start-node (create-anchor 0 'proxy))
          (end-node (create-anchor 1 'proxy))
          (nodes (list start-node end-node))
          (mount (getprop obj *symbol-mount*))
          (unmount (getprop obj *symbol-unmount*))
          (fragment (chain document (create-document-fragment))))
+
+    (when mount (chain mount (call proxy clone)))
+    (when unmount (chain *proxy-unmount-map* (set proxy unmount)))
 
     ;; Each proxy should contain references to its own delimiters.
     (chain fragment (append-child start-node))
@@ -391,8 +444,6 @@
 
     ;; Initialization
     (chain *object (assign proxy obj))
-    (when mount (chain mount (call proxy clone)))
-    (when unmount (chain *proxy-unmount-map* (set proxy unmount)))
 
     (list fragment proxy)))
 

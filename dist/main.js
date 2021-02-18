@@ -65,6 +65,14 @@ if ('undefined' === typeof PROXYTEMPLATEMAP) {
 if ('undefined' === typeof PROXYANCHORMAP) {
     var PROXYANCHORMAP = new WeakMap();
 };
+/* (DEFVAR *TEMPLATE-PROCESSED-MAP* (NEW (*WEAK-MAP))) */
+if ('undefined' === typeof TEMPLATEPROCESSEDMAP) {
+    var TEMPLATEPROCESSEDMAP = new WeakMap();
+};
+/* (DEFVAR *TEMPLATE-CONTEXT-MAP* (NEW (*WEAK-MAP))) */
+if ('undefined' === typeof TEMPLATECONTEXTMAP) {
+    var TEMPLATECONTEXTMAP = new WeakMap();
+};
 /* (DEFVAR *PROXY-OBJECT*
      (CREATE SET SET-PROPERTY DELETE-PROPERTY SET-PROPERTY)) */
 if ('undefined' === typeof PROXYOBJECT) {
@@ -429,7 +437,7 @@ function removeBetweenDelimiters(startNode, endNode, unmount, self) {
 };
 /* (DEFUN SET-SLOT (TARGET KEY VALUE DESCRIPTOR)
      (WHEN (NOT (OR (GETPROP TARGET KEY) VALUE)) (RETURN-FROM SET-SLOT))
-     (LET* ((ANCHOR (@ DESCRIPTOR ANCHOR))
+     (LET* ((ANCHOR (@ DESCRIPTOR NODE))
             (SLOT (@ DESCRIPTOR SLOT))
             (TEMPLATE (@ DESCRIPTOR TEMPLATE))
             (HASH (CHAIN *TARGET-DELIMITER-MAP* (GET TARGET)))
@@ -463,10 +471,8 @@ function removeBetweenDelimiters(startNode, endNode, unmount, self) {
                (LET* ((RESULT (CREATE-ARRAY VALUE TEMPLATE))
                       (NODES (@ RESULT 0))
                       (PROXY (@ RESULT 1)))
-                 (CHAIN PARENT-NODE (INSERT-BEFORE START-NODE ANCHOR))
                  (LOOP FOR NODE IN NODES
                        DO (CHAIN PARENT-NODE (INSERT-BEFORE NODE ANCHOR)))
-                 (CHAIN PARENT-NODE (INSERT-BEFORE END-NODE ANCHOR))
                  (CHAIN *PROXY-ANCHOR-MAP* (SET PROXY ANCHOR))
                  (CHAIN *PROXY-DELIMITER-MAP* (SET PROXY (GETPROP HASH KEY)))
                  (SETF RETURN-VALUE PROXY))
@@ -485,70 +491,68 @@ function setSlot(target, key, value, descriptor) {
     if (!(target[key] || value)) {
         return;
     };
-    var anchor24 = descriptor.anchor;
-    var slot25 = descriptor.slot;
-    var template26 = descriptor.template;
+    var anchor = descriptor.node;
+    var slot24 = descriptor.slot;
+    var template25 = descriptor.template;
     var hash = TARGETDELIMITERMAP.get(target);
     var nodes = hash[key];
-    var parentNode27 = anchor24.parentNode;
+    var parentNode26 = anchor.parentNode;
     var startNode = createAnchor(0, key);
     var endNode = createAnchor(1, key);
     var returnValue = null;
     if (nodes) {
         var previousValue = target[key];
         if (Array.isArray(previousValue)) {
-            var _js29 = previousValue.length;
-            for (var _js28 = 0; _js28 < _js29; _js28 += 1) {
-                var proxy = previousValue[_js28];
+            var _js28 = previousValue.length;
+            for (var _js27 = 0; _js27 < _js28; _js27 += 1) {
+                var proxy = previousValue[_js27];
                 var unmount = PROXYUNMOUNTMAP.get(proxy);
-                var nodes30 = PROXYDELIMITERMAP.get(proxy);
-                if (nodes30) {
-                    removeBetweenDelimiters(nodes30[0], nodes30[1], unmount, proxy);
+                var nodes29 = PROXYDELIMITERMAP.get(proxy);
+                if (nodes29) {
+                    removeBetweenDelimiters(nodes29[0], nodes29[1], unmount, proxy);
                 };
             };
         } else {
             if (previousValue) {
-                var unmount30 = PROXYUNMOUNTMAP.get(previousValue);
-                var nodes31 = PROXYDELIMITERMAP.get(previousValue);
-                removeBetweenDelimiters(nodes31[0], nodes31[1], unmount30, previousValue);
+                var unmount29 = PROXYUNMOUNTMAP.get(previousValue);
+                var nodes30 = PROXYDELIMITERMAP.get(previousValue);
+                removeBetweenDelimiters(nodes30[0], nodes30[1], unmount29, previousValue);
             };
         };
         removeBetweenDelimiters(nodes[0], nodes[1]);
         delete hash[key];
     };
     hash[key] = [startNode, endNode];
-    parentNode27.insertBefore(startNode, anchor24);
+    parentNode26.insertBefore(startNode, anchor);
     if (value) {
         if (Array.isArray(value)) {
-            var result = createArray(value, template26);
-            var nodes32 = result[0];
-            var proxy33 = result[1];
-            parentNode27.insertBefore(startNode, anchor24);
-            var _js35 = nodes32.length;
-            for (var _js34 = 0; _js34 < _js35; _js34 += 1) {
-                var node = nodes32[_js34];
-                parentNode27.insertBefore(node, anchor24);
+            var result = createArray(value, template25);
+            var nodes31 = result[0];
+            var proxy32 = result[1];
+            var _js34 = nodes31.length;
+            for (var _js33 = 0; _js33 < _js34; _js33 += 1) {
+                var node = nodes31[_js33];
+                parentNode26.insertBefore(node, anchor);
             };
-            parentNode27.insertBefore(endNode, anchor24);
-            PROXYANCHORMAP.set(proxy33, anchor24);
-            PROXYDELIMITERMAP.set(proxy33, hash[key]);
-            returnValue = proxy33;
+            PROXYANCHORMAP.set(proxy32, anchor);
+            PROXYDELIMITERMAP.set(proxy32, hash[key]);
+            returnValue = proxy32;
         } else {
-            var result36 = createBinding(value, template26);
-            var node37 = result36[0];
-            var proxy38 = result36[1];
-            parentNode27.insertBefore(node37, anchor24);
-            returnValue = proxy38;
+            var result35 = createBinding(value, template25);
+            var node36 = result35[0];
+            var proxy37 = result35[1];
+            parentNode26.insertBefore(node36, anchor);
+            returnValue = proxy37;
         };
     } else {
-        var _js39 = slot25.childNodes;
-        var _js41 = _js39.length;
-        for (var _js40 = 0; _js40 < _js41; _js40 += 1) {
-            var node42 = _js39[_js40];
-            parentNode27.insertBefore(node42.cloneNode(true), anchor24);
+        var _js38 = slot24.childNodes;
+        var _js40 = _js38.length;
+        for (var _js39 = 0; _js39 < _js40; _js39 += 1) {
+            var node41 = _js38[_js39];
+            parentNode26.insertBefore(node41.cloneNode(true), anchor);
         };
     };
-    parentNode27.insertBefore(endNode, anchor24);
+    parentNode26.insertBefore(endNode, anchor);
     __PS_MV_REG = [];
     return returnValue;
 };
@@ -568,135 +572,180 @@ function setSlot(target, key, value, descriptor) {
                    (@ BOUND-LISTENER OPTIONS)))
            (SETF (GETPROP HASH EVENT) BOUND-LISTENER))))) */
 function setEvent(target, value, descriptor, receiver) {
-    var node42 = descriptor.node;
-    var event43 = descriptor.event;
+    var node41 = descriptor.node;
+    var event42 = descriptor.event;
     var hash = TARGETEVENTMAP.get(target);
-    var listener = hash[event43];
+    var listener = hash[event42];
     if (listener) {
-        node42.removeEventListener(event43, listener, listener.options);
+        node41.removeEventListener(event42, listener, listener.options);
     };
     if (value) {
         var boundListener = value.bind(receiver);
         boundListener.options = value.options;
-        node42.addEventListener(event43, boundListener, boundListener.options);
-        return hash[event43] = boundListener;
+        node41.addEventListener(event42, boundListener, boundListener.options);
+        return hash[event42] = boundListener;
     };
 };
-/* (DEFUN CREATE-CONTEXT (CLONE)
-     (LET ((NODE NIL)
-           (ITER
-            (CHAIN DOCUMENT
-                   (CREATE-NODE-ITERATOR CLONE (@ *NODE-FILTER SHOW_ELEMENT))))
-           (CONTEXT (CREATE)))
-       (LOOP WHILE (SETF NODE (CHAIN ITER (NEXT-NODE)))
-             DO (WHEN
-                    (OR (EQ (@ NODE TAG-NAME) *TAG-SLOT*)
-                        (@ NODE DATASET TEMPLATE))
-                  (LET* ((SLOT-NAME (OR (@ NODE DATASET KEY) (@ NODE NAME)))
-                         (ANCHOR (CREATE-ANCHOR 2 SLOT-NAME))
-                         (TEMPLATE-NODE
-                          (CHAIN DOCUMENT
-                                 (QUERY-SELECTOR (@ NODE DATASET TEMPLATE)))))
-                    (WHEN (EQ SLOT-NAME UNDEFINED)
-                      (THROW
-                          (NEW
-                           (*ERROR Missing `name` or `data-key` for slot.))))
-                    (CHAIN NODE PARENT-NODE (INSERT-BEFORE ANCHOR NODE))
-                    (SETF (GETPROP CONTEXT SLOT-NAME)
-                            (CREATE ANCHOR ANCHOR SLOT NODE TEMPLATE
-                             TEMPLATE-NODE TYPE *SYMBOL-SLOT*))
-                    (CHAIN NODE (REMOVE)))
-                  (CONTINUE)) (LOOP FOR KEY OF (@ NODE DATASET)
-                                    DO (LET ((VALUE
-                                              (GETPROP (@ NODE DATASET) KEY))
-                                             (RESULT NIL))
-                                         (CASE KEY
-                                           (text
-                                            (SETF RESULT
-                                                    (CREATE NODE NODE TYPE
-                                                     *SYMBOL-TEXT*)))
-                                           (class
-                                            (SETF RESULT
-                                                    (CREATE NODE NODE TYPE
-                                                     *SYMBOL-CLASS*)))
-                                           (unsafeHtml
-                                            (SETF RESULT
-                                                    (CREATE NODE NODE TYPE
-                                                     *SYMBOL-HTML*))))
-                                         (WHEN
-                                             (CHAIN KEY
-                                                    (STARTS-WITH 'ATTRIBUTE))
-                                           (SETF RESULT
-                                                   (CREATE NODE NODE TYPE
-                                                    *SYMBOL-ATTRIBUTE* NAME
-                                                    (CHAIN KEY (SLICE 9)
-                                                           (TO-LOWER-CASE)))))
-                                         (WHEN (CHAIN KEY (STARTS-WITH 'EVENT))
-                                           (SETF RESULT
-                                                   (CREATE NODE NODE TYPE
-                                                    *SYMBOL-EVENT* EVENT
-                                                    (CHAIN KEY (SLICE 5)
-                                                           (TO-LOWER-CASE)))))
-                                         (WHEN RESULT
-                                           (DELETE
-                                            (GETPROP (@ NODE DATASET) KEY))
-                                           (SETF (GETPROP CONTEXT VALUE)
-                                                   RESULT)))))
-       CONTEXT)) */
-function createContext(clone) {
-    var node = null;
-    var iter = document.createNodeIterator(clone, NodeFilter['SHOW_ELEMENT']);
+/* (DEFUN PROCESS-TEMPLATE (TEMPLATE)
+     (LET* ((ROOT (OR (@ TEMPLATE CONTENT) TEMPLATE))
+            (CLONE (CHAIN ROOT (CLONE-NODE T)))
+            (CONTEXT (CREATE)))
+       (DEFUN WALK (PARENT-NODE PATH)
+         (LOOP FOR I FROM 0 TO (- (LENGTH (@ PARENT-NODE CHILD-NODES)) 1)
+               DO (LET ((NODE (GETPROP (@ PARENT-NODE CHILD-NODES) I)))
+                    (WHEN (NOT (EQ (@ NODE NODE-TYPE) (@ *NODE ELEMENT_NODE)))
+                      (CONTINUE))
+                    (WHEN (LENGTH (@ NODE CHILDREN))
+                      (WALK NODE (CHAIN PATH (CONCAT I))))
+                    (WHEN
+                        (OR (EQ (@ NODE TAG-NAME) *TAG-SLOT*)
+                            (@ NODE DATASET TEMPLATE))
+                      (LET* ((SLOT-NAME
+                              (OR (@ NODE DATASET KEY) (@ NODE NAME)))
+                             (ANCHOR (CREATE-ANCHOR 2 SLOT-NAME))
+                             (TEMPLATE-NODE
+                              (CHAIN DOCUMENT
+                                     (QUERY-SELECTOR
+                                      (@ NODE DATASET TEMPLATE)))))
+                        (WHEN (EQ SLOT-NAME UNDEFINED)
+                          (THROW
+                              (NEW
+                               (*ERROR
+                                Missing `name` or `data-key` for slot.))))
+                        (CHAIN PARENT-NODE (INSERT-BEFORE ANCHOR NODE))
+                        (SETF (GETPROP CONTEXT SLOT-NAME)
+                                (CREATE PATH (CHAIN PATH (CONCAT I)) SLOT NODE
+                                 TEMPLATE TEMPLATE-NODE TYPE *SYMBOL-SLOT*))
+                        (CHAIN NODE (REMOVE)))
+                      (CONTINUE))
+                    (LOOP FOR KEY OF (@ NODE DATASET)
+                          DO (LET ((VALUE (GETPROP (@ NODE DATASET) KEY))
+                                   (RESULT NIL))
+                               (CASE KEY
+                                 (text
+                                  (SETF RESULT (CREATE TYPE *SYMBOL-TEXT*)))
+                                 (class
+                                  (SETF RESULT (CREATE TYPE *SYMBOL-CLASS*)))
+                                 (unsafeHtml
+                                  (SETF RESULT (CREATE TYPE *SYMBOL-HTML*))))
+                               (WHEN (CHAIN KEY (STARTS-WITH 'ATTRIBUTE))
+                                 (SETF RESULT
+                                         (CREATE TYPE *SYMBOL-ATTRIBUTE* NAME
+                                          (CHAIN KEY (SLICE 9)
+                                                 (TO-LOWER-CASE)))))
+                               (WHEN (CHAIN KEY (STARTS-WITH 'EVENT))
+                                 (SETF RESULT
+                                         (CREATE TYPE *SYMBOL-EVENT* EVENT
+                                          (CHAIN KEY (SLICE 5)
+                                                 (TO-LOWER-CASE)))))
+                               (WHEN RESULT
+                                 (DELETE (GETPROP (@ NODE DATASET) KEY))
+                                 (CHAIN NODE (REMOVE-ATTRIBUTE KEY))
+                                 (SETF (@ RESULT PATH) (CHAIN PATH (CONCAT I))
+                                       (GETPROP CONTEXT VALUE) RESULT)))))))
+       (WALK CLONE (LIST))
+       (CHAIN *TEMPLATE-PROCESSED-MAP* (SET TEMPLATE CLONE))
+       (CHAIN *TEMPLATE-CONTEXT-MAP* (SET TEMPLATE CONTEXT)))) */
+function processTemplate(template) {
+    var root = template.content || template;
+    var clone = root.cloneNode(true);
     var context = {  };
-    while (node = iter.nextNode()) {
-        if (node.tagName === TAGSLOT || node.dataset.template) {
-            var slotName = node.dataset.key || node.name;
-            var anchor = createAnchor(2, slotName);
-            var templateNode = document.querySelector(node.dataset.template);
-            if (slotName === undefined) {
-                throw new Error('Missing `name` or `data-key` for slot.');
+    function walk(parentNode, path) {
+        var _js43 = parentNode.childNodes.length - 1;
+        for (var i = 0; i <= _js43; i += 1) {
+            var node = parentNode.childNodes[i];
+            if (node.nodeType !== Node['ELEMENT_NODE']) {
+                continue;
             };
-            node.parentNode.insertBefore(anchor, node);
-            context[slotName] = { anchor : anchor,
-                               slot : node,
-                               template : templateNode,
-                               type : SYMBOLSLOT
-                             };
-            node.remove();
-            continue;
-        };
-        for (var key in node.dataset) {
-            var value = node.dataset[key];
-            var result = null;
-            switch (key) {
-            case 'text':
-                result = { node : node, type : SYMBOLTEXT };
-                break;
-            case 'class':
-                result = { node : node, type : SYMBOLCLASS };
-                break;
-            case 'unsafeHtml':
-                result = { node : node, type : SYMBOLHTML };
+            if (node.children.length) {
+                walk(node, path.concat(i));
             };
-            if (key.startsWith('attribute')) {
-                result = { node : node,
-                        type : SYMBOLATTRIBUTE,
-                        name : key.slice(9).toLowerCase()
-                      };
+            if (node.tagName === TAGSLOT || node.dataset.template) {
+                var slotName = node.dataset.key || node.name;
+                var anchor = createAnchor(2, slotName);
+                var templateNode = document.querySelector(node.dataset.template);
+                if (slotName === undefined) {
+                    throw new Error('Missing `name` or `data-key` for slot.');
+                };
+                parentNode.insertBefore(anchor, node);
+                context[slotName] = { path : path.concat(i),
+                                   slot : node,
+                                   template : templateNode,
+                                   type : SYMBOLSLOT
+                                 };
+                node.remove();
+                continue;
             };
-            if (key.startsWith('event')) {
-                result = { node : node,
-                        type : SYMBOLEVENT,
-                        event : key.slice(5).toLowerCase()
-                      };
-            };
-            if (result) {
-                delete node.dataset[key];
-                context[value] = result;
+            for (var key in node.dataset) {
+                var value = node.dataset[key];
+                var result = null;
+                switch (key) {
+                case 'text':
+                    result = { type : SYMBOLTEXT };
+                    break;
+                case 'class':
+                    result = { type : SYMBOLCLASS };
+                    break;
+                case 'unsafeHtml':
+                    result = { type : SYMBOLHTML };
+                };
+                if (key.startsWith('attribute')) {
+                    result = { type : SYMBOLATTRIBUTE, name : key.slice(9).toLowerCase() };
+                };
+                if (key.startsWith('event')) {
+                    result = { type : SYMBOLEVENT, event : key.slice(5).toLowerCase() };
+                };
+                if (result) {
+                    delete node.dataset[key];
+                    node.removeAttribute(key);
+                    result.path = path.concat(i);
+                    context[value] = result;
+                };
             };
         };
     };
+    walk(clone, []);
+    TEMPLATEPROCESSEDMAP.set(template, clone);
     __PS_MV_REG = [];
-    return context;
+    return TEMPLATECONTEXTMAP.set(template, context);
+};
+/* (DEFUN CREATE-CONTEXT (CLONE TEMPLATE)
+     (LET ((CONTEXT (CHAIN *TEMPLATE-CONTEXT-MAP* (GET TEMPLATE)))
+           (CLONED-CONTEXT (CREATE)))
+       (LOOP FOR KEY OF CONTEXT
+             DO (LET* ((DESCRIPTOR (GETPROP CONTEXT KEY))
+                       (PATH (@ DESCRIPTOR PATH))
+                       (NODE (GET-PATH CLONE PATH)))
+                  (SETF (GETPROP CLONED-CONTEXT KEY)
+                          (CHAIN *OBJECT
+                                 (ASSIGN (CREATE NODE NODE) DESCRIPTOR)))))
+       CLONED-CONTEXT)) */
+function createContext(clone, template) {
+    var context = TEMPLATECONTEXTMAP.get(template);
+    var clonedContext = {  };
+    for (var key in context) {
+        var descriptor = context[key];
+        var path44 = descriptor.path;
+        var node = getPath(clone, path44);
+        clonedContext[key] = Object.assign({ node : node }, descriptor);
+    };
+    __PS_MV_REG = [];
+    return clonedContext;
+};
+/* (DEFUN GET-PATH (NODE PATH)
+     (LET ((RESULT NODE))
+       (LOOP FOR I FROM 0 TO (- (LENGTH PATH) 1)
+             DO (LET ((J (GETPROP PATH I)))
+                  (SETF RESULT (GETPROP (@ RESULT CHILD-NODES) J))))
+       RESULT)) */
+function getPath(node, path) {
+    var result = node;
+    var _js44 = path.length - 1;
+    for (var i = 0; i <= _js44; i += 1) {
+        var j = path[i];
+        result = result.childNodes[j];
+    };
+    return result;
 };
 /* (DEFUN CREATE-ARRAY (ARRAY TEMPLATE)
      (LET* ((NODES (LIST)) (PROXIES (LIST)) (PROXY NIL))
@@ -711,9 +760,9 @@ function createArray(array, template) {
     var nodes = [];
     var proxies = [];
     var proxy = null;
-    var _js45 = array.length;
-    for (var _js44 = 0; _js44 < _js45; _js44 += 1) {
-        var item = array[_js44];
+    var _js46 = array.length;
+    for (var _js45 = 0; _js45 < _js46; _js45 += 1) {
+        var item = array[_js45];
         var result = createBinding(item, template);
         nodes.push(result[0]);
         proxies.push(result[1]);
@@ -724,50 +773,59 @@ function createArray(array, template) {
     return [nodes, proxy];
 };
 /* (DEFUN CREATE-BINDING (OBJ TEMPLATE)
-     (LET* ((ROOT (OR (@ TEMPLATE CONTENT) TEMPLATE))
-            (CLONE (CHAIN ROOT (CLONE-NODE T)))
+     (WHEN (NOT (CHAIN *TEMPLATE-PROCESSED-MAP* (GET TEMPLATE)))
+       (PROCESS-TEMPLATE TEMPLATE))
+     (LET* ((CLONE
+             (CHAIN (CHAIN *TEMPLATE-PROCESSED-MAP* (GET TEMPLATE))
+                    (CLONE-NODE T)))
             (PROXY (NEW (*PROXY OBJ *PROXY-OBJECT*)))
-            (CONTEXT (CREATE-CONTEXT CLONE))
+            (CONTEXT (CREATE-CONTEXT CLONE TEMPLATE))
             (START-NODE (CREATE-ANCHOR 0 'PROXY))
             (END-NODE (CREATE-ANCHOR 1 'PROXY))
             (NODES (LIST START-NODE END-NODE))
             (MOUNT (GETPROP OBJ *SYMBOL-MOUNT*))
-            (UNMOUNT (GETPROP OBJ *SYMBOL-UNMOUNT*)))
-       (CHAIN CLONE (INSERT-BEFORE START-NODE (@ CLONE FIRST-CHILD)))
-       (CHAIN CLONE (APPEND-CHILD END-NODE))
+            (UNMOUNT (GETPROP OBJ *SYMBOL-UNMOUNT*))
+            (FRAGMENT (CHAIN DOCUMENT (CREATE-DOCUMENT-FRAGMENT))))
+       (WHEN MOUNT (CHAIN MOUNT (CALL PROXY CLONE)))
+       (WHEN UNMOUNT (CHAIN *PROXY-UNMOUNT-MAP* (SET PROXY UNMOUNT)))
+       (CHAIN FRAGMENT (APPEND-CHILD START-NODE))
+       (CHAIN FRAGMENT (APPEND-CHILD CLONE))
+       (CHAIN FRAGMENT (APPEND-CHILD END-NODE))
        (CHAIN *PROXY-DELIMITER-MAP* (SET PROXY NODES))
        (CHAIN *TARGET-CONTEXT-MAP* (SET OBJ CONTEXT))
        (CHAIN *TARGET-EVENT-MAP* (SET OBJ (CREATE)))
        (CHAIN *TARGET-DELIMITER-MAP* (SET OBJ (CREATE)))
        (CHAIN *OBJECT (ASSIGN PROXY OBJ))
-       (WHEN MOUNT (CHAIN MOUNT (CALL PROXY CLONE)))
-       (WHEN UNMOUNT (CHAIN *PROXY-UNMOUNT-MAP* (SET PROXY UNMOUNT)))
-       (LIST CLONE PROXY))) */
+       (LIST FRAGMENT PROXY))) */
 function createBinding(obj, template) {
-    var root = template.content || template;
-    var clone = root.cloneNode(true);
+    if (!TEMPLATEPROCESSEDMAP.get(template)) {
+        processTemplate(template);
+    };
+    var clone = TEMPLATEPROCESSEDMAP.get(template).cloneNode(true);
     var proxy = new Proxy(obj, PROXYOBJECT);
-    var context = createContext(clone);
+    var context = createContext(clone, template);
     var startNode = createAnchor(0, 'proxy');
     var endNode = createAnchor(1, 'proxy');
     var nodes = [startNode, endNode];
     var mount = obj[SYMBOLMOUNT];
     var unmount = obj[SYMBOLUNMOUNT];
-    clone.insertBefore(startNode, clone.firstChild);
-    clone.appendChild(endNode);
-    PROXYDELIMITERMAP.set(proxy, nodes);
-    TARGETCONTEXTMAP.set(obj, context);
-    TARGETEVENTMAP.set(obj, {  });
-    TARGETDELIMITERMAP.set(obj, {  });
-    Object.assign(proxy, obj);
+    var fragment = document.createDocumentFragment();
     if (mount) {
         mount.call(proxy, clone);
     };
     if (unmount) {
         PROXYUNMOUNTMAP.set(proxy, unmount);
     };
+    fragment.appendChild(startNode);
+    fragment.appendChild(clone);
+    fragment.appendChild(endNode);
+    PROXYDELIMITERMAP.set(proxy, nodes);
+    TARGETCONTEXTMAP.set(obj, context);
+    TARGETEVENTMAP.set(obj, {  });
+    TARGETDELIMITERMAP.set(obj, {  });
+    Object.assign(proxy, obj);
     __PS_MV_REG = [];
-    return [clone, proxy];
+    return [fragment, proxy];
 };
 /* (DEFUN CREATE-ANCHOR (TYPE KEY)
      (IF (@ MAIN DEBUG)
