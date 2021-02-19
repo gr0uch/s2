@@ -13,8 +13,8 @@
    (list (list 'document 'query-selector) "function")
    (list (list 'document 'create-text-node) "function")
    (list (list 'document 'create-comment) "function")
-   (list (list 'document 'create-node-iterator) "function")
-   (list (list '*node-filter) "function")
+   (list (list 'document 'create-document-fragment) "function")
+   (list (list '*node) "function")
 
    ;; Sanity checking JS.
    (list (list '*object 'prototype 'has-own-property) "function")
