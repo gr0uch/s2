@@ -1,6 +1,6 @@
 # s²
 
-**s2 is a ~2kb metaprogramming function that enables web user interfaces to be mapped as data structures.**
+**s2 is a ~2kb metaprogramming function that maps data structures to the DOM.**
 
 It returns a `Proxy` so that plain JS objects (data + functions), can map directly to elements. Data structures are bound to the DOM, using HTML `<template>` & `<slot>` tags, and `data-` attributes to bind data and events.
 
