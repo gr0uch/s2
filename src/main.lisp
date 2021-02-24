@@ -163,11 +163,15 @@
   t)
 
 
-(defun set-property (target key value receiver)
+(defun set-property (target key value receiver is-initializing)
   (let* ((context (chain *target-context-map* (get target)))
+         ;; Even though there may be 5 arguments here,
+         ;; we don't care about setting if initializing.
          (is-setter (eq (length arguments) 4))
-         (is-delete (eq (length arguments) 2)))
-    (when (chain *object prototype has-own-property (call context key))
+         (is-delete (eq (length arguments) 2))
+         (is-changed (not (eq (getprop target key) value))))
+    (when (and (chain *object prototype has-own-property (call context key))
+               (or is-changed is-initializing))
       (let* ((descriptor (getprop context key))
              (node (@ descriptor node))
              (type (@ descriptor type)))
@@ -443,7 +447,10 @@
     (chain *target-delimiter-map* (set obj (create)))
 
     ;; Initialization
-    (chain *object (assign proxy obj))
+    ; (chain *object (assign proxy obj))
+    (loop
+     for key of obj do
+     (set-property obj key (getprop obj key) proxy t))
 
     (list fragment proxy)))
 

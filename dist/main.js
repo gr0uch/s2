@@ -284,11 +284,14 @@ function setIndex(target, key, value, receiver) {
     __PS_MV_REG = [];
     return true;
 };
-/* (DEFUN SET-PROPERTY (TARGET KEY VALUE RECEIVER)
+/* (DEFUN SET-PROPERTY (TARGET KEY VALUE RECEIVER IS-INITIALIZING)
      (LET* ((CONTEXT (CHAIN *TARGET-CONTEXT-MAP* (GET TARGET)))
             (IS-SETTER (EQ (LENGTH ARGUMENTS) 4))
-            (IS-DELETE (EQ (LENGTH ARGUMENTS) 2)))
-       (WHEN (CHAIN *OBJECT PROTOTYPE HAS-OWN-PROPERTY (CALL CONTEXT KEY))
+            (IS-DELETE (EQ (LENGTH ARGUMENTS) 2))
+            (IS-CHANGED (NOT (EQ (GETPROP TARGET KEY) VALUE))))
+       (WHEN
+           (AND (CHAIN *OBJECT PROTOTYPE HAS-OWN-PROPERTY (CALL CONTEXT KEY))
+                (OR IS-CHANGED IS-INITIALIZING))
          (LET* ((DESCRIPTOR (GETPROP CONTEXT KEY))
                 (NODE (@ DESCRIPTOR NODE))
                 (TYPE (@ DESCRIPTOR TYPE)))
@@ -313,11 +316,12 @@ function setIndex(target, key, value, receiver) {
        (WHEN IS-DELETE (DELETE (GETPROP TARGET KEY)))
        (WHEN IS-SETTER (CHAIN *REFLECT (SET TARGET KEY VALUE RECEIVER))))
      T) */
-function setProperty(target, key, value, receiver) {
+function setProperty(target, key, value, receiver, isInitializing) {
     var context = TARGETCONTEXTMAP.get(target);
     var isSetter = arguments.length === 4;
     var isDelete = arguments.length === 2;
-    if (Object.prototype.hasOwnProperty.call(context, key)) {
+    var isChanged = target[key] !== value;
+    if (Object.prototype.hasOwnProperty.call(context, key) && (isChanged || isInitializing)) {
         var descriptor = context[key];
         var node16 = descriptor.node;
         var type17 = descriptor.type;
@@ -795,7 +799,8 @@ function createArray(array, template) {
        (CHAIN *TARGET-CONTEXT-MAP* (SET OBJ CONTEXT))
        (CHAIN *TARGET-EVENT-MAP* (SET OBJ (CREATE)))
        (CHAIN *TARGET-DELIMITER-MAP* (SET OBJ (CREATE)))
-       (CHAIN *OBJECT (ASSIGN PROXY OBJ))
+       (LOOP FOR KEY OF OBJ
+             DO (SET-PROPERTY OBJ KEY (GETPROP OBJ KEY) PROXY T))
        (LIST FRAGMENT PROXY))) */
 function createBinding(obj, template) {
     if (!TEMPLATEPROCESSEDMAP.get(template)) {
@@ -823,7 +828,9 @@ function createBinding(obj, template) {
     TARGETCONTEXTMAP.set(obj, context);
     TARGETEVENTMAP.set(obj, {  });
     TARGETDELIMITERMAP.set(obj, {  });
-    Object.assign(proxy, obj);
+    for (var key in obj) {
+        setProperty(obj, key, obj[key], proxy, true);
+    };
     __PS_MV_REG = [];
     return [fragment, proxy];
 };
