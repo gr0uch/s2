@@ -111,8 +111,8 @@ if ('undefined' === typeof PROXYARRAY) {
                     (PARENT-NODE (@ ANCHOR PARENT-NODE))
                     (TEMPLATE (CHAIN *PROXY-TEMPLATE-MAP* (GET RECEIVER)))
                     (RESULT (CREATE-BINDING VALUE TEMPLATE))
-                    (NODE (@ RESULT 0))
-                    (PROXY (@ RESULT 1))
+                    (PROXY (@ RESULT 0))
+                    (NODE (@ RESULT 1))
                     (PREVIOUS-PROXY (GETPROP TARGET KEY))
                     (NEXT-PROXY NIL))
                (LOOP FOR I FROM (+ NUMKEY 1) TO (- (LENGTH TARGET) 1)
@@ -217,8 +217,8 @@ function setIndex(target, key, value, receiver) {
             var parentNode5 = anchor.parentNode;
             var template = PROXYTEMPLATEMAP.get(receiver);
             var result = createBinding(value, template);
-            var node = result[0];
-            var proxy6 = result[1];
+            var proxy6 = result[0];
+            var node = result[1];
             var previousProxy = target[key];
             var nextProxy = null;
             var _js7 = target.length - 1;
@@ -481,8 +481,8 @@ function removeBetweenDelimiters(startNode, endNode, unmount, self) {
                  (CHAIN *PROXY-DELIMITER-MAP* (SET PROXY (GETPROP HASH KEY)))
                  (SETF RETURN-VALUE PROXY))
                (LET* ((RESULT (CREATE-BINDING VALUE TEMPLATE))
-                      (NODE (@ RESULT 0))
-                      (PROXY (@ RESULT 1)))
+                      (PROXY (@ RESULT 0))
+                      (NODE (@ RESULT 1)))
                  (CHAIN PARENT-NODE (INSERT-BEFORE NODE ANCHOR))
                  (SETF RETURN-VALUE PROXY)))
            (LOOP FOR NODE IN (@ SLOT CHILD-NODES)
@@ -543,10 +543,10 @@ function setSlot(target, key, value, descriptor) {
             returnValue = proxy32;
         } else {
             var result35 = createBinding(value, template25);
-            var node36 = result35[0];
-            var proxy37 = result35[1];
-            parentNode26.insertBefore(node36, anchor);
-            returnValue = proxy37;
+            var proxy36 = result35[0];
+            var node37 = result35[1];
+            parentNode26.insertBefore(node37, anchor);
+            returnValue = proxy36;
         };
     } else {
         var _js38 = slot24.childNodes;
@@ -755,8 +755,8 @@ function getPath(node, path) {
      (LET* ((NODES (LIST)) (PROXIES (LIST)) (PROXY NIL))
        (LOOP FOR ITEM IN ARRAY
              DO (LET ((RESULT (CREATE-BINDING ITEM TEMPLATE)))
-                  (CHAIN NODES (PUSH (@ RESULT 0)))
-                  (CHAIN PROXIES (PUSH (@ RESULT 1)))))
+                  (CHAIN PROXIES (PUSH (@ RESULT 0)))
+                  (CHAIN NODES (PUSH (@ RESULT 1)))))
        (SETF PROXY (NEW (*PROXY PROXIES *PROXY-ARRAY*)))
        (CHAIN *PROXY-TEMPLATE-MAP* (SET PROXY TEMPLATE))
        (LIST NODES PROXY))) */
@@ -768,8 +768,8 @@ function createArray(array, template) {
     for (var _js45 = 0; _js45 < _js46; _js45 += 1) {
         var item = array[_js45];
         var result = createBinding(item, template);
-        nodes.push(result[0]);
-        proxies.push(result[1]);
+        proxies.push(result[0]);
+        nodes.push(result[1]);
     };
     proxy = new Proxy(proxies, PROXYARRAY);
     PROXYTEMPLATEMAP.set(proxy, template);
@@ -801,7 +801,7 @@ function createArray(array, template) {
        (CHAIN *TARGET-DELIMITER-MAP* (SET OBJ (CREATE)))
        (LOOP FOR KEY OF OBJ
              DO (SET-PROPERTY OBJ KEY (GETPROP OBJ KEY) PROXY T))
-       (LIST FRAGMENT PROXY))) */
+       (LIST PROXY FRAGMENT))) */
 function createBinding(obj, template) {
     if (!TEMPLATEPROCESSEDMAP.get(template)) {
         processTemplate(template);
@@ -832,7 +832,7 @@ function createBinding(obj, template) {
         setProperty(obj, key, obj[key], proxy, true);
     };
     __PS_MV_REG = [];
-    return [fragment, proxy];
+    return [proxy, fragment];
 };
 /* (DEFUN CREATE-ANCHOR (TYPE KEY)
      (IF (@ MAIN DEBUG)

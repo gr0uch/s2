@@ -16,7 +16,7 @@ cleanupTemplates();
 
 const template = document.querySelector("#root");
 
-const [node, proxy] = s2({
+const [proxy, node] = s2({
   title: "Hello, <em>world!</em>",
   titleClass: "title",
   titleLang: "en",

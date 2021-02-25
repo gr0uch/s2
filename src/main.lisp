@@ -90,8 +90,8 @@
                  (parent-node (@ anchor parent-node))
                  (template (chain *proxy-template-map* (get receiver)))
                  (result (create-binding value template))
-                 (node (@ result 0))
-                 (proxy (@ result 1))
+                 (proxy (@ result 0))
+                 (node (@ result 1))
                  (previous-proxy (getprop target key))
                  (next-proxy nil))
 
@@ -286,8 +286,8 @@
               (chain *proxy-delimiter-map* (set proxy (getprop hash key)))
               (setf return-value proxy))
           (let* ((result (create-binding value template))
-                 (node (@ result 0))
-                 (proxy (@ result 1)))
+                 (proxy (@ result 0))
+                 (node (@ result 1)))
             (chain parent-node (insert-before node anchor))
             (setf return-value proxy)))
       ;; Use empty state from slot
@@ -412,8 +412,8 @@
     (loop
      for item in array do
      (let ((result (create-binding item template)))
-       (chain nodes (push (@ result 0)))
-       (chain proxies (push (@ result 1)))))
+       (chain proxies (push (@ result 0)))
+       (chain nodes (push (@ result 1)))))
     (setf proxy (new (*proxy proxies *proxy-array*)))
     (chain *proxy-template-map* (set proxy template))
     (list nodes proxy)))
@@ -452,7 +452,7 @@
      for key of obj do
      (set-property obj key (getprop obj key) proxy t))
 
-    (list fragment proxy)))
+    (list proxy fragment)))
 
 
 (defun create-anchor (type key)

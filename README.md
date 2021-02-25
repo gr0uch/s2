@@ -36,7 +36,7 @@ Binding data:
 
 ```js
 const template = document.getElementById("root");
-const [node, proxy] = s2({
+const [proxy, node] = s2({
   counter: {
     count: 0,
     increment() {
