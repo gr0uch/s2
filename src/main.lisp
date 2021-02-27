@@ -242,7 +242,7 @@
 
 ;; The way that this works is it tries to present an immediate-mode interface
 ;; on top of a retained mode underlying layer, the DOM. For example, assigning
-;; a new object when there was a previous object before, will try to make the
+;; a new object where there was a previous object before, will try to make the
 ;; least DOM updates possible.
 (defun set-slot (target key value descriptor)
   ;; Skip deletion if already empty.
@@ -297,10 +297,10 @@
                 (chain parent-node (insert-before node anchor))
                 (setf return-value proxy)))
           ;; Assign values on existing proxies
-          (let* (;; Casting to array first makes this a little simpler to do.
-                 (is-prev-array (chain *array (is-array previous-value)))
+          (let* (
+                 ;; Casting to array first makes this a little simpler to do.
                  (previous-values
-                  (if is-prev-array
+                  (if (chain *array (is-array previous-value))
                       previous-value (list previous-value)))
                  (values
                   (if (chain *array (is-array value))

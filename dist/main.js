@@ -485,9 +485,8 @@ function removeBetweenDelimiters(startNode, endNode, unmount, self) {
                           (NODE (@ RESULT 1)))
                      (CHAIN PARENT-NODE (INSERT-BEFORE NODE ANCHOR))
                      (SETF RETURN-VALUE PROXY)))
-               (LET* ((IS-PREV-ARRAY (CHAIN *ARRAY (IS-ARRAY PREVIOUS-VALUE)))
-                      (PREVIOUS-VALUES
-                       (IF IS-PREV-ARRAY
+               (LET* ((PREVIOUS-VALUES
+                       (IF (CHAIN *ARRAY (IS-ARRAY PREVIOUS-VALUE))
                            PREVIOUS-VALUE
                            (LIST PREVIOUS-VALUE)))
                       (VALUES
@@ -577,8 +576,7 @@ function setSlot(target, key, value, descriptor) {
                 returnValue = proxy36;
             };
         } else {
-            var isPrevArray = Array.isArray(previousValue);
-            var previousValues = isPrevArray ? previousValue : [previousValue];
+            var previousValues = Array.isArray(previousValue) ? previousValue : [previousValue];
             var values = Array.isArray(value) ? value : [value];
             var _js38 = values.length - 1;
             for (var i = 0; i <= _js38; i += 1) {
