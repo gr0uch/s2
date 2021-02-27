@@ -297,14 +297,17 @@
                 (chain parent-node (insert-before node anchor))
                 (setf return-value proxy)))
           ;; Assign values on existing proxies
-          (let* (
+          (let* ((is-previous-array (chain *array (is-array previous-value)))
+                 (is-value-array (chain *array (is-array value)))
                  ;; Casting to array first makes this a little simpler to do.
                  (previous-values
-                  (if (chain *array (is-array previous-value))
-                      previous-value (list previous-value)))
+                  (if is-previous-array previous-value (list previous-value)))
                  (values
-                  (if (chain *array (is-array value))
-                      value (list value))))
+                  (if is-value-array value (list value))))
+            ;; Bail out on type mismatch.
+            (when (not (eq is-previous-array is-value-array))
+              (throw (new (*type-error
+                           (+ "Object/array mismatch on key `" key "`.")))))
             (loop
              for i from 0 to (- (length values) 1) do
              (let ((prev (getprop previous-values i))
@@ -369,7 +372,8 @@
                    (chain document (query-selector
                                     (@ node dataset template)))))
              (when (eq slot-name undefined)
-               (throw (new (*error "Missing `name` or `data-key` for slot."))))
+               (throw (new (*type-error
+                            "Missing `name` or `data-key` for slot."))))
              (chain parent-node (insert-before anchor node))
              (setf (getprop context slot-name)
                    (create

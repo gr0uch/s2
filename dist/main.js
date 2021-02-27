@@ -485,14 +485,22 @@ function removeBetweenDelimiters(startNode, endNode, unmount, self) {
                           (NODE (@ RESULT 1)))
                      (CHAIN PARENT-NODE (INSERT-BEFORE NODE ANCHOR))
                      (SETF RETURN-VALUE PROXY)))
-               (LET* ((PREVIOUS-VALUES
-                       (IF (CHAIN *ARRAY (IS-ARRAY PREVIOUS-VALUE))
+               (LET* ((IS-PREVIOUS-ARRAY
+                       (CHAIN *ARRAY (IS-ARRAY PREVIOUS-VALUE)))
+                      (IS-VALUE-ARRAY (CHAIN *ARRAY (IS-ARRAY VALUE)))
+                      (PREVIOUS-VALUES
+                       (IF IS-PREVIOUS-ARRAY
                            PREVIOUS-VALUE
                            (LIST PREVIOUS-VALUE)))
                       (VALUES
-                       (IF (CHAIN *ARRAY (IS-ARRAY VALUE))
+                       (IF IS-VALUE-ARRAY
                            VALUE
                            (LIST VALUE))))
+                 (WHEN (NOT (EQ IS-PREVIOUS-ARRAY IS-VALUE-ARRAY))
+                   (THROW
+                       (NEW
+                        (*TYPE-ERROR
+                         (+ Object/array mismatch on key ` KEY `.)))))
                  (LOOP FOR I FROM 0 TO (- (LENGTH VALUES) 1)
                        DO (LET ((PREV (GETPROP PREVIOUS-VALUES I))
                                 (OBJ (GETPROP VALUES I)))
@@ -576,8 +584,13 @@ function setSlot(target, key, value, descriptor) {
                 returnValue = proxy36;
             };
         } else {
-            var previousValues = Array.isArray(previousValue) ? previousValue : [previousValue];
-            var values = Array.isArray(value) ? value : [value];
+            var isPreviousArray = Array.isArray(previousValue);
+            var isValueArray = Array.isArray(value);
+            var previousValues = isPreviousArray ? previousValue : [previousValue];
+            var values = isValueArray ? value : [value];
+            if (isPreviousArray !== isValueArray) {
+                throw new TypeError('Object/array mismatch on key `' + key + '`.');
+            };
             var _js38 = values.length - 1;
             for (var i = 0; i <= _js38; i += 1) {
                 var prev = previousValues[i];
@@ -666,7 +679,7 @@ function setEvent(target, value, descriptor, receiver) {
                         (WHEN (EQ SLOT-NAME UNDEFINED)
                           (THROW
                               (NEW
-                               (*ERROR
+                               (*TYPE-ERROR
                                 Missing `name` or `data-key` for slot.))))
                         (CHAIN PARENT-NODE (INSERT-BEFORE ANCHOR NODE))
                         (SETF (GETPROP CONTEXT SLOT-NAME)
@@ -721,7 +734,7 @@ function processTemplate(template) {
                 var anchor = createAnchor(2, slotName);
                 var templateNode = document.querySelector(node.dataset.template);
                 if (slotName === undefined) {
-                    throw new Error('Missing `name` or `data-key` for slot.');
+                    throw new TypeError('Missing `name` or `data-key` for slot.');
                 };
                 parentNode.insertBefore(anchor, node);
                 context[slotName] = { path : path.concat(i),
