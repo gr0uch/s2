@@ -18,7 +18,7 @@ function test() {
     p.list.things = test.initialThings.slice();
     button.click();
     if (list.textContent === expectations[i]) this.count++;
-    else console.error(`expected:`, expectations[i], `got:`, list.textContent);
+    else console.error(i, `expected:`, expectations[i], `got:`, list.textContent);
   });
   p.list.things = test.initialThings.slice();
   this.runText = this.count === this.total ? 'Tests passed!' : 'Tests failed!';

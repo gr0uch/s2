@@ -284,14 +284,14 @@ function setIndex(target, key, value, receiver) {
     __PS_MV_REG = [];
     return true;
 };
-/* (DEFUN SET-PROPERTY (TARGET KEY VALUE RECEIVER IS-INITIALIZING)
+/* (DEFUN SET-PROPERTY (TARGET KEY VALUE RECEIVER)
      (LET* ((CONTEXT (CHAIN *TARGET-CONTEXT-MAP* (GET TARGET)))
             (IS-SETTER (EQ (LENGTH ARGUMENTS) 4))
             (IS-DELETE (EQ (LENGTH ARGUMENTS) 2))
             (IS-CHANGED (NOT (EQ (GETPROP TARGET KEY) VALUE))))
        (WHEN
            (AND (CHAIN *OBJECT PROTOTYPE HAS-OWN-PROPERTY (CALL CONTEXT KEY))
-                (OR IS-CHANGED IS-INITIALIZING))
+                IS-CHANGED)
          (LET* ((DESCRIPTOR (GETPROP CONTEXT KEY))
                 (NODE (@ DESCRIPTOR NODE))
                 (TYPE (@ DESCRIPTOR TYPE)))
@@ -316,12 +316,12 @@ function setIndex(target, key, value, receiver) {
        (WHEN IS-DELETE (DELETE (GETPROP TARGET KEY)))
        (WHEN IS-SETTER (CHAIN *REFLECT (SET TARGET KEY VALUE RECEIVER))))
      T) */
-function setProperty(target, key, value, receiver, isInitializing) {
+function setProperty(target, key, value, receiver) {
     var context = TARGETCONTEXTMAP.get(target);
     var isSetter = arguments.length === 4;
     var isDelete = arguments.length === 2;
     var isChanged = target[key] !== value;
-    if (Object.prototype.hasOwnProperty.call(context, key) && (isChanged || isInitializing)) {
+    if (Object.prototype.hasOwnProperty.call(context, key) && isChanged) {
         var descriptor = context[key];
         var node16 = descriptor.node;
         var type17 = descriptor.type;
@@ -449,42 +449,69 @@ function removeBetweenDelimiters(startNode, endNode, unmount, self) {
             (PARENT-NODE (@ ANCHOR PARENT-NODE))
             (START-NODE (CREATE-ANCHOR 0 KEY))
             (END-NODE (CREATE-ANCHOR 1 KEY))
+            (PREVIOUS-VALUE (GETPROP TARGET KEY))
             (RETURN-VALUE NIL))
-       (WHEN NODES
-         (LET ((PREVIOUS-VALUE (GETPROP TARGET KEY)))
-           (IF (CHAIN *ARRAY (IS-ARRAY PREVIOUS-VALUE))
-               (LOOP FOR PROXY IN PREVIOUS-VALUE
-                     DO (LET ((UNMOUNT (CHAIN *PROXY-UNMOUNT-MAP* (GET PROXY)))
-                              (NODES (CHAIN *PROXY-DELIMITER-MAP* (GET PROXY))))
-                          (WHEN NODES
-                            (REMOVE-BETWEEN-DELIMITERS (@ NODES 0) (@ NODES 1)
-                             UNMOUNT PROXY))))
-               (WHEN PREVIOUS-VALUE
-                 (LET ((UNMOUNT
-                        (CHAIN *PROXY-UNMOUNT-MAP* (GET PREVIOUS-VALUE)))
-                       (NODES
-                        (CHAIN *PROXY-DELIMITER-MAP* (GET PREVIOUS-VALUE))))
-                   (REMOVE-BETWEEN-DELIMITERS (@ NODES 0) (@ NODES 1) UNMOUNT
-                    PREVIOUS-VALUE)))))
+       (WHEN (AND NODES (OR (NOT VALUE) (AND VALUE (NOT PREVIOUS-VALUE))))
+         (IF (CHAIN *ARRAY (IS-ARRAY PREVIOUS-VALUE))
+             (LOOP FOR PROXY IN PREVIOUS-VALUE
+                   DO (LET ((UNMOUNT (CHAIN *PROXY-UNMOUNT-MAP* (GET PROXY)))
+                            (NODES (CHAIN *PROXY-DELIMITER-MAP* (GET PROXY))))
+                        (WHEN NODES
+                          (REMOVE-BETWEEN-DELIMITERS (@ NODES 0) (@ NODES 1)
+                           UNMOUNT PROXY))))
+             (WHEN PREVIOUS-VALUE
+               (LET ((UNMOUNT (CHAIN *PROXY-UNMOUNT-MAP* (GET PREVIOUS-VALUE)))
+                     (NODES (CHAIN *PROXY-DELIMITER-MAP* (GET PREVIOUS-VALUE))))
+                 (REMOVE-BETWEEN-DELIMITERS (@ NODES 0) (@ NODES 1) UNMOUNT
+                  PREVIOUS-VALUE))))
          (REMOVE-BETWEEN-DELIMITERS (@ NODES 0) (@ NODES 1))
          (DELETE (GETPROP HASH KEY)))
        (SETF (GETPROP HASH KEY) (LIST START-NODE END-NODE))
        (CHAIN PARENT-NODE (INSERT-BEFORE START-NODE ANCHOR))
        (IF VALUE
-           (IF (CHAIN *ARRAY (IS-ARRAY VALUE))
-               (LET* ((RESULT (CREATE-ARRAY VALUE TEMPLATE))
-                      (NODES (@ RESULT 0))
-                      (PROXY (@ RESULT 1)))
-                 (LOOP FOR NODE IN NODES
-                       DO (CHAIN PARENT-NODE (INSERT-BEFORE NODE ANCHOR)))
-                 (CHAIN *PROXY-ANCHOR-MAP* (SET PROXY ANCHOR))
-                 (CHAIN *PROXY-DELIMITER-MAP* (SET PROXY (GETPROP HASH KEY)))
-                 (SETF RETURN-VALUE PROXY))
-               (LET* ((RESULT (CREATE-BINDING VALUE TEMPLATE))
-                      (PROXY (@ RESULT 0))
-                      (NODE (@ RESULT 1)))
-                 (CHAIN PARENT-NODE (INSERT-BEFORE NODE ANCHOR))
-                 (SETF RETURN-VALUE PROXY)))
+           (IF (NOT PREVIOUS-VALUE)
+               (IF (CHAIN *ARRAY (IS-ARRAY VALUE))
+                   (LET* ((RESULT (CREATE-ARRAY VALUE TEMPLATE))
+                          (NODES (@ RESULT 0))
+                          (PROXY (@ RESULT 1)))
+                     (LOOP FOR NODE IN NODES
+                           DO (CHAIN PARENT-NODE (INSERT-BEFORE NODE ANCHOR)))
+                     (CHAIN *PROXY-ANCHOR-MAP* (SET PROXY ANCHOR))
+                     (CHAIN *PROXY-DELIMITER-MAP*
+                            (SET PROXY (GETPROP HASH KEY)))
+                     (SETF RETURN-VALUE PROXY))
+                   (LET* ((RESULT (CREATE-BINDING VALUE TEMPLATE))
+                          (PROXY (@ RESULT 0))
+                          (NODE (@ RESULT 1)))
+                     (CHAIN PARENT-NODE (INSERT-BEFORE NODE ANCHOR))
+                     (SETF RETURN-VALUE PROXY)))
+               (LET* ((IS-PREV-ARRAY (CHAIN *ARRAY (IS-ARRAY PREVIOUS-VALUE)))
+                      (PREVIOUS-VALUES
+                       (IF IS-PREV-ARRAY
+                           PREVIOUS-VALUE
+                           (LIST PREVIOUS-VALUE)))
+                      (VALUES
+                       (IF (CHAIN *ARRAY (IS-ARRAY VALUE))
+                           VALUE
+                           (LIST VALUE))))
+                 (LOOP FOR I FROM 0 TO (- (LENGTH VALUES) 1)
+                       DO (LET ((PREV (GETPROP PREVIOUS-VALUES I))
+                                (OBJ (GETPROP VALUES I)))
+                            (IF PREV
+                                (PROGN
+                                 (LOOP FOR KEY OF OBJ
+                                       DO (SETF (GETPROP PREV KEY)
+                                                  (GETPROP OBJ KEY)))
+                                 (LOOP FOR KEY OF PREV
+                                       DO (WHEN
+                                              (NOT
+                                               (CHAIN OBJ
+                                                      (HAS-OWN-PROPERTY KEY)))
+                                            (DELETE (GETPROP PREV KEY)))))
+                                (SETF (GETPROP PREVIOUS-VALUES I) OBJ))))
+                 (WHEN (CHAIN *ARRAY (IS-ARRAY PREVIOUS-VALUE))
+                   (SETF (LENGTH PREVIOUS-VALUES) (LENGTH VALUES)))
+                 (SETF RETURN-VALUE PREVIOUS-VALUE)))
            (LOOP FOR NODE IN (@ SLOT CHILD-NODES)
                  DO (CHAIN PARENT-NODE
                            (INSERT-BEFORE (CHAIN NODE (CLONE-NODE T))
@@ -503,9 +530,9 @@ function setSlot(target, key, value, descriptor) {
     var parentNode26 = anchor.parentNode;
     var startNode = createAnchor(0, key);
     var endNode = createAnchor(1, key);
+    var previousValue = target[key];
     var returnValue = null;
-    if (nodes) {
-        var previousValue = target[key];
+    if (nodes && (!value || value && !previousValue)) {
         if (Array.isArray(previousValue)) {
             var _js28 = previousValue.length;
             for (var _js27 = 0; _js27 < _js28; _js27 += 1) {
@@ -529,31 +556,58 @@ function setSlot(target, key, value, descriptor) {
     hash[key] = [startNode, endNode];
     parentNode26.insertBefore(startNode, anchor);
     if (value) {
-        if (Array.isArray(value)) {
-            var result = createArray(value, template25);
-            var nodes31 = result[0];
-            var proxy32 = result[1];
-            var _js34 = nodes31.length;
-            for (var _js33 = 0; _js33 < _js34; _js33 += 1) {
-                var node = nodes31[_js33];
-                parentNode26.insertBefore(node, anchor);
+        if (!previousValue) {
+            if (Array.isArray(value)) {
+                var result = createArray(value, template25);
+                var nodes31 = result[0];
+                var proxy32 = result[1];
+                var _js34 = nodes31.length;
+                for (var _js33 = 0; _js33 < _js34; _js33 += 1) {
+                    var node = nodes31[_js33];
+                    parentNode26.insertBefore(node, anchor);
+                };
+                PROXYANCHORMAP.set(proxy32, anchor);
+                PROXYDELIMITERMAP.set(proxy32, hash[key]);
+                returnValue = proxy32;
+            } else {
+                var result35 = createBinding(value, template25);
+                var proxy36 = result35[0];
+                var node37 = result35[1];
+                parentNode26.insertBefore(node37, anchor);
+                returnValue = proxy36;
             };
-            PROXYANCHORMAP.set(proxy32, anchor);
-            PROXYDELIMITERMAP.set(proxy32, hash[key]);
-            returnValue = proxy32;
         } else {
-            var result35 = createBinding(value, template25);
-            var proxy36 = result35[0];
-            var node37 = result35[1];
-            parentNode26.insertBefore(node37, anchor);
-            returnValue = proxy36;
+            var isPrevArray = Array.isArray(previousValue);
+            var previousValues = isPrevArray ? previousValue : [previousValue];
+            var values = Array.isArray(value) ? value : [value];
+            var _js38 = values.length - 1;
+            for (var i = 0; i <= _js38; i += 1) {
+                var prev = previousValues[i];
+                var obj = values[i];
+                if (prev) {
+                    for (var key in obj) {
+                        prev[key] = obj[key];
+                    };
+                    for (var key in prev) {
+                        if (!obj.hasOwnProperty(key)) {
+                            delete prev[key];
+                        };
+                    };
+                } else {
+                    previousValues[i] = obj;
+                };
+            };
+            if (Array.isArray(previousValue)) {
+                previousValues.length = values.length;
+            };
+            returnValue = previousValue;
         };
     } else {
-        var _js38 = slot24.childNodes;
-        var _js40 = _js38.length;
-        for (var _js39 = 0; _js39 < _js40; _js39 += 1) {
-            var node41 = _js38[_js39];
-            parentNode26.insertBefore(node41.cloneNode(true), anchor);
+        var _js39 = slot24.childNodes;
+        var _js41 = _js39.length;
+        for (var _js40 = 0; _js40 < _js41; _js40 += 1) {
+            var node42 = _js39[_js40];
+            parentNode26.insertBefore(node42.cloneNode(true), anchor);
         };
     };
     parentNode26.insertBefore(endNode, anchor);
@@ -576,18 +630,18 @@ function setSlot(target, key, value, descriptor) {
                    (@ BOUND-LISTENER OPTIONS)))
            (SETF (GETPROP HASH EVENT) BOUND-LISTENER))))) */
 function setEvent(target, value, descriptor, receiver) {
-    var node41 = descriptor.node;
-    var event42 = descriptor.event;
+    var node42 = descriptor.node;
+    var event43 = descriptor.event;
     var hash = TARGETEVENTMAP.get(target);
-    var listener = hash[event42];
+    var listener = hash[event43];
     if (listener) {
-        node41.removeEventListener(event42, listener, listener.options);
+        node42.removeEventListener(event43, listener, listener.options);
     };
     if (value) {
         var boundListener = value.bind(receiver);
         boundListener.options = value.options;
-        node41.addEventListener(event42, boundListener, boundListener.options);
-        return hash[event42] = boundListener;
+        node42.addEventListener(event43, boundListener, boundListener.options);
+        return hash[event43] = boundListener;
     };
 };
 /* (DEFUN PROCESS-TEMPLATE (TEMPLATE)
@@ -655,8 +709,8 @@ function processTemplate(template) {
     var clone = root.cloneNode(true);
     var context = {  };
     function walk(parentNode, path) {
-        var _js43 = parentNode.childNodes.length - 1;
-        for (var i = 0; i <= _js43; i += 1) {
+        var _js44 = parentNode.childNodes.length - 1;
+        for (var i = 0; i <= _js44; i += 1) {
             var node = parentNode.childNodes[i];
             if (node.nodeType !== Node['ELEMENT_NODE']) {
                 continue;
@@ -729,8 +783,8 @@ function createContext(clone, template) {
     var clonedContext = {  };
     for (var key in context) {
         var descriptor = context[key];
-        var path44 = descriptor.path;
-        var node = getPath(clone, path44);
+        var path45 = descriptor.path;
+        var node = getPath(clone, path45);
         clonedContext[key] = Object.assign({ node : node }, descriptor);
     };
     __PS_MV_REG = [];
@@ -744,8 +798,8 @@ function createContext(clone, template) {
        RESULT)) */
 function getPath(node, path) {
     var result = node;
-    var _js44 = path.length - 1;
-    for (var i = 0; i <= _js44; i += 1) {
+    var _js45 = path.length - 1;
+    for (var i = 0; i <= _js45; i += 1) {
         var j = path[i];
         result = result.childNodes[j];
     };
@@ -764,9 +818,9 @@ function createArray(array, template) {
     var nodes = [];
     var proxies = [];
     var proxy = null;
-    var _js46 = array.length;
-    for (var _js45 = 0; _js45 < _js46; _js45 += 1) {
-        var item = array[_js45];
+    var _js47 = array.length;
+    for (var _js46 = 0; _js46 < _js47; _js46 += 1) {
+        var item = array[_js46];
         var result = createBinding(item, template);
         proxies.push(result[0]);
         nodes.push(result[1]);
@@ -782,7 +836,8 @@ function createArray(array, template) {
      (LET* ((CLONE
              (CHAIN (CHAIN *TEMPLATE-PROCESSED-MAP* (GET TEMPLATE))
                     (CLONE-NODE T)))
-            (PROXY (NEW (*PROXY OBJ *PROXY-OBJECT*)))
+            (TARGET (CREATE))
+            (PROXY (NEW (*PROXY TARGET *PROXY-OBJECT*)))
             (CONTEXT (CREATE-CONTEXT CLONE TEMPLATE))
             (START-NODE (CREATE-ANCHOR 0 'PROXY))
             (END-NODE (CREATE-ANCHOR 1 'PROXY))
@@ -796,18 +851,19 @@ function createArray(array, template) {
        (CHAIN FRAGMENT (APPEND-CHILD CLONE))
        (CHAIN FRAGMENT (APPEND-CHILD END-NODE))
        (CHAIN *PROXY-DELIMITER-MAP* (SET PROXY NODES))
-       (CHAIN *TARGET-CONTEXT-MAP* (SET OBJ CONTEXT))
-       (CHAIN *TARGET-EVENT-MAP* (SET OBJ (CREATE)))
-       (CHAIN *TARGET-DELIMITER-MAP* (SET OBJ (CREATE)))
+       (CHAIN *TARGET-CONTEXT-MAP* (SET TARGET CONTEXT))
+       (CHAIN *TARGET-EVENT-MAP* (SET TARGET (CREATE)))
+       (CHAIN *TARGET-DELIMITER-MAP* (SET TARGET (CREATE)))
        (LOOP FOR KEY OF OBJ
-             DO (SET-PROPERTY OBJ KEY (GETPROP OBJ KEY) PROXY T))
+             DO (SET-PROPERTY TARGET KEY (GETPROP OBJ KEY) PROXY))
        (LIST PROXY FRAGMENT))) */
 function createBinding(obj, template) {
     if (!TEMPLATEPROCESSEDMAP.get(template)) {
         processTemplate(template);
     };
     var clone = TEMPLATEPROCESSEDMAP.get(template).cloneNode(true);
-    var proxy = new Proxy(obj, PROXYOBJECT);
+    var target = {  };
+    var proxy = new Proxy(target, PROXYOBJECT);
     var context = createContext(clone, template);
     var startNode = createAnchor(0, 'proxy');
     var endNode = createAnchor(1, 'proxy');
@@ -825,11 +881,11 @@ function createBinding(obj, template) {
     fragment.appendChild(clone);
     fragment.appendChild(endNode);
     PROXYDELIMITERMAP.set(proxy, nodes);
-    TARGETCONTEXTMAP.set(obj, context);
-    TARGETEVENTMAP.set(obj, {  });
-    TARGETDELIMITERMAP.set(obj, {  });
+    TARGETCONTEXTMAP.set(target, context);
+    TARGETEVENTMAP.set(target, {  });
+    TARGETDELIMITERMAP.set(target, {  });
     for (var key in obj) {
-        setProperty(obj, key, obj[key], proxy, true);
+        setProperty(target, key, obj[key], proxy);
     };
     __PS_MV_REG = [];
     return [proxy, fragment];

@@ -163,7 +163,7 @@
   t)
 
 
-(defun set-property (target key value receiver is-initializing)
+(defun set-property (target key value receiver)
   (let* ((context (chain *target-context-map* (get target)))
          ;; Even though there may be 5 arguments here,
          ;; we don't care about setting if initializing.
@@ -171,7 +171,7 @@
          (is-delete (eq (length arguments) 2))
          (is-changed (not (eq (getprop target key) value))))
     (when (and (chain *object prototype has-own-property (call context key))
-               (or is-changed is-initializing))
+               is-changed)
       (let* ((descriptor (getprop context key))
              (node (@ descriptor node))
              (type (@ descriptor type)))
@@ -240,6 +240,10 @@
     (chain end-node (remove))))
 
 
+;; The way that this works is it tries to present an immediate-mode interface
+;; on top of a retained mode underlying layer, the DOM. For example, assigning
+;; a new object when there was a previous object before, will try to make the
+;; least DOM updates possible.
 (defun set-slot (target key value descriptor)
   ;; Skip deletion if already empty.
   (when (not (or (getprop target key) value)) (return-from set-slot))
@@ -252,44 +256,74 @@
          (parent-node (@ anchor parent-node))
          (start-node (create-anchor 0 key))
          (end-node (create-anchor 1 key))
+         (previous-value (getprop target key))
          (return-value nil))
 
-    (when nodes
-      (let ((previous-value (getprop target key)))
-        (if (chain *array (is-array previous-value))
-            (loop
-             for proxy in previous-value do
-             (let ((unmount (chain *proxy-unmount-map* (get proxy)))
-                   (nodes (chain *proxy-delimiter-map* (get proxy))))
-               (when nodes
-                 (remove-between-delimiters
-                  (@ nodes 0) (@ nodes 1) unmount proxy))))
-          (when previous-value
-            (let ((unmount (chain *proxy-unmount-map* (get previous-value)))
-                  (nodes (chain *proxy-delimiter-map* (get previous-value))))
-              (remove-between-delimiters
-               (@ nodes 0) (@ nodes 1) unmount previous-value)))))
+    (when (and nodes (or (not value) (and value (not previous-value))))
+      (if (chain *array (is-array previous-value))
+          (loop
+           for proxy in previous-value do
+           (let ((unmount (chain *proxy-unmount-map* (get proxy)))
+                 (nodes (chain *proxy-delimiter-map* (get proxy))))
+             (when nodes
+               (remove-between-delimiters
+                (@ nodes 0) (@ nodes 1) unmount proxy))))
+        (when previous-value
+          (let ((unmount (chain *proxy-unmount-map* (get previous-value)))
+                (nodes (chain *proxy-delimiter-map* (get previous-value))))
+            (remove-between-delimiters
+             (@ nodes 0) (@ nodes 1) unmount previous-value))))
       (remove-between-delimiters (@ nodes 0) (@ nodes 1))
       (delete (getprop hash key)))
 
     (setf (getprop hash key) (list start-node end-node))
     (chain parent-node (insert-before start-node anchor))
-    ;; Create proxies
+
     (if value
-        (if (chain *array (is-array value))
-            (let* ((result (create-array value template))
-                   (nodes (@ result 0))
-                   (proxy (@ result 1)))
-              (loop for node in nodes do
-                    (chain parent-node (insert-before node anchor)))
-              (chain *proxy-anchor-map* (set proxy anchor))
-              (chain *proxy-delimiter-map* (set proxy (getprop hash key)))
-              (setf return-value proxy))
-          (let* ((result (create-binding value template))
-                 (proxy (@ result 0))
-                 (node (@ result 1)))
-            (chain parent-node (insert-before node anchor))
-            (setf return-value proxy)))
+        (if (not previous-value)
+            ;; Create proxies
+            (if (chain *array (is-array value))
+                (let* ((result (create-array value template))
+                       (nodes (@ result 0))
+                       (proxy (@ result 1)))
+                  (loop for node in nodes do
+                        (chain parent-node (insert-before node anchor)))
+                  (chain *proxy-anchor-map* (set proxy anchor))
+                  (chain *proxy-delimiter-map* (set proxy (getprop hash key)))
+                  (setf return-value proxy))
+              (let* ((result (create-binding value template))
+                     (proxy (@ result 0))
+                     (node (@ result 1)))
+                (chain parent-node (insert-before node anchor))
+                (setf return-value proxy)))
+          ;; Assign values on existing proxies
+          (let* (;; Casting to array first makes this a little simpler to do.
+                 (is-prev-array (chain *array (is-array previous-value)))
+                 (previous-values
+                  (if is-prev-array
+                      previous-value (list previous-value)))
+                 (values
+                  (if (chain *array (is-array value))
+                      value (list value))))
+            (loop
+             for i from 0 to (- (length values) 1) do
+             (let ((prev (getprop previous-values i))
+                   (obj (getprop values i)))
+               (if prev
+                   (progn
+                     ;; Assignment.
+                     (loop
+                      for key of obj do
+                      (setf (getprop prev key) (getprop obj key)))
+                     ;; Removal.
+                     (loop
+                      for key of prev do
+                      (when (not (chain obj (has-own-property key)))
+                        (delete (getprop prev key)))))
+                 (setf (getprop previous-values i) obj))))
+            (when (chain *array (is-array previous-value))
+              (setf (length previous-values) (length values)))
+            (setf return-value previous-value)))
       ;; Use empty state from slot
       (loop
        for node in (@ slot child-nodes) do
@@ -424,7 +458,8 @@
     (process-template template))
   (let* ((clone (chain (chain *template-processed-map* (get template))
                        (clone-node t)))
-         (proxy (new (*proxy obj *proxy-object*)))
+         (target (create))
+         (proxy (new (*proxy target *proxy-object*)))
          (context (create-context clone template))
          (start-node (create-anchor 0 'proxy))
          (end-node (create-anchor 1 'proxy))
@@ -442,15 +477,14 @@
     (chain fragment (append-child end-node))
     (chain *proxy-delimiter-map* (set proxy nodes))
 
-    (chain *target-context-map* (set obj context))
-    (chain *target-event-map* (set obj (create)))
-    (chain *target-delimiter-map* (set obj (create)))
+    (chain *target-context-map* (set target context))
+    (chain *target-event-map* (set target (create)))
+    (chain *target-delimiter-map* (set target (create)))
 
     ;; Initialization
-    ; (chain *object (assign proxy obj))
     (loop
      for key of obj do
-     (set-property obj key (getprop obj key) proxy t))
+     (set-property target key (getprop obj key) proxy))
 
     (list proxy fragment)))
 
