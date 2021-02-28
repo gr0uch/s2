@@ -215,6 +215,13 @@ function add(event) {
       </section>
       <section>
         <div>
+          <h3>Developer Ergonomics</h3>
+          <p>The API is entirely comprised of one function, and that&rsquo;s it. The complexities of the DOM are entirely abstracted into Proxy objects. Writing UI code is as easy as mutating or replacing data structures.</p>
+          <p><strong>s&sup2;</strong> is optimized for <a href="https://en.wikipedia.org/wiki/Immediate_mode_GUI">immediate-mode</a> rendering. The entire state of the UI can be overwritten with new objects and it will try to make the most efficient DOM updates. This is made possible by its <a href="https://github.com/gr0uch/s2/search?q=set-index">array diffing</a> algorithm.</p>
+        </div>
+      </section>
+      <section>
+        <div>
           <h3>Further Reading</h3>
           <p>Check out the <a href="https://github.com/gr0uch/s2">GitHub repository</a> for technical details.</p>
         </div>
