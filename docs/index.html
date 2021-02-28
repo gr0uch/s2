@@ -102,6 +102,9 @@
         article > header, article > section { padding-left: calc(var(--l) * 1); }
       }
       @media (max-width: 640px) {
+        :root {
+          --h: 14px;
+        }
         #demo > *:last-child { flex: 2; }
         .bigword > * { font-size: calc(1em * 3); }
       }
