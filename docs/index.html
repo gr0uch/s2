@@ -86,8 +86,9 @@
       #demo h1 { font-size: inherit; font-family: inherit; }
 
       /* container */
-      #container input, #container button { font-family: inherit; font-size: inherit; line-height: inherit; color: inherit; display: inline-block; width: 70%; }
+      #container input, #container button { font-family: inherit; font-size: inherit; line-height: inherit; color: inherit; display: inline-block; width: 70%; border-radius: 0; }
       #container input:focus { outline: none; }
+      #container input::placeholder { color: var(--c-fg); opacity: 0.4; }
       #container button { width: 30%; display: inline-block; text-align: center; background: var(--c-e); color: var(--c-bg); cursor: pointer; }
       #container input, #container button { border-bottom: 1px var(--c-fg) solid; }
       #container > ul { list-style-type: none; }
