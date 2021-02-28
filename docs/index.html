@@ -67,7 +67,6 @@
       article > section:last-of-type { margin-bottom: calc(var(--l) * 7); }
       article > hr { height: 1px; }
       textarea { font-family: var(--f-m); font-size: calc(var(--h) - 6px); scrollbar-color: var(--c-l) var(--c-a); scrollbar-width: thin; }
-      textarea::selection { background: var(--c-h); color: var(--c-bg); }
 
       /* bigword */
       figure { margin: calc(var(--l) * 3) 0; text-align: center; }
@@ -80,6 +79,7 @@
 
       /* demo */
       #demo { position: relative; top: calc(var(--l) * 2); margin-top: calc(var(--l) * -6); display: flex; background: var(--c-j); border: calc(var(--l) * var(--b)) var(--c-fg) solid; }
+      #demo *::selection { background: var(--c-h); color: var(--c-bg); }
       #demo > * { flex: 1; display: flex; flex-direction: column; }
       #demo > * > * { padding: calc(var(--l) * var(--b)); }
       #demo textarea { width: 100%; flex: 1; resize: none; }
@@ -141,7 +141,7 @@
           <div id="demo">
             <div>
               <h4>JS</h4>
-              <textarea id="js">window.state = {
+              <textarea id="js" spellcheck="false">window.state = {
   todos: [
     'Wake up',
     'Get out of bed',
@@ -174,7 +174,7 @@ function add(event) {
             </div>
             <div>
               <h4>HTML</h4>
-              <textarea id="templates"><template id="todos">
+              <textarea id="templates" spellcheck="false"><template id="todos">
   <h1>Todos</h1>
   <form data-event-submit="add">
     <input data-value="todo" placeholder="Todo...">
