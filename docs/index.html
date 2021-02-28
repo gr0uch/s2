@@ -56,16 +56,17 @@
       .box > div > div > *:last-child { text-align: right; }
 
       /* content */
+      article { display: flex; flex-direction: column; }
       article, .box { max-width: calc(var(--l) * var(--wm)); margin: auto; }
       article > header, article > section { padding: 0 calc(var(--l) * 1) 0 calc((100% - var(--l) * 2) / 6 + var(--l) * 9 / 8); }
       article > header > div, article > section > div { margin: auto; padding: 0 calc(var(--l) * 3 / 2); max-width: calc(var(--l) * var(--w)); }
-      article > header { position: relative; background: var(--c-a); margin-bottom: calc(var(--l) * 5); }
+      article > header { position: relative; background: var(--c-a); margin-bottom: calc(var(--l) * 4); }
       article > header::before, article > header::after { content: ' '; display: block; position: absolute; width: 100%; height: 100%; top: 0; left: 100%; background: var(--c-a); }
       article > header::before { left: auto; right: 100%; }
       article > header > div > *:first-child { padding: calc(var(--l) * 7 / 2) 0; }
-      article > section { margin: calc(var(--l) * 4) 0; }
+      article > section { margin: calc(var(--l) * 2) 0; }
+      article > section > div > *:last-child { margin-bottom: 0; }
       article > section:last-of-type { margin-bottom: calc(var(--l) * 7); }
-      article > hr { height: 1px; }
       textarea { font-family: var(--f-m); font-size: calc(var(--h) - 6px); scrollbar-color: var(--c-l) var(--c-a); scrollbar-width: thin; }
 
       /* bigword */
@@ -78,7 +79,7 @@
       .bigword > *:nth-child(4) { -webkit-text-stroke-color: var(--c-j); text-stroke-color: var(--c-j); top: calc(var(--l) * var(--o) * 0.3); left: calc(var(--l) * var(--o) * 0.3); z-index: 1; }
 
       /* demo */
-      #demo { position: relative; top: calc(var(--l) * 2); margin-top: calc(var(--l) * -6); display: flex; background: var(--c-j); border: calc(var(--l) * var(--b)) var(--c-fg) solid; }
+      #demo { position: relative; top: calc(var(--l) * 2); margin-top: calc(var(--l) * -7); display: flex; background: var(--c-j); border: calc(var(--l) * var(--b)) var(--c-fg) solid; }
       #demo *::selection { background: var(--c-h); color: var(--c-bg); }
       #demo > * { flex: 1; display: flex; flex-direction: column; }
       #demo > * > * { padding: calc(var(--l) * var(--b)); }
@@ -233,7 +234,6 @@ function add(event) {
           <p>Check out the <a href="https://github.com/gr0uch/s2">GitHub repository</a> for technical details.</p>
         </div>
       </section>
-      <hr>
     </article>
     <script defer>
       (async global => {
