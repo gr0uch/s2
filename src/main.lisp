@@ -1,6 +1,7 @@
 (defvar *symbol-slot* (*symbol 'slot))
 (defvar *symbol-text* (*symbol 'text))
 (defvar *symbol-html* (*symbol 'html))
+(defvar *symbol-value* (*symbol 'value))
 (defvar *symbol-class* (*symbol 'class))
 (defvar *symbol-attribute* (*symbol 'attribute))
 (defvar *symbol-event* (*symbol 'event))
@@ -169,30 +170,46 @@
          ;; we don't care about setting if initializing.
          (is-setter (eq (length arguments) 4))
          (is-delete (eq (length arguments) 2))
-         (is-changed (not (eq (getprop target key) value))))
+         (is-changed (not (eq (getprop target key) value)))
+         (descriptor (getprop context key))
+         (node (@ descriptor node))
+         (type (@ descriptor type))
+         (normalized-value
+          (if (or (eq value undefined) (eq value nil)) "" value)))
+
     (when (and (chain *object prototype has-own-property (call context key))
                is-changed)
-      (let* ((descriptor (getprop context key))
-             (node (@ descriptor node))
-             (type (@ descriptor type)))
-        (when (and (eq type *symbol-text*)
-                   (not (eq value (@ node text-content))))
-          (setf (@ node text-content) value))
-        (when (and (eq type *symbol-html*)
-                   (not (eq value (@ node inner-h-t-m-l))))
-          (setf (@ node inner-h-t-m-l) value))
-        (when (eq type *symbol-class*)
-          (set-class node value))
-        (when (eq type *symbol-attribute*)
-          (set-attribute node (@ descriptor name) value))
-        (when (eq type *symbol-event*)
-          (set-event target value descriptor receiver))
-        (when (eq type *symbol-slot*)
-          (let ((proxy (set-slot target key value descriptor)))
-            (when proxy
-              (return-from
-               set-property
-               (chain *reflect (set target key proxy receiver))))))))
+      (when (and (eq type *symbol-text*)
+                 (not (eq value (@ node text-content))))
+        (setf (@ node text-content) normalized-value))
+      (when (and (eq type *symbol-html*)
+                 (not (eq value (@ node inner-h-t-m-l))))
+        (setf (@ node inner-h-t-m-l) normalized-value))
+      (when (and (eq type *symbol-value*)
+                 (not (eq value (@ node value))))
+        (setf (@ node value) normalized-value))
+      (when (eq type *symbol-class*)
+        (set-class node value))
+      (when (eq type *symbol-attribute*)
+        (set-attribute node (@ descriptor name) value))
+      (when (eq type *symbol-event*)
+        (set-event target value descriptor receiver))
+      (when (eq type *symbol-slot*)
+        (let ((proxy (set-slot target key value descriptor)))
+          (when proxy
+            (return-from
+             set-property
+             (chain *reflect (set target key proxy receiver)))))))
+
+    ;; Handle automatic event binding for value.
+    (when (and (eq type *symbol-value*)
+               (not (@ descriptor is-listening)))
+      (chain node (add-event-listener
+                   "input"
+                   (lambda (event)
+                     (chain *reflect (set target key
+                                          (@ event target value) receiver)))))
+      (setf (@ descriptor is-listening) t))
 
     (when is-delete (delete (getprop target key)))
     (when is-setter (chain *reflect (set target key value receiver))))
@@ -257,9 +274,13 @@
          (start-node (create-anchor 0 key))
          (end-node (create-anchor 1 key))
          (previous-value (getprop target key))
+         (is-previous-array (chain *array (is-array previous-value)))
+         (is-value-array (chain *array (is-array value)))
+         (is-type-mismatch (not (eq is-previous-array is-value-array)))
          (return-value nil))
 
-    (when (and nodes (or (not value) (and value (not previous-value))))
+    (when (and nodes (or (not value) (and value (not previous-value))
+                         is-type-mismatch))
       (if (chain *array (is-array previous-value))
           (loop
            for proxy in previous-value do
@@ -280,7 +301,7 @@
     (chain parent-node (insert-before start-node anchor))
 
     (if value
-        (if (not previous-value)
+        (if (or (not previous-value) is-type-mismatch)
             ;; Create proxies
             (if (chain *array (is-array value))
                 (let* ((result (create-array value template))
@@ -297,17 +318,16 @@
                 (chain parent-node (insert-before node anchor))
                 (setf return-value proxy)))
           ;; Assign values on existing proxies
-          (let* ((is-previous-array (chain *array (is-array previous-value)))
-                 (is-value-array (chain *array (is-array value)))
+          (let* (
                  ;; Casting to array first makes this a little simpler to do.
                  (previous-values
                   (if is-previous-array previous-value (list previous-value)))
                  (values
                   (if is-value-array value (list value))))
-            ;; Bail out on type mismatch.
-            (when (not (eq is-previous-array is-value-array))
-              (throw (new (*type-error
-                           (+ "Object/array mismatch on key `" key "`.")))))
+            ;; Bail out on type mismatch. Should not be possible currently.
+            ;; (when (not (eq is-previous-array is-value-array))
+            ;;   (throw (new (*type-error
+            ;;                (+ "Object/array mismatch on key `" key "`.")))))
             (loop
              for i from 0 to (- (length values) 1) do
              (let ((prev (getprop previous-values i))
@@ -392,6 +412,7 @@
             (case
              key
              ("text" (setf result (create type *symbol-text*)))
+             ("value" (setf result (create type *symbol-value*)))
              ("class" (setf result (create type *symbol-class*)))
              ("unsafeHtml" (setf result (create type *symbol-html*))))
             (when (chain key (starts-with 'attribute))
@@ -487,7 +508,7 @@
 
     ;; Initialization
     (loop
-     for key of obj do
+     for key of context do
      (set-property target key (getprop obj key) proxy))
 
     (list proxy fragment)))

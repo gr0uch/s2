@@ -11,6 +11,10 @@ if ('undefined' === typeof SYMBOLTEXT) {
 if ('undefined' === typeof SYMBOLHTML) {
     var SYMBOLHTML = Symbol('html');
 };
+/* (DEFVAR *SYMBOL-VALUE* (*SYMBOL 'VALUE)) */
+if ('undefined' === typeof SYMBOLVALUE) {
+    var SYMBOLVALUE = Symbol('value');
+};
 /* (DEFVAR *SYMBOL-CLASS* (*SYMBOL 'CLASS)) */
 if ('undefined' === typeof SYMBOLCLASS) {
     var SYMBOLCLASS = Symbol('class');
@@ -288,31 +292,44 @@ function setIndex(target, key, value, receiver) {
      (LET* ((CONTEXT (CHAIN *TARGET-CONTEXT-MAP* (GET TARGET)))
             (IS-SETTER (EQ (LENGTH ARGUMENTS) 4))
             (IS-DELETE (EQ (LENGTH ARGUMENTS) 2))
-            (IS-CHANGED (NOT (EQ (GETPROP TARGET KEY) VALUE))))
+            (IS-CHANGED (NOT (EQ (GETPROP TARGET KEY) VALUE)))
+            (DESCRIPTOR (GETPROP CONTEXT KEY))
+            (NODE (@ DESCRIPTOR NODE))
+            (TYPE (@ DESCRIPTOR TYPE))
+            (NORMALIZED-VALUE
+             (IF (OR (EQ VALUE UNDEFINED) (EQ VALUE NIL))
+
+                 VALUE)))
        (WHEN
            (AND (CHAIN *OBJECT PROTOTYPE HAS-OWN-PROPERTY (CALL CONTEXT KEY))
                 IS-CHANGED)
-         (LET* ((DESCRIPTOR (GETPROP CONTEXT KEY))
-                (NODE (@ DESCRIPTOR NODE))
-                (TYPE (@ DESCRIPTOR TYPE)))
-           (WHEN
-               (AND (EQ TYPE *SYMBOL-TEXT*)
-                    (NOT (EQ VALUE (@ NODE TEXT-CONTENT))))
-             (SETF (@ NODE TEXT-CONTENT) VALUE))
-           (WHEN
-               (AND (EQ TYPE *SYMBOL-HTML*)
-                    (NOT (EQ VALUE (@ NODE INNER-H-T-M-L))))
-             (SETF (@ NODE INNER-H-T-M-L) VALUE))
-           (WHEN (EQ TYPE *SYMBOL-CLASS*) (SET-CLASS NODE VALUE))
-           (WHEN (EQ TYPE *SYMBOL-ATTRIBUTE*)
-             (SET-ATTRIBUTE NODE (@ DESCRIPTOR NAME) VALUE))
-           (WHEN (EQ TYPE *SYMBOL-EVENT*)
-             (SET-EVENT TARGET VALUE DESCRIPTOR RECEIVER))
-           (WHEN (EQ TYPE *SYMBOL-SLOT*)
-             (LET ((PROXY (SET-SLOT TARGET KEY VALUE DESCRIPTOR)))
-               (WHEN PROXY
-                 (RETURN-FROM SET-PROPERTY
-                   (CHAIN *REFLECT (SET TARGET KEY PROXY RECEIVER))))))))
+         (WHEN
+             (AND (EQ TYPE *SYMBOL-TEXT*)
+                  (NOT (EQ VALUE (@ NODE TEXT-CONTENT))))
+           (SETF (@ NODE TEXT-CONTENT) NORMALIZED-VALUE))
+         (WHEN
+             (AND (EQ TYPE *SYMBOL-HTML*)
+                  (NOT (EQ VALUE (@ NODE INNER-H-T-M-L))))
+           (SETF (@ NODE INNER-H-T-M-L) NORMALIZED-VALUE))
+         (WHEN (AND (EQ TYPE *SYMBOL-VALUE*) (NOT (EQ VALUE (@ NODE VALUE))))
+           (SETF (@ NODE VALUE) NORMALIZED-VALUE))
+         (WHEN (EQ TYPE *SYMBOL-CLASS*) (SET-CLASS NODE VALUE))
+         (WHEN (EQ TYPE *SYMBOL-ATTRIBUTE*)
+           (SET-ATTRIBUTE NODE (@ DESCRIPTOR NAME) VALUE))
+         (WHEN (EQ TYPE *SYMBOL-EVENT*)
+           (SET-EVENT TARGET VALUE DESCRIPTOR RECEIVER))
+         (WHEN (EQ TYPE *SYMBOL-SLOT*)
+           (LET ((PROXY (SET-SLOT TARGET KEY VALUE DESCRIPTOR)))
+             (WHEN PROXY
+               (RETURN-FROM SET-PROPERTY
+                 (CHAIN *REFLECT (SET TARGET KEY PROXY RECEIVER)))))))
+       (WHEN (AND (EQ TYPE *SYMBOL-VALUE*) (NOT (@ DESCRIPTOR IS-LISTENING)))
+         (CHAIN NODE
+                (ADD-EVENT-LISTENER input
+                 (LAMBDA (EVENT)
+                   (CHAIN *REFLECT
+                          (SET TARGET KEY (@ EVENT TARGET VALUE) RECEIVER)))))
+         (SETF (@ DESCRIPTOR IS-LISTENING) T))
        (WHEN IS-DELETE (DELETE (GETPROP TARGET KEY)))
        (WHEN IS-SETTER (CHAIN *REFLECT (SET TARGET KEY VALUE RECEIVER))))
      T) */
@@ -321,15 +338,19 @@ function setProperty(target, key, value, receiver) {
     var isSetter = arguments.length === 4;
     var isDelete = arguments.length === 2;
     var isChanged = target[key] !== value;
+    var descriptor = context[key];
+    var node16 = descriptor.node;
+    var type17 = descriptor.type;
+    var normalizedValue = value === undefined || value === null ? '' : value;
     if (Object.prototype.hasOwnProperty.call(context, key) && isChanged) {
-        var descriptor = context[key];
-        var node16 = descriptor.node;
-        var type17 = descriptor.type;
         if (type17 === SYMBOLTEXT && value !== node16.textContent) {
-            node16.textContent = value;
+            node16.textContent = normalizedValue;
         };
         if (type17 === SYMBOLHTML && value !== node16.innerHTML) {
-            node16.innerHTML = value;
+            node16.innerHTML = normalizedValue;
+        };
+        if (type17 === SYMBOLVALUE && value !== node16.value) {
+            node16.value = normalizedValue;
         };
         if (type17 === SYMBOLCLASS) {
             setClass(node16, value);
@@ -347,6 +368,12 @@ function setProperty(target, key, value, receiver) {
                 return Reflect.set(target, key, proxy, receiver);
             };
         };
+    };
+    if (type17 === SYMBOLVALUE && !descriptor.isListening) {
+        node16.addEventListener('input', function (event) {
+            return Reflect.set(target, key, event.target.value, receiver);
+        });
+        descriptor.isListening = true;
     };
     if (isDelete) {
         delete target[key];
@@ -450,8 +477,14 @@ function removeBetweenDelimiters(startNode, endNode, unmount, self) {
             (START-NODE (CREATE-ANCHOR 0 KEY))
             (END-NODE (CREATE-ANCHOR 1 KEY))
             (PREVIOUS-VALUE (GETPROP TARGET KEY))
+            (IS-PREVIOUS-ARRAY (CHAIN *ARRAY (IS-ARRAY PREVIOUS-VALUE)))
+            (IS-VALUE-ARRAY (CHAIN *ARRAY (IS-ARRAY VALUE)))
+            (IS-TYPE-MISMATCH (NOT (EQ IS-PREVIOUS-ARRAY IS-VALUE-ARRAY)))
             (RETURN-VALUE NIL))
-       (WHEN (AND NODES (OR (NOT VALUE) (AND VALUE (NOT PREVIOUS-VALUE))))
+       (WHEN
+           (AND NODES
+                (OR (NOT VALUE) (AND VALUE (NOT PREVIOUS-VALUE))
+                    IS-TYPE-MISMATCH))
          (IF (CHAIN *ARRAY (IS-ARRAY PREVIOUS-VALUE))
              (LOOP FOR PROXY IN PREVIOUS-VALUE
                    DO (LET ((UNMOUNT (CHAIN *PROXY-UNMOUNT-MAP* (GET PROXY)))
@@ -469,7 +502,7 @@ function removeBetweenDelimiters(startNode, endNode, unmount, self) {
        (SETF (GETPROP HASH KEY) (LIST START-NODE END-NODE))
        (CHAIN PARENT-NODE (INSERT-BEFORE START-NODE ANCHOR))
        (IF VALUE
-           (IF (NOT PREVIOUS-VALUE)
+           (IF (OR (NOT PREVIOUS-VALUE) IS-TYPE-MISMATCH)
                (IF (CHAIN *ARRAY (IS-ARRAY VALUE))
                    (LET* ((RESULT (CREATE-ARRAY VALUE TEMPLATE))
                           (NODES (@ RESULT 0))
@@ -485,10 +518,7 @@ function removeBetweenDelimiters(startNode, endNode, unmount, self) {
                           (NODE (@ RESULT 1)))
                      (CHAIN PARENT-NODE (INSERT-BEFORE NODE ANCHOR))
                      (SETF RETURN-VALUE PROXY)))
-               (LET* ((IS-PREVIOUS-ARRAY
-                       (CHAIN *ARRAY (IS-ARRAY PREVIOUS-VALUE)))
-                      (IS-VALUE-ARRAY (CHAIN *ARRAY (IS-ARRAY VALUE)))
-                      (PREVIOUS-VALUES
+               (LET* ((PREVIOUS-VALUES
                        (IF IS-PREVIOUS-ARRAY
                            PREVIOUS-VALUE
                            (LIST PREVIOUS-VALUE)))
@@ -496,11 +526,6 @@ function removeBetweenDelimiters(startNode, endNode, unmount, self) {
                        (IF IS-VALUE-ARRAY
                            VALUE
                            (LIST VALUE))))
-                 (WHEN (NOT (EQ IS-PREVIOUS-ARRAY IS-VALUE-ARRAY))
-                   (THROW
-                       (NEW
-                        (*TYPE-ERROR
-                         (+ Object/array mismatch on key ` KEY `.)))))
                  (LOOP FOR I FROM 0 TO (- (LENGTH VALUES) 1)
                        DO (LET ((PREV (GETPROP PREVIOUS-VALUES I))
                                 (OBJ (GETPROP VALUES I)))
@@ -538,8 +563,11 @@ function setSlot(target, key, value, descriptor) {
     var startNode = createAnchor(0, key);
     var endNode = createAnchor(1, key);
     var previousValue = target[key];
+    var isPreviousArray = Array.isArray(previousValue);
+    var isValueArray = Array.isArray(value);
+    var isTypeMismatch = isPreviousArray !== isValueArray;
     var returnValue = null;
-    if (nodes && (!value || value && !previousValue)) {
+    if (nodes && (!value || value && !previousValue || isTypeMismatch)) {
         if (Array.isArray(previousValue)) {
             var _js28 = previousValue.length;
             for (var _js27 = 0; _js27 < _js28; _js27 += 1) {
@@ -563,7 +591,7 @@ function setSlot(target, key, value, descriptor) {
     hash[key] = [startNode, endNode];
     parentNode26.insertBefore(startNode, anchor);
     if (value) {
-        if (!previousValue) {
+        if (!previousValue || isTypeMismatch) {
             if (Array.isArray(value)) {
                 var result = createArray(value, template25);
                 var nodes31 = result[0];
@@ -584,13 +612,8 @@ function setSlot(target, key, value, descriptor) {
                 returnValue = proxy36;
             };
         } else {
-            var isPreviousArray = Array.isArray(previousValue);
-            var isValueArray = Array.isArray(value);
             var previousValues = isPreviousArray ? previousValue : [previousValue];
             var values = isValueArray ? value : [value];
-            if (isPreviousArray !== isValueArray) {
-                throw new TypeError('Object/array mismatch on key `' + key + '`.');
-            };
             var _js38 = values.length - 1;
             for (var i = 0; i <= _js38; i += 1) {
                 var prev = previousValues[i];
@@ -693,6 +716,8 @@ function setEvent(target, value, descriptor, receiver) {
                                (CASE KEY
                                  (text
                                   (SETF RESULT (CREATE TYPE *SYMBOL-TEXT*)))
+                                 (value
+                                  (SETF RESULT (CREATE TYPE *SYMBOL-VALUE*)))
                                  (class
                                   (SETF RESULT (CREATE TYPE *SYMBOL-CLASS*)))
                                  (unsafeHtml
@@ -751,6 +776,9 @@ function processTemplate(template) {
                 switch (key) {
                 case 'text':
                     result = { type : SYMBOLTEXT };
+                    break;
+                case 'value':
+                    result = { type : SYMBOLVALUE };
                     break;
                 case 'class':
                     result = { type : SYMBOLCLASS };
@@ -865,7 +893,7 @@ function createArray(array, template) {
        (CHAIN *TARGET-CONTEXT-MAP* (SET TARGET CONTEXT))
        (CHAIN *TARGET-EVENT-MAP* (SET TARGET (CREATE)))
        (CHAIN *TARGET-DELIMITER-MAP* (SET TARGET (CREATE)))
-       (LOOP FOR KEY OF OBJ
+       (LOOP FOR KEY OF CONTEXT
              DO (SET-PROPERTY TARGET KEY (GETPROP OBJ KEY) PROXY))
        (LIST PROXY FRAGMENT))) */
 function createBinding(obj, template) {
@@ -895,7 +923,7 @@ function createBinding(obj, template) {
     TARGETCONTEXTMAP.set(target, context);
     TARGETEVENTMAP.set(target, {  });
     TARGETDELIMITERMAP.set(target, {  });
-    for (var key in obj) {
+    for (var key in context) {
         setProperty(target, key, obj[key], proxy);
     };
     __PS_MV_REG = [];

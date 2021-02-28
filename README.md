@@ -58,8 +58,9 @@ delete proxy.counter; // Elements removed
 Here are the data attributes it will look for:
 
 - `data-text`, `data-unsafe-html`
-- `data-event-*`
 - `data-class`
+- `data-value`
+- `data-event-*`
 - `data-attribute-*`
 
 
@@ -90,9 +91,9 @@ import { mount, unmount } from '...';
 - `hydrate.js` (TBD)
 
 
-## Caveats
+## Benchmarks
 
-s2 relies on Proxy objects throughout, so one can not use references to the original objects and expect it to work. Instead, always get new references by accessing keys via the Proxy. This generally shouldn't be a problem.
+See [js-framework-benchmark results table](https://krausest.github.io/js-framework-benchmark/current.html).
 
 
 ## Web Components

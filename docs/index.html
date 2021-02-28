@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>s&sup2;</title>
+    <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNiIgdmlld0JveD0iMCAwIDQuMjMzMzMzMyA0LjIzMzMzMzMiPjxnPjxwYXRoIGZpbGw9IiMzZmI2OGIiIGZpbGwtcnVsZT0iZXZlbm9kZCIgZD0iTTAgMGg0LjIzM3Y0LjIzM2gtNC4yMzN6Ii8+PHBhdGggZD0iTTEuNDE2LjgzMXEtLjQwMy4zLS40MDMuNjQ2IDAgLjQ0NC4zMi40NDQuMTE0IDAgLjM2Mi0uMTk2dC40ODYtLjE5NnEuMjI3IDAgLjM2Ny4xMTkuMTQuMTE0LjE0LjMwNSAwIC4xODEtLjE4MS4zODItLjE4MS4xOTYtLjY0MS40NS0uNDYuMjQ4LS41ODQuMzMxLS4xMjQuMDg4LS4yMTIuMjEybC0uMDI2LS4wMzEuMDMxLS4wNjIuMDM2LS4wNzgtLjA4OC0uMTAzcS0uMDgzLS4wNzgtLjIyMi0uMDc4LS4yNTggMC0uNDA4LjI2OWwtLjAyNi4wMzEtLjAzMS0uMDMxcTAtLjA4My4yMzMtLjMyLjIzOC0uMjQzLjU2My0uMjQzLjI0MyAwIC40MjQuMTU1bC4wNDEuMDI2LjA3Mi0uMDQxcS4zNDYtLjE4MS40NDQtLjMzMS4wOTgtLjE1LjA5OC0uMzE1IDAtLjE4MS0uMTA5LS4yODQtLjEwMy0uMTA5LS4yNzQtLjEwOS0uMTI0IDAtLjM3Ny4xOTYtLjI0OC4xOTYtLjQ2LjE5Ni0uMTY1IDAtLjI4NC0uMTI5LS4xMTktLjEzNC0uMTE5LS4zMTUgMC0uMjU4LjIyNy0uNTE3LjIyNy0uMjU4LjgxNi0uNTY4LjI4OS0uMTU1LjQwMy0uMzI2bC4wMTYtLjAyMS4wMjEuMDQxLS4wOTMuMTI0LS4wODguMTI0cS4xNzEuMTQ1LjI3OS4xNDUuMTM0IDAgLjI4NC0uMTAzbC4wMjEuMDMxcTAgLjAyNi0uMjQzLjI0My0uMjM4LjIxMi0uMzcyLjIxMi0uMTI0IDAtLjQ0NC0uMjg0eiIgc3R5bGU9ImxpbmUtaGVpZ2h0OjEuMjU7LWlua3NjYXBlLWZvbnQtc3BlY2lmaWNhdGlvbjpQYXJjaG1lbnQ7cGFpbnQtb3JkZXI6bm9ybWFsIiBmb250LXNpemU9IjEwLjU4MyIgZm9udC1mYW1pbHk9IlBhcmNobWVudCIgc3Ryb2tlPSIjZmZmIiBzdHJva2Utd2lkdGg9Ii4xMzIiIHN0cm9rZS1saW5lY2FwPSJzcXVhcmUiIGZpbGw9Im5vbmUiLz48cGF0aCBkPSJNMS44ODMgMy45NTZsLjQzMi0uMzk3LjM0LS4zMjdxLjMwMi0uMjg2LjQtLjQ5NS4wOTgtLjIxLjA5OC0uNDQ4IDAtLjI2Ny0uMTExLS40MjItLjEwOC0uMTU2LS4zMTgtLjE1Ni0uMTUyIDAtLjI4Ni4wODMtLjEzLjA3OS0uMTMuMTcxIDAgLjE1Mi4xNjUuMTUyLjEyMSAwIC4xOTQuMDczLjA3Ni4wNy4wNzYuMTg0IDAgLjE0My0uMDk4LjIzOHQtLjI0MS4wOTVxLS4xNzggMC0uMjk1LS4xMDItLjExNy0uMTA1LS4xMTctLjI3MyAwLS4xOTcuMTMzLS4zNTYuMTMzLS4xNjIuMjk4LS4yMzUuMTY4LS4wNzMuMjk1LS4wOTJsLjI3Ni0uMDIycS4zODQgMCAuNjU0LjE3MXQuMjcuNDk1cTAgLjIwMy0uMTI3LjM2Mi0uMTI0LjE1OS0uMjc5LjI0MS0uMTU2LjA3OS0uNDc5LjIwNi0uMzIxLjEyNC0uMzU2LjE4MXYuMDEzbC4xODEtLjAxLjIyMi0uMDAzaC41MDJxLjE1NiAwIC4yMTktLjAzOGwuMDkyLS4xMDguMDUxLS4xMzcuMDM4LS4xMTFoLjA0MWwtLjIwMyAxLjA4NmgtMS45Mzd6IiBzdHlsZT0ibGluZS1oZWlnaHQ6MS4yNTstaW5rc2NhcGUtZm9udC1zcGVjaWZpY2F0aW9uOkVsZXBoYW50IiBmb250LXNpemU9IjMuMTc1IiBmb250LWZhbWlseT0iRWxlcGhhbnQiLz48L2c+PC9zdmc+" type="image/svg+xml">
+    <style type="text/css">
+      :root {
+        --w: 32;
+        --wm: calc(var(--w) * /*φ*/1.6180339887);
+
+        --h: 18px;
+        --l: calc(1em * 3 / 2);
+
+        --b: calc(1 / 4);
+        --o: calc(var(--b) * 2);
+
+        --f-h: Garamond, Big Caslon Medium, Palatino Linotype, Palatino, serif;
+        --f-b: -apple-system, BlinkMacSystemFont, Microsoft Sans Serif, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji;
+        --f-m: SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
+
+        --c-bg: #fff;
+        --c-fg: #000;
+        --c-a: rgb(240, 240, 240);
+        --c-a2: rgba(235, 235, 235, 0.75);
+        --c-j: #f1e05a;
+        --c-l: #3fb68b;
+        --c-h: #e34c26;
+        --c-e: #6e40c9;
+      }
+      ::selection { background: var(--c-j); color: var(--c-fg); }
+      * { margin: 0; padding: 0; border: 0; box-sizing: border-box; }
+      body { font-size: var(--h); line-height: var(--l); background: var(--c-bg); color: var(--c-fg); font-family: var(--f-b); overflow-x: hidden; }
+      h1, h2, h3, h4, h5, h6 { font-size: inherit; line-height: inherit; font-weight: inherit; hyphens: auto; }
+      h1 { font-size: 3em; line-height: var(--l); font-family: var(--f-h); }
+      h2 { font-size: calc(1em * 5 / 2); line-height: calc(var(--l) * 5 / 6); font-family: var(--f-h); }
+      h3 { font-weight: bold; margin-bottom: calc(var(--l) * 1); }
+      p { margin-bottom: calc(var(--l) * 1); letter-spacing: 0.01em; hyphens: auto; }
+      u.l { text-decoration-color: var(--c-l); }
+      u.h { text-decoration-color: var(--c-h); }
+      u.j { text-decoration-color: var(--c-j); }
+      u.e { text-decoration-color: var(--c-e); }
+      a { color: inherit; text-decoration-color: var(--c-l); text-decoration-thickness: calc(var(--h) * var(--b) * var(--o)); font-weight: bold; letter-spacing: 0; }
+
+      /* box frame */
+      .box-wrapper { position: fixed; z-index: 1; pointer-events: none; width: 100%; height: 100%; top: 0; left: 0; padding: calc(var(--l) * 3 / 4); }
+      .box { border: calc(var(--l) * var(--b)) var(--c-fg) solid; display: flex; height: 100%; width: 100%; }
+      .box > header { border-right: calc(var(--l) * var(--b)) var(--c-fg) solid; flex: 1; display: flex; pointer-events: auto; }
+      .box > header > div { align-self: center; flex: 1; }
+      .box > header > div > * { background: var(--c-fg); color: var(--c-bg); width: calc(var(--l) * 3 / 2); height: calc(var(--l) * 3 / 2); border-radius: 50%; margin: auto; display: flex; align-items: center; justify-content: center; font-weight: bold; user-select: none; }
+      .box > div { flex: 5; display: flex; }
+      .box > div > div { border-top: calc(var(--l) * var(--b)) var(--c-fg) solid; padding: calc(var(--l) * var(--b)); flex: 1; align-self: flex-end; background: var(--c-a2); pointer-events: auto; display: flex; justify-content: space-between; }
+      .box > div > div > * { margin: 0; }
+      .box > div > div > *:last-child { text-align: right; }
+
+      /* content */
+      article, .box { max-width: calc(var(--l) * var(--wm)); margin: auto; }
+      article > header, article > section { padding: 0 calc(var(--l) * 1) 0 calc((100% - var(--l) * 2) / 6 + var(--l) * 9 / 8); }
+      article > header > div, article > section > div { margin: auto; padding: 0 calc(var(--l) * 3 / 2); max-width: calc(var(--l) * var(--w)); }
+      article > header { position: relative; background: var(--c-a); margin-bottom: calc(var(--l) * 5); }
+      article > header::before, article > header::after { content: ' '; display: block; position: absolute; width: 100%; height: 100%; top: 0; left: 100%; background: var(--c-a); }
+      article > header::before { left: auto; right: 100%; }
+      article > header > div > *:first-child { padding: calc(var(--l) * 7 / 2) 0; }
+      article > section { margin: calc(var(--l) * 4) 0; }
+      article > section:last-of-type { margin-bottom: calc(var(--l) * 7); }
+      textarea { font-family: var(--f-m); font-size: calc(var(--h) - 6px); scrollbar-color: var(--c-l) var(--c-a); scrollbar-width: thin; }
+
+      /* bigword */
+      figure { margin: calc(var(--l) * 3) 0; text-align: center; }
+      .bigword { position: relative; height: calc(var(--l) * 1); display: inline-block; z-index: 0; white-space: nowrap; user-select: none; }
+      .bigword > * { font-weight: inherit; position: absolute; top: 0; left: 0; color: transparent; font-size: calc(1em * 4); letter-spacing: 0.04em; -webkit-text-stroke-width: calc(var(--h) * var(--b) / 3); text-stroke-width: calc(var(--h) * var(--b) / 3); }
+      .bigword > *:nth-child(1) { position: relative; -webkit-text-stroke-color: var(--c-e); text-stroke-color: var(--c-e); top: calc(var(--l) * var(--o) * -0.3); left: calc(var(--l) * var(--o) * -0.3); z-index: 4; }
+      .bigword > *:nth-child(2) { -webkit-text-stroke-color: var(--c-j); text-stroke-color: var(--c-j); top: calc(var(--l) * var(--o) * -0.1); left: calc(var(--l) * var(--o) * -0.1); z-index: 3; }
+      .bigword > *:nth-child(3) { -webkit-text-stroke-color: var(--c-h); text-stroke-color: var(--c-h); top: calc(var(--l) * var(--o) * 0.1); left: calc(var(--l) * var(--o) * 0.1); z-index: 2; }
+      .bigword > *:nth-child(4) { -webkit-text-stroke-color: var(--c-j); text-stroke-color: var(--c-j); top: calc(var(--l) * var(--o) * 0.3); left: calc(var(--l) * var(--o) * 0.3); z-index: 1; }
+
+      /* demo */
+      #demo { position: relative; top: calc(var(--l) * 2); margin-top: calc(var(--l) * -6); display: flex; background: var(--c-j); border: calc(var(--l) * var(--b)) var(--c-fg) solid; }
+      #demo > * { flex: 1; display: flex; flex-direction: column; }
+      #demo > * > * { padding: calc(var(--l) * var(--b)); }
+      #demo textarea { width: 100%; flex: 1; resize: none; }
+      #demo textarea:focus { outline: none; }
+      #demo > *:last-child { border-left: calc(var(--l) * var(--b)) var(--c-fg) solid; display: block; background: var(--c-l); }
+      #demo * { background: none; }
+      #demo h1 { font-size: inherit; font-family: inherit; }
+
+      /* container */
+      #container input, #container button { font-family: inherit; font-size: inherit; line-height: inherit; color: inherit; display: inline-block; width: 70%; }
+      #container input:focus { outline: none; }
+      #container button { width: 30%; display: inline-block; text-align: center; background: var(--c-e); color: var(--c-bg); cursor: pointer; }
+      #container input, #container button { border-bottom: 1px var(--c-fg) solid; }
+      #container > ul { list-style-type: none; }
+      #container > ul > li > div { cursor: pointer; display: inline-block; float: right; user-select: none; }
+
+      /* responsive */
+      @media (max-width: 1024px) {
+        .box { flex-direction: column; }
+        .box > header { border: 0; flex: 0; padding-top: calc(var(--h) * 1); }
+        .box > div { flex: 1; }
+        .box > header > div > * { width: calc(var(--l) * 2 / 2); height: calc(var(--l) * 2 / 2); }
+        article > header, article > section { padding-left: calc(var(--l) * 1); }
+      }
+      @media (max-width: 640px) {
+        #demo > *:last-child { flex: 2; }
+        .bigword > * { font-size: calc(1em * 3); }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="box-wrapper">
+      <div class="box">
+        <header>
+          <div>
+            <h1>s&sup2;</h1>
+          </div>
+        </header>
+        <div>
+          <div>
+            <div>
+              &copy;
+            </div>
+            <div>
+              See the code on <a href="https://github.com/gr0uch/s2">GitHub</a>.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <article>
+      <header>
+        <div>
+          <h2><strong>s&sup2;</strong> is a <em>metaprogramming</em> function. It takes two inputs, an <u class="l">object</u> and a <u class="h">template element</u>, and returns two outputs: a <u class="j">proxy</u> and a <u class="e">document fragment</u>.</h2>
+          <div id="demo">
+            <div>
+              <h4>JS</h4>
+              <textarea id="js">window.state = {
+  todos: [
+    'Wake up',
+    'Get out of bed',
+    'Brush teeth',
+    'Get dressed',
+  ].map(todo =>
+    ({ todo, remove })),
+  add,
+};
+
+function remove() {
+  proxy.todos = proxy.todos
+    .filter(({ todo }) =>
+      todo !== this.todo);
+  if (!proxy.todos.length)
+    delete proxy.todos;
+}
+
+function add(event) {
+  event.preventDefault();
+  const { todo } = this;
+  if (todo) {
+    if (!proxy.todos)
+      proxy.todos = [];
+    proxy.todos
+      .unshift({ remove, todo });
+    delete this.todo;
+  }
+}</textarea>
+            </div>
+            <div>
+              <h4>HTML</h4>
+              <textarea id="templates"><template id="todos">
+  <h1>Todos</h1>
+  <form data-event-submit="add">
+    <input data-value="todo" placeholder="Todo...">
+    <button>Add</button>
+  </form>
+  <ul>
+    <slot name="todos" data-template="#todo">
+      <li><em>Nothing to do!</em></li>
+    </slot>
+  </ul>
+</template>
+
+<template id="todo">
+  <li>
+    <span data-text="todo"></span>
+    <div data-event-click="remove">&#x2715;</div>
+  </li>
+</template></textarea>
+            </div>
+            <div id="container"><noscript>JS required!</noscript></div>
+          </div>
+        </div>
+      </header>
+      <section>
+        <div>
+          <h3>Rationale</h3>
+          <p>With all the web frameworks that come and go, there is so much churn and APIs to learn and eventually discard. <p>
+          <p>Dissatisfied with the status quo, I set out to create an abstraction that is fundamental, as timeless as possible, and unversioned. It should be expressive enough to build large single-page applications, but also small enough that it can be dropped in for a tiny widget.</p>
+        </div>
+      </section>
+      <section>
+        <div>
+          <h3>How It Works</h3>
+          <figure>
+            <div class="bigword">
+              <h3>new Proxy()</h3>
+              <h3>new Proxy()</h3>
+              <h3>new Proxy()</h3>
+              <h3>new Proxy()</h3>
+            </div>
+          </figure>
+          <p><strong>s&sup2;</strong> makes extensive use of <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy">Proxy</a> objects. Internally, these proxies are mapped to DOM elements using a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakMap">WeakMap</a>, which makes it a <a href="https://www.stefankrause.net/wp/?p=342">keyed</a> implementation.</p>
+          <p>The consequence of using proxies instead of a traditional API with method calls, is that <em>UI code disappears, it is folded into the data</em>.</p>
+        </div>
+      </section>
+      <section>
+        <div>
+          <h3>Further Reading</h3>
+          <p>Check out the <a href="https://github.com/gr0uch/s2">GitHub repository</a> for technical details.</p>
+        </div>
+      </section>
+    </article>
+    <script defer>
+      (async global => {
+        const [
+            { default: depCheck },
+            { default: s2 },
+        ] = await Promise.all([
+          import('./dep-check.min.js'),
+          import('./main.min.js'),
+        ]);
+
+        const container = document.getElementById('container');
+        if (!depCheck()) {
+          const notice = document.createElement('div');
+          notice.textContent =
+            'This browser environment does not contain all of the required APIs.';
+          container.appendChild(notice);
+          return;
+        }
+
+        const js = document.getElementById('js');
+        const templates = document.getElementById('templates');
+        const tmp = document.createElement('div');
+        tmp.id = 'tmp';
+        document.body.appendChild(tmp);
+
+        js.addEventListener('input', mount);
+        templates.addEventListener('input', mount);
+
+        function mount() {
+          const start = performance.now();
+          eval(js.value);
+          tmp.innerHTML = templates.value;
+          cleanupTemplates();
+          const root = document.getElementById('todos');
+          const [proxy, node] = s2(global.state, root);
+          while (container.firstChild) container.firstChild.remove();
+          container.appendChild(node);
+          global.proxy = proxy;
+          console.info(`\`mount\` called in ${performance.now() - start}ms`);
+        }
+
+        function cleanupTemplates() {
+          document.querySelectorAll('template').forEach(template => {
+            const iter = document
+              .createNodeIterator(template.content, NodeFilter.SHOW_TEXT);
+            let node;
+            while (node = iter.nextNode()) {
+              if (!node.nodeValue.trim().length)
+                node.remove();
+            }
+          });
+        }
+
+        mount();
+      })(this);
+    </script>
+  </body>
+</html>
