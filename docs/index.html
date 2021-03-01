@@ -36,7 +36,7 @@
       h1 { font-size: 3em; line-height: var(--l); font-family: var(--f-h); }
       h2 { font-size: calc(1em * 5 / 2); line-height: calc(var(--l) * 5 / 6); font-family: var(--f-h); }
       h3 { font-weight: bold; margin-bottom: calc(var(--l) * 1); }
-      p { margin-bottom: calc(var(--l) * 1); letter-spacing: 0.01em; hyphens: auto; }
+      p { margin-bottom: calc(var(--l) * 1); letter-spacing: 0.02em; hyphens: auto; }
       u.l { text-decoration-color: var(--c-l); }
       u.h { text-decoration-color: var(--c-h); }
       u.j { text-decoration-color: var(--c-j); }
@@ -83,6 +83,7 @@
       #demo { position: relative; top: calc(var(--l) * 2); margin-top: calc(var(--l) * -6); display: flex; }
       #demo *::selection { background: var(--c-h); color: var(--c-bg); }
       #demo > * { flex: 4; display: flex; flex-direction: column; border: calc(var(--l) * var(--b)) var(--c-fg) solid; background: var(--c-bg); }
+      #demo > * > h4 { background: var(--c-j); }
       #demo > * > * { padding: calc(var(--l) * var(--b)); }
       #demo textarea { width: 100%; flex: 1; resize: none; }
       #demo textarea:focus { outline: none; }
