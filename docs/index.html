@@ -191,11 +191,15 @@ function add(event) {
                 <textarea id="templates" spellcheck="false"><template id="todos">
   <h1>Todos</h1>
   <form data-event-submit="add">
-    <input data-value="todo" placeholder="Todo...">
+    <input
+      data-value="todo"
+      placeholder="Todo...">
     <button>Add</button>
   </form>
   <ul>
-    <slot name="todos" data-template="#todo">
+    <slot
+      name="todos"
+      data-template="#todo">
       <li><em>Nothing to do!</em></li>
     </slot>
   </ul>
@@ -203,7 +207,9 @@ function add(event) {
 
 <template id="todo">
   <li>
-    <div data-event-click="remove">&#x2715;</div>
+    <div data-event-click="remove">
+      &#x2715;
+    </div>
     <span data-text="todo"></span>
   </li>
 </template>
