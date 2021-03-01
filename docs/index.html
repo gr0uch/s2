@@ -61,7 +61,7 @@
       article, .box { max-width: calc(var(--l) * var(--wm)); margin: auto; }
       article > header, article > section { padding: 0 calc(var(--l) * 1) 0 calc((100% - var(--l) * 2) / 6 + var(--l) * 9 / 8); }
       article > header > div, article > section > div { margin: auto; padding: 0 calc(var(--l) * 3 / 2); max-width: calc(var(--l) * var(--w)); }
-      article > header { background: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNDAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAzNy4wNDIgNS4yOTIiPjxwYXRoIHN0eWxlPSJmaWxsOm5vbmU7c3Ryb2tlOiNmZmY7c3Ryb2tlLXdpZHRoOi43MTQxMjI7c3Ryb2tlLWxpbmVjYXA6YnV0dDtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW1pdGVybGltaXQ6NDtzdHJva2UtZGFzaGFycmF5Om5vbmU7c3Ryb2tlLW9wYWNpdHk6MSIgZD0iTTAgNC42MDRjOS4yNiAwIDkuMjYtMy45MTYgMTguNTItMy45MTYgOS4yNjEgMCA5LjI2MSAzLjkxNiAxOC41MjIgMy45MTYiLz48L3N2Zz4=) 0 center repeat; }
+      article > header { background: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNDAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAzNy4wNDIgNS4yOTIiPjxwYXRoIHN0eWxlPSJmaWxsOm5vbmU7c3Ryb2tlOiNmZmY7c3Ryb2tlLXdpZHRoOi43MTQxMjI7c3Ryb2tlLWxpbmVjYXA6YnV0dDtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW1pdGVybGltaXQ6NDtzdHJva2UtZGFzaGFycmF5Om5vbmU7c3Ryb2tlLW9wYWNpdHk6MSIgZD0iTTAgNC42MDRjOS4yNiAwIDkuMjYtMy45MTYgMTguNTItMy45MTYgOS4yNjEgMCA5LjI2MSAzLjkxNiAxOC41MjIgMy45MTYiLz48L3N2Zz4=) 0 0 repeat; }
       article > hr { height: calc(var(--l) * 3 / 4); background: var(--c-a); position: sticky; top: 0; }
       article > header > div > * { position: relative; }
       article > header > div > *:first-child { padding: calc(var(--l) * 11 / 4) 0; }
@@ -82,11 +82,11 @@
       /* demo */
       #demo { position: relative; top: calc(var(--l) * 2); margin-top: calc(var(--l) * -6); display: flex; background: var(--c-bg); border: calc(var(--l) * var(--b)) var(--c-fg) solid; }
       #demo *::selection { background: var(--c-h); color: var(--c-bg); }
-      #demo > * { flex: 1; display: flex; flex-direction: column; }
+      #demo > * { flex: 4; display: flex; flex-direction: column; }
       #demo > * > * { padding: calc(var(--l) * var(--b)); }
       #demo textarea { width: 100%; flex: 1; resize: none; }
       #demo textarea:focus { outline: none; }
-      #demo > *:last-child { border-left: calc(var(--l) * var(--b)) var(--c-fg) solid; display: block; background: var(--c-l); }
+      #demo > *:last-child { flex: 3; border-left: calc(var(--l) * var(--b)) var(--c-fg) solid; display: block; background: var(--c-l); }
       #demo * { background: none; }
       #demo h1 { font-size: inherit; font-family: inherit; }
 
@@ -107,6 +107,8 @@
         .box > div { flex: 1; }
         .box > header > div > * { width: calc(var(--l) * 2 / 2); height: calc(var(--l) * 2 / 2); }
         article > header, article > section { padding-left: calc(var(--l) * 1); }
+        #demo > * { flex: 1; }
+        #demo > *:last-child { flex: 1; }
       }
       @media (max-width: 640px) {
         :root {
@@ -201,8 +203,8 @@ function add(event) {
 
 <template id="todo">
   <li>
-    <span data-text="todo"></span>
     <div data-event-click="remove">&#x2715;</div>
+    <span data-text="todo"></span>
   </li>
 </template>
 </textarea>
