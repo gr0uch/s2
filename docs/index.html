@@ -61,10 +61,10 @@
       article, .box { max-width: calc(var(--l) * var(--wm)); margin: auto; }
       article > header, article > section { padding: 0 calc(var(--l) * 1) 0 calc((100% - var(--l) * 2) / 6 + var(--l) * 9 / 8); }
       article > header > div, article > section > div { margin: auto; padding: 0 calc(var(--l) * 3 / 2); max-width: calc(var(--l) * var(--w)); }
-      article > header { background: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNDAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAzNy4wNDIgNS4yOTIiPjxwYXRoIHN0eWxlPSJmaWxsOm5vbmU7c3Ryb2tlOiNmZmY7c3Ryb2tlLXdpZHRoOi43MTQxMjI7c3Ryb2tlLWxpbmVjYXA6YnV0dDtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW1pdGVybGltaXQ6NDtzdHJva2UtZGFzaGFycmF5Om5vbmU7c3Ryb2tlLW9wYWNpdHk6MSIgZD0iTTAgNC42MDRjOS4yNiAwIDkuMjYtMy45MTYgMTguNTItMy45MTYgOS4yNjEgMCA5LjI2MSAzLjkxNiAxOC41MjIgMy45MTYiLz48L3N2Zz4=) left center repeat; }
+      article > header { background: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNDAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAzNy4wNDIgNS4yOTIiPjxwYXRoIHN0eWxlPSJmaWxsOm5vbmU7c3Ryb2tlOiNmZmY7c3Ryb2tlLXdpZHRoOi43MTQxMjI7c3Ryb2tlLWxpbmVjYXA6YnV0dDtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW1pdGVybGltaXQ6NDtzdHJva2UtZGFzaGFycmF5Om5vbmU7c3Ryb2tlLW9wYWNpdHk6MSIgZD0iTTAgNC42MDRjOS4yNiAwIDkuMjYtMy45MTYgMTguNTItMy45MTYgOS4yNjEgMCA5LjI2MSAzLjkxNiAxOC41MjIgMy45MTYiLz48L3N2Zz4=) 0 center repeat; }
       article > hr { height: calc(var(--l) * 3 / 4); background: var(--c-a); position: sticky; top: 0; }
       article > header > div > * { position: relative; }
-      article > header > div > *:first-child { padding: calc(var(--l) * 7 / 2) 0; }
+      article > header > div > *:first-child { padding: calc(var(--l) * 11 / 4) 0; }
       article > section { margin: calc(var(--l) * 2) 0; }
       article > section > div > *:last-child { margin-bottom: 0; }
       article > section:last-of-type { margin-bottom: calc(var(--l) * 7); }
@@ -80,7 +80,7 @@
       .bigword > *:nth-child(4) { -webkit-text-stroke-color: var(--c-j); text-stroke-color: var(--c-j); top: calc(var(--l) * var(--o) * 0.3); left: calc(var(--l) * var(--o) * 0.3); z-index: 1; }
 
       /* demo */
-      #demo { position: relative; top: calc(var(--l) * 2); margin-top: calc(var(--l) * -8); display: flex; background: var(--c-j); border: calc(var(--l) * var(--b)) var(--c-fg) solid; }
+      #demo { position: relative; top: calc(var(--l) * 2); margin-top: calc(var(--l) * -7); display: flex; background: var(--c-j); border: calc(var(--l) * var(--b)) var(--c-fg) solid; }
       #demo *::selection { background: var(--c-h); color: var(--c-bg); }
       #demo > * { flex: 1; display: flex; flex-direction: column; }
       #demo > * > * { padding: calc(var(--l) * var(--b)); }
@@ -118,7 +118,7 @@
         figure { margin: calc(var(--l) * 2) 0; }
         .bigword > * { font-size: calc(1em * 5 / 2); }
         article > header > div, article > section > div { padding: 0; }
-        article > header > div > *:first-child { padding: calc(var(--l) * 7 / 2) 0 calc(var(--l) * 5); }
+        article > header > div > *:first-child { padding: calc(var(--l) * 7 / 2) 0 calc(var(--l) * 9 / 2); }
       }
     </style>
   </head>
@@ -143,15 +143,15 @@
       </div>
     </div>
     <div class="container top">
-    <article>
-      <hr>
-      <header>
-        <div>
-          <h2><strong>s&sup2;</strong> is a <em>metaprogramming</em> function. It takes two inputs, an <u class="l">object</u> and a <u class="h">template element</u>, and returns two outputs: a <u class="j">proxy</u> and a <u class="e">document fragment</u>.</h2>
-          <div id="demo">
-            <div>
-              <h4>JS</h4>
-              <textarea id="js" spellcheck="false">window.state = {
+      <article>
+        <hr>
+        <header>
+          <div>
+            <h2><strong>s&sup2;</strong> is a <em>metaprogramming</em> function. It takes two inputs, an <u class="l">object</u> and a <u class="h">template element</u>, and returns two outputs: a <u class="j">proxy</u> and a <u class="e">document fragment</u>.</h2>
+            <div id="demo">
+              <div>
+                <h4>JS</h4>
+                <textarea id="js" spellcheck="false">window.state = {
   todos: [
     'Wake up',
     'Get out of bed',
@@ -180,11 +180,12 @@ function add(event) {
       .unshift({ remove, todo });
     delete this.todo;
   }
-}</textarea>
-            </div>
-            <div>
-              <h4>HTML</h4>
-              <textarea id="templates" spellcheck="false"><template id="todos">
+}
+</textarea>
+              </div>
+              <div>
+                <h4>HTML</h4>
+                <textarea id="templates" spellcheck="false"><template id="todos">
   <h1>Todos</h1>
   <form data-event-submit="add">
     <input data-value="todo" placeholder="Todo...">
@@ -202,52 +203,53 @@ function add(event) {
     <span data-text="todo"></span>
     <div data-event-click="remove">&#x2715;</div>
   </li>
-</template></textarea>
+</template>
+</textarea>
+              </div>
+              <div id="container"><noscript>JS required!</noscript></div>
             </div>
-            <div id="container"><noscript>JS required!</noscript></div>
           </div>
-        </div>
-      </header>
-    </article>
+        </header>
+      </article>
     </div>
     <div class="container">
-    <article>
-      <section>
-        <div>
-          <h3>Rationale</h3>
-          <p>With all the front-end web frameworks that come and go, there is so much churn and APIs to learn and eventually discard. <p>
-          <p>Dissatisfied with the status quo, I set out to create an abstraction that is fundamental, as timeless as possible, and unversioned. It should be expressive enough to build large single-page applications, but also small enough that it can be dropped in for a tiny widget.</p>
-        </div>
-      </section>
-      <section>
-        <div>
-          <h3>How It Works</h3>
-          <figure>
-            <div class="bigword">
-              <h3>new Proxy()</h3>
-              <h3>new Proxy()</h3>
-              <h3>new Proxy()</h3>
-              <h3>new Proxy()</h3>
-            </div>
-          </figure>
-          <p><strong>s&sup2;</strong> makes extensive use of <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy">Proxy</a> objects. Internally, these proxies are mapped to DOM elements using a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakMap">WeakMap</a>, which makes it a <a href="https://www.stefankrause.net/wp/?p=342">keyed</a> implementation.</p>
-          <p>The consequence of using proxies instead of a traditional API with method calls, is that <em>UI code disappears, it is folded into the data</em>.</p>
-        </div>
-      </section>
-      <section>
-        <div>
-          <h3>Developer Ergonomics</h3>
-          <p>The API is entirely comprised of one function, and that&rsquo;s it. The complexities of the DOM are entirely abstracted into Proxy objects. Writing UI code is as easy as mutating or replacing data structures.</p>
-          <p><strong>s&sup2;</strong> is optimized for <a href="https://en.wikipedia.org/wiki/Immediate_mode_GUI">immediate-mode</a> rendering. The entire state of the UI can be overwritten with new objects and it will try to make the most efficient DOM updates. This is made possible by its <a href="https://github.com/gr0uch/s2/search?q=set-index">array diffing</a> algorithm.</p>
-        </div>
-      </section>
-      <section>
-        <div>
-          <h3>Further Reading</h3>
-          <p>Check out the <a href="https://github.com/gr0uch/s2">GitHub repository</a> for technical details.</p>
-        </div>
-      </section>
-    </article>
+      <article>
+        <section>
+          <div>
+            <h3>Rationale</h3>
+            <p>With all the front-end web frameworks that come and go, there is so much churn and APIs to learn and eventually discard. <p>
+            <p>Dissatisfied with the status quo, I set out to create an abstraction that is fundamental, as timeless as possible, and unversioned. It should be expressive enough to build large single-page applications, but also small enough that it can be dropped in for a tiny widget.</p>
+          </div>
+        </section>
+        <section>
+          <div>
+            <h3>How It Works</h3>
+            <figure>
+              <div class="bigword">
+                <h3>new Proxy()</h3>
+                <h3>new Proxy()</h3>
+                <h3>new Proxy()</h3>
+                <h3>new Proxy()</h3>
+              </div>
+            </figure>
+            <p><strong>s&sup2;</strong> makes extensive use of <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy">Proxy</a> objects. Internally, these proxies are mapped to DOM elements using a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakMap">WeakMap</a>, which makes it a <a href="https://www.stefankrause.net/wp/?p=342">keyed</a> implementation.</p>
+            <p>The consequence of using proxies instead of a traditional API with method calls, is that <em>UI code disappears, it is folded into the data</em>.</p>
+          </div>
+        </section>
+        <section>
+          <div>
+            <h3>Developer Ergonomics</h3>
+            <p>The API is entirely comprised of one function, and that&rsquo;s it. The complexities of the DOM are entirely abstracted into Proxy objects. Writing UI code is as easy as mutating or replacing data structures.</p>
+            <p><strong>s&sup2;</strong> is optimized for <a href="https://en.wikipedia.org/wiki/Immediate_mode_GUI">immediate-mode</a> rendering. The entire state of the UI can be overwritten with new objects and it will try to make the most efficient DOM updates. This is made possible by its <a href="https://github.com/gr0uch/s2/search?q=set-index">array diffing</a> algorithm.</p>
+          </div>
+        </section>
+        <section>
+          <div>
+            <h3>Further Reading</h3>
+            <p>Check out the <a href="https://github.com/gr0uch/s2">GitHub repository</a> for technical details.</p>
+          </div>
+        </section>
+      </article>
     </div>
     <script defer>
       (async global => {
