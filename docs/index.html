@@ -31,7 +31,6 @@
       }
       ::selection { background: var(--c-j); color: var(--c-fg); }
       * { margin: 0; padding: 0; border: 0; box-sizing: border-box; }
-      html, body { overflow-x: hidden; }
       body { font-size: var(--h); line-height: var(--l); background: var(--c-bg); color: var(--c-fg); font-family: var(--f-b); }
       h1, h2, h3, h4, h5, h6 { font-size: inherit; line-height: inherit; font-weight: inherit; hyphens: auto; }
       h1 { font-size: 3em; line-height: var(--l); font-family: var(--f-h); }
@@ -47,7 +46,7 @@
       /* box frame */
       .box-wrapper { position: fixed; z-index: 1; pointer-events: none; width: 100%; height: 100%; top: 0; left: 0; padding: calc(var(--l) * 3 / 4); }
       .box { border: calc(var(--l) * var(--b)) var(--c-fg) solid; display: flex; height: 100%; width: 100%; }
-      .box > header { border-right: calc(var(--l) * var(--b)) var(--c-fg) solid; flex: 1; display: flex; pointer-events: auto; background: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAyNi40NTggNS4yOTIiPjxwYXRoIHN0eWxlPSJmaWxsOm5vbmU7c3Ryb2tlOiNmZmY7c3Ryb2tlLXdpZHRoOi42MTE0MDc7c3Ryb2tlLWxpbmVjYXA6YnV0dDtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW1pdGVybGltaXQ6NDtzdHJva2UtZGFzaGFycmF5Om5vbmU7c3Ryb2tlLW9wYWNpdHk6MSIgZD0iTTAgNC42NTVjNi42MTUgMCA2LjYxNS00LjAxOSAxMy4yMy00LjAxOSA2LjYxNCAwIDYuNjE0IDQuMDIgMTMuMjI4IDQuMDIiLz48L3N2Zz4=) left center repeat; }
+      .box > header { border-right: calc(var(--l) * var(--b)) var(--c-fg) solid; flex: 1; display: flex; pointer-events: auto; }
       .box > header > div { align-self: center; flex: 1; }
       .box > header > div > * { background: var(--c-fg); color: var(--c-bg); width: calc(var(--l) * 3 / 2); height: calc(var(--l) * 3 / 2); border-radius: 50%; margin: auto; display: flex; align-items: center; justify-content: center; font-weight: bold; user-select: none; }
       .box > div { flex: 5; display: flex; }
@@ -56,13 +55,15 @@
       .box > div > div > *:last-child { text-align: right; }
 
       /* content */
+      .container { padding: 0 calc(var(--l) * 3 / 4); }
+      .container.top { margin-bottom: calc(var(--l) * 4); background: var(--c-a); }
       article { display: flex; flex-direction: column; }
       article, .box { max-width: calc(var(--l) * var(--wm)); margin: auto; }
       article > header, article > section { padding: 0 calc(var(--l) * 1) 0 calc((100% - var(--l) * 2) / 6 + var(--l) * 9 / 8); }
       article > header > div, article > section > div { margin: auto; padding: 0 calc(var(--l) * 3 / 2); max-width: calc(var(--l) * var(--w)); }
-      article > header { position: relative; background: var(--c-a); margin-bottom: calc(var(--l) * 4); }
-      article > header::before, article > header::after { content: ' '; display: block; position: absolute; width: 100%; height: 100%; top: 0; left: 100%; background: var(--c-a); }
-      article > header::before { left: auto; right: 100%; }
+      article > header { background: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNDAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAzNy4wNDIgNS4yOTIiPjxwYXRoIHN0eWxlPSJmaWxsOm5vbmU7c3Ryb2tlOiNmZmY7c3Ryb2tlLXdpZHRoOi43MTQxMjI7c3Ryb2tlLWxpbmVjYXA6YnV0dDtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW1pdGVybGltaXQ6NDtzdHJva2UtZGFzaGFycmF5Om5vbmU7c3Ryb2tlLW9wYWNpdHk6MSIgZD0iTTAgNC42MDRjOS4yNiAwIDkuMjYtMy45MTYgMTguNTItMy45MTYgOS4yNjEgMCA5LjI2MSAzLjkxNiAxOC41MjIgMy45MTYiLz48L3N2Zz4=) left center repeat; }
+      article > hr { height: calc(var(--l) * 3 / 4); background: var(--c-a); position: sticky; top: 0; }
+      article > header > div > * { position: relative; }
       article > header > div > *:first-child { padding: calc(var(--l) * 7 / 2) 0; }
       article > section { margin: calc(var(--l) * 2) 0; }
       article > section > div > *:last-child { margin-bottom: 0; }
@@ -111,8 +112,13 @@
         :root {
           --h: 14px;
         }
+        h1 { font-size: calc(1em * 2); line-height: var(--l); }
+        h2 { font-size: calc(1em * 3 / 2); line-height: calc(var(--l) * 5 / 6); }
         #demo > *:last-child { flex: 2; }
-        .bigword > * { font-size: calc(1em * 3); }
+        figure { margin: calc(var(--l) * 2) 0; }
+        .bigword > * { font-size: calc(1em * 5 / 2); }
+        article > header > div, article > section > div { padding: 0; }
+        article > header > div > *:first-child { padding: calc(var(--l) * 7 / 2) 0 calc(var(--l) * 5); }
       }
     </style>
   </head>
@@ -136,7 +142,9 @@
         </div>
       </div>
     </div>
+    <div class="container top">
     <article>
+      <hr>
       <header>
         <div>
           <h2><strong>s&sup2;</strong> is a <em>metaprogramming</em> function. It takes two inputs, an <u class="l">object</u> and a <u class="h">template element</u>, and returns two outputs: a <u class="j">proxy</u> and a <u class="e">document fragment</u>.</h2>
@@ -200,6 +208,10 @@ function add(event) {
           </div>
         </div>
       </header>
+    </article>
+    </div>
+    <div class="container">
+    <article>
       <section>
         <div>
           <h3>Rationale</h3>
@@ -236,6 +248,7 @@ function add(event) {
         </div>
       </section>
     </article>
+    </div>
     <script defer>
       (async global => {
         const [
