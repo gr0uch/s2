@@ -80,14 +80,16 @@
       .bigword > *:nth-child(4) { -webkit-text-stroke-color: var(--c-j); text-stroke-color: var(--c-j); top: calc(var(--l) * var(--o) * 0.3); left: calc(var(--l) * var(--o) * 0.3); z-index: 1; }
 
       /* demo */
-      #demo { position: relative; top: calc(var(--l) * 2); margin-top: calc(var(--l) * -6); display: flex; background: var(--c-bg); border: calc(var(--l) * var(--b)) var(--c-fg) solid; }
+      #demo { position: relative; top: calc(var(--l) * 2); margin-top: calc(var(--l) * -6); display: flex; }
       #demo *::selection { background: var(--c-h); color: var(--c-bg); }
-      #demo > * { flex: 4; display: flex; flex-direction: column; }
+      #demo > * { flex: 4; display: flex; flex-direction: column; border: calc(var(--l) * var(--b)) var(--c-fg) solid; background: var(--c-bg); }
       #demo > * > * { padding: calc(var(--l) * var(--b)); }
       #demo textarea { width: 100%; flex: 1; resize: none; }
       #demo textarea:focus { outline: none; }
-      #demo > *:last-child { flex: 3; border-left: calc(var(--l) * var(--b)) var(--c-fg) solid; display: block; background: var(--c-l); }
-      #demo * { background: none; }
+      #demo > *:nth-child(1) { border-right: 0; }
+      #demo > *:nth-child(2) { border-left: 0; }
+      #demo > *:last-child { flex: 3; display: block; background: var(--c-l); margin-left: calc(var(--l) * var(--b)); }
+      #demo input, #demo textarea { background: none; color: inherit; }
       #demo h1 { font-size: inherit; font-family: inherit; }
 
       /* container */
@@ -227,7 +229,7 @@ function add(event) {
           <div>
             <h3>Rationale</h3>
             <p>With all the front-end web frameworks that come and go, there is so much churn and APIs to learn and eventually discard. <p>
-            <p>Dissatisfied with the status quo, I set out to create an abstraction that is fundamental, as timeless as possible, and unversioned. It should be expressive enough to build large single-page applications, but also small enough that it can be dropped in for a tiny widget.</p>
+            <p>I set out to create an abstraction that is fundamental, as timeless as possible, and unversioned. It should be expressive enough to build large single-page applications, but also small enough that it can be dropped in for a tiny widget.</p>
           </div>
         </section>
         <section>
