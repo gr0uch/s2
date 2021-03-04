@@ -385,11 +385,11 @@ function setProperty(target, key, value, receiver) {
     return true;
 };
 /* (DEFUN SET-ATTRIBUTE (NODE NAME VALUE)
-     (IF (OR (EQ VALUE NIL) (EQ VALUE UNDEFINED))
+     (IF (NOT (OR (EQ VALUE NIL) (EQ VALUE UNDEFINED)))
          (CHAIN NODE (SET-ATTRIBUTE NAME VALUE))
          (CHAIN NODE (REMOVE-ATTRIBUTE NAME)))) */
 function setAttribute(node, name, value) {
-    return value === null || value === undefined ? node.setAttribute(name, value) : node.removeAttribute(name);
+    return !(value === null || value === undefined) ? node.setAttribute(name, value) : node.removeAttribute(name);
 };
 /* (DEFUN SET-CLASS (NODE VALUE)
      (IF VALUE
