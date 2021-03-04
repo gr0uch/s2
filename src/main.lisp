@@ -172,8 +172,8 @@
          (is-delete (eq (length arguments) 2))
          (is-changed (not (eq (getprop target key) value)))
          (descriptor (getprop context key))
-         (node (@ descriptor node))
-         (type (@ descriptor type))
+         (node (and descriptor (@ descriptor node)))
+         (type (and descriptor (@ descriptor type)))
          (normalized-value
           (if (or (eq value undefined) (eq value nil)) "" value)))
 

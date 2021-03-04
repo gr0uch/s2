@@ -294,8 +294,8 @@ function setIndex(target, key, value, receiver) {
             (IS-DELETE (EQ (LENGTH ARGUMENTS) 2))
             (IS-CHANGED (NOT (EQ (GETPROP TARGET KEY) VALUE)))
             (DESCRIPTOR (GETPROP CONTEXT KEY))
-            (NODE (@ DESCRIPTOR NODE))
-            (TYPE (@ DESCRIPTOR TYPE))
+            (NODE (AND DESCRIPTOR (@ DESCRIPTOR NODE)))
+            (TYPE (AND DESCRIPTOR (@ DESCRIPTOR TYPE)))
             (NORMALIZED-VALUE
              (IF (OR (EQ VALUE UNDEFINED) (EQ VALUE NIL))
 
@@ -339,8 +339,8 @@ function setProperty(target, key, value, receiver) {
     var isDelete = arguments.length === 2;
     var isChanged = target[key] !== value;
     var descriptor = context[key];
-    var node16 = descriptor.node;
-    var type17 = descriptor.type;
+    var node16 = descriptor && descriptor.node;
+    var type17 = descriptor && descriptor.type;
     var normalizedValue = value === undefined || value === null ? '' : value;
     if (Object.prototype.hasOwnProperty.call(context, key) && isChanged) {
         if (type17 === SYMBOLTEXT && value !== node16.textContent) {
