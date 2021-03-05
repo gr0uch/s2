@@ -386,10 +386,16 @@ function setProperty(target, key, value, receiver) {
 };
 /* (DEFUN SET-ATTRIBUTE (NODE NAME VALUE)
      (IF (NOT (OR (EQ VALUE NIL) (EQ VALUE UNDEFINED)))
-         (CHAIN NODE (SET-ATTRIBUTE NAME VALUE))
+         (IF (IN NAME NODE)
+             (SETF (GETPROP NODE NAME) VALUE)
+             (CHAIN NODE (SET-ATTRIBUTE NAME VALUE)))
          (CHAIN NODE (REMOVE-ATTRIBUTE NAME)))) */
 function setAttribute(node, name, value) {
-    return !(value === null || value === undefined) ? node.setAttribute(name, value) : node.removeAttribute(name);
+    if (!(value === null || value === undefined)) {
+        return name in node ? (node[name] = value) : node.setAttribute(name, value);
+    } else {
+        return node.removeAttribute(name);
+    };
 };
 /* (DEFUN SET-CLASS (NODE VALUE)
      (IF VALUE
