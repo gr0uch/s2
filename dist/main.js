@@ -541,10 +541,7 @@ function removeBetweenDelimiters(startNode, endNode, unmount, self) {
                                        DO (SETF (GETPROP PREV KEY)
                                                   (GETPROP OBJ KEY)))
                                  (LOOP FOR KEY OF PREV
-                                       DO (WHEN
-                                              (NOT
-                                               (CHAIN OBJ
-                                                      (HAS-OWN-PROPERTY KEY)))
+                                       DO (WHEN (NOT (IN KEY OBJ))
                                             (DELETE (GETPROP PREV KEY)))))
                                 (SETF (GETPROP PREVIOUS-VALUES I) OBJ))))
                  (WHEN (CHAIN *ARRAY (IS-ARRAY PREVIOUS-VALUE))
@@ -629,7 +626,7 @@ function setSlot(target, key, value, descriptor) {
                         prev[key] = obj[key];
                     };
                     for (var key in prev) {
-                        if (!obj.hasOwnProperty(key)) {
+                        if (!(key in obj)) {
                             delete prev[key];
                         };
                     };
@@ -900,6 +897,10 @@ function createArray(array, template) {
        (CHAIN *TARGET-EVENT-MAP* (SET TARGET (CREATE)))
        (CHAIN *TARGET-DELIMITER-MAP* (SET TARGET (CREATE)))
        (LOOP FOR KEY OF CONTEXT
+             DO (WHEN (IN KEY OBJ)
+                  (CONTINUE)) (SET-PROPERTY TARGET KEY (GETPROP OBJ KEY)
+                               PROXY))
+       (LOOP FOR KEY OF OBJ
              DO (SET-PROPERTY TARGET KEY (GETPROP OBJ KEY) PROXY))
        (LIST PROXY FRAGMENT))) */
 function createBinding(obj, template) {
@@ -930,6 +931,12 @@ function createBinding(obj, template) {
     TARGETEVENTMAP.set(target, {  });
     TARGETDELIMITERMAP.set(target, {  });
     for (var key in context) {
+        if (key in obj) {
+            continue;
+        };
+        setProperty(target, key, obj[key], proxy);
+    };
+    for (var key in obj) {
         setProperty(target, key, obj[key], proxy);
     };
     __PS_MV_REG = [];

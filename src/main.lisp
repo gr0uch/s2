@@ -342,7 +342,7 @@
                      ;; Removal.
                      (loop
                       for key of prev do
-                      (when (not (chain obj (has-own-property key)))
+                      (when (not (in key obj))
                         (delete (getprop prev key)))))
                  (setf (getprop previous-values i) obj))))
             (when (chain *array (is-array previous-value))
@@ -510,6 +510,10 @@
     ;; Initialization
     (loop
      for key of context do
+     (when (in key obj) (continue))
+     (set-property target key (getprop obj key) proxy))
+    (loop
+     for key of obj do
      (set-property target key (getprop obj key) proxy))
 
     (list proxy fragment)))
