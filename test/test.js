@@ -44,6 +44,7 @@ const [proxy, node] = s2({
     [unmount]: delayUnmount,
   },
   // f: new Array(1000).fill().map(() => ({ f: 'f' })),
+  n: 'n',
   [mount]: function spam(node) {
     // return null;
     const t = {};

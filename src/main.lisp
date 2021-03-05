@@ -506,11 +506,11 @@
     ;; Initialization
     (loop
      for key of context do
-     (when (in key obj) (continue))
      (set-property target key (getprop obj key) proxy t))
     (loop
      for key of obj do
-     (set-property target key (getprop obj key) proxy t))
+     (when (in key context) (continue))
+     (setf (getprop target key) (getprop obj key)))
 
     (when mount (chain mount (call proxy clone)))
 

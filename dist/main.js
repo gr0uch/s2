@@ -901,11 +901,10 @@ function createArray(array, template) {
        (CHAIN *TARGET-EVENT-MAP* (SET TARGET (CREATE)))
        (CHAIN *TARGET-DELIMITER-MAP* (SET TARGET (CREATE)))
        (LOOP FOR KEY OF CONTEXT
-             DO (WHEN (IN KEY OBJ)
-                  (CONTINUE)) (SET-PROPERTY TARGET KEY (GETPROP OBJ KEY) PROXY
-                               T))
-       (LOOP FOR KEY OF OBJ
              DO (SET-PROPERTY TARGET KEY (GETPROP OBJ KEY) PROXY T))
+       (LOOP FOR KEY OF OBJ
+             DO (WHEN (IN KEY CONTEXT)
+                  (CONTINUE)) (SETF (GETPROP TARGET KEY) (GETPROP OBJ KEY)))
        (WHEN MOUNT (CHAIN MOUNT (CALL PROXY CLONE)))
        (CHAIN FRAGMENT (APPEND-CHILD START-NODE))
        (CHAIN FRAGMENT (APPEND-CHILD CLONE))
@@ -933,13 +932,13 @@ function createBinding(obj, template) {
     TARGETEVENTMAP.set(target, {  });
     TARGETDELIMITERMAP.set(target, {  });
     for (var key in context) {
-        if (key in obj) {
-            continue;
-        };
         setProperty(target, key, obj[key], proxy, true);
     };
     for (var key in obj) {
-        setProperty(target, key, obj[key], proxy, true);
+        if (key in context) {
+            continue;
+        };
+        target[key] = obj[key];
     };
     if (mount) {
         mount.call(proxy, clone);
