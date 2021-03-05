@@ -288,9 +288,10 @@ function setIndex(target, key, value, receiver) {
     __PS_MV_REG = [];
     return true;
 };
-/* (DEFUN SET-PROPERTY (TARGET KEY VALUE RECEIVER)
+/* (DEFUN SET-PROPERTY (TARGET KEY VALUE RECEIVER IS-INITIALIZING)
+     (WHEN (@ MAIN DEBUG) (CONSOLE-LOG 'SET-PROPERTY ARGUMENTS))
      (LET* ((CONTEXT (CHAIN *TARGET-CONTEXT-MAP* (GET TARGET)))
-            (IS-SETTER (EQ (LENGTH ARGUMENTS) 4))
+            (IS-SETTER (>= (LENGTH ARGUMENTS) 4))
             (IS-DELETE (EQ (LENGTH ARGUMENTS) 2))
             (IS-CHANGED (NOT (EQ (GETPROP TARGET KEY) VALUE)))
             (DESCRIPTOR (GETPROP CONTEXT KEY))
@@ -302,7 +303,7 @@ function setIndex(target, key, value, receiver) {
                  VALUE)))
        (WHEN
            (AND (CHAIN *OBJECT PROTOTYPE HAS-OWN-PROPERTY (CALL CONTEXT KEY))
-                IS-CHANGED)
+                (OR IS-CHANGED IS-INITIALIZING))
          (WHEN
              (AND (EQ TYPE *SYMBOL-TEXT*)
                   (NOT (EQ VALUE (@ NODE TEXT-CONTENT))))
@@ -319,7 +320,7 @@ function setIndex(target, key, value, receiver) {
          (WHEN (EQ TYPE *SYMBOL-EVENT*)
            (SET-EVENT TARGET VALUE DESCRIPTOR RECEIVER))
          (WHEN (EQ TYPE *SYMBOL-SLOT*)
-           (LET ((PROXY (SET-SLOT TARGET KEY VALUE DESCRIPTOR)))
+           (LET ((PROXY (SET-SLOT TARGET KEY VALUE DESCRIPTOR IS-INITIALIZING)))
              (WHEN PROXY
                (RETURN-FROM SET-PROPERTY
                  (CHAIN *REFLECT (SET TARGET KEY PROXY RECEIVER)))))))
@@ -333,16 +334,19 @@ function setIndex(target, key, value, receiver) {
        (WHEN IS-DELETE (DELETE (GETPROP TARGET KEY)))
        (WHEN IS-SETTER (CHAIN *REFLECT (SET TARGET KEY VALUE RECEIVER))))
      T) */
-function setProperty(target, key, value, receiver) {
+function setProperty(target, key, value, receiver, isInitializing) {
+    if (main.debug) {
+        console.log('setProperty', arguments);
+    };
     var context = TARGETCONTEXTMAP.get(target);
-    var isSetter = arguments.length === 4;
+    var isSetter = arguments.length >= 4;
     var isDelete = arguments.length === 2;
     var isChanged = target[key] !== value;
     var descriptor = context[key];
     var node16 = descriptor && descriptor.node;
     var type17 = descriptor && descriptor.type;
     var normalizedValue = value === undefined || value === null ? '' : value;
-    if (Object.prototype.hasOwnProperty.call(context, key) && isChanged) {
+    if (Object.prototype.hasOwnProperty.call(context, key) && (isChanged || isInitializing)) {
         if (type17 === SYMBOLTEXT && value !== node16.textContent) {
             node16.textContent = normalizedValue;
         };
@@ -362,7 +366,7 @@ function setProperty(target, key, value, receiver) {
             setEvent(target, value, descriptor, receiver);
         };
         if (type17 === SYMBOLSLOT) {
-            var proxy = setSlot(target, key, value, descriptor);
+            var proxy = setSlot(target, key, value, descriptor, isInitializing);
             if (proxy) {
                 __PS_MV_REG = [];
                 return Reflect.set(target, key, proxy, receiver);
@@ -472,8 +476,10 @@ function removeBetweenDelimiters(startNode, endNode, unmount, self) {
     __PS_MV_REG = [];
     return endNode.remove();
 };
-/* (DEFUN SET-SLOT (TARGET KEY VALUE DESCRIPTOR)
-     (WHEN (NOT (OR (GETPROP TARGET KEY) VALUE)) (RETURN-FROM SET-SLOT))
+/* (DEFUN SET-SLOT (TARGET KEY VALUE DESCRIPTOR IS-INITIALIZING)
+     (WHEN (@ MAIN DEBUG) (CONSOLE-LOG 'SET-SLOT ARGUMENTS))
+     (WHEN (NOT (OR (GETPROP TARGET KEY) VALUE IS-INITIALIZING))
+       (RETURN-FROM SET-SLOT))
      (LET* ((ANCHOR (@ DESCRIPTOR NODE))
             (SLOT (@ DESCRIPTOR SLOT))
             (TEMPLATE (@ DESCRIPTOR TEMPLATE))
@@ -553,8 +559,11 @@ function removeBetweenDelimiters(startNode, endNode, unmount, self) {
                             ANCHOR))))
        (CHAIN PARENT-NODE (INSERT-BEFORE END-NODE ANCHOR))
        RETURN-VALUE)) */
-function setSlot(target, key, value, descriptor) {
-    if (!(target[key] || value)) {
+function setSlot(target, key, value, descriptor, isInitializing) {
+    if (main.debug) {
+        console.log('setSlot', arguments);
+    };
+    if (!(target[key] || value || isInitializing)) {
         return;
     };
     var anchor = descriptor.node;
@@ -897,10 +906,10 @@ function createArray(array, template) {
        (CHAIN *TARGET-DELIMITER-MAP* (SET TARGET (CREATE)))
        (LOOP FOR KEY OF CONTEXT
              DO (WHEN (IN KEY OBJ)
-                  (CONTINUE)) (SET-PROPERTY TARGET KEY (GETPROP OBJ KEY)
-                               PROXY))
+                  (CONTINUE)) (SET-PROPERTY TARGET KEY (GETPROP OBJ KEY) PROXY
+                               T))
        (LOOP FOR KEY OF OBJ
-             DO (SET-PROPERTY TARGET KEY (GETPROP OBJ KEY) PROXY))
+             DO (SET-PROPERTY TARGET KEY (GETPROP OBJ KEY) PROXY T))
        (WHEN MOUNT (CHAIN MOUNT (CALL PROXY CLONE)))
        (LIST PROXY FRAGMENT))) */
 function createBinding(obj, template) {
@@ -931,10 +940,10 @@ function createBinding(obj, template) {
         if (key in obj) {
             continue;
         };
-        setProperty(target, key, obj[key], proxy);
+        setProperty(target, key, obj[key], proxy, true);
     };
     for (var key in obj) {
-        setProperty(target, key, obj[key], proxy);
+        setProperty(target, key, obj[key], proxy, true);
     };
     if (mount) {
         mount.call(proxy, clone);

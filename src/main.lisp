@@ -164,11 +164,10 @@
   t)
 
 
-(defun set-property (target key value receiver)
+(defun set-property (target key value receiver is-initializing)
+  (when (@ main debug) (console-log 'set-property arguments))
   (let* ((context (chain *target-context-map* (get target)))
-         ;; Even though there may be 5 arguments here,
-         ;; we don't care about setting if initializing.
-         (is-setter (eq (length arguments) 4))
+         (is-setter (>= (length arguments) 4))
          (is-delete (eq (length arguments) 2))
          (is-changed (not (eq (getprop target key) value)))
          (descriptor (getprop context key))
@@ -178,7 +177,7 @@
           (if (or (eq value undefined) (eq value nil)) "" value)))
 
     (when (and (chain *object prototype has-own-property (call context key))
-               is-changed)
+               (or is-changed is-initializing))
       (when (and (eq type *symbol-text*)
                  (not (eq value (@ node text-content))))
         (setf (@ node text-content) normalized-value))
@@ -195,7 +194,7 @@
       (when (eq type *symbol-event*)
         (set-event target value descriptor receiver))
       (when (eq type *symbol-slot*)
-        (let ((proxy (set-slot target key value descriptor)))
+        (let ((proxy (set-slot target key value descriptor is-initializing)))
           (when proxy
             (return-from
              set-property
@@ -262,9 +261,12 @@
 ;; on top of a retained mode underlying layer, the DOM. For example, assigning
 ;; a new object where there was a previous object before, will try to make the
 ;; least DOM updates possible.
-(defun set-slot (target key value descriptor)
+(defun set-slot (target key value descriptor is-initializing)
+  (when (@ main debug) (console-log 'set-slot arguments))
+
   ;; Skip deletion if already empty.
-  (when (not (or (getprop target key) value)) (return-from set-slot))
+  (when (not (or (getprop target key) value is-initializing))
+    (return-from set-slot))
 
   (let* ((anchor (@ descriptor node))
          (slot (@ descriptor slot))
@@ -353,6 +355,7 @@
        for node in (@ slot child-nodes) do
        (chain parent-node (insert-before
                            (chain node (clone-node t)) anchor))))
+
     (chain parent-node (insert-before end-node anchor))
     return-value))
 
@@ -510,10 +513,10 @@
     (loop
      for key of context do
      (when (in key obj) (continue))
-     (set-property target key (getprop obj key) proxy))
+     (set-property target key (getprop obj key) proxy t))
     (loop
      for key of obj do
-     (set-property target key (getprop obj key) proxy))
+     (set-property target key (getprop obj key) proxy t))
 
     (when mount (chain mount (call proxy clone)))
 

@@ -32,7 +32,7 @@
   </h1>
   <slot name="list" data-template="#list"></slot>
   <slot name="counter" data-template="#counter"></slot>
-  <!--<slot name="f" data-template="#f"></slot>-->
+  <slot name="f" data-template="#f">!!!~</slot>
 </template>
 
 <template id="f">
@@ -66,5 +66,7 @@
 </template>
 
 <template id="things">
-  <li data-text="text"></li>
+  <li>
+    <span data-text="text"></span>
+  </li>
 </template>
