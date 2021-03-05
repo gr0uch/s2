@@ -45,12 +45,12 @@ const [proxy, node] = s2({
   },
   // f: new Array(1000).fill().map(() => ({ f: 'f' })),
   [mount]: function spam(node) {
-    return null;
+    // return null;
     const t = {};
     let i, n, c;
     n = document.createElement('span')
-    n.textContent = 'd';
-    for (i = 0; i < 1000; i++) {
+    n.textContent = '_';
+    for (i = 0; i < 10; i++) {
       c = n.cloneNode(true);
       node.appendChild(document.createComment('fak'));
       node.appendChild(c);

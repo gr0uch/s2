@@ -499,12 +499,6 @@
 
     (when unmount (chain *proxy-unmount-map* (set proxy unmount)))
 
-    ;; Each proxy should contain references to its own delimiters.
-    (chain fragment (append-child start-node))
-    (chain fragment (append-child clone))
-    (chain fragment (append-child end-node))
-    (chain *proxy-delimiter-map* (set proxy nodes))
-
     (chain *target-context-map* (set target context))
     (chain *target-event-map* (set target (create)))
     (chain *target-delimiter-map* (set target (create)))
@@ -519,6 +513,12 @@
      (set-property target key (getprop obj key) proxy t))
 
     (when mount (chain mount (call proxy clone)))
+
+    ;; Each proxy should contain references to its own delimiters.
+    (chain fragment (append-child start-node))
+    (chain fragment (append-child clone))
+    (chain fragment (append-child end-node))
+    (chain *proxy-delimiter-map* (set proxy nodes))
 
     (list proxy fragment)))
 

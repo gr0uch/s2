@@ -897,10 +897,6 @@ function createArray(array, template) {
             (UNMOUNT (GETPROP OBJ *SYMBOL-UNMOUNT*))
             (FRAGMENT (CHAIN DOCUMENT (CREATE-DOCUMENT-FRAGMENT))))
        (WHEN UNMOUNT (CHAIN *PROXY-UNMOUNT-MAP* (SET PROXY UNMOUNT)))
-       (CHAIN FRAGMENT (APPEND-CHILD START-NODE))
-       (CHAIN FRAGMENT (APPEND-CHILD CLONE))
-       (CHAIN FRAGMENT (APPEND-CHILD END-NODE))
-       (CHAIN *PROXY-DELIMITER-MAP* (SET PROXY NODES))
        (CHAIN *TARGET-CONTEXT-MAP* (SET TARGET CONTEXT))
        (CHAIN *TARGET-EVENT-MAP* (SET TARGET (CREATE)))
        (CHAIN *TARGET-DELIMITER-MAP* (SET TARGET (CREATE)))
@@ -911,6 +907,10 @@ function createArray(array, template) {
        (LOOP FOR KEY OF OBJ
              DO (SET-PROPERTY TARGET KEY (GETPROP OBJ KEY) PROXY T))
        (WHEN MOUNT (CHAIN MOUNT (CALL PROXY CLONE)))
+       (CHAIN FRAGMENT (APPEND-CHILD START-NODE))
+       (CHAIN FRAGMENT (APPEND-CHILD CLONE))
+       (CHAIN FRAGMENT (APPEND-CHILD END-NODE))
+       (CHAIN *PROXY-DELIMITER-MAP* (SET PROXY NODES))
        (LIST PROXY FRAGMENT))) */
 function createBinding(obj, template) {
     if (!TEMPLATEPROCESSEDMAP.get(template)) {
@@ -929,10 +929,6 @@ function createBinding(obj, template) {
     if (unmount) {
         PROXYUNMOUNTMAP.set(proxy, unmount);
     };
-    fragment.appendChild(startNode);
-    fragment.appendChild(clone);
-    fragment.appendChild(endNode);
-    PROXYDELIMITERMAP.set(proxy, nodes);
     TARGETCONTEXTMAP.set(target, context);
     TARGETEVENTMAP.set(target, {  });
     TARGETDELIMITERMAP.set(target, {  });
@@ -948,6 +944,10 @@ function createBinding(obj, template) {
     if (mount) {
         mount.call(proxy, clone);
     };
+    fragment.appendChild(startNode);
+    fragment.appendChild(clone);
+    fragment.appendChild(endNode);
+    PROXYDELIMITERMAP.set(proxy, nodes);
     __PS_MV_REG = [];
     return [proxy, fragment];
 };
