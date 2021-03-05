@@ -494,7 +494,6 @@
          (unmount (getprop obj *symbol-unmount*))
          (fragment (chain document (create-document-fragment))))
 
-    (when mount (chain mount (call proxy clone)))
     (when unmount (chain *proxy-unmount-map* (set proxy unmount)))
 
     ;; Each proxy should contain references to its own delimiters.
@@ -515,6 +514,8 @@
     (loop
      for key of obj do
      (set-property target key (getprop obj key) proxy))
+
+    (when mount (chain mount (call proxy clone)))
 
     (list proxy fragment)))
 

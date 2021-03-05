@@ -887,7 +887,6 @@ function createArray(array, template) {
             (MOUNT (GETPROP OBJ *SYMBOL-MOUNT*))
             (UNMOUNT (GETPROP OBJ *SYMBOL-UNMOUNT*))
             (FRAGMENT (CHAIN DOCUMENT (CREATE-DOCUMENT-FRAGMENT))))
-       (WHEN MOUNT (CHAIN MOUNT (CALL PROXY CLONE)))
        (WHEN UNMOUNT (CHAIN *PROXY-UNMOUNT-MAP* (SET PROXY UNMOUNT)))
        (CHAIN FRAGMENT (APPEND-CHILD START-NODE))
        (CHAIN FRAGMENT (APPEND-CHILD CLONE))
@@ -902,6 +901,7 @@ function createArray(array, template) {
                                PROXY))
        (LOOP FOR KEY OF OBJ
              DO (SET-PROPERTY TARGET KEY (GETPROP OBJ KEY) PROXY))
+       (WHEN MOUNT (CHAIN MOUNT (CALL PROXY CLONE)))
        (LIST PROXY FRAGMENT))) */
 function createBinding(obj, template) {
     if (!TEMPLATEPROCESSEDMAP.get(template)) {
@@ -917,9 +917,6 @@ function createBinding(obj, template) {
     var mount = obj[SYMBOLMOUNT];
     var unmount = obj[SYMBOLUNMOUNT];
     var fragment = document.createDocumentFragment();
-    if (mount) {
-        mount.call(proxy, clone);
-    };
     if (unmount) {
         PROXYUNMOUNTMAP.set(proxy, unmount);
     };
@@ -938,6 +935,9 @@ function createBinding(obj, template) {
     };
     for (var key in obj) {
         setProperty(target, key, obj[key], proxy);
+    };
+    if (mount) {
+        mount.call(proxy, clone);
     };
     __PS_MV_REG = [];
     return [proxy, fragment];
