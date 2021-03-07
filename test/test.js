@@ -2,6 +2,11 @@ import s2, { mount, unmount } from "../dist/main.js";
 import depCheck from "../dist/dep-check.js";
 import test from "./runner.js";
 
+s2.debug = true;
+s2.isDeferred = true;
+depCheck();
+cleanupTemplates();
+
 const start = performance.now();
 const initialThings = [
   { text: 'a' },
@@ -10,9 +15,6 @@ const initialThings = [
 ];
 
 test.initialThings = initialThings;
-s2.debug = true;
-depCheck();
-cleanupTemplates();
 
 const template = document.querySelector("#root");
 

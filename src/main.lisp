@@ -44,6 +44,7 @@
 
 (defvar *proxy-object* (create set set-property delete-property set-property))
 (defvar *proxy-array* (create set set-index delete-property set-index))
+(defvar *deferred-queue* (list))
 
 
 ;; The logic contained here is the most difficult. The flow is like:
@@ -55,12 +56,15 @@
 ;;   - Swap: swap indexes of proxies only.
 ;;     - The target location may or may not have a proxy.
 ;;     - The target location's proxy may or may not be the same proxy.
-(defun set-index (target key value receiver)
+(defun set-index (target key value receiver is-initializing)
+  (when (and (@ main is-deferred) (not is-initializing))
+    (enqueue (lambda () (set-index target key value receiver t)))
+    (return-from set-index t))
+
   (when (@ main debug) (console-log 'set-index arguments))
   (let* ((numkey (chain *number (parse-int key 10)))
          (is-index (not (chain *number (is-na-n numkey))))
-         (is-setter (eq (length arguments) 4))
-         (is-delete (eq (length arguments) 2)))
+         (is-setter (not (eq value undefined))))
 
     (when (eq key 'length)
       ;; Setting array length should remove extra values.
@@ -73,18 +77,19 @@
                       (@ nodes 0) (@ nodes 1) unmount proxy)))
        (delete (getprop target i))))
 
-    (when (and is-delete (getprop target key))
+    ;; Handle deletion.
+    (when (and (not is-setter) (getprop target key))
       (let* ((proxy (getprop target key))
              (nodes (chain *proxy-delimiter-map* (get proxy)))
              (unmount (chain *proxy-unmount-map* (get proxy))))
         (remove-between-delimiters (@ nodes 0) (@ nodes 1) unmount proxy))
       (delete (getprop target key)))
 
-    (when (and is-setter (not is-index))
-      (return-from
-       set-index (chain *reflect (set target key value receiver))))
-
     (when is-setter
+      (when (not is-index)
+        (return-from
+         set-index (chain *reflect (set target key value receiver))))
+
       (if (not (chain target (includes value)))
           ;; Inserting or replacing an object.
           (let* ((anchor (chain *proxy-anchor-map* (get receiver)))
@@ -164,11 +169,29 @@
   t)
 
 
+;; When using deferred mode.
+(defun enqueue (fn)
+  (when (not (length *deferred-queue*))
+    (request-animation-frame
+     (lambda ()
+       (let ((q (length *deferred-queue*)))
+         (loop
+          while (length *deferred-queue*) do
+          (let ((func (chain *deferred-queue* (shift))))
+            (func)))
+         (when (@ main debug)
+           (console-log "queue flushed" q))))))
+  (chain *deferred-queue* (push fn)))
+
+
 (defun set-property (target key value receiver is-initializing)
+  (when (and (@ main is-deferred) (not is-initializing))
+    (enqueue (lambda () (set-property target key value receiver t)))
+    (return-from set-property t))
+
   (when (@ main debug) (console-log 'set-property arguments))
   (let* ((context (chain *target-context-map* (get target)))
-         (is-setter (>= (length arguments) 4))
-         (is-delete (eq (length arguments) 2))
+         (is-setter (not (eq value undefined)))
          (is-changed (not (eq (getprop target key) value)))
          (descriptor (getprop context key))
          (node (and descriptor (@ descriptor node)))
@@ -210,8 +233,9 @@
                                           (@ event target value) receiver)))))
       (setf (@ descriptor is-listening) t))
 
-    (when is-delete (delete (getprop target key)))
-    (when is-setter (chain *reflect (set target key value receiver))))
+    (if is-setter
+        (chain *reflect (set target key value receiver))
+      (delete (getprop target key))))
   t)
 
 
@@ -534,6 +558,9 @@
 
 (defun main (origin template)
   (create-binding origin template))
+
+(setf (@ main debug) (not t)
+      (@ main is-deferred) (not t))
 
 
 (export

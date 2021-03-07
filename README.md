@@ -84,6 +84,12 @@ import { mount, unmount } from '...';
 ```
 
 
+## Flags
+
+- `s2.debug`: turn on messages in the console. Warning: has a performance impact.
+- `s2.isDeferred` (experimental): this will defer setting proxy values until the next frame. This might be preferable if there is significant blocking in between updates. However, it can break functionality in case there are updates that depend on a previous update in the same tick.
+
+
 ## Optional Modules
 
 - `dep-check.js`: this is used to check if all of the required APIs are present in the runtime.

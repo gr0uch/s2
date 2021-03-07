@@ -86,12 +86,18 @@ if ('undefined' === typeof PROXYOBJECT) {
 if ('undefined' === typeof PROXYARRAY) {
     var PROXYARRAY = { set : setIndex, deleteProperty : setIndex };
 };
-/* (DEFUN SET-INDEX (TARGET KEY VALUE RECEIVER)
+/* (DEFVAR *DEFERRED-QUEUE* (LIST)) */
+if ('undefined' === typeof DEFERREDQUEUE) {
+    var DEFERREDQUEUE = [];
+};
+/* (DEFUN SET-INDEX (TARGET KEY VALUE RECEIVER IS-INITIALIZING)
+     (WHEN (AND (@ MAIN IS-DEFERRED) (NOT IS-INITIALIZING))
+       (ENQUEUE (LAMBDA () (SET-INDEX TARGET KEY VALUE RECEIVER T)))
+       (RETURN-FROM SET-INDEX T))
      (WHEN (@ MAIN DEBUG) (CONSOLE-LOG 'SET-INDEX ARGUMENTS))
      (LET* ((NUMKEY (CHAIN *NUMBER (PARSE-INT KEY 10)))
             (IS-INDEX (NOT (CHAIN *NUMBER (IS-NA-N NUMKEY))))
-            (IS-SETTER (EQ (LENGTH ARGUMENTS) 4))
-            (IS-DELETE (EQ (LENGTH ARGUMENTS) 2)))
+            (IS-SETTER (NOT (EQ VALUE UNDEFINED))))
        (WHEN (EQ KEY 'LENGTH)
          (LOOP FOR I FROM VALUE TO (- (LENGTH TARGET) 1)
                DO (LET* ((PROXY (GETPROP TARGET I))
@@ -100,16 +106,16 @@ if ('undefined' === typeof PROXYARRAY) {
                     (WHEN NODES
                       (REMOVE-BETWEEN-DELIMITERS (@ NODES 0) (@ NODES 1)
                        UNMOUNT PROXY))) (DELETE (GETPROP TARGET I))))
-       (WHEN (AND IS-DELETE (GETPROP TARGET KEY))
+       (WHEN (AND (NOT IS-SETTER) (GETPROP TARGET KEY))
          (LET* ((PROXY (GETPROP TARGET KEY))
                 (NODES (CHAIN *PROXY-DELIMITER-MAP* (GET PROXY)))
                 (UNMOUNT (CHAIN *PROXY-UNMOUNT-MAP* (GET PROXY))))
            (REMOVE-BETWEEN-DELIMITERS (@ NODES 0) (@ NODES 1) UNMOUNT PROXY))
          (DELETE (GETPROP TARGET KEY)))
-       (WHEN (AND IS-SETTER (NOT IS-INDEX))
-         (RETURN-FROM SET-INDEX
-           (CHAIN *REFLECT (SET TARGET KEY VALUE RECEIVER))))
        (WHEN IS-SETTER
+         (WHEN (NOT IS-INDEX)
+           (RETURN-FROM SET-INDEX
+             (CHAIN *REFLECT (SET TARGET KEY VALUE RECEIVER))))
          (IF (NOT (CHAIN TARGET (INCLUDES VALUE)))
              (LET* ((ANCHOR (CHAIN *PROXY-ANCHOR-MAP* (GET RECEIVER)))
                     (PARENT-NODE (@ ANCHOR PARENT-NODE))
@@ -184,14 +190,21 @@ if ('undefined' === typeof PROXYARRAY) {
                         (SET TARGET OTHER-INDEX OTHER-PROXY RECEIVER)))))
          (CHAIN *REFLECT (SET TARGET KEY VALUE RECEIVER))))
      T) */
-function setIndex(target, key, value, receiver) {
+function setIndex(target, key, value, receiver, isInitializing) {
+    if (main.isDeferred && !isInitializing) {
+        enqueue(function () {
+            __PS_MV_REG = [];
+            return setIndex(target, key, value, receiver, true);
+        });
+        __PS_MV_REG = [];
+        return true;
+    };
     if (main.debug) {
         console.log('setIndex', arguments);
     };
     var numkey = Number.parseInt(key, 10);
     var isIndex = !Number.isNaN(numkey);
-    var isSetter = arguments.length === 4;
-    var isDelete = arguments.length === 2;
+    var isSetter = value !== undefined;
     if (key === 'length') {
         var _js1 = target.length - 1;
         for (var i = value; i <= _js1; i += 1) {
@@ -204,18 +217,18 @@ function setIndex(target, key, value, receiver) {
             delete target[i];
         };
     };
-    if (isDelete && target[key]) {
+    if (!isSetter && target[key]) {
         var proxy2 = target[key];
         var nodes3 = PROXYDELIMITERMAP.get(proxy2);
         var unmount4 = PROXYUNMOUNTMAP.get(proxy2);
         removeBetweenDelimiters(nodes3[0], nodes3[1], unmount4, proxy2);
         delete target[key];
     };
-    if (isSetter && !isIndex) {
-        __PS_MV_REG = [];
-        return Reflect.set(target, key, value, receiver);
-    };
     if (isSetter) {
+        if (!isIndex) {
+            __PS_MV_REG = [];
+            return Reflect.set(target, key, value, receiver);
+        };
         if (!target.includes(value)) {
             var anchor = PROXYANCHORMAP.get(receiver);
             var parentNode5 = anchor.parentNode;
@@ -288,11 +301,38 @@ function setIndex(target, key, value, receiver) {
     __PS_MV_REG = [];
     return true;
 };
+/* (DEFUN ENQUEUE (FN)
+     (WHEN (NOT (LENGTH *DEFERRED-QUEUE*))
+       (REQUEST-ANIMATION-FRAME
+        (LAMBDA ()
+          (LET ((Q (LENGTH *DEFERRED-QUEUE*)))
+            (LOOP WHILE (LENGTH *DEFERRED-QUEUE*)
+                  DO (LET ((FUNC (CHAIN *DEFERRED-QUEUE* (SHIFT))))
+                       (FUNC)))
+            (WHEN (@ MAIN DEBUG) (CONSOLE-LOG queue flushed Q))))))
+     (CHAIN *DEFERRED-QUEUE* (PUSH FN))) */
+function enqueue(fn) {
+    if (!DEFERREDQUEUE.length) {
+        requestAnimationFrame(function () {
+            var q = DEFERREDQUEUE.length;
+            while (DEFERREDQUEUE.length) {
+                var func = DEFERREDQUEUE.shift();
+                func();
+            };
+            __PS_MV_REG = [];
+            return main.debug ? console.log('queue flushed', q) : null;
+        });
+    };
+    __PS_MV_REG = [];
+    return DEFERREDQUEUE.push(fn);
+};
 /* (DEFUN SET-PROPERTY (TARGET KEY VALUE RECEIVER IS-INITIALIZING)
+     (WHEN (AND (@ MAIN IS-DEFERRED) (NOT IS-INITIALIZING))
+       (ENQUEUE (LAMBDA () (SET-PROPERTY TARGET KEY VALUE RECEIVER T)))
+       (RETURN-FROM SET-PROPERTY T))
      (WHEN (@ MAIN DEBUG) (CONSOLE-LOG 'SET-PROPERTY ARGUMENTS))
      (LET* ((CONTEXT (CHAIN *TARGET-CONTEXT-MAP* (GET TARGET)))
-            (IS-SETTER (>= (LENGTH ARGUMENTS) 4))
-            (IS-DELETE (EQ (LENGTH ARGUMENTS) 2))
+            (IS-SETTER (NOT (EQ VALUE UNDEFINED)))
             (IS-CHANGED (NOT (EQ (GETPROP TARGET KEY) VALUE)))
             (DESCRIPTOR (GETPROP CONTEXT KEY))
             (NODE (AND DESCRIPTOR (@ DESCRIPTOR NODE)))
@@ -331,16 +371,24 @@ function setIndex(target, key, value, receiver) {
                    (CHAIN *REFLECT
                           (SET TARGET KEY (@ EVENT TARGET VALUE) RECEIVER)))))
          (SETF (@ DESCRIPTOR IS-LISTENING) T))
-       (WHEN IS-DELETE (DELETE (GETPROP TARGET KEY)))
-       (WHEN IS-SETTER (CHAIN *REFLECT (SET TARGET KEY VALUE RECEIVER))))
+       (IF IS-SETTER
+           (CHAIN *REFLECT (SET TARGET KEY VALUE RECEIVER))
+           (DELETE (GETPROP TARGET KEY))))
      T) */
 function setProperty(target, key, value, receiver, isInitializing) {
+    if (main.isDeferred && !isInitializing) {
+        enqueue(function () {
+            __PS_MV_REG = [];
+            return setProperty(target, key, value, receiver, true);
+        });
+        __PS_MV_REG = [];
+        return true;
+    };
     if (main.debug) {
         console.log('setProperty', arguments);
     };
     var context = TARGETCONTEXTMAP.get(target);
-    var isSetter = arguments.length >= 4;
-    var isDelete = arguments.length === 2;
+    var isSetter = value !== undefined;
     var isChanged = target[key] !== value;
     var descriptor = context[key];
     var node16 = descriptor && descriptor.node;
@@ -379,11 +427,10 @@ function setProperty(target, key, value, receiver, isInitializing) {
         });
         descriptor.isListening = true;
     };
-    if (isDelete) {
-        delete target[key];
-    };
     if (isSetter) {
         Reflect.set(target, key, value, receiver);
+    } else {
+        delete target[key];
     };
     __PS_MV_REG = [];
     return true;
@@ -975,6 +1022,10 @@ function main(origin, template) {
     __PS_MV_REG = [];
     return createBinding(origin, template);
 };
+/* (SETF (@ MAIN DEBUG) (NOT T)
+         (@ MAIN IS-DEFERRED) (NOT T)) */
+main.debug = !true;
+main.isDeferred = !true;
 /* (EXPORT DEFAULT MAIN NAMES
            (*SYMBOL-MOUNT* AS MOUNT *SYMBOL-UNMOUNT* AS UNMOUNT)) */
 export { SYMBOLMOUNT as mount, SYMBOLUNMOUNT as unmount, };

@@ -14,6 +14,7 @@
    (list (list 'document 'create-text-node) "function")
    (list (list 'document 'create-comment) "function")
    (list (list 'document 'create-document-fragment) "function")
+   (list (list 'window 'request-animation-frame) "function")
    (list (list '*node) "function")
 
    ;; Sanity checking JS.

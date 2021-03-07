@@ -8,7 +8,8 @@
     <style type="text/css">
       :root {
         --w: 32;
-        --wm: calc(var(--w) * /*φ*/1.6180339887);
+        --wm: calc(var(--w) * 3 / 2);
+        --c: 6;
 
         --h: 18px;
         --l: calc(1em * 8 / 5);
@@ -49,7 +50,7 @@
       .box > header { border-right: calc(var(--l) * var(--b)) var(--c-fg) solid; flex: 1; display: flex; pointer-events: auto; }
       .box > header > div { align-self: center; flex: 1; }
       .box > header > div > * { background: var(--c-fg); color: var(--c-bg); width: calc(var(--l) * 3 / 2); height: calc(var(--l) * 3 / 2); border-radius: 50%; margin: auto; display: flex; align-items: center; justify-content: center; font-weight: bold; user-select: none; }
-      .box > div { flex: 5; display: flex; }
+      .box > div { flex: calc(var(--c) - 1); display: flex; }
       .box > div > div { border-top: calc(var(--l) * var(--b)) var(--c-fg) solid; padding: calc(var(--l) * var(--b)); flex: 1; align-self: flex-end; background: var(--c-a2); pointer-events: auto; display: flex; justify-content: space-between; }
       .box > div > div > * { margin: 0; }
       .box > div > div > *:last-child { text-align: right; }
@@ -59,7 +60,7 @@
       .container.top { margin-bottom: calc(var(--l) * 4); background: var(--c-a); }
       article { display: flex; flex-direction: column; }
       article, .box { max-width: calc(var(--l) * var(--wm)); margin: auto; }
-      article > header, article > section { padding: 0 calc(var(--l) * 1) 0 calc((100% - var(--l) * 2) / 6 + var(--l) * 9 / 8); }
+      article > header, article > section { padding: 0 calc(var(--l) * 1) 0 calc((100% - var(--l) * 2) / var(--c) + var(--l) * 9 / 8); }
       article > header > div, article > section > div { margin: auto; padding: 0 calc(var(--l) * 3 / 2); max-width: calc(var(--l) * var(--w)); }
       article > header { background: url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNDAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAzNy4wNDIgNS4yOTIiPjxwYXRoIHN0eWxlPSJmaWxsOm5vbmU7c3Ryb2tlOiNmZmY7c3Ryb2tlLXdpZHRoOi43MTQxMjI7c3Ryb2tlLWxpbmVjYXA6YnV0dDtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW1pdGVybGltaXQ6NDtzdHJva2UtZGFzaGFycmF5Om5vbmU7c3Ryb2tlLW9wYWNpdHk6MSIgZD0iTTAgNC42MDRjOS4yNiAwIDkuMjYtMy45MTYgMTguNTItMy45MTYgOS4yNjEgMCA5LjI2MSAzLjkxNiAxOC41MjIgMy45MTYiLz48L3N2Zz4=) 0 0 repeat; }
       article > hr { height: calc(var(--l) * 3 / 4); background: var(--c-a); position: sticky; top: 0; }
@@ -68,7 +69,6 @@
       article > section { margin: calc(var(--l) * 2) 0; }
       article > section > div > *:last-child { margin-bottom: 0; }
       article > section:last-of-type { margin-bottom: calc(var(--l) * 7); }
-      textarea { font-family: var(--f-m); font-size: calc(var(--h) - 6px); scrollbar-color: var(--c-l) var(--c-a); scrollbar-width: thin; }
 
       /* bigword */
       figure { margin: calc(var(--l) * 3) 0; text-align: center; }
@@ -82,14 +82,17 @@
       /* demo */
       #demo { position: relative; top: calc(var(--l) * 2); margin-top: calc(var(--l) * -6); display: flex; }
       #demo *::selection { background: var(--c-h); color: var(--c-bg); }
+      #demo textarea { font-family: var(--f-m); font-size: calc(var(--h) - 6px); scrollbar-color: var(--c-j) var(--c-a); scrollbar-width: thin; }
       #demo > * { flex: 4; display: flex; flex-direction: column; border: calc(var(--l) * var(--b)) var(--c-fg) solid; background: var(--c-bg); }
       #demo > * > h4 { background: var(--c-j); }
+      #demo > *:nth-child(2) > h4 { background: var(--c-l); }
+      #demo > *:nth-child(2) textarea { scrollbar-color: var(--c-l) var(--c-a); }
       #demo > * > * { padding: calc(var(--l) * var(--b)); }
       #demo textarea { width: 100%; flex: 1; resize: none; }
       #demo textarea:focus { outline: none; }
       #demo > *:nth-child(1) { border-right: 0; }
       #demo > *:nth-child(2) { border-left: 0; }
-      #demo > *:last-child { flex: 3; display: block; background: var(--c-l); margin-left: calc(var(--l) * var(--b)); }
+      #demo > *:last-child { flex: 3; display: block; background: var(--c-e); margin-left: calc(var(--l) * var(--b)); }
       #demo input, #demo textarea { background: none; color: inherit; }
       #demo h1 { font-size: inherit; font-family: inherit; }
 
@@ -98,7 +101,7 @@
       #container input, #container button { font-family: inherit; font-size: inherit; line-height: inherit; color: inherit; display: inline-block; width: 70%; border-radius: 0; }
       #container input:focus { outline: none; }
       #container input::placeholder { color: var(--c-fg); opacity: 0.4; }
-      #container button { width: 30%; display: inline-block; text-align: center; background: var(--c-e); color: var(--c-bg); cursor: pointer; }
+      #container button { width: 30%; display: inline-block; text-align: center; background: var(--c-h); color: var(--c-bg); cursor: pointer; }
       #container input, #container button { border-bottom: 1px var(--c-fg) solid; }
       #container > ul { list-style-type: none; }
       #container > ul > li > div { cursor: pointer; display: inline-block; float: right; user-select: none; }
@@ -152,7 +155,7 @@
         <hr>
         <header>
           <div>
-            <h2><strong>s&sup2;</strong> is a <em>metaprogramming</em> function. It takes two inputs, an <u class="l">object</u> and a <u class="h">template element</u>, and returns two outputs: a <u class="j">proxy</u> and a <u class="e">document fragment</u>.</h2>
+            <h2><strong>s&sup2;</strong> is a <em>metaprogramming</em> function. It takes two inputs, an <u class="j">object</u> and a <u class="l">template element</u>, and returns two outputs: a <u class="h">proxy</u> and a <u class="e">document fragment</u>.</h2>
             <div id="demo">
               <div>
                 <h4>JS</h4>
