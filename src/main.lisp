@@ -248,22 +248,10 @@
 
 (defun set-class (node value)
   (if value
-      (let* ((class-list (@ node class-list))
-             (prototype (chain *object (get-prototype-of value)))
-             (array
-              (if (eq prototype (@ *set prototype)) (chain value (values))
-                (if (eq prototype (@ *array prototype)) value
-                  (if (eq prototype (@ *string prototype))
-                      (chain value (split " "))
-                    (list))))))
-        (loop for cls in (chain class-list (values)) do
-              (when (not (chain array (includes cls)))
-                (chain class-list (remove cls))))
-        (loop for cls in array do
-              (when (not (chain class-list (contains cls)))
-                (chain class-list (add cls)))))
-    (chain node (remove-attribute 'class)))
-  nil)
+      (setf (@ node class-name)
+            (if (chain *array (is-array value))
+                (chain value (split " ")) value))
+    (chain node (remove-attribute 'class))))
 
 
 (defun remove-between-delimiters (start-node end-node unmount self)

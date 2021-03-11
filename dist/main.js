@@ -450,48 +450,17 @@ function setAttribute(node, name, value) {
 };
 /* (DEFUN SET-CLASS (NODE VALUE)
      (IF VALUE
-         (LET* ((CLASS-LIST (@ NODE CLASS-LIST))
-                (PROTOTYPE (CHAIN *OBJECT (GET-PROTOTYPE-OF VALUE)))
-                (ARRAY
-                 (IF (EQ PROTOTYPE (@ *SET PROTOTYPE))
-                     (CHAIN VALUE (VALUES))
-                     (IF (EQ PROTOTYPE (@ *ARRAY PROTOTYPE))
-                         VALUE
-                         (IF (EQ PROTOTYPE (@ *STRING PROTOTYPE))
-                             (CHAIN VALUE (SPLIT  ))
-                             (LIST))))))
-           (LOOP FOR CLS IN (CHAIN CLASS-LIST (VALUES))
-                 DO (WHEN (NOT (CHAIN ARRAY (INCLUDES CLS)))
-                      (CHAIN CLASS-LIST (REMOVE CLS))))
-           (LOOP FOR CLS IN ARRAY
-                 DO (WHEN (NOT (CHAIN CLASS-LIST (CONTAINS CLS)))
-                      (CHAIN CLASS-LIST (ADD CLS)))))
-         (CHAIN NODE (REMOVE-ATTRIBUTE 'CLASS)))
-     NIL) */
+         (SETF (@ NODE CLASS-NAME)
+                 (IF (CHAIN *ARRAY (IS-ARRAY VALUE))
+                     (CHAIN VALUE (SPLIT  ))
+                     VALUE))
+         (CHAIN NODE (REMOVE-ATTRIBUTE 'CLASS)))) */
 function setClass(node, value) {
     if (value) {
-        var classList18 = node.classList;
-        var prototype = Object.getPrototypeOf(value);
-        var array = prototype === Set.prototype ? value.values() : (prototype === Array.prototype ? value : (prototype === String.prototype ? value.split(' ') : []));
-        var _js19 = classList18.values();
-        var _js21 = _js19.length;
-        for (var _js20 = 0; _js20 < _js21; _js20 += 1) {
-            var cls = _js19[_js20];
-            if (!array.includes(cls)) {
-                classList18.remove(cls);
-            };
-        };
-        var _js23 = array.length;
-        for (var _js22 = 0; _js22 < _js23; _js22 += 1) {
-            var cls24 = array[_js22];
-            if (!classList18.contains(cls24)) {
-                classList18.add(cls24);
-            };
-        };
+        return node.className = Array.isArray(value) ? value.split(' ') : value;
     } else {
-        node.removeAttribute('class');
+        return node.removeAttribute('class');
     };
-    return null;
 };
 /* (DEFUN REMOVE-BETWEEN-DELIMITERS (START-NODE END-NODE UNMOUNT SELF)
      (LET* ((NODE START-NODE) (FIRST-NODE NODE))
@@ -614,11 +583,11 @@ function setSlot(target, key, value, descriptor, isInitializing) {
         return;
     };
     var anchor = descriptor.node;
-    var slot24 = descriptor.slot;
-    var template25 = descriptor.template;
+    var slot18 = descriptor.slot;
+    var template19 = descriptor.template;
     var hash = TARGETDELIMITERMAP.get(target);
     var nodes = hash[key];
-    var parentNode26 = anchor.parentNode;
+    var parentNode20 = anchor.parentNode;
     var startNode = createAnchor(0, key);
     var endNode = createAnchor(1, key);
     var previousValue = target[key];
@@ -628,53 +597,53 @@ function setSlot(target, key, value, descriptor, isInitializing) {
     var returnValue = null;
     if (nodes && (!value || value && !previousValue || isTypeMismatch)) {
         if (Array.isArray(previousValue)) {
-            var _js28 = previousValue.length;
-            for (var _js27 = 0; _js27 < _js28; _js27 += 1) {
-                var proxy = previousValue[_js27];
+            var _js22 = previousValue.length;
+            for (var _js21 = 0; _js21 < _js22; _js21 += 1) {
+                var proxy = previousValue[_js21];
                 var unmount = PROXYUNMOUNTMAP.get(proxy);
-                var nodes29 = PROXYDELIMITERMAP.get(proxy);
-                if (nodes29) {
-                    removeBetweenDelimiters(nodes29[0], nodes29[1], unmount, proxy);
+                var nodes23 = PROXYDELIMITERMAP.get(proxy);
+                if (nodes23) {
+                    removeBetweenDelimiters(nodes23[0], nodes23[1], unmount, proxy);
                 };
             };
         } else {
             if (previousValue) {
-                var unmount29 = PROXYUNMOUNTMAP.get(previousValue);
-                var nodes30 = PROXYDELIMITERMAP.get(previousValue);
-                removeBetweenDelimiters(nodes30[0], nodes30[1], unmount29, previousValue);
+                var unmount23 = PROXYUNMOUNTMAP.get(previousValue);
+                var nodes24 = PROXYDELIMITERMAP.get(previousValue);
+                removeBetweenDelimiters(nodes24[0], nodes24[1], unmount23, previousValue);
             };
         };
         removeBetweenDelimiters(nodes[0], nodes[1]);
         delete hash[key];
     };
     hash[key] = [startNode, endNode];
-    parentNode26.insertBefore(startNode, anchor);
+    parentNode20.insertBefore(startNode, anchor);
     if (value) {
         if (!previousValue || isTypeMismatch) {
             if (Array.isArray(value)) {
-                var result = createArray(value, template25);
-                var nodes31 = result[0];
-                var proxy32 = result[1];
-                var _js34 = nodes31.length;
-                for (var _js33 = 0; _js33 < _js34; _js33 += 1) {
-                    var node = nodes31[_js33];
-                    parentNode26.insertBefore(node, anchor);
+                var result = createArray(value, template19);
+                var nodes25 = result[0];
+                var proxy26 = result[1];
+                var _js28 = nodes25.length;
+                for (var _js27 = 0; _js27 < _js28; _js27 += 1) {
+                    var node = nodes25[_js27];
+                    parentNode20.insertBefore(node, anchor);
                 };
-                PROXYANCHORMAP.set(proxy32, anchor);
-                PROXYDELIMITERMAP.set(proxy32, hash[key]);
-                returnValue = proxy32;
+                PROXYANCHORMAP.set(proxy26, anchor);
+                PROXYDELIMITERMAP.set(proxy26, hash[key]);
+                returnValue = proxy26;
             } else {
-                var result35 = createBinding(value, template25);
-                var proxy36 = result35[0];
-                var node37 = result35[1];
-                parentNode26.insertBefore(node37, anchor);
-                returnValue = proxy36;
+                var result29 = createBinding(value, template19);
+                var proxy30 = result29[0];
+                var node31 = result29[1];
+                parentNode20.insertBefore(node31, anchor);
+                returnValue = proxy30;
             };
         } else {
             var previousValues = isPreviousArray ? previousValue : [previousValue];
             var values = isValueArray ? value : [value];
-            var _js38 = values.length - 1;
-            for (var i = 0; i <= _js38; i += 1) {
+            var _js32 = values.length - 1;
+            for (var i = 0; i <= _js32; i += 1) {
                 var prev = previousValues[i];
                 var obj = values[i];
                 if (prev) {
@@ -696,14 +665,14 @@ function setSlot(target, key, value, descriptor, isInitializing) {
             returnValue = previousValue;
         };
     } else {
-        var _js39 = slot24.childNodes;
-        var _js41 = _js39.length;
-        for (var _js40 = 0; _js40 < _js41; _js40 += 1) {
-            var node42 = _js39[_js40];
-            parentNode26.insertBefore(node42.cloneNode(true), anchor);
+        var _js33 = slot18.childNodes;
+        var _js35 = _js33.length;
+        for (var _js34 = 0; _js34 < _js35; _js34 += 1) {
+            var node36 = _js33[_js34];
+            parentNode20.insertBefore(node36.cloneNode(true), anchor);
         };
     };
-    parentNode26.insertBefore(endNode, anchor);
+    parentNode20.insertBefore(endNode, anchor);
     __PS_MV_REG = [];
     return returnValue;
 };
@@ -723,18 +692,18 @@ function setSlot(target, key, value, descriptor, isInitializing) {
                    (@ BOUND-LISTENER OPTIONS)))
            (SETF (GETPROP HASH EVENT) BOUND-LISTENER))))) */
 function setEvent(target, value, descriptor, receiver) {
-    var node42 = descriptor.node;
-    var event43 = descriptor.event;
+    var node36 = descriptor.node;
+    var event37 = descriptor.event;
     var hash = TARGETEVENTMAP.get(target);
-    var listener = hash[event43];
+    var listener = hash[event37];
     if (listener) {
-        node42.removeEventListener(event43, listener, listener.options);
+        node36.removeEventListener(event37, listener, listener.options);
     };
     if (value) {
         var boundListener = value.bind(receiver);
         boundListener.options = value.options;
-        node42.addEventListener(event43, boundListener, boundListener.options);
-        return hash[event43] = boundListener;
+        node36.addEventListener(event37, boundListener, boundListener.options);
+        return hash[event37] = boundListener;
     };
 };
 /* (DEFUN PROCESS-TEMPLATE (TEMPLATE)
@@ -804,8 +773,8 @@ function processTemplate(template) {
     var clone = root.cloneNode(true);
     var context = {  };
     function walk(parentNode, path) {
-        var _js44 = parentNode.childNodes.length - 1;
-        for (var i = 0; i <= _js44; i += 1) {
+        var _js38 = parentNode.childNodes.length - 1;
+        for (var i = 0; i <= _js38; i += 1) {
             var node = parentNode.childNodes[i];
             if (node.nodeType !== Node['ELEMENT_NODE']) {
                 continue;
@@ -881,8 +850,8 @@ function createContext(clone, template) {
     var clonedContext = {  };
     for (var key in context) {
         var descriptor = context[key];
-        var path45 = descriptor.path;
-        var node = getPath(clone, path45);
+        var path39 = descriptor.path;
+        var node = getPath(clone, path39);
         clonedContext[key] = Object.assign({ node : node }, descriptor);
     };
     __PS_MV_REG = [];
@@ -896,8 +865,8 @@ function createContext(clone, template) {
        RESULT)) */
 function getPath(node, path) {
     var result = node;
-    var _js45 = path.length - 1;
-    for (var i = 0; i <= _js45; i += 1) {
+    var _js39 = path.length - 1;
+    for (var i = 0; i <= _js39; i += 1) {
         var j = path[i];
         result = result.childNodes[j];
     };
@@ -916,9 +885,9 @@ function createArray(array, template) {
     var nodes = [];
     var proxies = [];
     var proxy = null;
-    var _js47 = array.length;
-    for (var _js46 = 0; _js46 < _js47; _js46 += 1) {
-        var item = array[_js46];
+    var _js41 = array.length;
+    for (var _js40 = 0; _js40 < _js41; _js40 += 1) {
+        var item = array[_js40];
         var result = createBinding(item, template);
         proxies.push(result[0]);
         nodes.push(result[1]);
