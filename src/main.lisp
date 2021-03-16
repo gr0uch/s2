@@ -401,7 +401,9 @@
          (when (length (@ node children))
            (walk node (chain path (concat i))))
 
-         (when (or (eq (@ node tag-name) *tag-slot*) (@ node dataset template))
+         (when (and (or (eq (@ node tag-name) *tag-slot*)
+                        (@ node dataset key))
+                    (@ node dataset template))
            (let* ((slot-name (or (@ node dataset key) (@ node name)))
                   (anchor (create-anchor 2 slot-name))
                   (template-node

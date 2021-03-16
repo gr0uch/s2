@@ -718,8 +718,10 @@ function setEvent(target, value, descriptor, receiver) {
                     (WHEN (LENGTH (@ NODE CHILDREN))
                       (WALK NODE (CHAIN PATH (CONCAT I))))
                     (WHEN
-                        (OR (EQ (@ NODE TAG-NAME) *TAG-SLOT*)
-                            (@ NODE DATASET TEMPLATE))
+                        (AND
+                         (OR (EQ (@ NODE TAG-NAME) *TAG-SLOT*)
+                             (@ NODE DATASET KEY))
+                         (@ NODE DATASET TEMPLATE))
                       (LET* ((SLOT-NAME
                               (OR (@ NODE DATASET KEY) (@ NODE NAME)))
                              (ANCHOR (CREATE-ANCHOR 2 SLOT-NAME))
@@ -782,7 +784,7 @@ function processTemplate(template) {
             if (node.children.length) {
                 walk(node, path.concat(i));
             };
-            if (node.tagName === TAGSLOT || node.dataset.template) {
+            if ((node.tagName === TAGSLOT || node.dataset.key) && node.dataset.template) {
                 var slotName = node.dataset.key || node.name;
                 var anchor = createAnchor(2, slotName);
                 var templateNode = document.querySelector(node.dataset.template);

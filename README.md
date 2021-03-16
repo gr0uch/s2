@@ -57,11 +57,12 @@ delete proxy.counter; // Elements removed
 
 Here are the data attributes it will look for:
 
-- `data-text`, `data-unsafe-html`
-- `data-class`
-- `data-value`
-- `data-event-*`
-- `data-attribute-*`
+- `data-key`, `data-template`: for binding keys valued by objects to templates.
+- `data-text`, `data-unsafe-html`: for setting text and HTML.
+- `data-class`: shorthand for setting `class` attribute.
+- `data-value`: for setting input values, also handles binding to `input` event automatically.
+- `data-event-*`: for adding event listeners.
+- `data-attribute-*`: for setting arbitrary attributes.
 
 
 ## Mount and Unmount
@@ -106,7 +107,7 @@ See [js-framework-benchmark results table](https://krausest.github.io/js-framewo
 
 s2 is agnostic about most of [Web Components](https://developer.mozilla.org/en-US/docs/Web/Web_Components), since the specification doesn't play well with server-side rendered HTML without some non-trivial work. It aims to focus on orthogonal functionality like data binding.
 
-Although s2 uses `<template>` and `<slot>` elements, it does so in a different context. For example, it is not possible to use the `slot` attribute to fill content in a slot, since s2 binds the slot to data rather than elements.
+Although s2 uses `<template>` and `<slot>` elements, it does so in a different context. For example, it is not possible to use the `slot` attribute to fill content in a slot, since s2 binds the slot to data rather than elements. If you want to use an alternate syntax in case you want to use real slots, use `data-key` in place of the `name` attribute.
 
 
 ## Name
