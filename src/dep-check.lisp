@@ -3,31 +3,31 @@
 
 (defvar *passed-check* false)
 (defvar *dep-map*
-  (list
-   ;; Sanity checking DOM.
-   (list (list '*node 'prototype 'clone-node) "function")
-   (list (list '*node 'prototype 'append-child) "function")
-   (list (list '*node 'prototype 'insert-before) "function")
-   (list (list '*node 'prototype 'next-sibling) "property")
-   (list (list '*element 'prototype 'remove) "function")
-   (list (list 'document 'query-selector) "function")
-   (list (list 'document 'create-text-node) "function")
-   (list (list 'document 'create-comment) "function")
-   (list (list 'document 'create-document-fragment) "function")
-   (list (list 'window 'request-animation-frame) "function")
-   (list (list '*node) "function")
+  '(
+    ;; Sanity checking DOM.
+    ((*node prototype clone-node) function)
+    ((*node prototype append-child) function)
+    ((*node prototype insert-before) function)
+    ((*node prototype next-sibling) property)
+    ((*element prototype remove) function)
+    ((document query-selector) function)
+    ((document create-text-node) function)
+    ((document create-comment) function)
+    ((document create-document-fragment) function)
+    ((window request-animation-frame) function)
+    ((*node) function)
 
-   ;; Sanity checking JS.
-   (list (list '*object 'prototype 'has-own-property) "function")
-   (list (list '*number 'parse-int) "function")
-   (list (list '*number 'is-na-n) "function")
-   (list (list '*array 'is-array) "function")
-   (list (list '*object 'assign) "function")
-   (list (list '*promise) "function")
-   (list (list '*symbol) "function")
-   (list (list '*reflect) "object")
-   (list (list '*weak-map) "function")
-   (list (list '*proxy) "function")))
+    ;; Sanity checking JS.
+    ((*object prototype has-own-property) function)
+    ((*number parse-int) function)
+    ((*number is-na-n) function)
+    ((*array is-array) function)
+    ((*object assign) function)
+    ((*promise) function)
+    ((*symbol) function)
+    ((*reflect) object)
+    ((*weak-map) function)
+    ((*proxy) function)))
 
 (defun dep-check ()
   (when *passed-check* (return-from dep-check))

@@ -4,25 +4,21 @@ if ('undefined' === typeof PASSEDCHECK) {
     var PASSEDCHECK = false;
 };
 /* (DEFVAR *DEP-MAP*
-     (LIST (LIST (LIST '*NODE 'PROTOTYPE 'CLONE-NODE) function)
-           (LIST (LIST '*NODE 'PROTOTYPE 'APPEND-CHILD) function)
-           (LIST (LIST '*NODE 'PROTOTYPE 'INSERT-BEFORE) function)
-           (LIST (LIST '*NODE 'PROTOTYPE 'NEXT-SIBLING) property)
-           (LIST (LIST '*ELEMENT 'PROTOTYPE 'REMOVE) function)
-           (LIST (LIST 'DOCUMENT 'QUERY-SELECTOR) function)
-           (LIST (LIST 'DOCUMENT 'CREATE-TEXT-NODE) function)
-           (LIST (LIST 'DOCUMENT 'CREATE-COMMENT) function)
-           (LIST (LIST 'DOCUMENT 'CREATE-DOCUMENT-FRAGMENT) function)
-           (LIST (LIST 'WINDOW 'REQUEST-ANIMATION-FRAME) function)
-           (LIST (LIST '*NODE) function)
-           (LIST (LIST '*OBJECT 'PROTOTYPE 'HAS-OWN-PROPERTY) function)
-           (LIST (LIST '*NUMBER 'PARSE-INT) function)
-           (LIST (LIST '*NUMBER 'IS-NA-N) function)
-           (LIST (LIST '*ARRAY 'IS-ARRAY) function)
-           (LIST (LIST '*OBJECT 'ASSIGN) function)
-           (LIST (LIST '*PROMISE) function) (LIST (LIST '*SYMBOL) function)
-           (LIST (LIST '*REFLECT) object) (LIST (LIST '*WEAK-MAP) function)
-           (LIST (LIST '*PROXY) function))) */
+     '(((*NODE PROTOTYPE CLONE-NODE) FUNCTION)
+       ((*NODE PROTOTYPE APPEND-CHILD) FUNCTION)
+       ((*NODE PROTOTYPE INSERT-BEFORE) FUNCTION)
+       ((*NODE PROTOTYPE NEXT-SIBLING) PROPERTY)
+       ((*ELEMENT PROTOTYPE REMOVE) FUNCTION)
+       ((DOCUMENT QUERY-SELECTOR) FUNCTION)
+       ((DOCUMENT CREATE-TEXT-NODE) FUNCTION)
+       ((DOCUMENT CREATE-COMMENT) FUNCTION)
+       ((DOCUMENT CREATE-DOCUMENT-FRAGMENT) FUNCTION)
+       ((WINDOW REQUEST-ANIMATION-FRAME) FUNCTION) ((*NODE) FUNCTION)
+       ((*OBJECT PROTOTYPE HAS-OWN-PROPERTY) FUNCTION)
+       ((*NUMBER PARSE-INT) FUNCTION) ((*NUMBER IS-NA-N) FUNCTION)
+       ((*ARRAY IS-ARRAY) FUNCTION) ((*OBJECT ASSIGN) FUNCTION)
+       ((*PROMISE) FUNCTION) ((*SYMBOL) FUNCTION) ((*REFLECT) OBJECT)
+       ((*WEAK-MAP) FUNCTION) ((*PROXY) FUNCTION))) */
 if ('undefined' === typeof DEPMAP) {
     var DEPMAP = [[['Node', 'prototype', 'cloneNode'], 'function'], [['Node', 'prototype', 'appendChild'], 'function'], [['Node', 'prototype', 'insertBefore'], 'function'], [['Node', 'prototype', 'nextSibling'], 'property'], [['Element', 'prototype', 'remove'], 'function'], [['document', 'querySelector'], 'function'], [['document', 'createTextNode'], 'function'], [['document', 'createComment'], 'function'], [['document', 'createDocumentFragment'], 'function'], [['window', 'requestAnimationFrame'], 'function'], [['Node'], 'function'], [['Object', 'prototype', 'hasOwnProperty'], 'function'], [['Number', 'parseInt'], 'function'], [['Number', 'isNaN'], 'function'], [['Array', 'isArray'], 'function'], [['Object', 'assign'], 'function'], [['Promise'], 'function'], [['Symbol'], 'function'], [['Reflect'], 'object'], [['WeakMap'], 'function'], [['Proxy'], 'function']];
 };
