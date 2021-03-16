@@ -49,7 +49,7 @@
       /* box frame */
       .box-wrapper { position: fixed; z-index: 1; pointer-events: none; width: 100%; height: 100%; top: 0; left: 0; padding: calc(var(--l) * 3 / 4); }
       .box { border: calc(var(--l) * var(--b)) var(--c-fg) solid; display: flex; height: 100%; width: 100%; }
-      .box > header { border-right: calc(var(--l) * var(--b)) var(--c-fg) solid; flex: 1; display: flex; pointer-events: auto; }
+      .box > header { border-right: calc(var(--l) * var(--b)) var(--c-fg) solid; flex: 1; display: flex; pointer-events: auto; background: var(--c-a); }
       .box > header > div { align-self: center; flex: 1; }
       .box > header > div > * { background: var(--c-fg); color: var(--c-bg); width: calc(var(--l) * 3 / 2); height: calc(var(--l) * 3 / 2); border-radius: 50%; margin: auto; display: flex; align-items: center; justify-content: center; font-weight: bold; user-select: none; }
       .box > div { flex: calc(var(--c) - 1); display: flex; }
@@ -59,13 +59,13 @@
 
       /* content */
       .container { padding: 0 calc(var(--l) * 3 / 4); }
-      .container.top { margin-bottom: calc(var(--l) * 4); background: var(--c-a3); }
+      .container.top { margin-bottom: calc(var(--l) * 4); background: var(--c-a3) url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNDAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAzNy4wNDIgNS4yOTIiPjxwYXRoIHN0eWxlPSJmaWxsOm5vbmU7c3Ryb2tlOiNmMGYwZjA7c3Ryb2tlLXdpZHRoOi43MTQxMjI7c3Ryb2tlLWxpbmVjYXA6YnV0dDtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW1pdGVybGltaXQ6NDtzdHJva2UtZGFzaGFycmF5Om5vbmU7c3Ryb2tlLW9wYWNpdHk6MSIgZD0iTTAgNC42MDRjOS4yNiAwIDkuMjYtMy45MTYgMTguNTItMy45MTYgOS4yNjEgMCA5LjI2MSAzLjkxNiAxOC41MjIgMy45MTYiLz48L3N2Zz4=) center -10px repeat; }
       article { display: flex; flex-direction: column; }
       article, .box { max-width: calc(var(--l) * var(--wm)); margin: auto; }
       article > header, article > section { padding: 0 calc(var(--l) * 1) 0 calc((100% - var(--l) * 2) / var(--c) + var(--l) * 9 / 8); }
       article > header > div, article > section > div { margin: auto; padding: 0 calc(var(--l) * 3 / 2); max-width: calc(var(--l) * var(--w)); }
-      article > header { background: var(--c-a) /*url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNDAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAzNy4wNDIgNS4yOTIiPjxwYXRoIHN0eWxlPSJmaWxsOm5vbmU7c3Ryb2tlOiNmZmY7c3Ryb2tlLXdpZHRoOi43MTQxMjI7c3Ryb2tlLWxpbmVjYXA6YnV0dDtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW1pdGVybGltaXQ6NDtzdHJva2UtZGFzaGFycmF5Om5vbmU7c3Ryb2tlLW9wYWNpdHk6MSIgZD0iTTAgNC42MDRjOS4yNiAwIDkuMjYtMy45MTYgMTguNTItMy45MTYgOS4yNjEgMCA5LjI2MSAzLjkxNiAxOC41MjIgMy45MTYiLz48L3N2Zz4=) 0 0 repeat*/; }
-      article > hr { height: calc(var(--l) * 3 / 4); background: var(--c-a3); position: sticky; top: 0; }
+      article > header { background: var(--c-a); }
+      article > hr { height: calc(var(--l) * 3 / 4); background: var(--c-a3) url(data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNDAiIGhlaWdodD0iMjAiIHZpZXdCb3g9IjAgMCAzNy4wNDIgNS4yOTIiPjxwYXRoIHN0eWxlPSJmaWxsOm5vbmU7c3Ryb2tlOiNmMGYwZjA7c3Ryb2tlLXdpZHRoOi43MTQxMjI7c3Ryb2tlLWxpbmVjYXA6YnV0dDtzdHJva2UtbGluZWpvaW46bWl0ZXI7c3Ryb2tlLW1pdGVybGltaXQ6NDtzdHJva2UtZGFzaGFycmF5Om5vbmU7c3Ryb2tlLW9wYWNpdHk6MSIgZD0iTTAgNC42MDRjOS4yNiAwIDkuMjYtMy45MTYgMTguNTItMy45MTYgOS4yNjEgMCA5LjI2MSAzLjkxNiAxOC41MjIgMy45MTYiLz48L3N2Zz4=) center -10px repeat; position: sticky; top: 0; }
       article > header > div > * { position: relative; }
       article > header > div > *:first-child { padding: calc(var(--l) * 11 / 4) 0; }
       article > section { margin: calc(var(--l) * 2) 0; }
@@ -322,6 +322,17 @@ function add(event) {
         }
 
         mount();
+
+        // One layout trick requires JS...
+        const hr = document.querySelector('article > hr');
+        const top = document.querySelector('.container.top');
+        window.addEventListener('scroll', setBG, { passive: true });
+        function setBG() {
+          const limit = top.clientHeight - hr.clientHeight;
+          const value = `${-Math.min(limit, document.documentElement.scrollTop) - 10}px`;
+          hr.style.backgroundPositionY = value;
+        }
+        setBG();
       })(this);
     </script>
   </body>
