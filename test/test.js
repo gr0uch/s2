@@ -21,7 +21,8 @@ const template = document.querySelector("#root");
 const [proxy, node] = s2({
   title: "Hello, <em>world!</em>",
   titleClass: "title",
-  titleLang: "en",
+  foo: "bar",
+  titleStyle: "color: #ff8;",
   list: {
     things: initialThings.slice(),
     'try': [

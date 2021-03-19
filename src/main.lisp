@@ -4,6 +4,7 @@
 (defvar *symbol-value* (*symbol 'value))
 (defvar *symbol-class* (*symbol 'class))
 (defvar *symbol-attribute* (*symbol 'attribute))
+(defvar *symbol-data* (*symbol 'data))
 (defvar *symbol-event* (*symbol 'event))
 (defvar *symbol-mount* (*symbol 'mount))
 (defvar *symbol-unmount* (*symbol 'unmount))
@@ -214,6 +215,8 @@
         (set-class node value))
       (when (eq type *symbol-attribute*)
         (set-attribute node (@ descriptor name) value))
+      (when (eq type *symbol-data*)
+        (set-data node (@ descriptor name) value))
       (when (eq type *symbol-event*)
         (set-event target value descriptor receiver))
       (when (eq type *symbol-slot*)
@@ -244,6 +247,12 @@
       (if (in name node) (setf (getprop node name) value)
         (chain node (set-attribute name value)))
     (chain node (remove-attribute name))))
+
+
+(defun set-data (node name value)
+  (if (not (or (eq value nil) (eq value undefined)))
+      (setf (getprop (@ node dataset) name) value)
+    (delete (getprop (@ node dataset) name))))
 
 
 (defun set-class (node value)
@@ -445,6 +454,11 @@
                      type *symbol-event*
                      ;; Slice off "event", all events are lowercase.
                      event (chain key (slice 5) (to-lower-case)))))
+
+            ;; Handle data attribute reflection.
+            (when (not result)
+              (setf result (create type *symbol-data* name key)))
+
             (when result
               (delete (getprop (@ node dataset) key))
               (chain node (remove-attribute key))

@@ -23,6 +23,10 @@ if ('undefined' === typeof SYMBOLCLASS) {
 if ('undefined' === typeof SYMBOLATTRIBUTE) {
     var SYMBOLATTRIBUTE = Symbol('attribute');
 };
+/* (DEFVAR *SYMBOL-DATA* (*SYMBOL 'DATA)) */
+if ('undefined' === typeof SYMBOLDATA) {
+    var SYMBOLDATA = Symbol('data');
+};
 /* (DEFVAR *SYMBOL-EVENT* (*SYMBOL 'EVENT)) */
 if ('undefined' === typeof SYMBOLEVENT) {
     var SYMBOLEVENT = Symbol('event');
@@ -357,6 +361,8 @@ function enqueue(fn) {
          (WHEN (EQ TYPE *SYMBOL-CLASS*) (SET-CLASS NODE VALUE))
          (WHEN (EQ TYPE *SYMBOL-ATTRIBUTE*)
            (SET-ATTRIBUTE NODE (@ DESCRIPTOR NAME) VALUE))
+         (WHEN (EQ TYPE *SYMBOL-DATA*)
+           (SET-DATA NODE (@ DESCRIPTOR NAME) VALUE))
          (WHEN (EQ TYPE *SYMBOL-EVENT*)
            (SET-EVENT TARGET VALUE DESCRIPTOR RECEIVER))
          (WHEN (EQ TYPE *SYMBOL-SLOT*)
@@ -410,6 +416,9 @@ function setProperty(target, key, value, receiver, isInitializing) {
         if (type17 === SYMBOLATTRIBUTE) {
             setAttribute(node16, descriptor.name, value);
         };
+        if (type17 === SYMBOLDATA) {
+            setData(node16, descriptor.name, value);
+        };
         if (type17 === SYMBOLEVENT) {
             setEvent(target, value, descriptor, receiver);
         };
@@ -447,6 +456,13 @@ function setAttribute(node, name, value) {
     } else {
         return node.removeAttribute(name);
     };
+};
+/* (DEFUN SET-DATA (NODE NAME VALUE)
+     (IF (NOT (OR (EQ VALUE NIL) (EQ VALUE UNDEFINED)))
+         (SETF (GETPROP (@ NODE DATASET) NAME) VALUE)
+         (DELETE (GETPROP (@ NODE DATASET) NAME)))) */
+function setData(node, name, value) {
+    return !(value === null || value === undefined) ? (node.dataset[name] = value) : delete node.dataset[name];
 };
 /* (DEFUN SET-CLASS (NODE VALUE)
      (IF VALUE
@@ -762,6 +778,9 @@ function setEvent(target, value, descriptor, receiver) {
                                          (CREATE TYPE *SYMBOL-EVENT* EVENT
                                           (CHAIN KEY (SLICE 5)
                                                  (TO-LOWER-CASE)))))
+                               (WHEN (NOT RESULT)
+                                 (SETF RESULT
+                                         (CREATE TYPE *SYMBOL-DATA* NAME KEY)))
                                (WHEN RESULT
                                  (DELETE (GETPROP (@ NODE DATASET) KEY))
                                  (CHAIN NODE (REMOVE-ATTRIBUTE KEY))
@@ -821,6 +840,9 @@ function processTemplate(template) {
                 };
                 if (key.startsWith('event')) {
                     result = { type : SYMBOLEVENT, event : key.slice(5).toLowerCase() };
+                };
+                if (!result) {
+                    result = { type : SYMBOLDATA, name : key };
                 };
                 if (result) {
                     delete node.dataset[key];

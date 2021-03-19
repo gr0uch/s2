@@ -63,6 +63,7 @@ Here are the data attributes it will look for:
 - `data-value`: for setting input values, also handles binding to `input` event automatically.
 - `data-event-*`: for adding event listeners.
 - `data-attribute-*`: for setting arbitrary attributes.
+- `data-*`: for setting data attributes (reflection).
 
 
 ## Mount and Unmount
