@@ -220,7 +220,11 @@
     (when (and (chain *object prototype has-own-property (call context key))
                (or is-changed is-initializing))
       (if (in type *property-handlers*)
-          ((getprop *property-handlers* type) node (@ descriptor name) value)
+          ((getprop *property-handlers* type)
+           node (@ descriptor name)
+           (if (eq (typeof value) 'function)
+               (chain value (call target))
+               value))
         (progn
           (when (eq type *symbol-event*)
             (set-event target value descriptor receiver))
@@ -538,12 +542,12 @@
 
     ;; Initialization
     (loop
-     for key of context do
-     (set-property target key (getprop obj key) proxy t))
-    (loop
      for key of obj do
      (when (in key context) (continue))
      (setf (getprop target key) (getprop obj key)))
+    (loop
+     for key of context do
+     (set-property target key (getprop obj key) proxy t))
 
     (when mount (chain mount (call proxy clone)))
 

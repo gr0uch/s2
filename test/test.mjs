@@ -46,13 +46,13 @@ const [proxy, node] = s2({
     },
     [unmount]: delayUnmount,
   },
-  // f: new Array(1000).fill().map(() => ({ f: 'f' })),
+  f: new Array(10).fill().map(() => ({ z: 'z', f() { return this.z; } })),
   n: 'n',
   [mount]: function spam(node) {
     // return null;
     const t = {};
     let i, n, c;
-    n = document.createElement('span')
+    n = document.createElement('span');
     n.textContent = '_';
     for (i = 0; i < 10; i++) {
       c = n.cloneNode(true);

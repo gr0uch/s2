@@ -382,7 +382,9 @@ function enqueue(fn) {
                 (OR IS-CHANGED IS-INITIALIZING))
          (IF (IN TYPE *PROPERTY-HANDLERS*)
              ((GETPROP *PROPERTY-HANDLERS* TYPE) NODE (@ DESCRIPTOR NAME)
-              VALUE)
+              (IF (EQ (TYPEOF VALUE) 'FUNCTION)
+                  (CHAIN VALUE (CALL TARGET))
+                  VALUE))
              (PROGN
               (WHEN (EQ TYPE *SYMBOL-EVENT*)
                 (SET-EVENT TARGET VALUE DESCRIPTOR RECEIVER))
@@ -423,7 +425,7 @@ function setProperty(target, key, value, receiver, isInitializing) {
     var type17 = descriptor && descriptor.type;
     if (Object.prototype.hasOwnProperty.call(context, key) && (isChanged || isInitializing)) {
         if (type17 in PROPERTYHANDLERS) {
-            PROPERTYHANDLERS[type17](node16, descriptor.name, value);
+            PROPERTYHANDLERS[type17](node16, descriptor.name, typeof value === 'function' ? value.call(target) : value);
         } else {
             if (type17 === SYMBOLEVENT) {
                 setEvent(target, value, descriptor, receiver);
@@ -947,11 +949,11 @@ function createArray(array, template) {
        (CHAIN *TARGET-CONTEXT-MAP* (SET TARGET CONTEXT))
        (CHAIN *TARGET-EVENT-MAP* (SET TARGET (CREATE)))
        (CHAIN *TARGET-DELIMITER-MAP* (SET TARGET (CREATE)))
-       (LOOP FOR KEY OF CONTEXT
-             DO (SET-PROPERTY TARGET KEY (GETPROP OBJ KEY) PROXY T))
        (LOOP FOR KEY OF OBJ
              DO (WHEN (IN KEY CONTEXT)
                   (CONTINUE)) (SETF (GETPROP TARGET KEY) (GETPROP OBJ KEY)))
+       (LOOP FOR KEY OF CONTEXT
+             DO (SET-PROPERTY TARGET KEY (GETPROP OBJ KEY) PROXY T))
        (WHEN MOUNT (CHAIN MOUNT (CALL PROXY CLONE)))
        (CHAIN FRAGMENT (APPEND-CHILD START-NODE))
        (CHAIN FRAGMENT (APPEND-CHILD CLONE))
@@ -978,14 +980,14 @@ function createBinding(obj, template) {
     TARGETCONTEXTMAP.set(target, context);
     TARGETEVENTMAP.set(target, {  });
     TARGETDELIMITERMAP.set(target, {  });
-    for (var key in context) {
-        setProperty(target, key, obj[key], proxy, true);
-    };
     for (var key in obj) {
         if (key in context) {
             continue;
         };
         target[key] = obj[key];
+    };
+    for (var key in context) {
+        setProperty(target, key, obj[key], proxy, true);
     };
     if (mount) {
         mount.call(proxy, clone);
