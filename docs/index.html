@@ -274,8 +274,8 @@ function add(event) {
             { default: depCheck },
             { default: s2 },
         ] = await Promise.all([
-          import('./dep-check.min.js'),
-          import('./main.min.js'),
+          import('./dep-check.min.mjs'),
+          import('./main.min.mjs'),
         ]);
 
         const container = document.getElementById('container');

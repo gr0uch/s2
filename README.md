@@ -16,7 +16,7 @@ The result is that *UI code effectively disappears*, it is folded into the data.
 Import the module:
 
 ```js
-import s2 from "https://cdn.jsdelivr.net/gh/gr0uch/s2@latest/dist/main.min.js";
+import s2 from "https://cdn.jsdelivr.net/gh/gr0uch/s2@latest/dist/main.min.mjs";
 ```
 
 Trivial example of composing templates, binding text and events:
@@ -94,9 +94,9 @@ import { mount, unmount } from '...';
 
 ## Optional Modules
 
-- `dep-check.js`: this is used to check if all of the required APIs are present in the runtime.
-- `render-to-string.js` (TBD)
-- `hydrate.js` (TBD)
+- `dep-check.mjs`: this is used to check if all of the required APIs are present in the runtime.
+- `render-to-string.mjs` (TBD)
+- `hydrate.mjs` (TBD)
 
 
 ## Benchmarks

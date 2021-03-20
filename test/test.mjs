@@ -1,6 +1,6 @@
-import s2, { mount, unmount } from "../dist/main.js";
-import depCheck from "../dist/dep-check.js";
-import test from "./runner.js";
+import s2, { mount, unmount } from "../dist/main.mjs";
+import depCheck from "../dist/dep-check.mjs";
+import test from "./runner.mjs";
 
 s2.debug = true;
 s2.isDeferred = true;

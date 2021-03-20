@@ -3,22 +3,22 @@ SRC_DIR = src/
 DIST_DIR = dist/
 DOCS_DIR = docs/
 
-ORIGINAL_MODULES = $(filter-out $(wildcard ${DIST_DIR}*.min.js), $(wildcard ${DIST_DIR}*.js))
-MIN_MODULES = $(wildcard ${DIST_DIR}*.min.js)
+ORIGINAL_MODULES = $(filter-out $(wildcard ${DIST_DIR}*.min.mjs), $(wildcard ${DIST_DIR}*.mjs))
+MIN_MODULES = $(wildcard ${DIST_DIR}*.min.mjs)
 
-.PHONY: build min clean
+.PHONY: build min clean copy
 
 all: build min copy
 
 build: $(SRC_DIR)*.lisp
 	mkdir -p $(DIST_DIR)
 	for f in $^; do \
-		./psbuild $${f} > $(DIST_DIR)`basename $${f%%.*}`.js; \
+		./psbuild $${f} > $(DIST_DIR)`basename $${f%%.*}`.mjs; \
 	done
 
 min:
 	for f in $(ORIGINAL_MODULES); do \
-		${BIN_MIN} -cm toplevel < $${f} > $(DIST_DIR)`basename $${f%%.*}`.min.js; \
+		${BIN_MIN} -cm toplevel < $${f} > $(DIST_DIR)`basename $${f%%.*}`.min.mjs; \
 	done
 
 copy:
