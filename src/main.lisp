@@ -45,7 +45,26 @@
 
 (defvar *proxy-object* (create set set-property delete-property set-property))
 (defvar *proxy-array* (create set set-index delete-property set-index))
+
 (defvar *deferred-queue* (list))
+
+(defvar *property-handlers* (create))
+(setf
+ (getprop *property-handlers* *symbol-text*)
+ (lambda (node key value)
+   (when (not (eq value (@ node text-content)))
+     (setf (@ node text-content) value)))
+ (getprop *property-handlers* *symbol-html*)
+ (lambda (node key value)
+   (when (not (eq value (@ node inner-h-t-m-l)))
+     (setf (@ node inner-h-t-m-l) value)))
+ (getprop *property-handlers* *symbol-value*)
+ (lambda (node key value)
+   (when (not (eq value (@ node value)))
+     (setf (@ node value) (if (eq value undefined) "" value))))
+ (getprop *property-handlers* *symbol-class*) set-class
+ (getprop *property-handlers* *symbol-attribute*) set-attribute
+ (getprop *property-handlers* *symbol-data*) set-data)
 
 
 ;; The logic contained here is the most difficult. The flow is like:
@@ -196,35 +215,21 @@
          (is-changed (not (eq (getprop target key) value)))
          (descriptor (getprop context key))
          (node (and descriptor (@ descriptor node)))
-         (type (and descriptor (@ descriptor type)))
-         (normalized-value
-          (if (or (eq value undefined) (eq value nil)) "" value)))
+         (type (and descriptor (@ descriptor type))))
 
     (when (and (chain *object prototype has-own-property (call context key))
                (or is-changed is-initializing))
-      (when (and (eq type *symbol-text*)
-                 (not (eq value (@ node text-content))))
-        (setf (@ node text-content) normalized-value))
-      (when (and (eq type *symbol-html*)
-                 (not (eq value (@ node inner-h-t-m-l))))
-        (setf (@ node inner-h-t-m-l) normalized-value))
-      (when (and (eq type *symbol-value*)
-                 (not (eq value (@ node value))))
-        (setf (@ node value) normalized-value))
-      (when (eq type *symbol-class*)
-        (set-class node value))
-      (when (eq type *symbol-attribute*)
-        (set-attribute node (@ descriptor name) value))
-      (when (eq type *symbol-data*)
-        (set-data node (@ descriptor name) value))
-      (when (eq type *symbol-event*)
-        (set-event target value descriptor receiver))
-      (when (eq type *symbol-slot*)
-        (let ((proxy (set-slot target key value descriptor is-initializing)))
-          (when proxy
-            (return-from
-             set-property
-             (chain *reflect (set target key proxy receiver)))))))
+      (if (in type *property-handlers*)
+          ((getprop *property-handlers* type) node (@ descriptor name) value)
+        (progn
+          (when (eq type *symbol-event*)
+            (set-event target value descriptor receiver))
+          (when (eq type *symbol-slot*)
+            (let ((proxy (set-slot target key value descriptor is-initializing)))
+              (when proxy
+                (return-from
+                 set-property
+                 (chain *reflect (set target key proxy receiver)))))))))
 
     ;; Handle automatic event binding for value.
     (when (and (eq type *symbol-value*)
@@ -255,7 +260,7 @@
     (delete (getprop (@ node dataset) name))))
 
 
-(defun set-class (node value)
+(defun set-class (node name value)
   (if value
       (setf (@ node class-name)
             (if (chain *array (is-array value))

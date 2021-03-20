@@ -94,6 +94,42 @@ if ('undefined' === typeof PROXYARRAY) {
 if ('undefined' === typeof DEFERREDQUEUE) {
     var DEFERREDQUEUE = [];
 };
+/* (DEFVAR *PROPERTY-HANDLERS* (CREATE)) */
+if ('undefined' === typeof PROPERTYHANDLERS) {
+    var PROPERTYHANDLERS = {  };
+};
+/* (SETF (GETPROP *PROPERTY-HANDLERS* *SYMBOL-TEXT*)
+           (LAMBDA (NODE KEY VALUE)
+             (WHEN (NOT (EQ VALUE (@ NODE TEXT-CONTENT)))
+               (SETF (@ NODE TEXT-CONTENT) VALUE)))
+         (GETPROP *PROPERTY-HANDLERS* *SYMBOL-HTML*)
+           (LAMBDA (NODE KEY VALUE)
+             (WHEN (NOT (EQ VALUE (@ NODE INNER-H-T-M-L)))
+               (SETF (@ NODE INNER-H-T-M-L) VALUE)))
+         (GETPROP *PROPERTY-HANDLERS* *SYMBOL-VALUE*)
+           (LAMBDA (NODE KEY VALUE)
+             (WHEN (NOT (EQ VALUE (@ NODE VALUE)))
+               (SETF (@ NODE VALUE)
+                       (IF (EQ VALUE UNDEFINED)
+
+                           VALUE))))
+         (GETPROP *PROPERTY-HANDLERS* *SYMBOL-CLASS*) SET-CLASS
+         (GETPROP *PROPERTY-HANDLERS* *SYMBOL-ATTRIBUTE*) SET-ATTRIBUTE
+         (GETPROP *PROPERTY-HANDLERS* *SYMBOL-DATA*) SET-DATA) */
+PROPERTYHANDLERS[SYMBOLTEXT] = function (node, key, value) {
+    return value !== node.textContent ? (node.textContent = value) : null;
+};
+PROPERTYHANDLERS[SYMBOLHTML] = function (node, key, value) {
+    return value !== node.innerHTML ? (node.innerHTML = value) : null;
+};
+PROPERTYHANDLERS[SYMBOLVALUE] = function (node, key, value) {
+    if (value !== node.value) {
+        return node.value = value === undefined ? '' : value;
+    };
+};
+PROPERTYHANDLERS[SYMBOLCLASS] = setClass;
+PROPERTYHANDLERS[SYMBOLATTRIBUTE] = setAttribute;
+PROPERTYHANDLERS[SYMBOLDATA] = setData;
 /* (DEFUN SET-INDEX (TARGET KEY VALUE RECEIVER IS-INITIALIZING)
      (WHEN (AND (@ MAIN IS-DEFERRED) (NOT IS-INITIALIZING))
        (ENQUEUE (LAMBDA () (SET-INDEX TARGET KEY VALUE RECEIVER T)))
@@ -340,36 +376,22 @@ function enqueue(fn) {
             (IS-CHANGED (NOT (EQ (GETPROP TARGET KEY) VALUE)))
             (DESCRIPTOR (GETPROP CONTEXT KEY))
             (NODE (AND DESCRIPTOR (@ DESCRIPTOR NODE)))
-            (TYPE (AND DESCRIPTOR (@ DESCRIPTOR TYPE)))
-            (NORMALIZED-VALUE
-             (IF (OR (EQ VALUE UNDEFINED) (EQ VALUE NIL))
-
-                 VALUE)))
+            (TYPE (AND DESCRIPTOR (@ DESCRIPTOR TYPE))))
        (WHEN
            (AND (CHAIN *OBJECT PROTOTYPE HAS-OWN-PROPERTY (CALL CONTEXT KEY))
                 (OR IS-CHANGED IS-INITIALIZING))
-         (WHEN
-             (AND (EQ TYPE *SYMBOL-TEXT*)
-                  (NOT (EQ VALUE (@ NODE TEXT-CONTENT))))
-           (SETF (@ NODE TEXT-CONTENT) NORMALIZED-VALUE))
-         (WHEN
-             (AND (EQ TYPE *SYMBOL-HTML*)
-                  (NOT (EQ VALUE (@ NODE INNER-H-T-M-L))))
-           (SETF (@ NODE INNER-H-T-M-L) NORMALIZED-VALUE))
-         (WHEN (AND (EQ TYPE *SYMBOL-VALUE*) (NOT (EQ VALUE (@ NODE VALUE))))
-           (SETF (@ NODE VALUE) NORMALIZED-VALUE))
-         (WHEN (EQ TYPE *SYMBOL-CLASS*) (SET-CLASS NODE VALUE))
-         (WHEN (EQ TYPE *SYMBOL-ATTRIBUTE*)
-           (SET-ATTRIBUTE NODE (@ DESCRIPTOR NAME) VALUE))
-         (WHEN (EQ TYPE *SYMBOL-DATA*)
-           (SET-DATA NODE (@ DESCRIPTOR NAME) VALUE))
-         (WHEN (EQ TYPE *SYMBOL-EVENT*)
-           (SET-EVENT TARGET VALUE DESCRIPTOR RECEIVER))
-         (WHEN (EQ TYPE *SYMBOL-SLOT*)
-           (LET ((PROXY (SET-SLOT TARGET KEY VALUE DESCRIPTOR IS-INITIALIZING)))
-             (WHEN PROXY
-               (RETURN-FROM SET-PROPERTY
-                 (CHAIN *REFLECT (SET TARGET KEY PROXY RECEIVER)))))))
+         (IF (IN TYPE *PROPERTY-HANDLERS*)
+             ((GETPROP *PROPERTY-HANDLERS* TYPE) NODE (@ DESCRIPTOR NAME)
+              VALUE)
+             (PROGN
+              (WHEN (EQ TYPE *SYMBOL-EVENT*)
+                (SET-EVENT TARGET VALUE DESCRIPTOR RECEIVER))
+              (WHEN (EQ TYPE *SYMBOL-SLOT*)
+                (LET ((PROXY
+                       (SET-SLOT TARGET KEY VALUE DESCRIPTOR IS-INITIALIZING)))
+                  (WHEN PROXY
+                    (RETURN-FROM SET-PROPERTY
+                      (CHAIN *REFLECT (SET TARGET KEY PROXY RECEIVER)))))))))
        (WHEN (AND (EQ TYPE *SYMBOL-VALUE*) (NOT (@ DESCRIPTOR IS-LISTENING)))
          (CHAIN NODE
                 (ADD-EVENT-LISTENER input
@@ -399,34 +421,19 @@ function setProperty(target, key, value, receiver, isInitializing) {
     var descriptor = context[key];
     var node16 = descriptor && descriptor.node;
     var type17 = descriptor && descriptor.type;
-    var normalizedValue = value === undefined || value === null ? '' : value;
     if (Object.prototype.hasOwnProperty.call(context, key) && (isChanged || isInitializing)) {
-        if (type17 === SYMBOLTEXT && value !== node16.textContent) {
-            node16.textContent = normalizedValue;
-        };
-        if (type17 === SYMBOLHTML && value !== node16.innerHTML) {
-            node16.innerHTML = normalizedValue;
-        };
-        if (type17 === SYMBOLVALUE && value !== node16.value) {
-            node16.value = normalizedValue;
-        };
-        if (type17 === SYMBOLCLASS) {
-            setClass(node16, value);
-        };
-        if (type17 === SYMBOLATTRIBUTE) {
-            setAttribute(node16, descriptor.name, value);
-        };
-        if (type17 === SYMBOLDATA) {
-            setData(node16, descriptor.name, value);
-        };
-        if (type17 === SYMBOLEVENT) {
-            setEvent(target, value, descriptor, receiver);
-        };
-        if (type17 === SYMBOLSLOT) {
-            var proxy = setSlot(target, key, value, descriptor, isInitializing);
-            if (proxy) {
-                __PS_MV_REG = [];
-                return Reflect.set(target, key, proxy, receiver);
+        if (type17 in PROPERTYHANDLERS) {
+            PROPERTYHANDLERS[type17](node16, descriptor.name, value);
+        } else {
+            if (type17 === SYMBOLEVENT) {
+                setEvent(target, value, descriptor, receiver);
+            };
+            if (type17 === SYMBOLSLOT) {
+                var proxy = setSlot(target, key, value, descriptor, isInitializing);
+                if (proxy) {
+                    __PS_MV_REG = [];
+                    return Reflect.set(target, key, proxy, receiver);
+                };
             };
         };
     };
@@ -464,14 +471,14 @@ function setAttribute(node, name, value) {
 function setData(node, name, value) {
     return !(value === null || value === undefined) ? (node.dataset[name] = value) : delete node.dataset[name];
 };
-/* (DEFUN SET-CLASS (NODE VALUE)
+/* (DEFUN SET-CLASS (NODE NAME VALUE)
      (IF VALUE
          (SETF (@ NODE CLASS-NAME)
                  (IF (CHAIN *ARRAY (IS-ARRAY VALUE))
                      (CHAIN VALUE (SPLIT  ))
                      VALUE))
          (CHAIN NODE (REMOVE-ATTRIBUTE 'CLASS)))) */
-function setClass(node, value) {
+function setClass(node, name, value) {
     if (value) {
         return node.className = Array.isArray(value) ? value.split(' ') : value;
     } else {
