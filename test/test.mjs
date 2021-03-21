@@ -1,5 +1,6 @@
 import s2, { mount, unmount } from "../dist/main.mjs";
 import depCheck from "../dist/dep-check.mjs";
+import { createContext, createComputed } from "../dist/computed-properties.mjs";
 import test from "./runner.mjs";
 
 s2.debug = true;
@@ -15,6 +16,11 @@ const initialThings = [
 ];
 
 test.initialThings = initialThings;
+
+const source = createContext({
+  z: 'f',
+});
+const computed = createComputed(mount, unmount);
 
 const template = document.querySelector("#root");
 
@@ -46,7 +52,13 @@ const [proxy, node] = s2({
     },
     [unmount]: delayUnmount,
   },
-  f: new Array(10).fill().map(() => ({ z: 'z', f() { return this.z; } })),
+  container: {
+    f: new Array(10).fill().map(() => computed({
+      f() {
+        return source.z;
+      },
+    })),
+  },
   n: 'n',
   [mount]: function spam(node) {
     // return null;
@@ -67,6 +79,7 @@ document.body.appendChild(node);
 console.log(`Mounted in ${performance.now() - start} ms`);
 
 window.p = proxy;
+window.s = source;
 
 async function delayUnmount(node) {
   console.log('Unmount called', node, this);

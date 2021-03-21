@@ -1,11 +1,12 @@
-(defvar *symbol-slot* (*symbol 'slot))
-(defvar *symbol-text* (*symbol 'text))
-(defvar *symbol-html* (*symbol 'html))
-(defvar *symbol-value* (*symbol 'value))
-(defvar *symbol-class* (*symbol 'class))
-(defvar *symbol-attribute* (*symbol 'attribute))
-(defvar *symbol-data* (*symbol 'data))
-(defvar *symbol-event* (*symbol 'event))
+(defvar *context-slot* 'slot)
+(defvar *context-text* 'text)
+(defvar *context-html* 'html)
+(defvar *context-value* 'value)
+(defvar *context-class* 'class)
+(defvar *context-attribute* 'attribute)
+(defvar *context-data* 'data)
+(defvar *context-event* 'event)
+
 (defvar *symbol-mount* (*symbol 'mount))
 (defvar *symbol-unmount* (*symbol 'unmount))
 (defvar *tag-slot* '*slot*)
@@ -50,21 +51,21 @@
 
 (defvar *property-handlers* (create))
 (setf
- (getprop *property-handlers* *symbol-text*)
+ (getprop *property-handlers* *context-text*)
  (lambda (node key value)
    (when (not (eq value (@ node text-content)))
      (setf (@ node text-content) value)))
- (getprop *property-handlers* *symbol-html*)
+ (getprop *property-handlers* *context-html*)
  (lambda (node key value)
    (when (not (eq value (@ node inner-h-t-m-l)))
      (setf (@ node inner-h-t-m-l) value)))
- (getprop *property-handlers* *symbol-value*)
+ (getprop *property-handlers* *context-value*)
  (lambda (node key value)
    (when (not (eq value (@ node value)))
      (setf (@ node value) (if (eq value undefined) "" value))))
- (getprop *property-handlers* *symbol-class*) set-class
- (getprop *property-handlers* *symbol-attribute*) set-attribute
- (getprop *property-handlers* *symbol-data*) set-data)
+ (getprop *property-handlers* *context-class*) set-class
+ (getprop *property-handlers* *context-attribute*) set-attribute
+ (getprop *property-handlers* *context-data*) set-data)
 
 
 ;; The logic contained here is the most difficult. The flow is like:
@@ -220,15 +221,11 @@
     (when (and (chain *object prototype has-own-property (call context key))
                (or is-changed is-initializing))
       (if (in type *property-handlers*)
-          ((getprop *property-handlers* type)
-           node (@ descriptor name)
-           (if (eq (typeof value) 'function)
-               (chain value (call target))
-               value))
+          ((getprop *property-handlers* type) node (@ descriptor name) value)
         (progn
-          (when (eq type *symbol-event*)
+          (when (eq type *context-event*)
             (set-event target value descriptor receiver))
-          (when (eq type *symbol-slot*)
+          (when (eq type *context-slot*)
             (let ((proxy (set-slot target key value descriptor is-initializing)))
               (when proxy
                 (return-from
@@ -236,7 +233,7 @@
                  (chain *reflect (set target key proxy receiver)))))))))
 
     ;; Handle automatic event binding for value.
-    (when (and (eq type *symbol-value*)
+    (when (and (eq type *context-value*)
                (not (@ descriptor is-listening)))
       (chain node (add-event-listener
                    "input"
@@ -284,7 +281,19 @@
                 (chain *promise (resolve (chain unmount (call self old-node)))
                        (then (lambda () (chain old-node (remove)))))
               (chain old-node (remove)))))
-    (chain end-node (remove))))
+    (chain end-node (remove)))
+  (recursive-unmount self))
+
+
+(defun recursive-unmount (self should-unmount)
+  (loop
+   for key of self do
+   (let ((value (getprop self key)))
+     (when (and (eq (typeof value) 'object) (not (eq value nil)))
+       (recursive-unmount value t))))
+  (when should-unmount
+    (let ((unmount (chain *proxy-unmount-map* (get self))))
+      (when unmount (chain unmount (call self))))))
 
 
 ;; The way that this works is it tries to present an immediate-mode interface
@@ -327,8 +336,12 @@
                 (nodes (chain *proxy-delimiter-map* (get previous-value))))
             (remove-between-delimiters
              (@ nodes 0) (@ nodes 1) unmount previous-value))))
-      (remove-between-delimiters (@ nodes 0) (@ nodes 1))
-      (delete (getprop hash key)))
+      (if (and value (not previous-value))
+          ;; This is specifically to remove slot placeholder.
+          (remove-between-delimiters (@ nodes 0) (@ nodes 1))
+        (progn
+          (chain nodes 0 (remove))
+          (chain nodes 1 (remove)))))
 
     (setf (getprop hash key) (list start-node end-node))
     (chain parent-node (insert-before start-node anchor))
@@ -436,7 +449,7 @@
                     path (chain path (concat i))
                     slot node
                     template template-node
-                    type *symbol-slot*))
+                    type *context-slot*))
              (chain node (remove))
              )
            (continue))
@@ -447,26 +460,26 @@
                 (result nil))
             (case
              key
-             ("text" (setf result (create type *symbol-text*)))
-             ("value" (setf result (create type *symbol-value*)))
-             ("class" (setf result (create type *symbol-class*)))
-             ("unsafeHtml" (setf result (create type *symbol-html*))))
+             ("text" (setf result (create type *context-text*)))
+             ("value" (setf result (create type *context-value*)))
+             ("class" (setf result (create type *context-class*)))
+             ("unsafeHtml" (setf result (create type *context-html*))))
             (when (chain key (starts-with 'attribute))
               (setf result
                     (create
-                     type *symbol-attribute*
+                     type *context-attribute*
                      ;; Slice off "attribute", all attributes are lowercase.
                      name (chain key (slice 9) (to-lower-case)))))
             (when (chain key (starts-with 'event))
               (setf result
                     (create
-                     type *symbol-event*
+                     type *context-event*
                      ;; Slice off "event", all events are lowercase.
                      event (chain key (slice 5) (to-lower-case)))))
 
             ;; Handle data attribute reflection.
             (when (not result)
-              (setf result (create type *symbol-data* name key)))
+              (setf result (create type *context-data* name key)))
 
             (when result
               (delete (getprop (@ node dataset) key))
@@ -578,5 +591,5 @@
 
 (export
  :default main
- :names
- (*symbol-mount* as mount *symbol-unmount* as unmount))
+ :names ((*symbol-mount* mount)
+         (*symbol-unmount* unmount)))

@@ -1,35 +1,35 @@
 var __PS_MV_REG;
-/* (DEFVAR *SYMBOL-SLOT* (*SYMBOL 'SLOT)) */
-if ('undefined' === typeof SYMBOLSLOT) {
-    var SYMBOLSLOT = Symbol('slot');
+/* (DEFVAR *CONTEXT-SLOT* 'SLOT) */
+if ('undefined' === typeof CONTEXTSLOT) {
+    var CONTEXTSLOT = 'slot';
 };
-/* (DEFVAR *SYMBOL-TEXT* (*SYMBOL 'TEXT)) */
-if ('undefined' === typeof SYMBOLTEXT) {
-    var SYMBOLTEXT = Symbol('text');
+/* (DEFVAR *CONTEXT-TEXT* 'TEXT) */
+if ('undefined' === typeof CONTEXTTEXT) {
+    var CONTEXTTEXT = 'text';
 };
-/* (DEFVAR *SYMBOL-HTML* (*SYMBOL 'HTML)) */
-if ('undefined' === typeof SYMBOLHTML) {
-    var SYMBOLHTML = Symbol('html');
+/* (DEFVAR *CONTEXT-HTML* 'HTML) */
+if ('undefined' === typeof CONTEXTHTML) {
+    var CONTEXTHTML = 'html';
 };
-/* (DEFVAR *SYMBOL-VALUE* (*SYMBOL 'VALUE)) */
-if ('undefined' === typeof SYMBOLVALUE) {
-    var SYMBOLVALUE = Symbol('value');
+/* (DEFVAR *CONTEXT-VALUE* 'VALUE) */
+if ('undefined' === typeof CONTEXTVALUE) {
+    var CONTEXTVALUE = 'value';
 };
-/* (DEFVAR *SYMBOL-CLASS* (*SYMBOL 'CLASS)) */
-if ('undefined' === typeof SYMBOLCLASS) {
-    var SYMBOLCLASS = Symbol('class');
+/* (DEFVAR *CONTEXT-CLASS* 'CLASS) */
+if ('undefined' === typeof CONTEXTCLASS) {
+    var CONTEXTCLASS = 'class';
 };
-/* (DEFVAR *SYMBOL-ATTRIBUTE* (*SYMBOL 'ATTRIBUTE)) */
-if ('undefined' === typeof SYMBOLATTRIBUTE) {
-    var SYMBOLATTRIBUTE = Symbol('attribute');
+/* (DEFVAR *CONTEXT-ATTRIBUTE* 'ATTRIBUTE) */
+if ('undefined' === typeof CONTEXTATTRIBUTE) {
+    var CONTEXTATTRIBUTE = 'attribute';
 };
-/* (DEFVAR *SYMBOL-DATA* (*SYMBOL 'DATA)) */
-if ('undefined' === typeof SYMBOLDATA) {
-    var SYMBOLDATA = Symbol('data');
+/* (DEFVAR *CONTEXT-DATA* 'DATA) */
+if ('undefined' === typeof CONTEXTDATA) {
+    var CONTEXTDATA = 'data';
 };
-/* (DEFVAR *SYMBOL-EVENT* (*SYMBOL 'EVENT)) */
-if ('undefined' === typeof SYMBOLEVENT) {
-    var SYMBOLEVENT = Symbol('event');
+/* (DEFVAR *CONTEXT-EVENT* 'EVENT) */
+if ('undefined' === typeof CONTEXTEVENT) {
+    var CONTEXTEVENT = 'event';
 };
 /* (DEFVAR *SYMBOL-MOUNT* (*SYMBOL 'MOUNT)) */
 if ('undefined' === typeof SYMBOLMOUNT) {
@@ -98,38 +98,38 @@ if ('undefined' === typeof DEFERREDQUEUE) {
 if ('undefined' === typeof PROPERTYHANDLERS) {
     var PROPERTYHANDLERS = {  };
 };
-/* (SETF (GETPROP *PROPERTY-HANDLERS* *SYMBOL-TEXT*)
+/* (SETF (GETPROP *PROPERTY-HANDLERS* *CONTEXT-TEXT*)
            (LAMBDA (NODE KEY VALUE)
              (WHEN (NOT (EQ VALUE (@ NODE TEXT-CONTENT)))
                (SETF (@ NODE TEXT-CONTENT) VALUE)))
-         (GETPROP *PROPERTY-HANDLERS* *SYMBOL-HTML*)
+         (GETPROP *PROPERTY-HANDLERS* *CONTEXT-HTML*)
            (LAMBDA (NODE KEY VALUE)
              (WHEN (NOT (EQ VALUE (@ NODE INNER-H-T-M-L)))
                (SETF (@ NODE INNER-H-T-M-L) VALUE)))
-         (GETPROP *PROPERTY-HANDLERS* *SYMBOL-VALUE*)
+         (GETPROP *PROPERTY-HANDLERS* *CONTEXT-VALUE*)
            (LAMBDA (NODE KEY VALUE)
              (WHEN (NOT (EQ VALUE (@ NODE VALUE)))
                (SETF (@ NODE VALUE)
                        (IF (EQ VALUE UNDEFINED)
 
                            VALUE))))
-         (GETPROP *PROPERTY-HANDLERS* *SYMBOL-CLASS*) SET-CLASS
-         (GETPROP *PROPERTY-HANDLERS* *SYMBOL-ATTRIBUTE*) SET-ATTRIBUTE
-         (GETPROP *PROPERTY-HANDLERS* *SYMBOL-DATA*) SET-DATA) */
-PROPERTYHANDLERS[SYMBOLTEXT] = function (node, key, value) {
+         (GETPROP *PROPERTY-HANDLERS* *CONTEXT-CLASS*) SET-CLASS
+         (GETPROP *PROPERTY-HANDLERS* *CONTEXT-ATTRIBUTE*) SET-ATTRIBUTE
+         (GETPROP *PROPERTY-HANDLERS* *CONTEXT-DATA*) SET-DATA) */
+PROPERTYHANDLERS[CONTEXTTEXT] = function (node, key, value) {
     return value !== node.textContent ? (node.textContent = value) : null;
 };
-PROPERTYHANDLERS[SYMBOLHTML] = function (node, key, value) {
+PROPERTYHANDLERS[CONTEXTHTML] = function (node, key, value) {
     return value !== node.innerHTML ? (node.innerHTML = value) : null;
 };
-PROPERTYHANDLERS[SYMBOLVALUE] = function (node, key, value) {
+PROPERTYHANDLERS[CONTEXTVALUE] = function (node, key, value) {
     if (value !== node.value) {
         return node.value = value === undefined ? '' : value;
     };
 };
-PROPERTYHANDLERS[SYMBOLCLASS] = setClass;
-PROPERTYHANDLERS[SYMBOLATTRIBUTE] = setAttribute;
-PROPERTYHANDLERS[SYMBOLDATA] = setData;
+PROPERTYHANDLERS[CONTEXTCLASS] = setClass;
+PROPERTYHANDLERS[CONTEXTATTRIBUTE] = setAttribute;
+PROPERTYHANDLERS[CONTEXTDATA] = setData;
 /* (DEFUN SET-INDEX (TARGET KEY VALUE RECEIVER IS-INITIALIZING)
      (WHEN (AND (@ MAIN IS-DEFERRED) (NOT IS-INITIALIZING))
        (ENQUEUE (LAMBDA () (SET-INDEX TARGET KEY VALUE RECEIVER T)))
@@ -382,19 +382,17 @@ function enqueue(fn) {
                 (OR IS-CHANGED IS-INITIALIZING))
          (IF (IN TYPE *PROPERTY-HANDLERS*)
              ((GETPROP *PROPERTY-HANDLERS* TYPE) NODE (@ DESCRIPTOR NAME)
-              (IF (EQ (TYPEOF VALUE) 'FUNCTION)
-                  (CHAIN VALUE (CALL TARGET))
-                  VALUE))
+              VALUE)
              (PROGN
-              (WHEN (EQ TYPE *SYMBOL-EVENT*)
+              (WHEN (EQ TYPE *CONTEXT-EVENT*)
                 (SET-EVENT TARGET VALUE DESCRIPTOR RECEIVER))
-              (WHEN (EQ TYPE *SYMBOL-SLOT*)
+              (WHEN (EQ TYPE *CONTEXT-SLOT*)
                 (LET ((PROXY
                        (SET-SLOT TARGET KEY VALUE DESCRIPTOR IS-INITIALIZING)))
                   (WHEN PROXY
                     (RETURN-FROM SET-PROPERTY
                       (CHAIN *REFLECT (SET TARGET KEY PROXY RECEIVER)))))))))
-       (WHEN (AND (EQ TYPE *SYMBOL-VALUE*) (NOT (@ DESCRIPTOR IS-LISTENING)))
+       (WHEN (AND (EQ TYPE *CONTEXT-VALUE*) (NOT (@ DESCRIPTOR IS-LISTENING)))
          (CHAIN NODE
                 (ADD-EVENT-LISTENER input
                  (LAMBDA (EVENT)
@@ -425,12 +423,12 @@ function setProperty(target, key, value, receiver, isInitializing) {
     var type17 = descriptor && descriptor.type;
     if (Object.prototype.hasOwnProperty.call(context, key) && (isChanged || isInitializing)) {
         if (type17 in PROPERTYHANDLERS) {
-            PROPERTYHANDLERS[type17](node16, descriptor.name, typeof value === 'function' ? value.call(target) : value);
+            PROPERTYHANDLERS[type17](node16, descriptor.name, value);
         } else {
-            if (type17 === SYMBOLEVENT) {
+            if (type17 === CONTEXTEVENT) {
                 setEvent(target, value, descriptor, receiver);
             };
-            if (type17 === SYMBOLSLOT) {
+            if (type17 === CONTEXTSLOT) {
                 var proxy = setSlot(target, key, value, descriptor, isInitializing);
                 if (proxy) {
                     __PS_MV_REG = [];
@@ -439,7 +437,7 @@ function setProperty(target, key, value, receiver, isInitializing) {
             };
         };
     };
-    if (type17 === SYMBOLVALUE && !descriptor.isListening) {
+    if (type17 === CONTEXTVALUE && !descriptor.isListening) {
         node16.addEventListener('input', function (event) {
             return Reflect.set(target, key, event.target.value, receiver);
         });
@@ -499,7 +497,8 @@ function setClass(node, name, value) {
                              (RESOLVE (CHAIN UNMOUNT (CALL SELF OLD-NODE)))
                              (THEN (LAMBDA () (CHAIN OLD-NODE (REMOVE)))))
                       (CHAIN OLD-NODE (REMOVE)))))
-       (CHAIN END-NODE (REMOVE)))) */
+       (CHAIN END-NODE (REMOVE)))
+     (RECURSIVE-UNMOUNT SELF)) */
 function removeBetweenDelimiters(startNode, endNode, unmount, self) {
     var node = startNode;
     var firstNode = node;
@@ -514,8 +513,30 @@ function removeBetweenDelimiters(startNode, endNode, unmount, self) {
             }) : oldNode.remove();
         })();
     };
+    endNode.remove();
     __PS_MV_REG = [];
-    return endNode.remove();
+    return recursiveUnmount(self);
+};
+/* (DEFUN RECURSIVE-UNMOUNT (SELF SHOULD-UNMOUNT)
+     (LOOP FOR KEY OF SELF
+           DO (LET ((VALUE (GETPROP SELF KEY)))
+                (WHEN (AND (EQ (TYPEOF VALUE) 'OBJECT) (NOT (EQ VALUE NIL)))
+                  (RECURSIVE-UNMOUNT VALUE T))))
+     (WHEN SHOULD-UNMOUNT
+       (LET ((UNMOUNT (CHAIN *PROXY-UNMOUNT-MAP* (GET SELF))))
+         (WHEN UNMOUNT (CHAIN UNMOUNT (CALL SELF)))))) */
+function recursiveUnmount(self, shouldUnmount) {
+    for (var key in self) {
+        var value = self[key];
+        if (typeof value === 'object' && value !== null) {
+            recursiveUnmount(value, true);
+        };
+    };
+    if (shouldUnmount) {
+        var unmount = PROXYUNMOUNTMAP.get(self);
+        __PS_MV_REG = [];
+        return unmount ? unmount.call(self) : null;
+    };
 };
 /* (DEFUN SET-SLOT (TARGET KEY VALUE DESCRIPTOR IS-INITIALIZING)
      (WHEN (@ MAIN DEBUG) (CONSOLE-LOG 'SET-SLOT ARGUMENTS))
@@ -550,8 +571,9 @@ function removeBetweenDelimiters(startNode, endNode, unmount, self) {
                      (NODES (CHAIN *PROXY-DELIMITER-MAP* (GET PREVIOUS-VALUE))))
                  (REMOVE-BETWEEN-DELIMITERS (@ NODES 0) (@ NODES 1) UNMOUNT
                   PREVIOUS-VALUE))))
-         (REMOVE-BETWEEN-DELIMITERS (@ NODES 0) (@ NODES 1))
-         (DELETE (GETPROP HASH KEY)))
+         (IF (AND VALUE (NOT PREVIOUS-VALUE))
+             (REMOVE-BETWEEN-DELIMITERS (@ NODES 0) (@ NODES 1))
+             (PROGN (CHAIN NODES 0 (REMOVE)) (CHAIN NODES 1 (REMOVE)))))
        (SETF (GETPROP HASH KEY) (LIST START-NODE END-NODE))
        (CHAIN PARENT-NODE (INSERT-BEFORE START-NODE ANCHOR))
        (IF VALUE
@@ -638,8 +660,12 @@ function setSlot(target, key, value, descriptor, isInitializing) {
                 removeBetweenDelimiters(nodes24[0], nodes24[1], unmount23, previousValue);
             };
         };
-        removeBetweenDelimiters(nodes[0], nodes[1]);
-        delete hash[key];
+        if (value && !previousValue) {
+            removeBetweenDelimiters(nodes[0], nodes[1]);
+        } else {
+            nodes[0].remove();
+            nodes[1].remove();
+        };
     };
     hash[key] = [startNode, endNode];
     parentNode20.insertBefore(startNode, anchor);
@@ -762,7 +788,7 @@ function setEvent(target, value, descriptor, receiver) {
                         (CHAIN PARENT-NODE (INSERT-BEFORE ANCHOR NODE))
                         (SETF (GETPROP CONTEXT SLOT-NAME)
                                 (CREATE PATH (CHAIN PATH (CONCAT I)) SLOT NODE
-                                 TEMPLATE TEMPLATE-NODE TYPE *SYMBOL-SLOT*))
+                                 TEMPLATE TEMPLATE-NODE TYPE *CONTEXT-SLOT*))
                         (CHAIN NODE (REMOVE)))
                       (CONTINUE))
                     (LOOP FOR KEY OF (@ NODE DATASET)
@@ -770,26 +796,27 @@ function setEvent(target, value, descriptor, receiver) {
                                    (RESULT NIL))
                                (CASE KEY
                                  (text
-                                  (SETF RESULT (CREATE TYPE *SYMBOL-TEXT*)))
+                                  (SETF RESULT (CREATE TYPE *CONTEXT-TEXT*)))
                                  (value
-                                  (SETF RESULT (CREATE TYPE *SYMBOL-VALUE*)))
+                                  (SETF RESULT (CREATE TYPE *CONTEXT-VALUE*)))
                                  (class
-                                  (SETF RESULT (CREATE TYPE *SYMBOL-CLASS*)))
+                                  (SETF RESULT (CREATE TYPE *CONTEXT-CLASS*)))
                                  (unsafeHtml
-                                  (SETF RESULT (CREATE TYPE *SYMBOL-HTML*))))
+                                  (SETF RESULT (CREATE TYPE *CONTEXT-HTML*))))
                                (WHEN (CHAIN KEY (STARTS-WITH 'ATTRIBUTE))
                                  (SETF RESULT
-                                         (CREATE TYPE *SYMBOL-ATTRIBUTE* NAME
+                                         (CREATE TYPE *CONTEXT-ATTRIBUTE* NAME
                                           (CHAIN KEY (SLICE 9)
                                                  (TO-LOWER-CASE)))))
                                (WHEN (CHAIN KEY (STARTS-WITH 'EVENT))
                                  (SETF RESULT
-                                         (CREATE TYPE *SYMBOL-EVENT* EVENT
+                                         (CREATE TYPE *CONTEXT-EVENT* EVENT
                                           (CHAIN KEY (SLICE 5)
                                                  (TO-LOWER-CASE)))))
                                (WHEN (NOT RESULT)
                                  (SETF RESULT
-                                         (CREATE TYPE *SYMBOL-DATA* NAME KEY)))
+                                         (CREATE TYPE *CONTEXT-DATA* NAME
+                                          KEY)))
                                (WHEN RESULT
                                  (DELETE (GETPROP (@ NODE DATASET) KEY))
                                  (CHAIN NODE (REMOVE-ATTRIBUTE KEY))
@@ -823,7 +850,7 @@ function processTemplate(template) {
                 context[slotName] = { path : path.concat(i),
                                    slot : node,
                                    template : templateNode,
-                                   type : SYMBOLSLOT
+                                   type : CONTEXTSLOT
                                  };
                 node.remove();
                 continue;
@@ -833,25 +860,25 @@ function processTemplate(template) {
                 var result = null;
                 switch (key) {
                 case 'text':
-                    result = { type : SYMBOLTEXT };
+                    result = { type : CONTEXTTEXT };
                     break;
                 case 'value':
-                    result = { type : SYMBOLVALUE };
+                    result = { type : CONTEXTVALUE };
                     break;
                 case 'class':
-                    result = { type : SYMBOLCLASS };
+                    result = { type : CONTEXTCLASS };
                     break;
                 case 'unsafeHtml':
-                    result = { type : SYMBOLHTML };
+                    result = { type : CONTEXTHTML };
                 };
                 if (key.startsWith('attribute')) {
-                    result = { type : SYMBOLATTRIBUTE, name : key.slice(9).toLowerCase() };
+                    result = { type : CONTEXTATTRIBUTE, name : key.slice(9).toLowerCase() };
                 };
                 if (key.startsWith('event')) {
-                    result = { type : SYMBOLEVENT, event : key.slice(5).toLowerCase() };
+                    result = { type : CONTEXTEVENT, event : key.slice(5).toLowerCase() };
                 };
                 if (!result) {
-                    result = { type : SYMBOLDATA, name : key };
+                    result = { type : CONTEXTDATA, name : key };
                 };
                 if (result) {
                     delete node.dataset[key];
@@ -1029,7 +1056,7 @@ function main(origin, template) {
 main.debug = !true;
 main.isDeferred = !true;
 /* (EXPORT DEFAULT MAIN NAMES
-           (*SYMBOL-MOUNT* AS MOUNT *SYMBOL-UNMOUNT* AS UNMOUNT)) */
+           ((*SYMBOL-MOUNT* MOUNT) (*SYMBOL-UNMOUNT* UNMOUNT))) */
 export { SYMBOLMOUNT as mount, SYMBOLUNMOUNT as unmount, };
 export default main;
 
