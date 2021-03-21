@@ -85,6 +85,8 @@ import { mount, unmount } from '...';
 }
 ```
 
+Note: `node` can be missing for the `unmount` function if it is called due to an ancestor object being deleted.
+
 
 ## Flags
 
