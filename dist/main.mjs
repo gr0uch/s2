@@ -380,7 +380,8 @@ function enqueue(fn) {
        (WHEN
            (AND (CHAIN *OBJECT PROTOTYPE HAS-OWN-PROPERTY (CALL CONTEXT KEY))
                 (OR IS-CHANGED IS-INITIALIZING))
-         (IF (IN TYPE *PROPERTY-HANDLERS*)
+         (IF (AND (IN TYPE *PROPERTY-HANDLERS*)
+                  (NOT (EQ (TYPEOF VALUE) 'FUNCTION)))
              ((GETPROP *PROPERTY-HANDLERS* TYPE) NODE (@ DESCRIPTOR NAME)
               VALUE)
              (PROGN
@@ -422,7 +423,7 @@ function setProperty(target, key, value, receiver, isInitializing) {
     var node16 = descriptor && descriptor.node;
     var type17 = descriptor && descriptor.type;
     if (Object.prototype.hasOwnProperty.call(context, key) && (isChanged || isInitializing)) {
-        if (type17 in PROPERTYHANDLERS) {
+        if (type17 in PROPERTYHANDLERS && typeof value !== 'function') {
             PROPERTYHANDLERS[type17](node16, descriptor.name, value);
         } else {
             if (type17 === CONTEXTEVENT) {
@@ -736,6 +737,7 @@ function setSlot(target, key, value, descriptor, isInitializing) {
          (CHAIN NODE
                 (REMOVE-EVENT-LISTENER EVENT LISTENER (@ LISTENER OPTIONS))))
        (WHEN VALUE
+         (SETF (@ VALUE IS-EVENT-LISTENER) T)
          (LET ((BOUND-LISTENER (CHAIN VALUE (BIND RECEIVER))))
            (SETF (@ BOUND-LISTENER OPTIONS) (@ VALUE OPTIONS))
            (CHAIN NODE
@@ -751,6 +753,7 @@ function setEvent(target, value, descriptor, receiver) {
         node36.removeEventListener(event37, listener, listener.options);
     };
     if (value) {
+        value.isEventListener = true;
         var boundListener = value.bind(receiver);
         boundListener.options = value.options;
         node36.addEventListener(event37, boundListener, boundListener.options);

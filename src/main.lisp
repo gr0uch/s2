@@ -220,7 +220,8 @@
 
     (when (and (chain *object prototype has-own-property (call context key))
                (or is-changed is-initializing))
-      (if (in type *property-handlers*)
+      (if (and (in type *property-handlers*)
+               (not (eq (typeof value) 'function)))
           ((getprop *property-handlers* type) node (@ descriptor name) value)
         (progn
           (when (eq type *context-event*)
@@ -412,6 +413,7 @@
       (chain node (remove-event-listener
                    event listener (@ listener options))))
     (when value
+      (setf (@ value is-event-listener) t)
       (let ((bound-listener (chain value (bind receiver))))
         (setf (@ bound-listener options) (@ value options))
         (chain node (add-event-listener

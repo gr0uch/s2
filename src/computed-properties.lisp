@@ -62,6 +62,7 @@
    (let* ((value (getprop obj key))
           (is-function (eq (typeof value) 'function)))
      (when is-function
+       (when (@ value is-event-listener) (continue))
        (clear-stack)
        (let ((return-value (value)))
          (when (not (eq return-value undefined))

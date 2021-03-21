@@ -21,10 +21,10 @@ if ('undefined' === typeof PROXYSOURCE) {
 };
 /* (DEFUN CLEAR-STACK ()
      (LOOP WHILE (LENGTH *READ-STACK*)
-           DO (CHAIN *READ-STACK* (SHIFT)))) */
+           DO (CHAIN *READ-STACK* (POP)))) */
 function clearStack() {
     while (READSTACK.length) {
-        READSTACK.shift();
+        READSTACK.pop();
     };
 };
 /* (DEFUN GET-PROPERTY (TARGET KEY RECEIVER)
@@ -91,6 +91,7 @@ function createContext(obj) {
            DO (LET* ((VALUE (GETPROP OBJ KEY))
                      (IS-FUNCTION (EQ (TYPEOF VALUE) 'FUNCTION)))
                 (WHEN IS-FUNCTION
+                  (WHEN (@ VALUE IS-EVENT-LISTENER) (CONTINUE))
                   (CLEAR-STACK)
                   (LET ((RETURN-VALUE (VALUE)))
                     (WHEN (NOT (EQ RETURN-VALUE UNDEFINED))
@@ -125,6 +126,9 @@ function mountObject(obj) {
         var value = obj[key];
         var isFunction = typeof value === 'function';
         if (isFunction) {
+            if (value.isEventListener) {
+                continue;
+            };
             clearStack();
             var returnValue = value();
             if (returnValue !== undefined) {
