@@ -20,29 +20,30 @@ if ('undefined' === typeof PROXYSOURCE) {
                       };
 };
 /* (DEFUN GET-PROPERTY (TARGET KEY RECEIVER)
-     (CHAIN *READ-STACK* (PUSH (LIST RECEIVER KEY)))
+     (CHAIN *READ-STACK* (PUSH (LIST TARGET KEY)))
      (CHAIN *REFLECT (GET TARGET KEY RECEIVER))) */
 function getProperty(target, key, receiver) {
-    READSTACK.push([receiver, key]);
+    READSTACK.push([target, key]);
     return Reflect.get(target, key, receiver);
 };
 /* (DEFUN SET-PROPERTY (TARGET KEY VALUE RECEIVER)
      (CHAIN *REFLECT (SET TARGET KEY VALUE RECEIVER))
-     (LET ((CONTEXT (CHAIN *SOURCE-CONTEXT-MAP* (GET RECEIVER)))
+     (LET ((CONTEXT (CHAIN *SOURCE-CONTEXT-MAP* (GET TARGET)))
            (KEY-BINDINGS NIL))
        (WHEN (NOT CONTEXT) (RETURN-FROM SET-PROPERTY T))
        (SETF KEY-BINDINGS (OR (GETPROP CONTEXT KEY) (LIST)))
        (LOOP FOR KEY-BINDING IN KEY-BINDINGS
-             DO (LET ((OBJ (@ KEY-BINDING 0))
-                      (OBJ-KEY (@ KEY-BINDING 1))
-                      (FN (@ KEY-BINDING 2)))
-                  (SETF (GETPROP OBJ OBJ-KEY) (FN))
+             DO (LET* ((OBJ (@ KEY-BINDING 0))
+                       (OBJ-KEY (@ KEY-BINDING 1))
+                       (FN (@ KEY-BINDING 2))
+                       (RETURN-VALUE (FN)))
+                  (SETF (GETPROP OBJ OBJ-KEY) RETURN-VALUE)
                   (LOOP WHILE (LENGTH *READ-STACK*)
                         DO (CHAIN *READ-STACK* (SHIFT))))))
      T) */
 function setProperty(target, key, value, receiver) {
     Reflect.set(target, key, value, receiver);
-    var context = SOURCECONTEXTMAP.get(receiver);
+    var context = SOURCECONTEXTMAP.get(target);
     var keyBindings = null;
     if (!context) {
         return true;
@@ -54,7 +55,8 @@ function setProperty(target, key, value, receiver) {
         var obj = keyBinding[0];
         var objKey = keyBinding[1];
         var fn = keyBinding[2];
-        obj[objKey] = fn();
+        var returnValue = fn();
+        obj[objKey] = returnValue;
         while (READSTACK.length) {
             READSTACK.shift();
         };

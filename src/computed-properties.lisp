@@ -12,23 +12,26 @@
 ;; By coordinating the function calls with the get trap, we can correlate
 ;; computed properties to their sources.
 (defun get-property (target key receiver)
-  (chain *read-stack* (push (list receiver key)))
+  (chain *read-stack* (push (list target key)))
   (chain *reflect (get target key receiver)))
 
 
 (defun set-property (target key value receiver)
-  (chain *reflect (set target key value receiver))
-  (let ((context (chain *source-context-map* (get receiver)))
+  (if (not (eq value undefined))
+      (chain *reflect (set target key value receiver))
+    (chain *reflect (delete-property target key)))
+  (let ((context (chain *source-context-map* (get target)))
         (key-bindings nil))
     (when (not context)
       (return-from set-property t))
     (setf key-bindings (or (getprop context key) (list)))
     (loop
      for key-binding in key-bindings do
-     (let ((obj (@ key-binding 0))
-           (obj-key (@ key-binding 1))
-           (fn (@ key-binding 2)))
-       (setf (getprop obj obj-key) (fn))
+     (let* ((obj (@ key-binding 0))
+            (obj-key (@ key-binding 1))
+            (fn (@ key-binding 2))
+            (return-value (fn)))
+       (setf (getprop obj obj-key) return-value)
        ;; Calling the function above will trigger the get trap which will
        ;; append to the *read-stack*, this is for good measure to avoid
        ;; memory leaking.
