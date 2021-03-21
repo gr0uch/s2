@@ -19,15 +19,28 @@ if ('undefined' === typeof PROXYSOURCE) {
                         deleteProperty : setProperty
                       };
 };
+/* (DEFUN CLEAR-STACK ()
+     (LOOP WHILE (LENGTH *READ-STACK*)
+           DO (CHAIN *READ-STACK* (SHIFT)))) */
+function clearStack() {
+    while (READSTACK.length) {
+        READSTACK.shift();
+    };
+};
 /* (DEFUN GET-PROPERTY (TARGET KEY RECEIVER)
      (CHAIN *READ-STACK* (PUSH (LIST TARGET KEY)))
+     (SET-TIMEOUT CLEAR-STACK 0)
      (CHAIN *REFLECT (GET TARGET KEY RECEIVER))) */
 function getProperty(target, key, receiver) {
     READSTACK.push([target, key]);
+    setTimeout(clearStack, 0);
+    __PS_MV_REG = [];
     return Reflect.get(target, key, receiver);
 };
 /* (DEFUN SET-PROPERTY (TARGET KEY VALUE RECEIVER)
-     (CHAIN *REFLECT (SET TARGET KEY VALUE RECEIVER))
+     (IF (NOT (EQ VALUE UNDEFINED))
+         (CHAIN *REFLECT (SET TARGET KEY VALUE RECEIVER))
+         (CHAIN *REFLECT (DELETE-PROPERTY TARGET KEY)))
      (LET ((CONTEXT (CHAIN *SOURCE-CONTEXT-MAP* (GET TARGET)))
            (KEY-BINDINGS NIL))
        (WHEN (NOT CONTEXT) (RETURN-FROM SET-PROPERTY T))
@@ -38,11 +51,14 @@ function getProperty(target, key, receiver) {
                        (FN (@ KEY-BINDING 2))
                        (RETURN-VALUE (FN)))
                   (SETF (GETPROP OBJ OBJ-KEY) RETURN-VALUE)
-                  (LOOP WHILE (LENGTH *READ-STACK*)
-                        DO (CHAIN *READ-STACK* (SHIFT))))))
+                  (CLEAR-STACK))))
      T) */
 function setProperty(target, key, value, receiver) {
-    Reflect.set(target, key, value, receiver);
+    if (value !== undefined) {
+        Reflect.set(target, key, value, receiver);
+    } else {
+        Reflect.deleteProperty(target, key);
+    };
     var context = SOURCECONTEXTMAP.get(target);
     var keyBindings = null;
     if (!context) {
@@ -57,9 +73,7 @@ function setProperty(target, key, value, receiver) {
         var fn = keyBinding[2];
         var returnValue = fn();
         obj[objKey] = returnValue;
-        while (READSTACK.length) {
-            READSTACK.shift();
-        };
+        clearStack();
     };
     __PS_MV_REG = [];
     return true;
@@ -77,8 +91,7 @@ function createContext(obj) {
            DO (LET* ((VALUE (GETPROP OBJ KEY))
                      (IS-FUNCTION (EQ (TYPEOF VALUE) 'FUNCTION)))
                 (WHEN IS-FUNCTION
-                  (LOOP WHILE (LENGTH *READ-STACK*)
-                        DO (CHAIN *READ-STACK* (SHIFT)))
+                  (CLEAR-STACK)
                   (LET ((RETURN-VALUE (VALUE)))
                     (WHEN (NOT (EQ RETURN-VALUE UNDEFINED))
                       (SETF (GETPROP OBJ KEY) RETURN-VALUE))
@@ -105,15 +118,14 @@ function createContext(obj) {
                                (LET ((KEY-BINDINGS
                                       (GETPROP SOURCE-CONTEXT SOURCE-KEY)))
                                  (CHAIN KEY-BINDINGS
-                                        (PUSH (LIST OBJ KEY VALUE))))))))))) */
+                                        (PUSH (LIST OBJ KEY VALUE))))))))))
+     (CLEAR-STACK)) */
 function mountObject(obj) {
     for (var key in obj) {
         var value = obj[key];
         var isFunction = typeof value === 'function';
         if (isFunction) {
-            while (READSTACK.length) {
-                READSTACK.shift();
-            };
+            clearStack();
             var returnValue = value();
             if (returnValue !== undefined) {
                 obj[key] = returnValue;
@@ -140,6 +152,8 @@ function mountObject(obj) {
             };
         };
     };
+    __PS_MV_REG = [];
+    return clearStack();
 };
 /* (DEFUN UNMOUNT-OBJECT (OBJ)
      (LET ((SOURCES (CHAIN *TARGET-SOURCES-MAP* (GET OBJ))))

@@ -9,10 +9,18 @@
    delete-property set-property))
 
 
+(defun clear-stack ()
+  (loop
+   while (length *read-stack*) do
+   (chain *read-stack* (pop))))
+
+
 ;; By coordinating the function calls with the get trap, we can correlate
 ;; computed properties to their sources.
 (defun get-property (target key receiver)
   (chain *read-stack* (push (list target key)))
+  ;; Prevent possible memory leaks from reading.
+  (set-timeout clear-stack 0)
   (chain *reflect (get target key receiver)))
 
 
@@ -35,9 +43,7 @@
        ;; Calling the function above will trigger the get trap which will
        ;; append to the *read-stack*, this is for good measure to avoid
        ;; memory leaking.
-       (loop
-        while (length *read-stack*) do
-        (chain *read-stack* (shift))))))
+       (clear-stack))))
   t)
 
 
@@ -56,9 +62,7 @@
    (let* ((value (getprop obj key))
           (is-function (eq (typeof value) 'function)))
      (when is-function
-       (loop
-        while (length *read-stack*) do
-        (chain *read-stack* (shift)))
+       (clear-stack)
        (let ((return-value (value)))
          (when (not (eq return-value undefined))
            (setf (getprop obj key) return-value))
@@ -80,7 +84,8 @@
               (setf (getprop source-context source-key) (list)))
 
             (let ((key-bindings (getprop source-context source-key)))
-              (chain key-bindings (push (list obj key value)))))))))))
+              (chain key-bindings (push (list obj key value))))))))))
+  (clear-stack))
 
 
 ;; Careful: this will only remove dependencies if unmount is called! This can
