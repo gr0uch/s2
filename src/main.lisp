@@ -304,8 +304,11 @@
 (defun set-slot (target key value descriptor is-initializing)
   (when (@ main debug) (console-log 'set-slot arguments))
 
-  ;; Skip deletion if already empty.
-  (when (not (or (getprop target key) value is-initializing))
+  (when (or
+         ;; Skip deletion if already empty.
+         (not (or (getprop target key) value is-initializing))
+         ;; Skip if value is invalid.
+         (and (not (eq value nil)) (not (eq (typeof value) 'object))))
     (return-from set-slot))
 
   (let* ((anchor (@ descriptor node))
@@ -318,6 +321,8 @@
          (end-node (create-anchor 1 key))
          (previous-value (getprop target key))
          (is-previous-array (chain *array (is-array previous-value)))
+         (is-previous-object (and previous-value
+                                  (eq (typeof previous-value) 'object)))
          (is-value-array (chain *array (is-array value)))
          (is-type-mismatch (not (eq is-previous-array is-value-array)))
          (return-value nil))
@@ -348,7 +353,9 @@
     (chain parent-node (insert-before start-node anchor))
 
     (if value
-        (if (or (not previous-value) is-type-mismatch)
+        (if (or (not previous-value)
+                (not is-previous-object)
+                is-type-mismatch)
             ;; Create proxies
             (if (chain *array (is-array value))
                 (let* ((result (create-array value template))

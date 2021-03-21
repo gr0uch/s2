@@ -3,10 +3,9 @@
 (defvar *read-stack* (list))
 
 (defvar *proxy-source*
-  (create
-   get get-property
-   set set-property
-   delete-property set-property))
+  (create get get-property
+          set set-property
+          delete-property set-property))
 
 
 (defun clear-stack ()
@@ -129,6 +128,4 @@
   computed)
 
 
-(export
- :names
- (create-context create-computed))
+(export :names (create-context create-computed))

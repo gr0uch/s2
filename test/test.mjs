@@ -18,7 +18,8 @@ const initialThings = [
 test.initialThings = initialThings;
 
 const source = createContext({
-  z: 'f',
+  showBox: true,
+  content: 'f',
 });
 const computed = createComputed(mount, unmount);
 
@@ -52,13 +53,16 @@ const [proxy, node] = s2({
     },
     [unmount]: delayUnmount,
   },
-  container: {
-    f: new Array(10).fill().map(() => computed({
-      f() {
-        return source.z;
-      },
-    })),
-  },
+  container: computed({
+    box() {
+      if (!source.showBox) return null;
+      return new Array(10).fill().map(() => computed({
+        content() {
+          return source.content;
+        },
+      }));
+    },
+  }),
   n: 'n',
   [mount]: function spam(node) {
     // return null;

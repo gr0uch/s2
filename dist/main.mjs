@@ -541,7 +541,9 @@ function recursiveUnmount(self, shouldUnmount) {
 };
 /* (DEFUN SET-SLOT (TARGET KEY VALUE DESCRIPTOR IS-INITIALIZING)
      (WHEN (@ MAIN DEBUG) (CONSOLE-LOG 'SET-SLOT ARGUMENTS))
-     (WHEN (NOT (OR (GETPROP TARGET KEY) VALUE IS-INITIALIZING))
+     (WHEN
+         (OR (NOT (OR (GETPROP TARGET KEY) VALUE IS-INITIALIZING))
+             (AND (NOT (EQ VALUE NIL)) (NOT (EQ (TYPEOF VALUE) 'OBJECT))))
        (RETURN-FROM SET-SLOT))
      (LET* ((ANCHOR (@ DESCRIPTOR NODE))
             (SLOT (@ DESCRIPTOR SLOT))
@@ -553,6 +555,8 @@ function recursiveUnmount(self, shouldUnmount) {
             (END-NODE (CREATE-ANCHOR 1 KEY))
             (PREVIOUS-VALUE (GETPROP TARGET KEY))
             (IS-PREVIOUS-ARRAY (CHAIN *ARRAY (IS-ARRAY PREVIOUS-VALUE)))
+            (IS-PREVIOUS-OBJECT
+             (AND PREVIOUS-VALUE (EQ (TYPEOF PREVIOUS-VALUE) 'OBJECT)))
             (IS-VALUE-ARRAY (CHAIN *ARRAY (IS-ARRAY VALUE)))
             (IS-TYPE-MISMATCH (NOT (EQ IS-PREVIOUS-ARRAY IS-VALUE-ARRAY)))
             (RETURN-VALUE NIL))
@@ -578,7 +582,8 @@ function recursiveUnmount(self, shouldUnmount) {
        (SETF (GETPROP HASH KEY) (LIST START-NODE END-NODE))
        (CHAIN PARENT-NODE (INSERT-BEFORE START-NODE ANCHOR))
        (IF VALUE
-           (IF (OR (NOT PREVIOUS-VALUE) IS-TYPE-MISMATCH)
+           (IF (OR (NOT PREVIOUS-VALUE) (NOT IS-PREVIOUS-OBJECT)
+                   IS-TYPE-MISMATCH)
                (IF (CHAIN *ARRAY (IS-ARRAY VALUE))
                    (LET* ((RESULT (CREATE-ARRAY VALUE TEMPLATE))
                           (NODES (@ RESULT 0))
@@ -627,7 +632,7 @@ function setSlot(target, key, value, descriptor, isInitializing) {
     if (main.debug) {
         console.log('setSlot', arguments);
     };
-    if (!(target[key] || value || isInitializing)) {
+    if (!(target[key] || value || isInitializing) || value !== null && typeof value !== 'object') {
         return;
     };
     var anchor = descriptor.node;
@@ -640,6 +645,7 @@ function setSlot(target, key, value, descriptor, isInitializing) {
     var endNode = createAnchor(1, key);
     var previousValue = target[key];
     var isPreviousArray = Array.isArray(previousValue);
+    var isPreviousObject = previousValue && typeof previousValue === 'object';
     var isValueArray = Array.isArray(value);
     var isTypeMismatch = isPreviousArray !== isValueArray;
     var returnValue = null;
@@ -671,7 +677,7 @@ function setSlot(target, key, value, descriptor, isInitializing) {
     hash[key] = [startNode, endNode];
     parentNode20.insertBefore(startNode, anchor);
     if (value) {
-        if (!previousValue || isTypeMismatch) {
+        if (!previousValue || !isPreviousObject || isTypeMismatch) {
             if (Array.isArray(value)) {
                 var result = createArray(value, template19);
                 var nodes25 = result[0];
