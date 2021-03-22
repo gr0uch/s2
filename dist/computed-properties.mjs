@@ -38,6 +38,7 @@ function getProperty(target, key, receiver) {
     return Reflect.get(target, key, receiver);
 };
 /* (DEFUN SET-PROPERTY (TARGET KEY VALUE RECEIVER)
+     (WHEN (EQ (GETPROP TARGET KEY) VALUE) (RETURN-FROM SET-PROPERTY T))
      (IF (NOT (EQ VALUE UNDEFINED))
          (CHAIN *REFLECT (SET TARGET KEY VALUE RECEIVER))
          (CHAIN *REFLECT (DELETE-PROPERTY TARGET KEY)))
@@ -54,6 +55,9 @@ function getProperty(target, key, receiver) {
                   (CLEAR-STACK))))
      T) */
 function setProperty(target, key, value, receiver) {
+    if (target[key] === value) {
+        return true;
+    };
     if (value !== undefined) {
         Reflect.set(target, key, value, receiver);
     } else {

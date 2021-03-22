@@ -24,6 +24,9 @@
 
 
 (defun set-property (target key value receiver)
+  ;; Skip if nothing changed.
+  (when (eq (getprop target key) value) (return-from set-property t))
+
   (if (not (eq value undefined))
       (chain *reflect (set target key value receiver))
     (chain *reflect (delete-property target key)))
