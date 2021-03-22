@@ -543,7 +543,8 @@ function recursiveUnmount(self, shouldUnmount) {
      (WHEN (@ MAIN DEBUG) (CONSOLE-LOG 'SET-SLOT ARGUMENTS))
      (WHEN
          (OR (NOT (OR (GETPROP TARGET KEY) VALUE IS-INITIALIZING))
-             (AND (NOT (EQ VALUE NIL)) (NOT (EQ (TYPEOF VALUE) 'OBJECT))))
+             (AND (NOT (EQ VALUE UNDEFINED))
+                  (NOT (EQ (TYPEOF VALUE) 'OBJECT))))
        (RETURN-FROM SET-SLOT))
      (LET* ((ANCHOR (@ DESCRIPTOR NODE))
             (SLOT (@ DESCRIPTOR SLOT))
@@ -632,7 +633,7 @@ function setSlot(target, key, value, descriptor, isInitializing) {
     if (main.debug) {
         console.log('setSlot', arguments);
     };
-    if (!(target[key] || value || isInitializing) || value !== null && typeof value !== 'object') {
+    if (!(target[key] || value || isInitializing) || value !== undefined && typeof value !== 'object') {
         return;
     };
     var anchor = descriptor.node;

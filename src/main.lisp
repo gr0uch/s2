@@ -307,8 +307,8 @@
   (when (or
          ;; Skip deletion if already empty.
          (not (or (getprop target key) value is-initializing))
-         ;; Skip if value is invalid.
-         (and (not (eq value nil)) (not (eq (typeof value) 'object))))
+         ;; Skip if value is invalid: not undefined nor null, AND not an object.
+         (and (not (eq value undefined)) (not (eq (typeof value) 'object))))
     (return-from set-slot))
 
   (let* ((anchor (@ descriptor node))
