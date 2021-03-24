@@ -40,6 +40,7 @@
       h1 { font-size: 3em; line-height: var(--l); font-family: var(--f-h); }
       h2 { font-size: calc(1em * 5 / 2); line-height: calc(var(--l) * 5 / 6); font-family: var(--f-h); }
       h3 { font-family: var(--f-h); font-weight: bold; margin-bottom: calc(var(--l) * 1); text-transform: uppercase; letter-spacing: 0.04em; }
+      code { font-family: var(--f-m); }
       p { margin-bottom: calc(var(--l) * 1); letter-spacing: 0.02em; hyphens: auto; }
       u.l { text-decoration-color: var(--c-l); }
       u.h { text-decoration-color: var(--c-h); }
@@ -236,8 +237,8 @@ function add(event) {
         <section>
           <div>
             <h3>Rationale</h3>
-            <p>With all the front-end web frameworks that come and go, there is so much churn and APIs to learn and eventually discard. <p>
-            <p>I set out to create an abstraction that is fundamental, as timeless as possible, and unversioned. It should be expressive enough to build large single-page applications, but also small enough that it can be dropped in for a tiny widget.</p>
+            <p>Front-end web frameworks come and go, bringing churn and APIs to learn and eventually discard. What I wanted to make is an abstraction that is fundamental, as timeless as possible, and unversioned.</p>
+            <p><strong>s&sup2;</strong> aims to be a fundamental function for building reactive web UI. It could not be any smaller than a single function.</p>
           </div>
         </section>
         <section>
@@ -251,7 +252,7 @@ function add(event) {
                 <h3>new Proxy()</h3>
               </div>
             </figure>
-            <p><strong>s&sup2;</strong> makes extensive use of <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy">Proxy</a> objects. Internally, these proxies are mapped to DOM elements using a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakMap">WeakMap</a>, which makes it a <a href="https://www.stefankrause.net/wp/?p=342">keyed</a> implementation.</p>
+            <p><strong>s&sup2;</strong> makes extensive use of <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy">Proxy</a> objects. Internally, these proxies are mapped to DOM elements using a <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/WeakMap">WeakMap</a>, which makes it a <a href="https://www.stefankrause.net/wp/?p=342">keyed</a> implementation. It turns objects into proxies recursively, so that deeply nested data structures are reactive.</p>
             <p>The consequence of using proxies instead of a traditional API with method calls, is that <em>UI code disappears, it is folded into the data</em>.</p>
           </div>
         </section>
@@ -260,6 +261,12 @@ function add(event) {
             <h3>Developer Ergonomics</h3>
             <p>The API is entirely comprised of one function, and that&rsquo;s it. The complexities of the DOM are entirely abstracted into Proxy objects. Writing UI code is as easy as mutating or replacing data structures.</p>
             <p><strong>s&sup2;</strong> is optimized for <a href="https://en.wikipedia.org/wiki/Immediate_mode_GUI">immediate-mode</a> rendering. The entire state of the UI can be overwritten with new objects and it will try to make the most efficient DOM updates. This is made possible by its <a href="https://github.com/gr0uch/s2/search?q=set-index">array diffing</a> algorithm.</p>
+          </div>
+        </section>
+        <section>
+          <div>
+            <h3>Computed Properties (Reactivity)</h3>
+            <p>Computed properties are an <a href="https://github.com/gr0uch/s2/blob/master/src/computed-properties.lisp">optional addon</a>. It adds automatic dependency tracking by using the <code>get</code> trap, which makes <strong>s&sup2;</strong> truly reactive. This is mainly an ergonomic feature so that variables that should be propagated in multiple places are updated automatically.</p>
           </div>
         </section>
         <section>
