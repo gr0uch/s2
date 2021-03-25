@@ -33,6 +33,7 @@
         --c-h: #e34c26;
         --c-e: #6e40c9;
         --c-e2: rgba(110, 64, 201, 0.2);
+        --c-e3: rgba(110, 64, 201, 0.1);
       }
       ::selection { background: var(--c-j); color: var(--c-fg); }
       * { margin: 0; padding: 0; border: 0; box-sizing: border-box; }
@@ -281,13 +282,14 @@ function add(event) {
               #computed-demo input { border-bottom: 1px var(--c-a3) solid; margin: 0 calc(var(--l) / 2); font-family: inherit; font-size: inherit; color: inherit; background: none; width: calc(var(--l) * 2); border-radius: 0; }
               #computed-demo input:focus { outline: none; }
               #computed-demo .computed-value { margin: 0 calc(var(--l) / 6); font-weight: bold; }
+              #computed-demo code { background: var(--c-e3); border-radius: calc(var(--l) / 6); padding: 0 calc(var(--l) / 8); }
             </style>
             <template id="computed">
               <div>
+                Formula: <code>value * multiplier</code>
                 <label>
                   Multiplier: <input type="number" data-value="multiplier" data-event-input="multiplierInput" step="0.1">
                 </label>
-                Formula: <code>value * multiplier</code>
               </div>
               <div>
                 <slot name="values" data-template="#value"></slot>
