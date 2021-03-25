@@ -41,7 +41,7 @@
       h1 { font-size: 3em; line-height: var(--l); font-family: var(--f-h); }
       h2 { font-size: calc(1em * 5 / 2); line-height: calc(var(--l) * 5 / 6); font-family: var(--f-h); }
       h3 { font-family: var(--f-h); font-weight: bold; margin-bottom: calc(var(--l) * 1); text-transform: uppercase; letter-spacing: 0.04em; }
-      code { font-family: var(--f-m); }
+      code { font-family: var(--f-m); font-size: calc(var(--h) - 1px); }
       p { margin-bottom: calc(var(--l) * 1); letter-spacing: 0.02em; hyphens: auto; }
       u.l { text-decoration-color: var(--c-l); }
       u.h { text-decoration-color: var(--c-h); }
@@ -272,7 +272,7 @@ function add(event) {
             <p>Computed properties are an <a href="https://github.com/gr0uch/s2/blob/master/src/computed-properties.lisp">optional addon</a>. It adds automatic dependency tracking by using the <code>get</code> trap, which makes <strong>s&sup2;</strong> truly reactive. This is mainly an ergonomic feature so that variables that should be propagated in multiple places are updated automatically.</p>
             <style>
               #computed-demo { display: flex; align-items: center; }
-              #computed-demo > :first-child { flex: 1; color: var(--c-e); padding: calc(var(--l) / 4); margin-right: var(--l); box-shadow: 0 calc(var(--l) / 4) calc(var(--l) / 2) var(--c-e2); }
+              #computed-demo > :first-child { flex: 1; color: var(--c-e); padding: calc(var(--l) / 4); margin: calc(var(--l) / 4) var(--l) calc(var(--l) / 4) 0; box-shadow: 0 calc(var(--l) / 4) calc(var(--l) / 2) var(--c-e2); }
               #computed-demo > :last-child { flex: 2; display: flex; flex-direction: column; }
               #computed-demo > :last-child > * { display: flex; padding: calc(var(--l) / 4) 0; margin: calc(var(--l) / 2) 0; box-shadow: 0 calc(var(--l) / 4) calc(var(--l) / 2) var(--c-a3); }
               #computed-demo > :last-child > * > * { flex: 1; padding: 0 calc(var(--l) / 4); }
@@ -287,6 +287,7 @@ function add(event) {
                 <label>
                   Multiplier: <input type="number" data-value="multiplier" data-event-input="multiplierInput" step="0.1">
                 </label>
+                Formula: <code>value * multiplier</code>
               </div>
               <div>
                 <slot name="values" data-template="#value"></slot>
