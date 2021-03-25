@@ -50,7 +50,7 @@ function getProperty(target, key, receiver) {
              DO (LET* ((OBJ (@ KEY-BINDING 0))
                        (OBJ-KEY (@ KEY-BINDING 1))
                        (FN (@ KEY-BINDING 2))
-                       (RETURN-VALUE (FN)))
+                       (RETURN-VALUE (CHAIN FN (CALL OBJ))))
                   (SETF (GETPROP OBJ OBJ-KEY) RETURN-VALUE)
                   (CLEAR-STACK))))
      T) */
@@ -75,17 +75,17 @@ function setProperty(target, key, value, receiver) {
         var obj = keyBinding[0];
         var objKey = keyBinding[1];
         var fn = keyBinding[2];
-        var returnValue = fn();
+        var returnValue = fn.call(obj);
         obj[objKey] = returnValue;
         clearStack();
     };
     __PS_MV_REG = [];
     return true;
 };
-/* (DEFUN CREATE-CONTEXT (OBJ)
+/* (DEFUN CREATE-SOURCE (OBJ)
      (LET ((PROXY (NEW (*PROXY OBJ *PROXY-SOURCE*))))
        PROXY)) */
-function createContext(obj) {
+function createSource(obj) {
     var proxy = new Proxy(obj, PROXYSOURCE);
     __PS_MV_REG = [];
     return proxy;
@@ -97,7 +97,7 @@ function createContext(obj) {
                 (WHEN IS-FUNCTION
                   (WHEN (@ VALUE IS-EVENT-LISTENER) (CONTINUE))
                   (CLEAR-STACK)
-                  (LET ((RETURN-VALUE (VALUE)))
+                  (LET ((RETURN-VALUE (CHAIN VALUE (CALL OBJ))))
                     (WHEN (NOT (EQ RETURN-VALUE UNDEFINED))
                       (SETF (GETPROP OBJ KEY) RETURN-VALUE))
                     (LOOP FOR TUPLE IN *READ-STACK*
@@ -134,7 +134,7 @@ function mountObject(obj) {
                 continue;
             };
             clearStack();
-            var returnValue = value();
+            var returnValue = value.call(obj);
             if (returnValue !== undefined) {
                 obj[key] = returnValue;
             };
@@ -231,6 +231,6 @@ function createComputed(mountSymbol, unmountSymbol) {
     };
     return computed;
 };
-/* (EXPORT NAMES (CREATE-CONTEXT CREATE-COMPUTED)) */
-export { createContext, createComputed, };
+/* (EXPORT NAMES (CREATE-SOURCE CREATE-COMPUTED)) */
+export { createSource, createComputed, };
 

@@ -32,6 +32,7 @@
         --c-l: #3fb68b;
         --c-h: #e34c26;
         --c-e: #6e40c9;
+        --c-e2: rgba(110, 64, 201, 0.2);
       }
       ::selection { background: var(--c-j); color: var(--c-fg); }
       * { margin: 0; padding: 0; border: 0; box-sizing: border-box; }
@@ -267,6 +268,44 @@ function add(event) {
           <div>
             <h3>Computed Properties (Reactivity)</h3>
             <p>Computed properties are an <a href="https://github.com/gr0uch/s2/blob/master/src/computed-properties.lisp">optional addon</a>. It adds automatic dependency tracking by using the <code>get</code> trap, which makes <strong>s&sup2;</strong> truly reactive. This is mainly an ergonomic feature so that variables that should be propagated in multiple places are updated automatically.</p>
+            <style>
+              #computed-demo { display: flex; align-items: center; }
+              #computed-demo > :first-child { flex: 1; color: var(--c-e); padding: calc(var(--l) / 4); margin-right: var(--l); box-shadow: 0 calc(var(--l) / 4) calc(var(--l) / 2) var(--c-e2); }
+              #computed-demo > :last-child { flex: 2; display: flex; flex-direction: column; }
+              #computed-demo > :last-child > * { display: flex; padding: calc(var(--l) / 4) 0; margin: calc(var(--l) / 2) 0; box-shadow: 0 calc(var(--l) / 4) calc(var(--l) / 2) var(--c-a3); }
+              #computed-demo > :last-child > * > * { flex: 1; padding: 0 calc(var(--l) / 4); }
+              #computed-demo label { display: flex; }
+              #computed-demo label > * { flex: 1; }
+              #computed-demo input { border-bottom: 1px var(--c-a3) solid; margin: 0 calc(var(--l) / 2); font-family: inherit; font-size: inherit; color: inherit; background: none; width: calc(var(--l) * 2); }
+              #computed-demo input:focus { outline: none; }
+              #computed-demo .computed-value { margin: 0 calc(var(--l) / 6); font-weight: bold; }
+            </style>
+            <template id="computed">
+              <div>
+                <label>
+                  Multiplier: <input type="number" data-value="multiplier" data-event-input="multiplierInput" step="0.1">
+                </label>
+              </div>
+              <div>
+                <slot name="values" data-template="#value"></slot>
+              </div>
+            </template>
+            <template id="value">
+              <div>
+                <div>
+                  <label>
+                    Value: <input type="number" data-value="value" data-event-input="valueInput" step="0.1">
+                  </label>
+                </div>
+                <div>
+                  <label>
+                    Computed: <span class="computed-value" data-text="computedValue"></span>
+                  </label>
+                </div>
+              </div>
+            </template>
+            <div id="computed-demo">
+            </div>
           </div>
         </section>
         <section>
@@ -281,10 +320,12 @@ function add(event) {
       (async global => {
         const [
             { default: depCheck },
-            { default: s2 },
+            { default: s2, mount: s2mount, unmount: s2unmount },
+            { createSource, createComputed },
         ] = await Promise.all([
           import('./dep-check.min.mjs'),
           import('./main.min.mjs'),
+          import('./computed-properties.min.mjs'),
         ]);
 
         const container = document.getElementById('container');
@@ -318,6 +359,50 @@ function add(event) {
           console.info(`\`mount\` called in ${performance.now() - start}ms`);
         }
 
+        const computed = createComputed(s2mount, s2unmount);
+        const sourceContext = createSource({
+          multiplier: 1.2,
+        });
+
+        function computedValue(value) {
+          const source = createSource({ value });
+          return computed({
+            source,
+            value,
+            valueInput,
+            computedValue() {
+              return (this.source.value * sourceContext.multiplier).toFixed(2);
+            },
+          });
+        }
+
+        function multiplierInput(event) {
+          const { target: { value } } = event;
+          sourceContext.multiplier = Number(value);
+        }
+
+        function valueInput(event) {
+          const { target: { value } } = event;
+          this.source.value = Number(value);
+        }
+
+        function mountComputed() {
+          const v1 = computedValue(2.5);
+          const v2 = computedValue(4);
+          const state = Object.assign({
+            multiplierInput,
+            values: [
+              v1,
+              v2,
+            ],
+          }, sourceContext);
+          const root = document.getElementById('computed');
+          const [proxy, node] = s2(state, root);
+          const container = document.getElementById('computed-demo');
+          container.appendChild(node);
+          global.s = sourceContext;
+        }
+
         function cleanupTemplates() {
           document.querySelectorAll('template').forEach(template => {
             const iter = document
@@ -331,6 +416,7 @@ function add(event) {
         }
 
         mount();
+        mountComputed();
 
         // One layout trick requires JS...
         const hr = document.querySelector('article > hr');

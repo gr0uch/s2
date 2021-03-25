@@ -1,6 +1,6 @@
 import s2, { mount, unmount } from "../dist/main.mjs";
 import depCheck from "../dist/dep-check.mjs";
-import { createContext, createComputed } from "../dist/computed-properties.mjs";
+import { createSource, createComputed } from "../dist/computed-properties.mjs";
 import test from "./runner.mjs";
 
 s2.debug = true;
@@ -17,7 +17,7 @@ const initialThings = [
 
 test.initialThings = initialThings;
 
-const source = createContext({
+const source = createSource({
   showBox: true,
   content: 'f',
 });

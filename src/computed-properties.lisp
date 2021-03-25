@@ -40,7 +40,7 @@
      (let* ((obj (@ key-binding 0))
             (obj-key (@ key-binding 1))
             (fn (@ key-binding 2))
-            (return-value (fn)))
+            (return-value (chain fn (call obj))))
        (setf (getprop obj obj-key) return-value)
        ;; Calling the function above will trigger the get trap which will
        ;; append to the *read-stack*, this is for good measure to avoid
@@ -49,8 +49,8 @@
   t)
 
 
-;; Context objects are sources of data that control computed properties.
-(defun create-context (obj)
+;; Source objects are sources of data that control computed properties.
+(defun create-source (obj)
   (let ((proxy (new (*proxy obj *proxy-source*))))
     proxy))
 
@@ -66,7 +66,7 @@
      (when is-function
        (when (@ value is-event-listener) (continue))
        (clear-stack)
-       (let ((return-value (value)))
+       (let ((return-value (chain value (call obj))))
          (when (not (eq return-value undefined))
            (setf (getprop obj key) return-value))
          (loop
@@ -131,4 +131,4 @@
   computed)
 
 
-(export :names (create-context create-computed))
+(export :names (create-source create-computed))

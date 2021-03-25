@@ -97,7 +97,7 @@ Note: `node` can be missing for the `unmount` function if it is called due to an
 ## Optional Modules
 
 - `dep-check.mjs`: this is used to check if all of the required APIs are present in the runtime.
-- `computed-properties.mjs`: adds a computed property feature that does automatic dependency tracking. Exports `createContext` to create a reactive object and `createComputed` to declare an object as having computed properties. See source code and tests for usage.
+- `computed-properties.mjs`: adds a computed property feature that does automatic dependency tracking. Exports `createSource` to create a reactive object and `createComputed` to declare an object as having computed properties. See source code and tests for usage.
 - `render-to-string.mjs` (TBD)
 - `hydrate.mjs` (TBD)
 
