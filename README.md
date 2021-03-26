@@ -82,7 +82,7 @@ import { mount, unmount, move } from '...';
     // Animations can be implemented here while waiting to remove the node.
     await new Promise(resolve => setTimeout(resolve, 1000));
   },
-  [move]: async function(node) {
+  [move]: function(node) {
     // Move is called when an object's index in an array changes. This is
     // useful for implementing FLIP animations.
   },
