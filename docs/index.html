@@ -287,9 +287,9 @@ function add(event) {
             </style>
             <template id="computed">
               <div>
-                Formula: <code>value * multiplier</code>
+                Formula: <code>value * scalar</code>
                 <label>
-                  Multiplier: <input type="number" data-value="multiplier" data-event-input="multiplierInput" step="0.1">
+                  Scalar: <input type="number" data-value="scalar" data-event-input="scalarInput" step="0.1">
                 </label>
               </div>
               <div>
@@ -390,7 +390,7 @@ function add(event) {
 
         const computed = createComputed(s2mount, s2unmount);
         const sourceContext = createSource({
-          multiplier: 1.2,
+          scalar: 1.2,
         });
 
         function computedValue(value) {
@@ -400,14 +400,14 @@ function add(event) {
             value,
             valueInput,
             computedValue() {
-              return (this.source.value * sourceContext.multiplier).toFixed(2);
+              return (this.source.value * sourceContext.scalar).toFixed(2);
             },
           });
         }
 
-        function multiplierInput(event) {
+        function scalarInput(event) {
           const { target: { value } } = event;
-          sourceContext.multiplier = Number(value);
+          sourceContext.scalar = Number(value);
         }
 
         function valueInput(event) {
@@ -419,7 +419,7 @@ function add(event) {
           const v1 = computedValue(2.5);
           const v2 = computedValue(4);
           const state = Object.assign({
-            multiplierInput,
+            scalarInput,
             values: [
               v1,
               v2,
