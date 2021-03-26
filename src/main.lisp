@@ -463,17 +463,16 @@
        for i from 0 to (- (length (@ parent-node child-nodes)) 1) do
        (let ((node (getprop (@ parent-node child-nodes) i)))
          (when (not (eq (@ node node-type) (@ *node "ELEMENT_NODE"))) (continue))
-         (when (length (@ node children))
-           (walk node (chain path (concat i))))
-
-         (when (and (or (eq (@ node tag-name) *tag-slot*)
-                        (@ node dataset key))
-                    (@ node dataset template))
+         (when (or (eq (@ node tag-name) *tag-slot*)
+                   (@ node dataset key))
            (let* ((slot-name (or (@ node dataset key) (@ node name)))
                   (anchor (create-anchor 2 slot-name))
+                  (template-selector (@ node dataset template))
                   (template-node
-                   (chain document (query-selector
-                                    (@ node dataset template)))))
+                   ;; Special case: when `data-key` exists and template is nested.
+                   (if template-selector
+                       (chain document (query-selector template-selector))
+                     node)))
              (when (eq slot-name undefined)
                (throw (new (*type-error
                             "Missing `name` or `data-key` for slot."))))
@@ -481,12 +480,16 @@
              (setf (getprop context slot-name)
                    (create
                     path (chain path (concat i))
-                    slot node
+                    ;; This is for the placeholder content. If the template is nested,
+                    ;; then we need to make a dummy placeholder.
+                    slot (if template-selector node (chain document (create-element 'div)))
                     template template-node
                     type *context-slot*))
-             (chain node (remove))
-             )
+             (chain node (remove)))
            (continue))
+
+         (when (length (@ node children))
+           (walk node (chain path (concat i))))
 
          (loop
           for key of (@ node dataset) do

@@ -840,20 +840,18 @@ function setEvent(target, value, descriptor, receiver) {
                DO (LET ((NODE (GETPROP (@ PARENT-NODE CHILD-NODES) I)))
                     (WHEN (NOT (EQ (@ NODE NODE-TYPE) (@ *NODE ELEMENT_NODE)))
                       (CONTINUE))
-                    (WHEN (LENGTH (@ NODE CHILDREN))
-                      (WALK NODE (CHAIN PATH (CONCAT I))))
                     (WHEN
-                        (AND
-                         (OR (EQ (@ NODE TAG-NAME) *TAG-SLOT*)
-                             (@ NODE DATASET KEY))
-                         (@ NODE DATASET TEMPLATE))
+                        (OR (EQ (@ NODE TAG-NAME) *TAG-SLOT*)
+                            (@ NODE DATASET KEY))
                       (LET* ((SLOT-NAME
                               (OR (@ NODE DATASET KEY) (@ NODE NAME)))
                              (ANCHOR (CREATE-ANCHOR 2 SLOT-NAME))
+                             (TEMPLATE-SELECTOR (@ NODE DATASET TEMPLATE))
                              (TEMPLATE-NODE
-                              (CHAIN DOCUMENT
-                                     (QUERY-SELECTOR
-                                      (@ NODE DATASET TEMPLATE)))))
+                              (IF TEMPLATE-SELECTOR
+                                  (CHAIN DOCUMENT
+                                         (QUERY-SELECTOR TEMPLATE-SELECTOR))
+                                  NODE)))
                         (WHEN (EQ SLOT-NAME UNDEFINED)
                           (THROW
                               (NEW
@@ -861,10 +859,15 @@ function setEvent(target, value, descriptor, receiver) {
                                 Missing `name` or `data-key` for slot.))))
                         (CHAIN PARENT-NODE (INSERT-BEFORE ANCHOR NODE))
                         (SETF (GETPROP CONTEXT SLOT-NAME)
-                                (CREATE PATH (CHAIN PATH (CONCAT I)) SLOT NODE
+                                (CREATE PATH (CHAIN PATH (CONCAT I)) SLOT
+                                 (IF TEMPLATE-SELECTOR
+                                     NODE
+                                     (CHAIN DOCUMENT (CREATE-ELEMENT 'DIV)))
                                  TEMPLATE TEMPLATE-NODE TYPE *CONTEXT-SLOT*))
                         (CHAIN NODE (REMOVE)))
                       (CONTINUE))
+                    (WHEN (LENGTH (@ NODE CHILDREN))
+                      (WALK NODE (CHAIN PATH (CONCAT I))))
                     (LOOP FOR KEY OF (@ NODE DATASET)
                           DO (LET ((VALUE (GETPROP (@ NODE DATASET) KEY))
                                    (RESULT NIL))
@@ -910,24 +913,25 @@ function processTemplate(template) {
             if (node.nodeType !== Node['ELEMENT_NODE']) {
                 continue;
             };
-            if (node.children.length) {
-                walk(node, path.concat(i));
-            };
-            if ((node.tagName === TAGSLOT || node.dataset.key) && node.dataset.template) {
+            if (node.tagName === TAGSLOT || node.dataset.key) {
                 var slotName = node.dataset.key || node.name;
                 var anchor = createAnchor(2, slotName);
-                var templateNode = document.querySelector(node.dataset.template);
+                var templateSelector = node.dataset.template;
+                var templateNode = templateSelector ? document.querySelector(templateSelector) : node;
                 if (slotName === undefined) {
                     throw new TypeError('Missing `name` or `data-key` for slot.');
                 };
                 parentNode.insertBefore(anchor, node);
                 context[slotName] = { path : path.concat(i),
-                                   slot : node,
+                                   slot : templateSelector ? node : document.createElement('div'),
                                    template : templateNode,
                                    type : CONTEXTSLOT
                                  };
                 node.remove();
                 continue;
+            };
+            if (node.children.length) {
+                walk(node, path.concat(i));
             };
             for (var key in node.dataset) {
                 var value = node.dataset[key];

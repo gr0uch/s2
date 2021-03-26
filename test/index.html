@@ -37,11 +37,9 @@
 </template>
 
 <template id="container">
-  <slot name="box" data-template="#box">!!!</slot>
-</template>
-
-<template id="box">
-  <span data-text="content"></span>
+  <slot name="box">
+    <span data-text="content"></span>
+  </slot>
 </template>
 
 <template id="list">

@@ -92,6 +92,21 @@ import { mount, unmount, move } from '...';
 ```
 
 
+## Deeply Nested Templates
+
+If you don't want to define a template for every object shape, which makes templates less re-usable but more inline, you can optionally omit `data-template` and use `data-key` only (or `<slot name="...">`) and nest the template inside. This also has the downside of not being able to define an empty state.
+
+```html
+<template id="root">
+  <h1>Hello, world!</h1>
+  <slot name="counter">
+    <span data-text="count"></span>
+    <button data-event-click="increment">Increment</button>
+  </slot>
+</template>
+```
+
+
 ## Flags
 
 - `s2.debug`: turn on messages in the console. Warning: has a performance impact.
