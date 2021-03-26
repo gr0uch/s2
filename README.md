@@ -39,8 +39,9 @@ const template = document.getElementById("root");
 const [proxy, node] = s2({
   counter: {
     count: 0,
-    increment() {
+    increment(event) {
       this.count++;
+      event.preventDefault();
     },
   }
 }, template);
