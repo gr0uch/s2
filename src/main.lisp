@@ -9,6 +9,7 @@
 
 (defvar *symbol-mount* (*symbol 'mount))
 (defvar *symbol-unmount* (*symbol 'unmount))
+(defvar *symbol-move* (*symbol 'move))
 (defvar *tag-slot* '*slot*)
 
 ;; Condensed form of console.log.
@@ -24,8 +25,9 @@
 ;; This is used to keep track of delimiters for slots.
 (defvar *target-delimiter-map* (new (*weak-map)))
 
-;; A map of proxies to unmount functions.
+;; A map of proxies to unmount/move functions.
 (defvar *proxy-unmount-map* (new (*weak-map)))
+(defvar *proxy-move-map* (new (*weak-map)))
 
 ;; A map of proxies to arrays of Nodes.
 ;; This is used to keep track of delimiters for individual proxy objects.
@@ -153,34 +155,57 @@
                 (chain target (find-index
                                (lambda (p i) (and (eq p value)
                                                   (not (eq i numkey)))))))
-               (other-proxy (getprop target key)))
-          (when (and other-proxy (not (eq value other-proxy)))
-            (let* ((other-nodes (chain *proxy-delimiter-map* (get other-proxy)))
-                   (other-start-node (@ other-nodes 0))
-                   (other-end-node (@ other-nodes 1))
-                   (nodes (chain *proxy-delimiter-map* (get value)))
-                   (start-node (@ nodes 0))
-                   (end-node (@ nodes 1))
-                   (anchor (@ nodes 1 next-sibling))
-                   (parent-node (@ anchor parent-node)))
+               (other-proxy (getprop target key))
+               (move (chain *proxy-move-map* (get value)))
+               (nodes (chain *proxy-delimiter-map* (get value)))
+               (start-node (@ nodes 0))
+               (end-node (@ nodes 1)))
+          (if other-proxy
+              (let* ((other-nodes (chain *proxy-delimiter-map* (get other-proxy)))
+                     (other-start-node (@ other-nodes 0))
+                     (other-end-node (@ other-nodes 1))
+                     (other-move (chain *proxy-move-map* (get other-proxy)))
+                     (anchor (@ nodes 1 next-sibling))
+                     (parent-node (@ anchor parent-node)))
 
-              ;; Move the current proxy to before the other position.
-              (let ((node start-node))
+                (when (not (eq value other-proxy))
+                  ;; Call move first.
+                  (when move
+                    (let ((node (@ start-node next-sibling)))
+                      (loop while (not (chain node (is-same-node end-node))) do
+                            (let ((old-node node))
+                              (setf node (@ node next-sibling))
+                              (chain move (call value old-node))))))
+                  (when other-move
+                    (let ((node (@ other-start-node next-sibling)))
+                      (loop while (not (chain node (is-same-node other-end-node))) do
+                            (let ((old-node node))
+                              (setf node (@ node next-sibling))
+                              (chain other-move (call other-proxy old-node))))))
+
+                  ;; Move the current proxy to before the other position.
+                  (let ((node start-node))
+                    (loop while (not (chain node (is-same-node end-node))) do
+                          (let ((old-node node))
+                            (setf node (@ node next-sibling))
+                            (chain parent-node
+                                   (insert-before old-node other-start-node))))
+                    (chain parent-node (insert-before end-node other-start-node)))
+
+                  ;; Move other proxy to after the current position.
+                  (let ((node other-start-node))
+                    (loop while (not (chain node (is-same-node other-end-node))) do
+                          (let ((old-node node))
+                            (setf node (@ node next-sibling))
+                            (chain parent-node (insert-before old-node anchor))))
+                    (chain parent-node (insert-before other-end-node anchor))))
+                )
+            (when move
+              (let ((node (@ start-node next-sibling)))
                 (loop while (not (chain node (is-same-node end-node))) do
                       (let ((old-node node))
                         (setf node (@ node next-sibling))
-                        (chain parent-node
-                               (insert-before old-node other-start-node))))
-                (chain parent-node (insert-before end-node other-start-node)))
-
-              ;; Move other proxy to after the current position.
-              (let ((node other-start-node))
-                (loop while (not (chain node (is-same-node other-end-node))) do
-                      (let ((old-node node))
-                        (setf node (@ node next-sibling))
-                        (chain parent-node (insert-before old-node anchor))))
-                (chain parent-node (insert-before other-end-node anchor)))
-              ))
+                        (chain move (call value old-node)))))))
 
           ;; After moving, set the other proxy to the other position.
           (when (~ other-index)
@@ -554,9 +579,11 @@
          (nodes (list start-node end-node))
          (mount (getprop obj *symbol-mount*))
          (unmount (getprop obj *symbol-unmount*))
+         (move (getprop obj *symbol-move*))
          (fragment (chain document (create-document-fragment))))
 
     (when unmount (chain *proxy-unmount-map* (set proxy unmount)))
+    (when move (chain *proxy-move-map* (set proxy move)))
 
     (chain *target-context-map* (set target context))
     (chain *target-event-map* (set target (create)))
@@ -601,4 +628,5 @@
 (export
  :default main
  :names ((*symbol-mount* mount)
-         (*symbol-unmount* unmount)))
+         (*symbol-unmount* unmount)
+         (*symbol-move* move)))

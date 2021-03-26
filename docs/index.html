@@ -30,6 +30,7 @@
         --c-a3: rgb(225, 225, 225);
         --c-j: #f1e05a;
         --c-l: #3fb68b;
+        --c-l2: rgba(63, 182, 138, 0.2);
         --c-h: #e34c26;
         --c-e: #6e40c9;
         --c-e2: rgba(110, 64, 201, 0.2);
@@ -315,6 +316,28 @@ function add(event) {
         </section>
         <section>
           <div>
+            <h3>Animations with FLIP</h3>
+            <p><a href="https://aerotwist.com/blog/flip-your-animations/">FLIP</a> is an animation technique that stands for First, Last, Invert, Play. The <code>move</code> symbol lets the developer implement smooth transitions.</p>
+            <style>
+              #flip-demo { display: flex; justify-content: center; }
+              #flip-demo > * { margin: 0 calc(var(--l) / 5); padding: calc(var(--l) / 12) calc(var(--l) / 3); box-shadow: 0 calc(var(--l) / 4) calc(var(--l) / 2) var(--c-a3); background: var(--c-bg); }
+              #flip-demo .shuffle { color: var(--c-l); user-select: none; cursor: pointer; box-shadow: 0 calc(var(--l) / 4) calc(var(--l) / 2) var(--c-l2); }
+              @media (max-width: 640px) {
+                  #flip-demo > * { margin: 0 2px; padding: 1px 5px; }
+              }
+            </style>
+            <template id="flip">
+              <slot name="flippers" data-template="#flipper"></slot>
+              <div class="shuffle" data-event-click="shuffle">Shuffle</div>
+            </template>
+            <template id="flipper">
+              <div data-text="text"></div>
+            </template>
+            <div id="flip-demo"></div>
+          </div>
+        </section>
+        <section>
+          <div>
             <h3>Further Reading</h3>
             <p>Check out the <a href="https://github.com/gr0uch/s2">GitHub repository</a> for technical details.</p>
           </div>
@@ -325,13 +348,14 @@ function add(event) {
       (async global => {
         const [
             { default: depCheck },
-            { default: s2, mount: s2mount, unmount: s2unmount },
+            { default: s2, mount: s2mount, unmount: s2unmount, move: s2move },
             { createSource, createComputed },
         ] = await Promise.all([
           import('./dep-check.min.mjs'),
           import('./main.min.mjs'),
           import('./computed-properties.min.mjs'),
         ]);
+        // s2.debug = true;
 
         const container = document.getElementById('container');
         if (!depCheck()) {
@@ -408,6 +432,43 @@ function add(event) {
           global.s = sourceContext;
         }
 
+        function mountFLIP() {
+          function move(node) {
+            if (this.isMoving) return;
+            this.isMoving = true;
+            const first = node.getBoundingClientRect();
+            requestAnimationFrame(() => {
+              delete this.isMoving;
+              const last = node.getBoundingClientRect();
+              const invert = first.left - last.left;
+              node.animate([
+                { transform: `translateX(${invert}px)` },
+                { transform: 'translateX(0)' },
+              ], {
+                duration: 250,
+                easing: 'ease-in-out',
+              });
+            });
+          }
+          function shuffle() {
+            const array = this.flippers;
+            array.sort((a, b) => Math.random() < 0.5 ? -1 : 1);
+          }
+          const state = {
+            flippers: new Array(9).fill().map((_, i) => {
+              return {
+                text: i + 1,
+                [s2move]: move,
+              };
+            }),
+            shuffle,
+          };
+          const root = document.getElementById('flip');
+          const [proxy, node] = s2(state, root);
+          const container = document.getElementById('flip-demo');
+          container.appendChild(node);
+        }
+
         function cleanupTemplates() {
           document.querySelectorAll('template').forEach(template => {
             const iter = document
@@ -420,8 +481,10 @@ function add(event) {
           });
         }
 
+        cleanupTemplates();
         mount();
         mountComputed();
+        mountFLIP();
 
         // One layout trick requires JS...
         const hr = document.querySelector('article > hr');

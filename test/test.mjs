@@ -1,4 +1,4 @@
-import s2, { mount, unmount } from "../dist/main.mjs";
+import s2, { mount, unmount, move } from "../dist/main.mjs";
 import depCheck from "../dist/dep-check.mjs";
 import { createSource, createComputed } from "../dist/computed-properties.mjs";
 import test from "./runner.mjs";
@@ -9,10 +9,15 @@ depCheck();
 cleanupTemplates();
 
 const start = performance.now();
+
+function moveThing (node) {
+    console.log('MOVE', this.text, node);
+}
+
 const initialThings = [
-  { text: 'a' },
-  { text: 'b' },
-  { text: 'c' },
+  { text: 'a', [move]: moveThing },
+  { text: 'b', [move]: moveThing },
+  { text: 'c', [move]: moveThing },
 ];
 
 test.initialThings = initialThings;

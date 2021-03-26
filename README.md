@@ -66,13 +66,13 @@ Here are the data attributes it will look for:
 - `data-*`: for setting data attributes (reflection).
 
 
-## Mount and Unmount
+## Mount, Unmount, & Move
 
-Each object may implement a `mount` and `unmount` function. This allows you to do animations and run any code needed on these events. The unmount function is particularly useful for implementing exiting animations, as it will wait for a promise to resolve before removing the node.
+Each object may implement a `mount`, `unmount` & `move` function. This allows you to do animations and run any code needed on these events. The unmount function is particularly useful for implementing exiting animations, as it will wait for a promise to resolve before removing the node.
 
 ```js
 // These named exports are symbols that prevent key collisions.
-import { mount, unmount } from '...';
+import { mount, unmount, move } from '...';
 
 {
   [mount]: function(node) {
@@ -81,6 +81,10 @@ import { mount, unmount } from '...';
   [unmount]: async function(node) {
     // Animations can be implemented here while waiting to remove the node.
     await new Promise(resolve => setTimeout(resolve, 1000));
+  },
+  [move]: async function(node) {
+    // Move is called when an object's index in an array changes. This is
+    // useful for implementing FLIP animations.
   },
 }
 ```
