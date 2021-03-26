@@ -80,6 +80,8 @@ import { mount, unmount, move } from '...';
   },
   [unmount]: async function(node) {
     // Animations can be implemented here while waiting to remove the node.
+    // Note: `node` can be missing for the `unmount` function if it is called
+    // due to an ancestor object being deleted.
     await new Promise(resolve => setTimeout(resolve, 1000));
   },
   [move]: function(node) {
@@ -88,8 +90,6 @@ import { mount, unmount, move } from '...';
   },
 }
 ```
-
-Note: `node` can be missing for the `unmount` function if it is called due to an ancestor object being deleted.
 
 
 ## Flags
