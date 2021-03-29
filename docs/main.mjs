@@ -441,46 +441,48 @@ function enqueue(fn) {
             (DESCRIPTORS (GETPROP CONTEXT KEY))
             (NODE NIL)
             (TYPE NIL))
-       (WHEN DESCRIPTORS
-         (LOOP FOR DESCRIPTOR IN DESCRIPTORS
-               DO (SETF NODE (@ DESCRIPTOR NODE)
-                        TYPE (@ DESCRIPTOR TYPE)) (WHEN
-                                                      (OR IS-CHANGED
-                                                          IS-INITIALIZING)
-                                                    (IF (AND
-                                                         (IN TYPE
-                                                          *PROPERTY-HANDLERS*)
-                                                         (NOT
-                                                          (EQ (TYPEOF VALUE)
-                                                              'FUNCTION)))
-                                                        ((GETPROP
-                                                          *PROPERTY-HANDLERS*
-                                                          TYPE)
-                                                         NODE
-                                                         (@ DESCRIPTOR NAME)
-                                                         VALUE)
-                                                        (PROGN
-                                                         (WHEN
-                                                             (EQ TYPE
-                                                                 *CONTEXT-EVENT*)
-                                                           (SET-EVENT TARGET
-                                                            VALUE DESCRIPTOR
-                                                            RECEIVER))
-                                                         (WHEN
-                                                             (EQ TYPE
-                                                                 *CONTEXT-SLOT*)
-                                                           (LET ((PROXY
-                                                                  (SET-SLOT
-                                                                   TARGET KEY
-                                                                   VALUE
-                                                                   DESCRIPTOR
-                                                                   IS-INITIALIZING)))
-                                                             (WHEN PROXY
-                                                               (RETURN-FROM
-                                                                   SET-PROPERTY
-                                                                 (CHAIN
-                                                                  *REFLECT
-                                                                  (SET TARGET
+       (LOOP FOR DESCRIPTOR IN DESCRIPTORS
+             DO (SETF NODE (@ DESCRIPTOR NODE)
+                      TYPE (@ DESCRIPTOR TYPE)) (WHEN
+                                                    (AND
+                                                     (CHAIN *OBJECT PROTOTYPE
+                                                            HAS-OWN-PROPERTY
+                                                            (CALL CONTEXT KEY))
+                                                     (OR IS-CHANGED
+                                                         IS-INITIALIZING))
+                                                  (IF (AND
+                                                       (IN TYPE
+                                                        *PROPERTY-HANDLERS*)
+                                                       (NOT
+                                                        (EQ (TYPEOF VALUE)
+                                                            'FUNCTION)))
+                                                      ((GETPROP
+                                                        *PROPERTY-HANDLERS*
+                                                        TYPE)
+                                                       NODE (@ DESCRIPTOR NAME)
+                                                       VALUE)
+                                                      (PROGN
+                                                       (WHEN
+                                                           (EQ TYPE
+                                                               *CONTEXT-EVENT*)
+                                                         (SET-EVENT TARGET
+                                                          VALUE DESCRIPTOR
+                                                          RECEIVER))
+                                                       (WHEN
+                                                           (EQ TYPE
+                                                               *CONTEXT-SLOT*)
+                                                         (LET ((PROXY
+                                                                (SET-SLOT
+                                                                 TARGET KEY
+                                                                 VALUE
+                                                                 DESCRIPTOR
+                                                                 IS-INITIALIZING)))
+                                                           (WHEN PROXY
+                                                             (RETURN-FROM
+                                                                 SET-PROPERTY
+                                                               (CHAIN *REFLECT
+                                                                      (SET
+                                                                       TARGET
                                                                        KEY
                                                                        PROXY
                                                                        RECEIVER))))))))) (WHEN
@@ -512,7 +514,7 @@ function enqueue(fn) {
                                                                                            (SETF (@
                                                                                                   DESCRIPTOR
                                                                                                   IS-LISTENING)
-                                                                                                   T))))
+                                                                                                   T)))
        (IF IS-SETTER
            (CHAIN *REFLECT (SET TARGET KEY VALUE RECEIVER))
            (DELETE (GETPROP TARGET KEY))))
@@ -535,34 +537,32 @@ function setProperty(target, key, value, receiver, isInitializing) {
     var descriptors = context[key];
     var node = null;
     var type = null;
-    if (descriptors) {
-        var _js20 = descriptors.length;
-        for (var _js19 = 0; _js19 < _js20; _js19 += 1) {
-            var descriptor = descriptors[_js19];
-            node = descriptor.node;
-            type = descriptor.type;
-            if (isChanged || isInitializing) {
-                if (type in PROPERTYHANDLERS && typeof value !== 'function') {
-                    PROPERTYHANDLERS[type](node, descriptor.name, value);
-                } else {
-                    if (type === CONTEXTEVENT) {
-                        setEvent(target, value, descriptor, receiver);
-                    };
-                    if (type === CONTEXTSLOT) {
-                        var proxy = setSlot(target, key, value, descriptor, isInitializing);
-                        if (proxy) {
-                            __PS_MV_REG = [];
-                            return Reflect.set(target, key, proxy, receiver);
-                        };
+    var _js20 = descriptors.length;
+    for (var _js19 = 0; _js19 < _js20; _js19 += 1) {
+        var descriptor = descriptors[_js19];
+        node = descriptor.node;
+        type = descriptor.type;
+        if (Object.prototype.hasOwnProperty.call(context, key) && (isChanged || isInitializing)) {
+            if (type in PROPERTYHANDLERS && typeof value !== 'function') {
+                PROPERTYHANDLERS[type](node, descriptor.name, value);
+            } else {
+                if (type === CONTEXTEVENT) {
+                    setEvent(target, value, descriptor, receiver);
+                };
+                if (type === CONTEXTSLOT) {
+                    var proxy = setSlot(target, key, value, descriptor, isInitializing);
+                    if (proxy) {
+                        __PS_MV_REG = [];
+                        return Reflect.set(target, key, proxy, receiver);
                     };
                 };
             };
-            if (type === CONTEXTVALUE && !descriptor.isListening) {
-                node.addEventListener('input', function (event) {
-                    return Reflect.set(target, key, event.target.value, receiver);
-                });
-                descriptor.isListening = true;
-            };
+        };
+        if (type === CONTEXTVALUE && !descriptor.isListening) {
+            node.addEventListener('input', function (event) {
+                return Reflect.set(target, key, event.target.value, receiver);
+            });
+            descriptor.isListening = true;
         };
     };
     if (isSetter) {

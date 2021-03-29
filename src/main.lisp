@@ -243,35 +243,37 @@
          (node nil)
          (type nil))
 
-    (loop
-     for descriptor in descriptors do
-     (setf node (@ descriptor node)
-           type (@ descriptor type))
-     (when (and (chain *object prototype has-own-property (call context key))
-                (or is-changed is-initializing))
-       (if (and (in type *property-handlers*)
-                (not (eq (typeof value) 'function)))
-           ((getprop *property-handlers* type) node (@ descriptor name) value)
-         (progn
-           (when (eq type *context-event*)
-             (set-event target value descriptor receiver))
-           (when (eq type *context-slot*)
-             (let ((proxy
-                    (set-slot target key value descriptor is-initializing)))
-               (when proxy
-                 (return-from
-                  set-property
-                  (chain *reflect (set target key proxy receiver)))))))))
+    (when descriptors
+      (loop
+       for descriptor in descriptors do
+       (setf node (@ descriptor node)
+             type (@ descriptor type))
+       (when (or is-changed is-initializing)
+         (if (and (in type *property-handlers*)
+                  (not (eq (typeof value) 'function)))
+             ((getprop *property-handlers* type)
+              node (@ descriptor name) value)
+           (progn
+             (when (eq type *context-event*)
+               (set-event target value descriptor receiver))
+             (when (eq type *context-slot*)
+               (let ((proxy
+                      (set-slot target key value descriptor is-initializing)))
+                 (when proxy
+                   (return-from
+                    set-property
+                    (chain *reflect (set target key proxy receiver)))))))))
 
-     ;; Handle automatic event binding for value.
-     (when (and (eq type *context-value*)
-                (not (@ descriptor is-listening)))
-       (chain node (add-event-listener
-                    "input"
-                    (lambda (event)
-                      (chain *reflect (set target key
-                                           (@ event target value) receiver)))))
-       (setf (@ descriptor is-listening) t)))
+       ;; Handle automatic event binding for value.
+       (when (and (eq type *context-value*)
+                  (not (@ descriptor is-listening)))
+         (chain node (add-event-listener
+                      "input"
+                      (lambda (event)
+                        (chain *reflect (set target key
+                                             (@ event target value)
+                                             receiver)))))
+         (setf (@ descriptor is-listening) t))))
 
     (if is-setter
         (chain *reflect (set target key value receiver))
