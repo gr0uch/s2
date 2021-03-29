@@ -438,32 +438,83 @@ function enqueue(fn) {
      (LET* ((CONTEXT (CHAIN *TARGET-CONTEXT-MAP* (GET TARGET)))
             (IS-SETTER (NOT (EQ VALUE UNDEFINED)))
             (IS-CHANGED (NOT (EQ (GETPROP TARGET KEY) VALUE)))
-            (DESCRIPTOR (GETPROP CONTEXT KEY))
-            (NODE (AND DESCRIPTOR (@ DESCRIPTOR NODE)))
-            (TYPE (AND DESCRIPTOR (@ DESCRIPTOR TYPE))))
-       (WHEN
-           (AND (CHAIN *OBJECT PROTOTYPE HAS-OWN-PROPERTY (CALL CONTEXT KEY))
-                (OR IS-CHANGED IS-INITIALIZING))
-         (IF (AND (IN TYPE *PROPERTY-HANDLERS*)
-                  (NOT (EQ (TYPEOF VALUE) 'FUNCTION)))
-             ((GETPROP *PROPERTY-HANDLERS* TYPE) NODE (@ DESCRIPTOR NAME)
-              VALUE)
-             (PROGN
-              (WHEN (EQ TYPE *CONTEXT-EVENT*)
-                (SET-EVENT TARGET VALUE DESCRIPTOR RECEIVER))
-              (WHEN (EQ TYPE *CONTEXT-SLOT*)
-                (LET ((PROXY
-                       (SET-SLOT TARGET KEY VALUE DESCRIPTOR IS-INITIALIZING)))
-                  (WHEN PROXY
-                    (RETURN-FROM SET-PROPERTY
-                      (CHAIN *REFLECT (SET TARGET KEY PROXY RECEIVER)))))))))
-       (WHEN (AND (EQ TYPE *CONTEXT-VALUE*) (NOT (@ DESCRIPTOR IS-LISTENING)))
-         (CHAIN NODE
-                (ADD-EVENT-LISTENER input
-                 (LAMBDA (EVENT)
-                   (CHAIN *REFLECT
-                          (SET TARGET KEY (@ EVENT TARGET VALUE) RECEIVER)))))
-         (SETF (@ DESCRIPTOR IS-LISTENING) T))
+            (DESCRIPTORS (GETPROP CONTEXT KEY))
+            (NODE NIL)
+            (TYPE NIL))
+       (LOOP FOR DESCRIPTOR IN DESCRIPTORS
+             DO (SETF NODE (@ DESCRIPTOR NODE)
+                      TYPE (@ DESCRIPTOR TYPE)) (WHEN
+                                                    (AND
+                                                     (CHAIN *OBJECT PROTOTYPE
+                                                            HAS-OWN-PROPERTY
+                                                            (CALL CONTEXT KEY))
+                                                     (OR IS-CHANGED
+                                                         IS-INITIALIZING))
+                                                  (IF (AND
+                                                       (IN TYPE
+                                                        *PROPERTY-HANDLERS*)
+                                                       (NOT
+                                                        (EQ (TYPEOF VALUE)
+                                                            'FUNCTION)))
+                                                      ((GETPROP
+                                                        *PROPERTY-HANDLERS*
+                                                        TYPE)
+                                                       NODE (@ DESCRIPTOR NAME)
+                                                       VALUE)
+                                                      (PROGN
+                                                       (WHEN
+                                                           (EQ TYPE
+                                                               *CONTEXT-EVENT*)
+                                                         (SET-EVENT TARGET
+                                                          VALUE DESCRIPTOR
+                                                          RECEIVER))
+                                                       (WHEN
+                                                           (EQ TYPE
+                                                               *CONTEXT-SLOT*)
+                                                         (LET ((PROXY
+                                                                (SET-SLOT
+                                                                 TARGET KEY
+                                                                 VALUE
+                                                                 DESCRIPTOR
+                                                                 IS-INITIALIZING)))
+                                                           (WHEN PROXY
+                                                             (RETURN-FROM
+                                                                 SET-PROPERTY
+                                                               (CHAIN *REFLECT
+                                                                      (SET
+                                                                       TARGET
+                                                                       KEY
+                                                                       PROXY
+                                                                       RECEIVER))))))))) (WHEN
+                                                                                             (AND
+                                                                                              (EQ
+                                                                                               TYPE
+                                                                                               *CONTEXT-VALUE*)
+                                                                                              (NOT
+                                                                                               (@
+                                                                                                DESCRIPTOR
+                                                                                                IS-LISTENING)))
+                                                                                           (CHAIN
+                                                                                            NODE
+                                                                                            (ADD-EVENT-LISTENER
+                                                                                             input
+                                                                                             (LAMBDA
+                                                                                                 (
+                                                                                                  EVENT)
+                                                                                               (CHAIN
+                                                                                                *REFLECT
+                                                                                                (SET
+                                                                                                 TARGET
+                                                                                                 KEY
+                                                                                                 (@
+                                                                                                  EVENT
+                                                                                                  TARGET
+                                                                                                  VALUE)
+                                                                                                 RECEIVER)))))
+                                                                                           (SETF (@
+                                                                                                  DESCRIPTOR
+                                                                                                  IS-LISTENING)
+                                                                                                   T)))
        (IF IS-SETTER
            (CHAIN *REFLECT (SET TARGET KEY VALUE RECEIVER))
            (DELETE (GETPROP TARGET KEY))))
@@ -483,30 +534,36 @@ function setProperty(target, key, value, receiver, isInitializing) {
     var context = TARGETCONTEXTMAP.get(target);
     var isSetter = value !== undefined;
     var isChanged = target[key] !== value;
-    var descriptor = context[key];
-    var node19 = descriptor && descriptor.node;
-    var type20 = descriptor && descriptor.type;
-    if (Object.prototype.hasOwnProperty.call(context, key) && (isChanged || isInitializing)) {
-        if (type20 in PROPERTYHANDLERS && typeof value !== 'function') {
-            PROPERTYHANDLERS[type20](node19, descriptor.name, value);
-        } else {
-            if (type20 === CONTEXTEVENT) {
-                setEvent(target, value, descriptor, receiver);
-            };
-            if (type20 === CONTEXTSLOT) {
-                var proxy = setSlot(target, key, value, descriptor, isInitializing);
-                if (proxy) {
-                    __PS_MV_REG = [];
-                    return Reflect.set(target, key, proxy, receiver);
+    var descriptors = context[key];
+    var node = null;
+    var type = null;
+    var _js20 = descriptors.length;
+    for (var _js19 = 0; _js19 < _js20; _js19 += 1) {
+        var descriptor = descriptors[_js19];
+        node = descriptor.node;
+        type = descriptor.type;
+        if (Object.prototype.hasOwnProperty.call(context, key) && (isChanged || isInitializing)) {
+            if (type in PROPERTYHANDLERS && typeof value !== 'function') {
+                PROPERTYHANDLERS[type](node, descriptor.name, value);
+            } else {
+                if (type === CONTEXTEVENT) {
+                    setEvent(target, value, descriptor, receiver);
+                };
+                if (type === CONTEXTSLOT) {
+                    var proxy = setSlot(target, key, value, descriptor, isInitializing);
+                    if (proxy) {
+                        __PS_MV_REG = [];
+                        return Reflect.set(target, key, proxy, receiver);
+                    };
                 };
             };
         };
-    };
-    if (type20 === CONTEXTVALUE && !descriptor.isListening) {
-        node19.addEventListener('input', function (event) {
-            return Reflect.set(target, key, event.target.value, receiver);
-        });
-        descriptor.isListening = true;
+        if (type === CONTEXTVALUE && !descriptor.isListening) {
+            node.addEventListener('input', function (event) {
+                return Reflect.set(target, key, event.target.value, receiver);
+            });
+            descriptor.isListening = true;
+        };
     };
     if (isSetter) {
         Reflect.set(target, key, value, receiver);
@@ -858,12 +915,15 @@ function setEvent(target, value, descriptor, receiver) {
                                (*TYPE-ERROR
                                 Missing `name` or `data-key` for slot.))))
                         (CHAIN PARENT-NODE (INSERT-BEFORE ANCHOR NODE))
-                        (SETF (GETPROP CONTEXT SLOT-NAME)
+                        (WHEN (NOT (IN SLOT-NAME CONTEXT))
+                          (SETF (GETPROP CONTEXT SLOT-NAME) (LIST)))
+                        (CHAIN (GETPROP CONTEXT SLOT-NAME)
+                               (PUSH
                                 (CREATE PATH (CHAIN PATH (CONCAT I)) SLOT
                                  (IF TEMPLATE-SELECTOR
                                      NODE
                                      (CHAIN DOCUMENT (CREATE-ELEMENT 'DIV)))
-                                 TEMPLATE TEMPLATE-NODE TYPE *CONTEXT-SLOT*))
+                                 TEMPLATE TEMPLATE-NODE TYPE *CONTEXT-SLOT*)))
                         (CHAIN NODE (REMOVE)))
                       (CONTINUE))
                     (WHEN (LENGTH (@ NODE CHILDREN))
@@ -897,8 +957,11 @@ function setEvent(target, value, descriptor, receiver) {
                                (WHEN RESULT
                                  (DELETE (GETPROP (@ NODE DATASET) KEY))
                                  (CHAIN NODE (REMOVE-ATTRIBUTE KEY))
-                                 (SETF (@ RESULT PATH) (CHAIN PATH (CONCAT I))
-                                       (GETPROP CONTEXT VALUE) RESULT)))))))
+                                 (SETF (@ RESULT PATH) (CHAIN PATH (CONCAT I)))
+                                 (WHEN (NOT (IN VALUE CONTEXT))
+                                   (SETF (GETPROP CONTEXT VALUE) (LIST)))
+                                 (CHAIN (GETPROP CONTEXT VALUE)
+                                        (PUSH RESULT))))))))
        (WALK CLONE (LIST))
        (CHAIN *TEMPLATE-PROCESSED-MAP* (SET TEMPLATE CLONE))
        (CHAIN *TEMPLATE-CONTEXT-MAP* (SET TEMPLATE CONTEXT)))) */
@@ -922,11 +985,14 @@ function processTemplate(template) {
                     throw new TypeError('Missing `name` or `data-key` for slot.');
                 };
                 parentNode.insertBefore(anchor, node);
-                context[slotName] = { path : path.concat(i),
-                                   slot : templateSelector ? node : document.createElement('div'),
-                                   template : templateNode,
-                                   type : CONTEXTSLOT
-                                 };
+                if (!(slotName in context)) {
+                    context[slotName] = [];
+                };
+                context[slotName].push({ path : path.concat(i),
+                                         slot : templateSelector ? node : document.createElement('div'),
+                                         template : templateNode,
+                                         type : CONTEXTSLOT
+                                       });
                 node.remove();
                 continue;
             };
@@ -962,7 +1028,10 @@ function processTemplate(template) {
                     delete node.dataset[key];
                     node.removeAttribute(key);
                     result.path = path.concat(i);
-                    context[value] = result;
+                    if (!(value in context)) {
+                        context[value] = [];
+                    };
+                    context[value].push(result);
                 };
             };
         };
@@ -976,21 +1045,30 @@ function processTemplate(template) {
      (LET ((CONTEXT (CHAIN *TEMPLATE-CONTEXT-MAP* (GET TEMPLATE)))
            (CLONED-CONTEXT (CREATE)))
        (LOOP FOR KEY OF CONTEXT
-             DO (LET* ((DESCRIPTOR (GETPROP CONTEXT KEY))
-                       (PATH (@ DESCRIPTOR PATH))
-                       (NODE (GET-PATH CLONE PATH)))
-                  (SETF (GETPROP CLONED-CONTEXT KEY)
-                          (CHAIN *OBJECT
-                                 (ASSIGN (CREATE NODE NODE) DESCRIPTOR)))))
+             DO (SETF (GETPROP CLONED-CONTEXT KEY)
+                        (LIST)) (LOOP FOR DESCRIPTOR IN (GETPROP CONTEXT KEY)
+                                      DO (LET* ((PATH (@ DESCRIPTOR PATH))
+                                                (NODE (GET-PATH CLONE PATH)))
+                                           (CHAIN (GETPROP CLONED-CONTEXT KEY)
+                                                  (PUSH
+                                                   (CHAIN *OBJECT
+                                                          (ASSIGN
+                                                           (CREATE NODE NODE)
+                                                           DESCRIPTOR)))))))
        CLONED-CONTEXT)) */
 function createContext(clone, template) {
     var context = TEMPLATECONTEXTMAP.get(template);
     var clonedContext = {  };
     for (var key in context) {
-        var descriptor = context[key];
-        var path42 = descriptor.path;
-        var node = getPath(clone, path42);
-        clonedContext[key] = Object.assign({ node : node }, descriptor);
+        clonedContext[key] = [];
+        var _js42 = context[key];
+        var _js44 = _js42.length;
+        for (var _js43 = 0; _js43 < _js44; _js43 += 1) {
+            var descriptor = _js42[_js43];
+            var path45 = descriptor.path;
+            var node = getPath(clone, path45);
+            clonedContext[key].push(Object.assign({ node : node }, descriptor));
+        };
     };
     __PS_MV_REG = [];
     return clonedContext;

@@ -239,34 +239,39 @@
   (let* ((context (chain *target-context-map* (get target)))
          (is-setter (not (eq value undefined)))
          (is-changed (not (eq (getprop target key) value)))
-         (descriptor (getprop context key))
-         (node (and descriptor (@ descriptor node)))
-         (type (and descriptor (@ descriptor type))))
+         (descriptors (getprop context key))
+         (node nil)
+         (type nil))
 
-    (when (and (chain *object prototype has-own-property (call context key))
-               (or is-changed is-initializing))
-      (if (and (in type *property-handlers*)
-               (not (eq (typeof value) 'function)))
-          ((getprop *property-handlers* type) node (@ descriptor name) value)
-        (progn
-          (when (eq type *context-event*)
-            (set-event target value descriptor receiver))
-          (when (eq type *context-slot*)
-            (let ((proxy (set-slot target key value descriptor is-initializing)))
-              (when proxy
-                (return-from
-                 set-property
-                 (chain *reflect (set target key proxy receiver)))))))))
+    (loop
+     for descriptor in descriptors do
+     (setf node (@ descriptor node)
+           type (@ descriptor type))
+     (when (and (chain *object prototype has-own-property (call context key))
+                (or is-changed is-initializing))
+       (if (and (in type *property-handlers*)
+                (not (eq (typeof value) 'function)))
+           ((getprop *property-handlers* type) node (@ descriptor name) value)
+         (progn
+           (when (eq type *context-event*)
+             (set-event target value descriptor receiver))
+           (when (eq type *context-slot*)
+             (let ((proxy
+                    (set-slot target key value descriptor is-initializing)))
+               (when proxy
+                 (return-from
+                  set-property
+                  (chain *reflect (set target key proxy receiver)))))))))
 
-    ;; Handle automatic event binding for value.
-    (when (and (eq type *context-value*)
-               (not (@ descriptor is-listening)))
-      (chain node (add-event-listener
-                   "input"
-                   (lambda (event)
-                     (chain *reflect (set target key
-                                          (@ event target value) receiver)))))
-      (setf (@ descriptor is-listening) t))
+     ;; Handle automatic event binding for value.
+     (when (and (eq type *context-value*)
+                (not (@ descriptor is-listening)))
+       (chain node (add-event-listener
+                    "input"
+                    (lambda (event)
+                      (chain *reflect (set target key
+                                           (@ event target value) receiver)))))
+       (setf (@ descriptor is-listening) t)))
 
     (if is-setter
         (chain *reflect (set target key value receiver))
@@ -477,14 +482,19 @@
                (throw (new (*type-error
                             "Missing `name` or `data-key` for slot."))))
              (chain parent-node (insert-before anchor node))
-             (setf (getprop context slot-name)
-                   (create
-                    path (chain path (concat i))
-                    ;; This is for the placeholder content. If the template is nested,
-                    ;; then we need to make a dummy placeholder.
-                    slot (if template-selector node (chain document (create-element 'div)))
-                    template template-node
-                    type *context-slot*))
+             (when (not (in slot-name context))
+               (setf (getprop context slot-name) (list)))
+             (chain
+              (getprop context slot-name)
+              (push
+               (create
+                path (chain path (concat i))
+                ;; This is for the placeholder content. If the template is nested,
+                ;; then we need to make a dummy placeholder.
+                slot (if template-selector node
+                       (chain document (create-element 'div)))
+                template template-node
+                type *context-slot*)))
              (chain node (remove)))
            (continue))
 
@@ -521,9 +531,10 @@
             (when result
               (delete (getprop (@ node dataset) key))
               (chain node (remove-attribute key))
-              (setf
-               (@ result path) (chain path (concat i))
-               (getprop context value) result)))))))
+              (setf (@ result path) (chain path (concat i)))
+              (when (not (in value context))
+                (setf (getprop context value) (list)))
+              (chain (getprop context value) (push result))))))))
 
     (walk clone (list))
     (chain *template-processed-map* (set template clone))
@@ -537,11 +548,14 @@
 
     (loop
      for key of context do
-     (let* ((descriptor (getprop context key))
-            (path (@ descriptor path))
-            (node (get-path clone path)))
-       (setf (getprop cloned-context key)
-             (chain *object (assign (create node node) descriptor)))))
+     (setf (getprop cloned-context key) (list))
+     (loop
+      for descriptor in (getprop context key) do
+      (let* ((path (@ descriptor path))
+             (node (get-path clone path)))
+        (chain (getprop cloned-context key)
+               (push (chain *object (assign (create node node)
+                                            descriptor)))))))
 
     cloned-context))
 
