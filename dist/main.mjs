@@ -952,8 +952,8 @@ function setEvent(target, value, descriptor, receiver) {
                                                  (TO-LOWER-CASE)))))
                                (WHEN (NOT RESULT)
                                  (SETF RESULT
-                                         (CREATE TYPE *CONTEXT-DATA* NAME
-                                          KEY)))
+                                         (CREATE TYPE *CONTEXT-DATA* NAME KEY))
+                                 (WHEN (NOT VALUE) (SETF VALUE KEY)))
                                (WHEN RESULT
                                  (DELETE (GETPROP (@ NODE DATASET) KEY))
                                  (CHAIN NODE (REMOVE-ATTRIBUTE KEY))
@@ -1023,6 +1023,9 @@ function processTemplate(template) {
                 };
                 if (!result) {
                     result = { type : CONTEXTDATA, name : key };
+                    if (!value) {
+                        value = key;
+                    };
                 };
                 if (result) {
                     delete node.dataset[key];

@@ -33,7 +33,7 @@ const template = document.querySelector("#root");
 const [proxy, node] = s2({
   title: "Hello, <em>world!</em>",
   titleClass: "title",
-  foo: "bar",
+  fooBar: "bar",
   titleStyle: "color: #ff8;",
   list: {
     things: initialThings.slice(),

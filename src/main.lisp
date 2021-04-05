@@ -528,7 +528,9 @@
 
             ;; Handle data attribute reflection.
             (when (not result)
-              (setf result (create type *context-data* name key)))
+              (setf result (create type *context-data* name key))
+              ;; Handle special edge case for self-named attribute.
+              (when (not value) (setf value key)))
 
             (when result
               (delete (getprop (@ node dataset) key))
