@@ -914,6 +914,7 @@ function setEvent(target, value, descriptor, receiver) {
                               (NEW
                                (*TYPE-ERROR
                                 Missing `name` or `data-key` for slot.))))
+                        (DELETE (@ NODE DATASET KEY))
                         (CHAIN PARENT-NODE (INSERT-BEFORE ANCHOR NODE))
                         (WHEN (NOT (IN SLOT-NAME CONTEXT))
                           (SETF (GETPROP CONTEXT SLOT-NAME) (LIST)))
@@ -984,6 +985,7 @@ function processTemplate(template) {
                 if (slotName === undefined) {
                     throw new TypeError('Missing `name` or `data-key` for slot.');
                 };
+                delete node.dataset.key;
                 parentNode.insertBefore(anchor, node);
                 if (!(slotName in context)) {
                     context[slotName] = [];

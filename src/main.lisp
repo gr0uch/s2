@@ -483,6 +483,10 @@
              (when (eq slot-name undefined)
                (throw (new (*type-error
                             "Missing `name` or `data-key` for slot."))))
+
+             ;; Hygiene.
+             (delete (@ node dataset key))
+
              (chain parent-node (insert-before anchor node))
              (when (not (in slot-name context))
                (setf (getprop context slot-name) (list)))
