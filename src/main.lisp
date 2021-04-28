@@ -51,6 +51,8 @@
 
 (defvar *deferred-queue* (list))
 
+(defvar *templates-hash* (create))
+
 (defvar *property-handlers* (create))
 (setf
  (getprop *property-handlers* *context-text*)
@@ -478,7 +480,8 @@
                   (template-node
                    ;; Special case: when `data-key` exists and template is nested.
                    (if template-selector
-                       (chain document (query-selector template-selector))
+                       (or (getprop *templates-hash* template-selector)
+                           (chain document (query-selector template-selector)))
                      node)))
              (when (eq slot-name undefined)
                (throw (new (*type-error
@@ -486,6 +489,14 @@
 
              ;; Hygiene.
              (delete (@ node dataset key))
+
+             ;; Move slot contents into document fragment.
+             (when (and (not template-selector)
+                        (eq (@ node tag-name) *tag-slot*))
+               (setf template-node (chain document (create-document-fragment)))
+               (loop
+                for node in (@ node child-nodes) do
+                (chain template-node (append-child node))))
 
              (chain parent-node (insert-before anchor node))
              (when (not (in slot-name context))
@@ -643,6 +654,14 @@
     (chain document (create-text-node ""))))
 
 
+(defun register-template (name template)
+  (when (eq (typeof template) 'string)
+    (let ((element (chain document (create-element 'template))))
+      (setf (@ element inner-h-t-m-l) template
+            template element)))
+  (setf (getprop *templates-hash* name) template))
+
+
 (defun main (origin template)
   (create-binding origin template))
 
@@ -654,4 +673,5 @@
  :default main
  :names ((*symbol-mount* mount)
          (*symbol-unmount* unmount)
-         (*symbol-move* move)))
+         (*symbol-move* move)
+         (register-template register-template)))

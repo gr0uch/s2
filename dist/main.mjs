@@ -102,6 +102,10 @@ if ('undefined' === typeof PROXYARRAY) {
 if ('undefined' === typeof DEFERREDQUEUE) {
     var DEFERREDQUEUE = [];
 };
+/* (DEFVAR *TEMPLATES-HASH* (CREATE)) */
+if ('undefined' === typeof TEMPLATESHASH) {
+    var TEMPLATESHASH = {  };
+};
 /* (DEFVAR *PROPERTY-HANDLERS* (CREATE)) */
 if ('undefined' === typeof PROPERTYHANDLERS) {
     var PROPERTYHANDLERS = {  };
@@ -906,8 +910,10 @@ function setEvent(target, value, descriptor, receiver) {
                              (TEMPLATE-SELECTOR (@ NODE DATASET TEMPLATE))
                              (TEMPLATE-NODE
                               (IF TEMPLATE-SELECTOR
-                                  (CHAIN DOCUMENT
-                                         (QUERY-SELECTOR TEMPLATE-SELECTOR))
+                                  (OR
+                                   (GETPROP *TEMPLATES-HASH* TEMPLATE-SELECTOR)
+                                   (CHAIN DOCUMENT
+                                          (QUERY-SELECTOR TEMPLATE-SELECTOR)))
                                   NODE)))
                         (WHEN (EQ SLOT-NAME UNDEFINED)
                           (THROW
@@ -915,6 +921,13 @@ function setEvent(target, value, descriptor, receiver) {
                                (*TYPE-ERROR
                                 Missing `name` or `data-key` for slot.))))
                         (DELETE (@ NODE DATASET KEY))
+                        (WHEN
+                            (AND (NOT TEMPLATE-SELECTOR)
+                                 (EQ (@ NODE TAG-NAME) *TAG-SLOT*))
+                          (SETF TEMPLATE-NODE
+                                  (CHAIN DOCUMENT (CREATE-DOCUMENT-FRAGMENT)))
+                          (LOOP FOR NODE IN (@ NODE CHILD-NODES)
+                                DO (CHAIN TEMPLATE-NODE (APPEND-CHILD NODE))))
                         (CHAIN PARENT-NODE (INSERT-BEFORE ANCHOR NODE))
                         (WHEN (NOT (IN SLOT-NAME CONTEXT))
                           (SETF (GETPROP CONTEXT SLOT-NAME) (LIST)))
@@ -981,11 +994,20 @@ function processTemplate(template) {
                 var slotName = node.dataset.key || node.name;
                 var anchor = createAnchor(2, slotName);
                 var templateSelector = node.dataset.template;
-                var templateNode = templateSelector ? document.querySelector(templateSelector) : node;
+                var templateNode = templateSelector ? TEMPLATESHASH[templateSelector] || document.querySelector(templateSelector) : node;
                 if (slotName === undefined) {
                     throw new TypeError('Missing `name` or `data-key` for slot.');
                 };
                 delete node.dataset.key;
+                if (!templateSelector && node.tagName === TAGSLOT) {
+                    templateNode = document.createDocumentFragment();
+                    var _js42 = node.childNodes;
+                    var _js44 = _js42.length;
+                    for (var _js43 = 0; _js43 < _js44; _js43 += 1) {
+                        var node45 = _js42[_js43];
+                        templateNode.appendChild(node45);
+                    };
+                };
                 parentNode.insertBefore(anchor, node);
                 if (!(slotName in context)) {
                     context[slotName] = [];
@@ -1213,6 +1235,20 @@ function createAnchor(type, key) {
         return document.createTextNode('');
     };
 };
+/* (DEFUN REGISTER-TEMPLATE (NAME TEMPLATE)
+     (WHEN (EQ (TYPEOF TEMPLATE) 'STRING)
+       (LET ((ELEMENT (CHAIN DOCUMENT (CREATE-ELEMENT 'TEMPLATE))))
+         (SETF (@ ELEMENT INNER-H-T-M-L) TEMPLATE
+               TEMPLATE ELEMENT)))
+     (SETF (GETPROP *TEMPLATES-HASH* NAME) TEMPLATE)) */
+function registerTemplate(name, template) {
+    if (typeof template === 'string') {
+        var element = document.createElement('template');
+        element.innerHTML = template;
+        template = element;
+    };
+    return TEMPLATESHASH[name] = template;
+};
 /* (DEFUN MAIN (ORIGIN TEMPLATE) (CREATE-BINDING ORIGIN TEMPLATE)) */
 function main(origin, template) {
     __PS_MV_REG = [];
@@ -1224,7 +1260,7 @@ main.debug = !true;
 main.isDeferred = !true;
 /* (EXPORT DEFAULT MAIN NAMES
            ((*SYMBOL-MOUNT* MOUNT) (*SYMBOL-UNMOUNT* UNMOUNT)
-            (*SYMBOL-MOVE* MOVE))) */
-export { SYMBOLMOUNT as mount, SYMBOLUNMOUNT as unmount, SYMBOLMOVE as move, };
+            (*SYMBOL-MOVE* MOVE) (REGISTER-TEMPLATE REGISTER-TEMPLATE))) */
+export { SYMBOLMOUNT as mount, SYMBOLUNMOUNT as unmount, SYMBOLMOVE as move, registerTemplate as registerTemplate, };
 export default main;
 

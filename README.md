@@ -108,6 +108,25 @@ If you don't want to define a template for every object shape, which makes templ
 ```
 
 
+## Registering Templates
+
+Registering a template allows it to be referred to by name, rather than by a query selector on the document.
+
+```js
+import { registerTemplate } from '...';
+
+registerTemplate('templateName', 'string or element here');
+```
+
+Now it can be referred to by name:
+
+```html
+<template id="root">
+  <slot name="something" data-template="templateName"></slot>
+</template>
+```
+
+
 ## Flags
 
 - `s2.debug`: turn on messages in the console. Warning: has a performance impact.

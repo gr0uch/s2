@@ -34,12 +34,13 @@
   <slot name="list" data-template="#list"></slot>
   <slot name="counter" data-template="#counter"></slot>
   <slot name="container" data-template="#container">Empty container</slot>
+  <slot name="reg" data-template="reg"></slot>
 </template>
 
 <template id="container">
-  <div data-key="box">
+  <slot name="box">
     <span data-text="content" data-wot="content"></span>
-  </div>
+  </slot>
 </template>
 
 <template id="list">

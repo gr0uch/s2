@@ -1,4 +1,4 @@
-import s2, { mount, unmount, move } from "../dist/main.mjs";
+import s2, { mount, unmount, move, registerTemplate } from "../dist/main.mjs";
 import depCheck from "../dist/dep-check.mjs";
 import { createSource, createComputed } from "../dist/computed-properties.mjs";
 import test from "./runner.mjs";
@@ -13,6 +13,8 @@ const start = performance.now();
 function moveThing (node) {
     console.log('MOVE', this.text, node);
 }
+
+registerTemplate('reg', '<b data-text="a"></b>');
 
 const initialThings = [
   { text: 'a', [move]: moveThing },
@@ -68,7 +70,7 @@ const [proxy, node] = s2({
       }));
     },
   }),
-  n: 'n',
+  reg: { a: 1 },
   [mount]: function spam(node) {
     // return null;
     const t = {};
