@@ -1,4 +1,4 @@
-var __PS_MV_REG;
+
 /* (DEFVAR *CONTEXT-SLOT* 'SLOT) */
 if ('undefined' === typeof CONTEXTSLOT) {
     var CONTEXTSLOT = 'slot';
@@ -272,10 +272,10 @@ PROPERTYHANDLERS[CONTEXTDATA] = setData;
 function setIndex(target, key, value, receiver, isInitializing) {
     if (main.isDeferred && !isInitializing) {
         enqueue(function () {
-            __PS_MV_REG = [];
+            
             return setIndex(target, key, value, receiver, true);
         });
-        __PS_MV_REG = [];
+        
         return true;
     };
     if (main.debug) {
@@ -305,7 +305,7 @@ function setIndex(target, key, value, receiver, isInitializing) {
     };
     if (isSetter) {
         if (!isIndex) {
-            __PS_MV_REG = [];
+            
             return Reflect.set(target, key, value, receiver);
         };
         if (!target.includes(value)) {
@@ -340,7 +340,7 @@ function setIndex(target, key, value, receiver, isInitializing) {
                 var endNode = PROXYDELIMITERMAP.get(receiver)[1];
                 parentNode5.insertBefore(node, endNode);
             };
-            __PS_MV_REG = [];
+            
             return Reflect.set(target, key, proxy6, receiver);
         } else {
             var otherIndex = target.findIndex(function (p, i) {
@@ -406,7 +406,7 @@ function setIndex(target, key, value, receiver, isInitializing) {
         };
         Reflect.set(target, key, value, receiver);
     };
-    __PS_MV_REG = [];
+    
     return true;
 };
 /* (DEFUN ENQUEUE (FN)
@@ -427,11 +427,11 @@ function enqueue(fn) {
                 var func = DEFERREDQUEUE.shift();
                 func();
             };
-            __PS_MV_REG = [];
+            
             return main.debug ? console.log('queue flushed', q) : null;
         });
     };
-    __PS_MV_REG = [];
+    
     return DEFERREDQUEUE.push(fn);
 };
 /* (DEFUN SET-PROPERTY (TARGET KEY VALUE RECEIVER IS-INITIALIZING)
@@ -524,10 +524,10 @@ function enqueue(fn) {
 function setProperty(target, key, value, receiver, isInitializing) {
     if (main.isDeferred && !isInitializing) {
         enqueue(function () {
-            __PS_MV_REG = [];
+            
             return setProperty(target, key, value, receiver, true);
         });
-        __PS_MV_REG = [];
+        
         return true;
     };
     if (main.debug) {
@@ -555,7 +555,7 @@ function setProperty(target, key, value, receiver, isInitializing) {
                     if (type === CONTEXTSLOT) {
                         var proxy = setSlot(target, key, value, descriptor, isInitializing);
                         if (proxy) {
-                            __PS_MV_REG = [];
+                            
                             return Reflect.set(target, key, proxy, receiver);
                         };
                     };
@@ -574,7 +574,7 @@ function setProperty(target, key, value, receiver, isInitializing) {
     } else {
         delete target[key];
     };
-    __PS_MV_REG = [];
+    
     return true;
 };
 /* (DEFUN SET-ATTRIBUTE (NODE NAME VALUE)
@@ -640,7 +640,7 @@ function removeBetweenDelimiters(startNode, endNode, unmount, self) {
         })();
     };
     endNode.remove();
-    __PS_MV_REG = [];
+    
     return recursiveUnmount(self);
 };
 /* (DEFUN RECURSIVE-UNMOUNT (SELF SHOULD-UNMOUNT)
@@ -660,7 +660,7 @@ function recursiveUnmount(self, shouldUnmount) {
     };
     if (shouldUnmount) {
         var unmount = PROXYUNMOUNTMAP.get(self);
-        __PS_MV_REG = [];
+        
         return unmount ? unmount.call(self) : null;
     };
 };
@@ -857,7 +857,7 @@ function setSlot(target, key, value, descriptor, isInitializing) {
         };
     };
     parentNode23.insertBefore(endNode, anchor);
-    __PS_MV_REG = [];
+    
     return returnValue;
 };
 /* (DEFUN SET-EVENT (TARGET VALUE DESCRIPTOR RECEIVER)
@@ -1065,7 +1065,7 @@ function processTemplate(template) {
     };
     walk(clone, []);
     TEMPLATEPROCESSEDMAP.set(template, clone);
-    __PS_MV_REG = [];
+    
     return TEMPLATECONTEXTMAP.set(template, context);
 };
 /* (DEFUN CREATE-CONTEXT (CLONE TEMPLATE)
@@ -1097,7 +1097,7 @@ function createContext(clone, template) {
             clonedContext[key].push(Object.assign({ node : node }, descriptor));
         };
     };
-    __PS_MV_REG = [];
+    
     return clonedContext;
 };
 /* (DEFUN GET-PATH (NODE PATH)
@@ -1137,7 +1137,7 @@ function createArray(array, template) {
     };
     proxy = new Proxy(proxies, PROXYARRAY);
     PROXYTEMPLATEMAP.set(proxy, template);
-    __PS_MV_REG = [];
+    
     return [nodes, proxy];
 };
 /* (DEFUN CREATE-BINDING (OBJ TEMPLATE)
@@ -1212,7 +1212,7 @@ function createBinding(obj, template) {
     fragment.appendChild(clone);
     fragment.appendChild(endNode);
     PROXYDELIMITERMAP.set(proxy, nodes);
-    __PS_MV_REG = [];
+    
     return [proxy, fragment];
 };
 /* (DEFUN CREATE-ANCHOR (TYPE KEY)
@@ -1251,7 +1251,7 @@ function registerTemplate(name, template) {
 };
 /* (DEFUN MAIN (ORIGIN TEMPLATE) (CREATE-BINDING ORIGIN TEMPLATE)) */
 function main(origin, template) {
-    __PS_MV_REG = [];
+    
     return createBinding(origin, template);
 };
 /* (SETF (@ MAIN DEBUG) (NOT T)

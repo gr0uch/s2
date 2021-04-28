@@ -1,4 +1,4 @@
-var __PS_MV_REG;
+
 /* (DEFVAR *PASSED-CHECK* FALSE) */
 if ('undefined' === typeof PASSEDCHECK) {
     var PASSEDCHECK = false;
@@ -89,7 +89,7 @@ function depCheck() {
             throw new TypeError('Expected ' + path.join('.') + ' to have type \"' + typeStr + '\"');
         };
     };
-    __PS_MV_REG = [];
+    
     return PASSEDCHECK = true;
 };
 /* (EXPORT DEFAULT DEP-CHECK) */

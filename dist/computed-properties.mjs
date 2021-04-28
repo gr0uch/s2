@@ -1,4 +1,4 @@
-var __PS_MV_REG;
+
 /* (DEFVAR *SOURCE-CONTEXT-MAP* (NEW (*WEAK-MAP))) */
 if ('undefined' === typeof SOURCECONTEXTMAP) {
     var SOURCECONTEXTMAP = new WeakMap();
@@ -34,7 +34,7 @@ function clearStack() {
 function getProperty(target, key, receiver) {
     READSTACK.push([target, key]);
     setTimeout(clearStack, 0);
-    __PS_MV_REG = [];
+    
     return Reflect.get(target, key, receiver);
 };
 /* (DEFUN SET-PROPERTY (TARGET KEY VALUE RECEIVER)
@@ -79,7 +79,7 @@ function setProperty(target, key, value, receiver) {
         obj[objKey] = returnValue;
         clearStack();
     };
-    __PS_MV_REG = [];
+    
     return true;
 };
 /* (DEFUN CREATE-SOURCE (OBJ)
@@ -87,7 +87,7 @@ function setProperty(target, key, value, receiver) {
        PROXY)) */
 function createSource(obj) {
     var proxy = new Proxy(obj, PROXYSOURCE);
-    __PS_MV_REG = [];
+    
     return proxy;
 };
 /* (DEFUN MOUNT-OBJECT (OBJ)
@@ -160,7 +160,7 @@ function mountObject(obj) {
             };
         };
     };
-    __PS_MV_REG = [];
+    
     return clearStack();
 };
 /* (DEFUN UNMOUNT-OBJECT (OBJ)
@@ -217,14 +217,14 @@ function createComputed(mountSymbol, unmountSymbol) {
             if (mount) {
                 mount.call(this);
             };
-            __PS_MV_REG = [];
+            
             return mountObject(this);
         };
         obj[unmountSymbol] = function () {
             if (unmount) {
                 unmount.call(this);
             };
-            __PS_MV_REG = [];
+            
             return unmountObject(this);
         };
         return obj;
