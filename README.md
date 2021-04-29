@@ -137,6 +137,7 @@ Now it can be referred to by name:
 
 - `dep-check.mjs`: this is used to check if all of the required APIs are present in the runtime.
 - `computed-properties.mjs`: adds a computed property feature that does automatic dependency tracking. Exports `createSource` to create a reactive object and `createComputed` to declare an object as having computed properties. See source code and tests for usage.
+- `mustache.mjs`: parse a subset of [Mustache](https://mustache.github.io/) templates into the format expected by s2. This adds context-awareness to the Mustache template. There are some caveats: no inverted sections, partials must be the only child of a section, and variables can not be interpolated with raw text.
 - `render-to-string.mjs` (TBD)
 - `hydrate.mjs` (TBD)
 

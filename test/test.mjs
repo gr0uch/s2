@@ -1,5 +1,6 @@
 import s2, { mount, unmount, move, registerTemplate } from "../dist/main.mjs";
 import depCheck from "../dist/dep-check.mjs";
+import parseMustache from "../dist/mustache.mjs";
 import { createSource, createComputed } from "../dist/computed-properties.mjs";
 import test from "./runner.mjs";
 
@@ -15,6 +16,25 @@ function moveThing (node) {
 }
 
 registerTemplate('reg', '<b data-text="a"></b>');
+const mustache = parseMustache(`
+<div
+  foo="{{foo}}"
+  class="{{cls}}"
+  data-something="{{something}}">
+  {{! comment }}
+  <span onclick="{{clicky}}">{{txt}}</span>
+  <span>{{{html}}}</span>
+  {{#ul}}
+    <span>{{name}}</span>
+  {{/ul}}
+  wtf
+  {{#ol}}
+    {{>reg}}
+  {{/ol}}
+</div>
+`);
+registerTemplate('must', mustache);
+console.log('^^', mustache);
 
 const initialThings = [
   { text: 'a', [move]: moveThing },
