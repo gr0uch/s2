@@ -186,49 +186,38 @@ function remove() {
   proxy.todos = proxy.todos
     .filter(({ todo }) =>
       todo !== this.todo);
-  if (!proxy.todos.length)
-    delete proxy.todos;
 }
 
 function add(event) {
   event.preventDefault();
   const { todo } = this;
-  if (todo) {
-    if (!proxy.todos)
-      proxy.todos = [];
-    proxy.todos
-      .unshift({ remove, todo });
-    delete this.todo;
-  }
+  if (!todo) return;
+  proxy.todos
+    .unshift({ remove, todo });
+  delete this.todo;
 }
 </textarea>
               </div>
               <div>
-                <h4>HTML</h4>
+                <h4>HTML + Mustache</h4>
                 <textarea id="templates" spellcheck="false"><template id="todos">
   <h1>Todos</h1>
-  <form data-event-submit="add">
+  <form onsubmit="{{add}}">
     <input
-      data-value="todo"
+      value="{{todo}}"
       placeholder="Todo...">
     <button>Add</button>
   </form>
   <ul>
-    <slot
-      name="todos"
-      data-template="#todo">
-      <li><em>Nothing to do!</em></li>
-    </slot>
+    {{#todos}}
+      <li>
+        <div onclick="{{remove}}">
+          &#x2715;
+        </div>
+        <span>{{todo}}</span>
+      </li>
+    {{/todos}}
   </ul>
-</template>
-
-<template id="todo">
-  <li>
-    <div data-event-click="remove">
-      &#x2715;
-    </div>
-    <span data-text="todo"></span>
-  </li>
 </template>
 </textarea>
               </div>
@@ -348,10 +337,12 @@ function add(event) {
             { default: depCheck },
             { default: s2, mount: s2mount, unmount: s2unmount, move: s2move },
             { createSource, createComputed },
+            { default: parseMustache },
         ] = await Promise.all([
           import('./dep-check.min.mjs'),
           import('./main.min.mjs'),
           import('./computed-properties.min.mjs'),
+          import('./mustache.min.mjs'),
         ]);
         // s2.debug = true;
 
@@ -379,6 +370,7 @@ function add(event) {
           tmp.innerHTML = templates.value;
           cleanupTemplates();
           const root = document.getElementById('todos');
+          parseMustache(root);
           const [proxy, node] = s2(global.state, root);
           while (container.firstChild) container.firstChild.remove();
           container.appendChild(node);
