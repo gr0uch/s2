@@ -67,14 +67,15 @@
   ;; match sections
   (let* ((nodes
           (loop for node in (@ element child-nodes) collect node))
-         (container nil)
-         (last-opened nil))
+         ;; these are stacks
+         (container (list))
+         (last-opened (list)))
     ;; first pass: tokenize text
     (loop
      for node in nodes do
      (when (not (eq (@ node node-type) (@ *node "TEXT_NODE")))
-       (when container
-         (chain container (append-child node)))
+       (when (length container)
+         (chain (@ container 0) (append-child node)))
        (continue))
      (let* ((text (@ node node-value))
             (tokens (chain text
@@ -92,20 +93,23 @@
               (match-unescaped-var
                (chain token (match *unescaped-var-regexp*))))
           (when match-open
-            (setf last-opened (chain (@ match-open 1) (trim))
-                  new-node (chain document (create-element 'slot))
-                  container new-node)
-            (chain new-node (set-attribute 'name last-opened))
-            (chain node parent-node (insert-before new-node node))
+            (setf new-node (chain document (create-element 'slot)))
+            (let ((name (chain (@ match-open 1) (trim))))
+              (chain last-opened (unshift name))
+              (chain new-node (set-attribute 'name name)))
+            (if (length container)
+                (chain container 0 (append-child new-node))
+              (chain node parent-node (insert-before new-node node)))
+            (chain container (unshift new-node))
             (continue))
-          (when (and match-partial container)
-            (setf (@ container dataset template)
+          (when (and match-partial (length container))
+            (setf (@ container 0 dataset template)
                   (chain (@ match-partial 1) (trim)))
             (continue))
           (when (and match-close (eq (chain (@ match-close 1) (trim))
-                                     last-opened))
-            (setf last-opened nil
-                  container nil)
+                                     (@ last-opened 0)))
+            (chain last-opened (shift))
+            (chain container (shift))
             (continue))
           ;; interpolate free vars as span elements
           (when match-var

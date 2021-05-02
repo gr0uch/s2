@@ -89,11 +89,12 @@ if ('undefined' === typeof PARTIALREGEXP) {
      (LET* ((NODES
              (LOOP FOR NODE IN (@ ELEMENT CHILD-NODES)
                    COLLECT NODE))
-            (CONTAINER NIL)
-            (LAST-OPENED NIL))
+            (CONTAINER (LIST))
+            (LAST-OPENED (LIST)))
        (LOOP FOR NODE IN NODES
              DO (WHEN (NOT (EQ (@ NODE NODE-TYPE) (@ *NODE TEXT_NODE)))
-                  (WHEN CONTAINER (CHAIN CONTAINER (APPEND-CHILD NODE)))
+                  (WHEN (LENGTH CONTAINER)
+                    (CHAIN (@ CONTAINER 0) (APPEND-CHILD NODE)))
                   (CONTINUE)) (LET* ((TEXT (@ NODE NODE-VALUE))
                                      (TOKENS
                                       (CHAIN TEXT (SPLIT *VAR-REGEXP-GLOBAL*)
@@ -121,23 +122,32 @@ if ('undefined' === typeof PARTIALREGEXP) {
                                                        (MATCH
                                                         *UNESCAPED-VAR-REGEXP*))))
                                            (WHEN MATCH-OPEN
-                                             (SETF LAST-OPENED
-                                                     (CHAIN (@ MATCH-OPEN 1)
-                                                            (TRIM))
-                                                   NEW-NODE
+                                             (SETF NEW-NODE
                                                      (CHAIN DOCUMENT
                                                             (CREATE-ELEMENT
-                                                             'SLOT))
-                                                   CONTAINER NEW-NODE)
-                                             (CHAIN NEW-NODE
-                                                    (SET-ATTRIBUTE 'NAME
-                                                     LAST-OPENED))
-                                             (CHAIN NODE PARENT-NODE
-                                                    (INSERT-BEFORE NEW-NODE
-                                                     NODE))
+                                                             'SLOT)))
+                                             (LET ((NAME
+                                                    (CHAIN (@ MATCH-OPEN 1)
+                                                           (TRIM))))
+                                               (CHAIN LAST-OPENED
+                                                      (UNSHIFT NAME))
+                                               (CHAIN NEW-NODE
+                                                      (SET-ATTRIBUTE 'NAME
+                                                       NAME)))
+                                             (IF (LENGTH CONTAINER)
+                                                 (CHAIN CONTAINER 0
+                                                        (APPEND-CHILD
+                                                         NEW-NODE))
+                                                 (CHAIN NODE PARENT-NODE
+                                                        (INSERT-BEFORE NEW-NODE
+                                                         NODE)))
+                                             (CHAIN CONTAINER
+                                                    (UNSHIFT NEW-NODE))
                                              (CONTINUE))
-                                           (WHEN (AND MATCH-PARTIAL CONTAINER)
-                                             (SETF (@ CONTAINER DATASET
+                                           (WHEN
+                                               (AND MATCH-PARTIAL
+                                                    (LENGTH CONTAINER))
+                                             (SETF (@ CONTAINER 0 DATASET
                                                     TEMPLATE)
                                                      (CHAIN (@ MATCH-PARTIAL 1)
                                                             (TRIM)))
@@ -147,9 +157,9 @@ if ('undefined' === typeof PARTIALREGEXP) {
                                                     (EQ
                                                      (CHAIN (@ MATCH-CLOSE 1)
                                                             (TRIM))
-                                                     LAST-OPENED))
-                                             (SETF LAST-OPENED NIL
-                                                   CONTAINER NIL)
+                                                     (@ LAST-OPENED 0)))
+                                             (CHAIN LAST-OPENED (SHIFT))
+                                             (CHAIN CONTAINER (SHIFT))
                                              (CONTINUE))
                                            (WHEN MATCH-VAR
                                              (SETF NEW-NODE
@@ -253,14 +263,14 @@ function processElement(element) {
         
         return collect10;
     })();
-    var container = null;
-    var lastOpened = null;
+    var container = [];
+    var lastOpened = [];
     var _js12 = nodes.length;
     for (var _js11 = 0; _js11 < _js12; _js11 += 1) {
         var node = nodes[_js11];
         if (node.nodeType !== Node['TEXT_NODE']) {
-            if (container) {
-                container.appendChild(node);
+            if (container.length) {
+                container[0].appendChild(node);
             };
             continue;
         };
@@ -278,20 +288,25 @@ function processElement(element) {
             var matchVar16 = token.match(VARREGEXP);
             var matchUnescapedVar17 = token.match(UNESCAPEDVARREGEXP);
             if (matchOpen) {
-                lastOpened = matchOpen[1].trim();
                 newNode = document.createElement('slot');
-                container = newNode;
-                newNode.setAttribute('name', lastOpened);
-                node.parentNode.insertBefore(newNode, node);
+                var name18 = matchOpen[1].trim();
+                lastOpened.unshift(name18);
+                newNode.setAttribute('name', name18);
+                if (container.length) {
+                    container[0].appendChild(newNode);
+                } else {
+                    node.parentNode.insertBefore(newNode, node);
+                };
+                container.unshift(newNode);
                 continue;
             };
-            if (matchPartial && container) {
-                container.dataset.template = matchPartial[1].trim();
+            if (matchPartial && container.length) {
+                container[0].dataset.template = matchPartial[1].trim();
                 continue;
             };
-            if (matchClose && matchClose[1].trim() === lastOpened) {
-                lastOpened = null;
-                container = null;
+            if (matchClose && matchClose[1].trim() === lastOpened[0]) {
+                lastOpened.shift();
+                container.shift();
                 continue;
             };
             if (matchVar16) {

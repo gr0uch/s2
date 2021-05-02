@@ -26,6 +26,9 @@ const mustache = parseMustache(`
   <span>{{{html}}}</span>
   {{#ul}}
     <span>{{name}}</span>
+    {{#deep}}
+      <span>{{value}}</span>
+    {{/deep}}
   {{/ul}}
   wtf {{yo}}
   {{#ol}}
