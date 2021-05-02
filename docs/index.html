@@ -183,9 +183,10 @@
 };
 
 function remove() {
-  proxy.todos = proxy.todos
-    .filter(({ todo }) =>
-      todo !== this.todo);
+  const { todos } = proxy;
+  const i = todos
+    .findIndex(_ => _ === this);
+  todos.splice(i, 1);
 }
 
 function add(event) {
