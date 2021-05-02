@@ -1,6 +1,7 @@
 (defvar *source-context-map* (new (*weak-map)))
 (defvar *target-sources-map* (new (*weak-map)))
 (defvar *read-stack* (list))
+(defvar *clear-stack-timeout* nil)
 
 (defvar *proxy-source*
   (create get get-property
@@ -9,6 +10,7 @@
 
 
 (defun clear-stack ()
+  (setf *clear-stack-timeout* nil)
   (loop
    while (length *read-stack*) do
    (chain *read-stack* (pop))))
@@ -19,7 +21,8 @@
 (defun get-property (target key receiver)
   (chain *read-stack* (push (list target key)))
   ;; Prevent possible memory leaks from reading.
-  (set-timeout clear-stack 0)
+  (when (not *clear-stack-timeout*)
+    (setf *clear-stack-timeout* (set-timeout clear-stack 0)))
   (chain *reflect (get target key receiver)))
 
 

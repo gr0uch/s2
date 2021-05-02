@@ -11,6 +11,10 @@ if ('undefined' === typeof TARGETSOURCESMAP) {
 if ('undefined' === typeof READSTACK) {
     var READSTACK = [];
 };
+/* (DEFVAR *CLEAR-STACK-TIMEOUT* NIL) */
+if ('undefined' === typeof CLEARSTACKTIMEOUT) {
+    var CLEARSTACKTIMEOUT = null;
+};
 /* (DEFVAR *PROXY-SOURCE*
      (CREATE GET GET-PROPERTY SET SET-PROPERTY DELETE-PROPERTY SET-PROPERTY)) */
 if ('undefined' === typeof PROXYSOURCE) {
@@ -20,20 +24,25 @@ if ('undefined' === typeof PROXYSOURCE) {
                       };
 };
 /* (DEFUN CLEAR-STACK ()
+     (SETF *CLEAR-STACK-TIMEOUT* NIL)
      (LOOP WHILE (LENGTH *READ-STACK*)
            DO (CHAIN *READ-STACK* (POP)))) */
 function clearStack() {
+    CLEARSTACKTIMEOUT = null;
     while (READSTACK.length) {
         READSTACK.pop();
     };
 };
 /* (DEFUN GET-PROPERTY (TARGET KEY RECEIVER)
      (CHAIN *READ-STACK* (PUSH (LIST TARGET KEY)))
-     (SET-TIMEOUT CLEAR-STACK 0)
+     (WHEN (NOT *CLEAR-STACK-TIMEOUT*)
+       (SETF *CLEAR-STACK-TIMEOUT* (SET-TIMEOUT CLEAR-STACK 0)))
      (CHAIN *REFLECT (GET TARGET KEY RECEIVER))) */
 function getProperty(target, key, receiver) {
     READSTACK.push([target, key]);
-    setTimeout(clearStack, 0);
+    if (!CLEARSTACKTIMEOUT) {
+        CLEARSTACKTIMEOUT = setTimeout(clearStack, 0);
+    };
     
     return Reflect.get(target, key, receiver);
 };
