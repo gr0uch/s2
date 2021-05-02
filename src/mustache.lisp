@@ -1,10 +1,19 @@
-(defvar *comment-regexp* (regex "/{{!(.+?)}}/gs"))
-(defvar *var-regexp* (regex "/^{{([^{}]+?)}}$/"))
-(defvar *var-regexp-global* (regex "/({{(?:[^{}]+?)}})/gm"))
-(defvar *unescaped-var-regexp* (regex "/^{{[{&]([^{}]+?)}{2,3}$/"))
-(defvar *section-open-regexp* (regex "/{{#([^{}]+?)}}/"))
-(defvar *section-close-regexp* (regex "/{{\\/([^{}]+?)}}/"))
-(defvar *partial-regexp* (regex "/{{>([^{}]+?)}}/"))
+(defvar *tag-open* "{{")
+(defvar *tag-close* "}}")
+(defvar *comment-regexp*
+  (new (*reg-exp (+ *tag-open* "!(.+?)" *tag-close*) "gs")))
+(defvar *var-regexp*
+  (new (*reg-exp (+ "^" *tag-open* "([^{}]+?)" *tag-close* "$"))))
+(defvar *var-regexp-global*
+  (new (*reg-exp (+ "(" *tag-open* "{1,2}(?:.+?)" *tag-close* "{1,2})") "gm")))
+(defvar *unescaped-var-regexp*
+  (new (*reg-exp (+ "^" *tag-open* "[{&]([^{}]+?)}?" *tag-close* "$"))))
+(defvar *section-open-regexp*
+  (new (*reg-exp (+ *tag-open* "#([^{}]+?)" *tag-close*))))
+(defvar *section-close-regexp*
+  (new (*reg-exp (+ *tag-open* "\/([^{}]+?)" *tag-close*))))
+(defvar *partial-regexp*
+  (new (*reg-exp (+ *tag-open* ">([^{}]+?)" *tag-close*))))
 
 (defun process-element (element)
   ;; match attributes
@@ -70,14 +79,18 @@
      (let* ((text (@ node node-value))
             (tokens (chain text
                            (split *var-regexp-global*)
-                           (map (lambda (s) (chain s (trim))))
-                           (filter *boolean))))
+                           ;; may want to keep whitespace
+                           ;; (map (lambda (s) (chain s (trim))))
+                           (filter (lambda (s) (chain s (trim)))))))
        (loop
         for token in tokens do
         (let ((new-node nil)
               (match-open (chain token (match *section-open-regexp*)))
               (match-close (chain token (match *section-close-regexp*)))
-              (match-partial (chain token (match *partial-regexp*))))
+              (match-partial (chain token (match *partial-regexp*)))
+              (match-var (chain token (match *var-regexp*)))
+              (match-unescaped-var
+               (chain token (match *unescaped-var-regexp*))))
           (when match-open
             (setf last-opened (chain (@ match-open 1) (trim))
                   new-node (chain document (create-element 'slot))
@@ -93,6 +106,17 @@
                                      last-opened))
             (setf last-opened nil
                   container nil)
+            (continue))
+          ;; interpolate free vars as span elements
+          (when match-var
+            (setf new-node (chain document (create-element 'span))
+                  (@ new-node dataset text) (@ match-var 1))
+            (chain node parent-node (insert-before new-node node))
+            (continue))
+          (when match-unescaped-var
+            (setf new-node (chain document (create-element 'span))
+                  (@ new-node dataset unsafe-html) (@ match-unescaped-var 1))
+            (chain node parent-node (insert-before new-node node))
             (continue))
           (setf new-node (chain document (create-text-node token)))
           (chain node parent-node (insert-before new-node node))))

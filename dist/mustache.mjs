@@ -1,31 +1,46 @@
 
-/* (DEFVAR *COMMENT-REGEXP* (REGEX /{{!(.+?)}}/gs)) */
+/* (DEFVAR *TAG-OPEN* {{) */
+if ('undefined' === typeof TAGOPEN) {
+    var TAGOPEN = '{{';
+};
+/* (DEFVAR *TAG-CLOSE* }}) */
+if ('undefined' === typeof TAGCLOSE) {
+    var TAGCLOSE = '}}';
+};
+/* (DEFVAR *COMMENT-REGEXP*
+     (NEW (*REG-EXP (+ *TAG-OPEN* !(.+?) *TAG-CLOSE*) gs))) */
 if ('undefined' === typeof COMMENTREGEXP) {
-    var COMMENTREGEXP = /{{!(.+?)}}/gs;
+    var COMMENTREGEXP = new RegExp(TAGOPEN + '!(.+?)' + TAGCLOSE, 'gs');
 };
-/* (DEFVAR *VAR-REGEXP* (REGEX /^{{([^{}]+?)}}$/)) */
+/* (DEFVAR *VAR-REGEXP*
+     (NEW (*REG-EXP (+ ^ *TAG-OPEN* ([^{}]+?) *TAG-CLOSE* $)))) */
 if ('undefined' === typeof VARREGEXP) {
-    var VARREGEXP = /^{{([^{}]+?)}}$/;
+    var VARREGEXP = new RegExp('^' + TAGOPEN + '([^{}]+?)' + TAGCLOSE + '$');
 };
-/* (DEFVAR *VAR-REGEXP-GLOBAL* (REGEX /({{(?:[^{}]+?)}})/gm)) */
+/* (DEFVAR *VAR-REGEXP-GLOBAL*
+     (NEW (*REG-EXP (+ ( *TAG-OPEN* {1,2}(?:.+?) *TAG-CLOSE* {1,2})) gm))) */
 if ('undefined' === typeof VARREGEXPGLOBAL) {
-    var VARREGEXPGLOBAL = /({{(?:[^{}]+?)}})/gm;
+    var VARREGEXPGLOBAL = new RegExp('(' + TAGOPEN + '{1,2}(?:.+?)' + TAGCLOSE + '{1,2})', 'gm');
 };
-/* (DEFVAR *UNESCAPED-VAR-REGEXP* (REGEX /^{{[{&]([^{}]+?)}{2,3}$/)) */
+/* (DEFVAR *UNESCAPED-VAR-REGEXP*
+     (NEW (*REG-EXP (+ ^ *TAG-OPEN* [{&]([^{}]+?)}? *TAG-CLOSE* $)))) */
 if ('undefined' === typeof UNESCAPEDVARREGEXP) {
-    var UNESCAPEDVARREGEXP = /^{{[{&]([^{}]+?)}{2,3}$/;
+    var UNESCAPEDVARREGEXP = new RegExp('^' + TAGOPEN + '[{&]([^{}]+?)}?' + TAGCLOSE + '$');
 };
-/* (DEFVAR *SECTION-OPEN-REGEXP* (REGEX /{{#([^{}]+?)}}/)) */
+/* (DEFVAR *SECTION-OPEN-REGEXP*
+     (NEW (*REG-EXP (+ *TAG-OPEN* #([^{}]+?) *TAG-CLOSE*)))) */
 if ('undefined' === typeof SECTIONOPENREGEXP) {
-    var SECTIONOPENREGEXP = /{{#([^{}]+?)}}/;
+    var SECTIONOPENREGEXP = new RegExp(TAGOPEN + '#([^{}]+?)' + TAGCLOSE);
 };
-/* (DEFVAR *SECTION-CLOSE-REGEXP* (REGEX /{{\/([^{}]+?)}}/)) */
+/* (DEFVAR *SECTION-CLOSE-REGEXP*
+     (NEW (*REG-EXP (+ *TAG-OPEN* /([^{}]+?) *TAG-CLOSE*)))) */
 if ('undefined' === typeof SECTIONCLOSEREGEXP) {
-    var SECTIONCLOSEREGEXP = /{{\/([^{}]+?)}}/;
+    var SECTIONCLOSEREGEXP = new RegExp(TAGOPEN + '/([^{}]+?)' + TAGCLOSE);
 };
-/* (DEFVAR *PARTIAL-REGEXP* (REGEX /{{>([^{}]+?)}}/)) */
+/* (DEFVAR *PARTIAL-REGEXP*
+     (NEW (*REG-EXP (+ *TAG-OPEN* >([^{}]+?) *TAG-CLOSE*)))) */
 if ('undefined' === typeof PARTIALREGEXP) {
-    var PARTIALREGEXP = /{{>([^{}]+?)}}/;
+    var PARTIALREGEXP = new RegExp(TAGOPEN + '>([^{}]+?)' + TAGCLOSE);
 };
 /* (DEFUN PROCESS-ELEMENT (ELEMENT)
      (LET ((ATTRIBUTE-ENTRIES
@@ -82,9 +97,8 @@ if ('undefined' === typeof PARTIALREGEXP) {
                   (CONTINUE)) (LET* ((TEXT (@ NODE NODE-VALUE))
                                      (TOKENS
                                       (CHAIN TEXT (SPLIT *VAR-REGEXP-GLOBAL*)
-                                             (MAP
-                                              (LAMBDA (S) (CHAIN S (TRIM))))
-                                             (FILTER *BOOLEAN))))
+                                             (FILTER
+                                              (LAMBDA (S) (CHAIN S (TRIM)))))))
                                 (LOOP FOR TOKEN IN TOKENS
                                       DO (LET ((NEW-NODE NIL)
                                                (MATCH-OPEN
@@ -98,7 +112,14 @@ if ('undefined' === typeof PARTIALREGEXP) {
                                                (MATCH-PARTIAL
                                                 (CHAIN TOKEN
                                                        (MATCH
-                                                        *PARTIAL-REGEXP*))))
+                                                        *PARTIAL-REGEXP*)))
+                                               (MATCH-VAR
+                                                (CHAIN TOKEN
+                                                       (MATCH *VAR-REGEXP*)))
+                                               (MATCH-UNESCAPED-VAR
+                                                (CHAIN TOKEN
+                                                       (MATCH
+                                                        *UNESCAPED-VAR-REGEXP*))))
                                            (WHEN MATCH-OPEN
                                              (SETF LAST-OPENED
                                                      (CHAIN (@ MATCH-OPEN 1)
@@ -129,6 +150,29 @@ if ('undefined' === typeof PARTIALREGEXP) {
                                                      LAST-OPENED))
                                              (SETF LAST-OPENED NIL
                                                    CONTAINER NIL)
+                                             (CONTINUE))
+                                           (WHEN MATCH-VAR
+                                             (SETF NEW-NODE
+                                                     (CHAIN DOCUMENT
+                                                            (CREATE-ELEMENT
+                                                             'SPAN))
+                                                   (@ NEW-NODE DATASET TEXT)
+                                                     (@ MATCH-VAR 1))
+                                             (CHAIN NODE PARENT-NODE
+                                                    (INSERT-BEFORE NEW-NODE
+                                                     NODE))
+                                             (CONTINUE))
+                                           (WHEN MATCH-UNESCAPED-VAR
+                                             (SETF NEW-NODE
+                                                     (CHAIN DOCUMENT
+                                                            (CREATE-ELEMENT
+                                                             'SPAN))
+                                                   (@ NEW-NODE DATASET
+                                                    UNSAFE-HTML)
+                                                     (@ MATCH-UNESCAPED-VAR 1))
+                                             (CHAIN NODE PARENT-NODE
+                                                    (INSERT-BEFORE NEW-NODE
+                                                     NODE))
                                              (CONTINUE))
                                            (SETF NEW-NODE
                                                    (CHAIN DOCUMENT
@@ -221,9 +265,9 @@ function processElement(element) {
             continue;
         };
         var text13 = node.nodeValue;
-        var tokens = text13.split(VARREGEXPGLOBAL).map(function (s) {
+        var tokens = text13.split(VARREGEXPGLOBAL).filter(function (s) {
             return s.trim();
-        }).filter(Boolean);
+        });
         var _js15 = tokens.length;
         for (var _js14 = 0; _js14 < _js15; _js14 += 1) {
             var token = tokens[_js14];
@@ -231,6 +275,8 @@ function processElement(element) {
             var matchOpen = token.match(SECTIONOPENREGEXP);
             var matchClose = token.match(SECTIONCLOSEREGEXP);
             var matchPartial = token.match(PARTIALREGEXP);
+            var matchVar16 = token.match(VARREGEXP);
+            var matchUnescapedVar17 = token.match(UNESCAPEDVARREGEXP);
             if (matchOpen) {
                 lastOpened = matchOpen[1].trim();
                 newNode = document.createElement('slot');
@@ -246,6 +292,18 @@ function processElement(element) {
             if (matchClose && matchClose[1].trim() === lastOpened) {
                 lastOpened = null;
                 container = null;
+                continue;
+            };
+            if (matchVar16) {
+                newNode = document.createElement('span');
+                newNode.dataset.text = matchVar16[1];
+                node.parentNode.insertBefore(newNode, node);
+                continue;
+            };
+            if (matchUnescapedVar17) {
+                newNode = document.createElement('span');
+                newNode.dataset.unsafeHtml = matchUnescapedVar17[1];
+                node.parentNode.insertBefore(newNode, node);
                 continue;
             };
             newNode = document.createTextNode(token);

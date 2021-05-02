@@ -27,10 +27,11 @@ const mustache = parseMustache(`
   {{#ul}}
     <span>{{name}}</span>
   {{/ul}}
-  wtf
+  wtf {{yo}}
   {{#ol}}
     {{>reg}}
   {{/ol}}
+  {{{danger}}}
 </div>
 `);
 registerTemplate('must', mustache);
