@@ -62,7 +62,7 @@
  (getprop *property-handlers* *context-html*)
  (lambda (node key value)
    (when (not (eq value (@ node inner-h-t-m-l)))
-     (setf (@ node inner-h-t-m-l) value)))
+     (setf (@ node inner-h-t-m-l) (or value ""))))
  (getprop *property-handlers* *context-value*)
  (lambda (node key value)
    (when (not (eq value (@ node value)))
@@ -251,7 +251,7 @@
        (setf node (@ descriptor node)
              type (@ descriptor type))
        (when (or is-changed is-initializing)
-         (if (and (in type *property-handlers*)
+         (if (and (in type *property-handlers*) ; conflict not possible
                   (not (eq (typeof value) 'function)))
              ((getprop *property-handlers* type)
               node (@ descriptor name) value)
@@ -285,6 +285,7 @@
 
 (defun set-attribute (node name value)
   (if (not (or (eq value nil) (eq value undefined)))
+      ;; intentional use of `in`
       (if (in name node) (setf (getprop node name) value)
         (chain node (set-attribute name value)))
     (chain node (remove-attribute name))))
@@ -429,7 +430,7 @@
                      ;; Removal.
                      (loop
                       for key of prev do
-                      (when (not (in key obj))
+                      (when (not (chain obj (has-own-property key)))
                         (delete (getprop prev key)))))
                  (setf (getprop previous-values i) obj))))
             (when (chain *array (is-array previous-value))
@@ -469,6 +470,7 @@
 
     (defun walk (parent-node path)
       (loop
+       ;; backwards iteration avoids problems with removing nodes.
        for i from 0 to (- (length (@ parent-node child-nodes)) 1) do
        (let ((node (getprop (@ parent-node child-nodes) i)))
          (when (not (eq (@ node node-type) (@ *node "ELEMENT_NODE"))) (continue))
@@ -495,11 +497,12 @@
                         (eq (@ node tag-name) *tag-slot*))
                (setf template-node (chain document (create-document-fragment)))
                (loop
-                for node in (@ node child-nodes) do
-                (chain template-node (append-child node))))
+                while (length (@ node child-nodes)) do
+                (let ((child-node (@ node child-nodes 0)))
+                  (chain template-node (append-child child-node)))))
 
              (chain parent-node (insert-before anchor node))
-             (when (not (in slot-name context))
+             (when (not (chain context (has-own-property slot-name)))
                (setf (getprop context slot-name) (list)))
              (chain
               (getprop context slot-name)
@@ -551,7 +554,7 @@
               (delete (getprop (@ node dataset) key))
               (chain node (remove-attribute key))
               (setf (@ result path) (chain path (concat i)))
-              (when (not (in value context))
+              (when (not (chain context (has-own-property value)))
                 (setf (getprop context value) (list)))
               (chain (getprop context value) (push result))))))))
 
@@ -628,7 +631,7 @@
     ;; Initialization
     (loop
      for key of obj do
-     (when (in key context) (continue))
+     (when (chain context (has-own-property key)) (continue))
      (setf (getprop target key) (getprop obj key)))
     (loop
      for key of context do
@@ -663,6 +666,8 @@
 
 
 (defun main (origin template)
+  (when (chain *templates-hash* (has-own-property template))
+    (setf template (getprop *templates-hash* template)))
   (create-binding origin template))
 
 (setf (@ main debug) (not t)

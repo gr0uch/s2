@@ -117,7 +117,7 @@ if ('undefined' === typeof PROPERTYHANDLERS) {
          (GETPROP *PROPERTY-HANDLERS* *CONTEXT-HTML*)
            (LAMBDA (NODE KEY VALUE)
              (WHEN (NOT (EQ VALUE (@ NODE INNER-H-T-M-L)))
-               (SETF (@ NODE INNER-H-T-M-L) VALUE)))
+               (SETF (@ NODE INNER-H-T-M-L) (OR VALUE ))))
          (GETPROP *PROPERTY-HANDLERS* *CONTEXT-VALUE*)
            (LAMBDA (NODE KEY VALUE)
              (WHEN (NOT (EQ VALUE (@ NODE VALUE)))
@@ -132,7 +132,7 @@ PROPERTYHANDLERS[CONTEXTTEXT] = function (node, key, value) {
     return value !== node.textContent ? (node.textContent = value) : null;
 };
 PROPERTYHANDLERS[CONTEXTHTML] = function (node, key, value) {
-    return value !== node.innerHTML ? (node.innerHTML = value) : null;
+    return value !== node.innerHTML ? (node.innerHTML = value || '') : null;
 };
 PROPERTYHANDLERS[CONTEXTVALUE] = function (node, key, value) {
     if (value !== node.value) {
@@ -742,7 +742,10 @@ function recursiveUnmount(self, shouldUnmount) {
                                        DO (SETF (GETPROP PREV KEY)
                                                   (GETPROP OBJ KEY)))
                                  (LOOP FOR KEY OF PREV
-                                       DO (WHEN (NOT (IN KEY OBJ))
+                                       DO (WHEN
+                                              (NOT
+                                               (CHAIN OBJ
+                                                      (HAS-OWN-PROPERTY KEY)))
                                             (DELETE (GETPROP PREV KEY)))))
                                 (SETF (GETPROP PREVIOUS-VALUES I) OBJ))))
                  (WHEN (CHAIN *ARRAY (IS-ARRAY PREVIOUS-VALUE))
@@ -835,7 +838,7 @@ function setSlot(target, key, value, descriptor, isInitializing) {
                         prev[key] = obj[key];
                     };
                     for (var key in prev) {
-                        if (!(key in obj)) {
+                        if (!obj.hasOwnProperty(key)) {
                             delete prev[key];
                         };
                     };
@@ -926,10 +929,13 @@ function setEvent(target, value, descriptor, receiver) {
                                  (EQ (@ NODE TAG-NAME) *TAG-SLOT*))
                           (SETF TEMPLATE-NODE
                                   (CHAIN DOCUMENT (CREATE-DOCUMENT-FRAGMENT)))
-                          (LOOP FOR NODE IN (@ NODE CHILD-NODES)
-                                DO (CHAIN TEMPLATE-NODE (APPEND-CHILD NODE))))
+                          (LOOP WHILE (LENGTH (@ NODE CHILD-NODES))
+                                DO (LET ((CHILD-NODE (@ NODE CHILD-NODES 0)))
+                                     (CHAIN TEMPLATE-NODE
+                                            (APPEND-CHILD CHILD-NODE)))))
                         (CHAIN PARENT-NODE (INSERT-BEFORE ANCHOR NODE))
-                        (WHEN (NOT (IN SLOT-NAME CONTEXT))
+                        (WHEN
+                            (NOT (CHAIN CONTEXT (HAS-OWN-PROPERTY SLOT-NAME)))
                           (SETF (GETPROP CONTEXT SLOT-NAME) (LIST)))
                         (CHAIN (GETPROP CONTEXT SLOT-NAME)
                                (PUSH
@@ -972,7 +978,9 @@ function setEvent(target, value, descriptor, receiver) {
                                  (DELETE (GETPROP (@ NODE DATASET) KEY))
                                  (CHAIN NODE (REMOVE-ATTRIBUTE KEY))
                                  (SETF (@ RESULT PATH) (CHAIN PATH (CONCAT I)))
-                                 (WHEN (NOT (IN VALUE CONTEXT))
+                                 (WHEN
+                                     (NOT
+                                      (CHAIN CONTEXT (HAS-OWN-PROPERTY VALUE)))
                                    (SETF (GETPROP CONTEXT VALUE) (LIST)))
                                  (CHAIN (GETPROP CONTEXT VALUE)
                                         (PUSH RESULT))))))))
@@ -1001,15 +1009,13 @@ function processTemplate(template) {
                 delete node.dataset.key;
                 if (!templateSelector && node.tagName === TAGSLOT) {
                     templateNode = document.createDocumentFragment();
-                    var _js42 = node.childNodes;
-                    var _js44 = _js42.length;
-                    for (var _js43 = 0; _js43 < _js44; _js43 += 1) {
-                        var node45 = _js42[_js43];
-                        templateNode.appendChild(node45);
+                    while (node.childNodes.length) {
+                        var childNode = node.childNodes[0];
+                        templateNode.appendChild(childNode);
                     };
                 };
                 parentNode.insertBefore(anchor, node);
-                if (!(slotName in context)) {
+                if (!context.hasOwnProperty(slotName)) {
                     context[slotName] = [];
                 };
                 context[slotName].push({ path : path.concat(i),
@@ -1055,7 +1061,7 @@ function processTemplate(template) {
                     delete node.dataset[key];
                     node.removeAttribute(key);
                     result.path = path.concat(i);
-                    if (!(value in context)) {
+                    if (!context.hasOwnProperty(value)) {
                         context[value] = [];
                     };
                     context[value].push(result);
@@ -1162,7 +1168,7 @@ function createArray(array, template) {
        (CHAIN *TARGET-EVENT-MAP* (SET TARGET (CREATE)))
        (CHAIN *TARGET-DELIMITER-MAP* (SET TARGET (CREATE)))
        (LOOP FOR KEY OF OBJ
-             DO (WHEN (IN KEY CONTEXT)
+             DO (WHEN (CHAIN CONTEXT (HAS-OWN-PROPERTY KEY))
                   (CONTINUE)) (SETF (GETPROP TARGET KEY) (GETPROP OBJ KEY)))
        (LOOP FOR KEY OF CONTEXT
              DO (SET-PROPERTY TARGET KEY (GETPROP OBJ KEY) PROXY T))
@@ -1197,7 +1203,7 @@ function createBinding(obj, template) {
     TARGETEVENTMAP.set(target, {  });
     TARGETDELIMITERMAP.set(target, {  });
     for (var key in obj) {
-        if (key in context) {
+        if (context.hasOwnProperty(key)) {
             continue;
         };
         target[key] = obj[key];
@@ -1249,8 +1255,14 @@ function registerTemplate(name, template) {
     };
     return TEMPLATESHASH[name] = template;
 };
-/* (DEFUN MAIN (ORIGIN TEMPLATE) (CREATE-BINDING ORIGIN TEMPLATE)) */
+/* (DEFUN MAIN (ORIGIN TEMPLATE)
+     (WHEN (CHAIN *TEMPLATES-HASH* (HAS-OWN-PROPERTY TEMPLATE))
+       (SETF TEMPLATE (GETPROP *TEMPLATES-HASH* TEMPLATE)))
+     (CREATE-BINDING ORIGIN TEMPLATE)) */
 function main(origin, template) {
+    if (TEMPLATESHASH.hasOwnProperty(template)) {
+        template = TEMPLATESHASH[template];
+    };
     
     return createBinding(origin, template);
 };

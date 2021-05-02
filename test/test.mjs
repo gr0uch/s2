@@ -4,7 +4,7 @@ import parseMustache from "../dist/mustache.mjs";
 import { createSource, createComputed } from "../dist/computed-properties.mjs";
 import test from "./runner.mjs";
 
-s2.debug = true;
+// s2.debug = true;
 s2.isDeferred = true;
 depCheck();
 cleanupTemplates();
@@ -16,7 +16,7 @@ function moveThing (node) {
 }
 
 registerTemplate('reg', '<b data-text="a"></b>');
-const mustache = parseMustache(`
+const mustacheStr = `
 <div
   foo="{{foo}}"
   class="{{cls}}"
@@ -36,9 +36,34 @@ const mustache = parseMustache(`
   {{/ol}}
   {{{danger}}}
 </div>
-`);
+`;
+const mustache = parseMustache(mustacheStr);
 registerTemplate('must', mustache);
-console.log('^^', mustache);
+
+import('https://unpkg.com/mustache@4.2.0/mustache.mjs').then(mod => {
+  const { default: Mustache } = mod;
+  const data = {
+    cls: 'cls',
+    clicky: function() {},
+    txt: 'txt',
+    html: '<b>html</b>',
+    ul: [
+      {
+        name: 'name',
+        deep: {
+          value: 'value',
+        },
+      }
+    ],
+    yo: 'yo',
+  };
+  const output = Mustache.render(mustacheStr, data);
+  const [_, fragment] = s2(data, 'must');
+  const div = document.createElement('div');
+  div.appendChild(fragment);
+  console.log('^^ mustache', output);
+  console.log('^^ s2', div.innerHTML, mustache);
+});
 
 const initialThings = [
   { text: 'a', [move]: moveThing },
@@ -91,6 +116,7 @@ const [proxy, node] = s2({
         content() {
           return source.content;
         },
+        content2: '%',
       }));
     },
   }),
