@@ -1,8 +1,8 @@
 ;; OPTIONAL MODULE
 ;; Use this if you are unsure about compatibility with the browser environment.
 
-(defvar *passed-check* false)
-(defvar *dep-map*
+(defparameter *passed-check* false)
+(defparameter *dep-map*
   '(
     ;; Sanity checking DOM.
     ((*node prototype clone-node) function)

@@ -1,9 +1,9 @@
-(defvar *source-context-map* (new (*weak-map)))
-(defvar *target-sources-map* (new (*weak-map)))
-(defvar *read-stack* (list))
-(defvar *clear-stack-timeout* nil)
+(defparameter *source-context-map* (new (*weak-map)))
+(defparameter *target-sources-map* (new (*weak-map)))
+(defparameter *read-stack* (list))
+(defparameter *clear-stack-timeout* nil)
 
-(defvar *proxy-source*
+(defparameter *proxy-source*
   (create get get-property
           set set-property
           delete-property set-property))

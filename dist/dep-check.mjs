@@ -1,9 +1,7 @@
 
-/* (DEFVAR *PASSED-CHECK* FALSE) */
-if ('undefined' === typeof PASSEDCHECK) {
-    var PASSEDCHECK = false;
-};
-/* (DEFVAR *DEP-MAP*
+/* (DEFPARAMETER *PASSED-CHECK* FALSE) */
+var PASSEDCHECK = false;
+/* (DEFPARAMETER *DEP-MAP*
      '(((*NODE PROTOTYPE CLONE-NODE) FUNCTION)
        ((*NODE PROTOTYPE APPEND-CHILD) FUNCTION)
        ((*NODE PROTOTYPE INSERT-BEFORE) FUNCTION)
@@ -19,9 +17,7 @@ if ('undefined' === typeof PASSEDCHECK) {
        ((*ARRAY IS-ARRAY) FUNCTION) ((*OBJECT ASSIGN) FUNCTION)
        ((*PROMISE) FUNCTION) ((*SYMBOL) FUNCTION) ((*REFLECT) OBJECT)
        ((*WEAK-MAP) FUNCTION) ((*PROXY) FUNCTION))) */
-if ('undefined' === typeof DEPMAP) {
-    var DEPMAP = [[['Node', 'prototype', 'cloneNode'], 'function'], [['Node', 'prototype', 'appendChild'], 'function'], [['Node', 'prototype', 'insertBefore'], 'function'], [['Node', 'prototype', 'nextSibling'], 'property'], [['Element', 'prototype', 'remove'], 'function'], [['document', 'querySelector'], 'function'], [['document', 'createTextNode'], 'function'], [['document', 'createComment'], 'function'], [['document', 'createDocumentFragment'], 'function'], [['window', 'requestAnimationFrame'], 'function'], [['Node'], 'function'], [['Object', 'prototype', 'hasOwnProperty'], 'function'], [['Number', 'parseInt'], 'function'], [['Number', 'isNaN'], 'function'], [['Array', 'isArray'], 'function'], [['Object', 'assign'], 'function'], [['Promise'], 'function'], [['Symbol'], 'function'], [['Reflect'], 'object'], [['WeakMap'], 'function'], [['Proxy'], 'function']];
-};
+var DEPMAP = [[['Node', 'prototype', 'cloneNode'], 'function'], [['Node', 'prototype', 'appendChild'], 'function'], [['Node', 'prototype', 'insertBefore'], 'function'], [['Node', 'prototype', 'nextSibling'], 'property'], [['Element', 'prototype', 'remove'], 'function'], [['document', 'querySelector'], 'function'], [['document', 'createTextNode'], 'function'], [['document', 'createComment'], 'function'], [['document', 'createDocumentFragment'], 'function'], [['window', 'requestAnimationFrame'], 'function'], [['Node'], 'function'], [['Object', 'prototype', 'hasOwnProperty'], 'function'], [['Number', 'parseInt'], 'function'], [['Number', 'isNaN'], 'function'], [['Array', 'isArray'], 'function'], [['Object', 'assign'], 'function'], [['Promise'], 'function'], [['Symbol'], 'function'], [['Reflect'], 'object'], [['WeakMap'], 'function'], [['Proxy'], 'function']];
 /* (DEFUN DEP-CHECK ()
      (WHEN *PASSED-CHECK* (RETURN-FROM DEP-CHECK))
      (LOOP FOR TUPLE IN *DEP-MAP*

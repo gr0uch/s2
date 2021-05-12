@@ -1,115 +1,61 @@
 
-/* (DEFVAR *CONTEXT-SLOT* 'SLOT) */
-if ('undefined' === typeof CONTEXTSLOT) {
-    var CONTEXTSLOT = 'slot';
-};
-/* (DEFVAR *CONTEXT-TEXT* 'TEXT) */
-if ('undefined' === typeof CONTEXTTEXT) {
-    var CONTEXTTEXT = 'text';
-};
-/* (DEFVAR *CONTEXT-HTML* 'HTML) */
-if ('undefined' === typeof CONTEXTHTML) {
-    var CONTEXTHTML = 'html';
-};
-/* (DEFVAR *CONTEXT-VALUE* 'VALUE) */
-if ('undefined' === typeof CONTEXTVALUE) {
-    var CONTEXTVALUE = 'value';
-};
-/* (DEFVAR *CONTEXT-CLASS* 'CLASS) */
-if ('undefined' === typeof CONTEXTCLASS) {
-    var CONTEXTCLASS = 'class';
-};
-/* (DEFVAR *CONTEXT-ATTRIBUTE* 'ATTRIBUTE) */
-if ('undefined' === typeof CONTEXTATTRIBUTE) {
-    var CONTEXTATTRIBUTE = 'attribute';
-};
-/* (DEFVAR *CONTEXT-DATA* 'DATA) */
-if ('undefined' === typeof CONTEXTDATA) {
-    var CONTEXTDATA = 'data';
-};
-/* (DEFVAR *CONTEXT-EVENT* 'EVENT) */
-if ('undefined' === typeof CONTEXTEVENT) {
-    var CONTEXTEVENT = 'event';
-};
-/* (DEFVAR *SYMBOL-MOUNT* (*SYMBOL 'MOUNT)) */
-if ('undefined' === typeof SYMBOLMOUNT) {
-    var SYMBOLMOUNT = Symbol('mount');
-};
-/* (DEFVAR *SYMBOL-UNMOUNT* (*SYMBOL 'UNMOUNT)) */
-if ('undefined' === typeof SYMBOLUNMOUNT) {
-    var SYMBOLUNMOUNT = Symbol('unmount');
-};
-/* (DEFVAR *SYMBOL-MOVE* (*SYMBOL 'MOVE)) */
-if ('undefined' === typeof SYMBOLMOVE) {
-    var SYMBOLMOVE = Symbol('move');
-};
-/* (DEFVAR *TAG-SLOT* '*SLOT*) */
-if ('undefined' === typeof TAGSLOT) {
-    var TAGSLOT = 'SLOT';
-};
+/* (DEFPARAMETER *CONTEXT-SLOT* 'SLOT) */
+var CONTEXTSLOT = 'slot';
+/* (DEFPARAMETER *CONTEXT-TEXT* 'TEXT) */
+var CONTEXTTEXT = 'text';
+/* (DEFPARAMETER *CONTEXT-HTML* 'HTML) */
+var CONTEXTHTML = 'html';
+/* (DEFPARAMETER *CONTEXT-VALUE* 'VALUE) */
+var CONTEXTVALUE = 'value';
+/* (DEFPARAMETER *CONTEXT-CLASS* 'CLASS) */
+var CONTEXTCLASS = 'class';
+/* (DEFPARAMETER *CONTEXT-ATTRIBUTE* 'ATTRIBUTE) */
+var CONTEXTATTRIBUTE = 'attribute';
+/* (DEFPARAMETER *CONTEXT-DATA* 'DATA) */
+var CONTEXTDATA = 'data';
+/* (DEFPARAMETER *CONTEXT-EVENT* 'EVENT) */
+var CONTEXTEVENT = 'event';
+/* (DEFPARAMETER *SYMBOL-MOUNT* (*SYMBOL 'MOUNT)) */
+var SYMBOLMOUNT = Symbol('mount');
+/* (DEFPARAMETER *SYMBOL-UNMOUNT* (*SYMBOL 'UNMOUNT)) */
+var SYMBOLUNMOUNT = Symbol('unmount');
+/* (DEFPARAMETER *SYMBOL-MOVE* (*SYMBOL 'MOVE)) */
+var SYMBOLMOVE = Symbol('move');
+/* (DEFPARAMETER *TAG-SLOT* '*SLOT*) */
+var TAGSLOT = 'SLOT';
 /* (DEFMACRO CONSOLE-LOG (&BODY FORMS) `(CHAIN CONSOLE (LOG ,@FORMS))) */
 
-/* (DEFVAR *TARGET-CONTEXT-MAP* (NEW (*WEAK-MAP))) */
-if ('undefined' === typeof TARGETCONTEXTMAP) {
-    var TARGETCONTEXTMAP = new WeakMap();
-};
-/* (DEFVAR *TARGET-EVENT-MAP* (NEW (*WEAK-MAP))) */
-if ('undefined' === typeof TARGETEVENTMAP) {
-    var TARGETEVENTMAP = new WeakMap();
-};
-/* (DEFVAR *TARGET-DELIMITER-MAP* (NEW (*WEAK-MAP))) */
-if ('undefined' === typeof TARGETDELIMITERMAP) {
-    var TARGETDELIMITERMAP = new WeakMap();
-};
-/* (DEFVAR *PROXY-UNMOUNT-MAP* (NEW (*WEAK-MAP))) */
-if ('undefined' === typeof PROXYUNMOUNTMAP) {
-    var PROXYUNMOUNTMAP = new WeakMap();
-};
-/* (DEFVAR *PROXY-MOVE-MAP* (NEW (*WEAK-MAP))) */
-if ('undefined' === typeof PROXYMOVEMAP) {
-    var PROXYMOVEMAP = new WeakMap();
-};
-/* (DEFVAR *PROXY-DELIMITER-MAP* (NEW (*WEAK-MAP))) */
-if ('undefined' === typeof PROXYDELIMITERMAP) {
-    var PROXYDELIMITERMAP = new WeakMap();
-};
-/* (DEFVAR *PROXY-TEMPLATE-MAP* (NEW (*WEAK-MAP))) */
-if ('undefined' === typeof PROXYTEMPLATEMAP) {
-    var PROXYTEMPLATEMAP = new WeakMap();
-};
-/* (DEFVAR *PROXY-ANCHOR-MAP* (NEW (*WEAK-MAP))) */
-if ('undefined' === typeof PROXYANCHORMAP) {
-    var PROXYANCHORMAP = new WeakMap();
-};
-/* (DEFVAR *TEMPLATE-PROCESSED-MAP* (NEW (*WEAK-MAP))) */
-if ('undefined' === typeof TEMPLATEPROCESSEDMAP) {
-    var TEMPLATEPROCESSEDMAP = new WeakMap();
-};
-/* (DEFVAR *TEMPLATE-CONTEXT-MAP* (NEW (*WEAK-MAP))) */
-if ('undefined' === typeof TEMPLATECONTEXTMAP) {
-    var TEMPLATECONTEXTMAP = new WeakMap();
-};
-/* (DEFVAR *PROXY-OBJECT*
+/* (DEFPARAMETER *TARGET-CONTEXT-MAP* (NEW (*WEAK-MAP))) */
+var TARGETCONTEXTMAP = new WeakMap();
+/* (DEFPARAMETER *TARGET-EVENT-MAP* (NEW (*WEAK-MAP))) */
+var TARGETEVENTMAP = new WeakMap();
+/* (DEFPARAMETER *TARGET-DELIMITER-MAP* (NEW (*WEAK-MAP))) */
+var TARGETDELIMITERMAP = new WeakMap();
+/* (DEFPARAMETER *PROXY-UNMOUNT-MAP* (NEW (*WEAK-MAP))) */
+var PROXYUNMOUNTMAP = new WeakMap();
+/* (DEFPARAMETER *PROXY-MOVE-MAP* (NEW (*WEAK-MAP))) */
+var PROXYMOVEMAP = new WeakMap();
+/* (DEFPARAMETER *PROXY-DELIMITER-MAP* (NEW (*WEAK-MAP))) */
+var PROXYDELIMITERMAP = new WeakMap();
+/* (DEFPARAMETER *PROXY-TEMPLATE-MAP* (NEW (*WEAK-MAP))) */
+var PROXYTEMPLATEMAP = new WeakMap();
+/* (DEFPARAMETER *PROXY-ANCHOR-MAP* (NEW (*WEAK-MAP))) */
+var PROXYANCHORMAP = new WeakMap();
+/* (DEFPARAMETER *TEMPLATE-PROCESSED-MAP* (NEW (*WEAK-MAP))) */
+var TEMPLATEPROCESSEDMAP = new WeakMap();
+/* (DEFPARAMETER *TEMPLATE-CONTEXT-MAP* (NEW (*WEAK-MAP))) */
+var TEMPLATECONTEXTMAP = new WeakMap();
+/* (DEFPARAMETER *PROXY-OBJECT*
      (CREATE SET SET-PROPERTY DELETE-PROPERTY SET-PROPERTY)) */
-if ('undefined' === typeof PROXYOBJECT) {
-    var PROXYOBJECT = { set : setProperty, deleteProperty : setProperty };
-};
-/* (DEFVAR *PROXY-ARRAY* (CREATE SET SET-INDEX DELETE-PROPERTY SET-INDEX)) */
-if ('undefined' === typeof PROXYARRAY) {
-    var PROXYARRAY = { set : setIndex, deleteProperty : setIndex };
-};
-/* (DEFVAR *DEFERRED-QUEUE* (LIST)) */
-if ('undefined' === typeof DEFERREDQUEUE) {
-    var DEFERREDQUEUE = [];
-};
-/* (DEFVAR *TEMPLATES-HASH* (CREATE)) */
-if ('undefined' === typeof TEMPLATESHASH) {
-    var TEMPLATESHASH = {  };
-};
-/* (DEFVAR *PROPERTY-HANDLERS* (CREATE)) */
-if ('undefined' === typeof PROPERTYHANDLERS) {
-    var PROPERTYHANDLERS = {  };
-};
+var PROXYOBJECT = { set : setProperty, deleteProperty : setProperty };
+/* (DEFPARAMETER *PROXY-ARRAY* (CREATE SET SET-INDEX DELETE-PROPERTY SET-INDEX)) */
+var PROXYARRAY = { set : setIndex, deleteProperty : setIndex };
+/* (DEFPARAMETER *DEFERRED-QUEUE* (LIST)) */
+var DEFERREDQUEUE = [];
+/* (DEFPARAMETER *TEMPLATES-HASH* (CREATE)) */
+var TEMPLATESHASH = {  };
+/* (DEFPARAMETER *PROPERTY-HANDLERS* (CREATE)) */
+var PROPERTYHANDLERS = {  };
 /* (SETF (GETPROP *PROPERTY-HANDLERS* *CONTEXT-TEXT*)
            (LAMBDA (NODE KEY VALUE)
              (WHEN (NOT (EQ VALUE (@ NODE TEXT-CONTENT)))

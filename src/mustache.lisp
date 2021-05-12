@@ -1,18 +1,18 @@
-(defvar *tag-open* "{{")
-(defvar *tag-close* "}}")
-(defvar *comment-regexp*
+(defparameter *tag-open* "{{")
+(defparameter *tag-close* "}}")
+(defparameter *comment-regexp*
   (new (*reg-exp (+ *tag-open* "!(.+?)" *tag-close*) "gs")))
-(defvar *var-regexp*
+(defparameter *var-regexp*
   (new (*reg-exp (+ "^" *tag-open* "([^{}]+?)" *tag-close* "$"))))
-(defvar *var-regexp-global*
+(defparameter *var-regexp-global*
   (new (*reg-exp (+ "(" *tag-open* "{1,2}(?:.+?)" *tag-close* "{1,2})") "gm")))
-(defvar *unescaped-var-regexp*
+(defparameter *unescaped-var-regexp*
   (new (*reg-exp (+ "^" *tag-open* "[{&]([^{}]+?)}?" *tag-close* "$"))))
-(defvar *section-open-regexp*
+(defparameter *section-open-regexp*
   (new (*reg-exp (+ *tag-open* "#([^{}]+?)" *tag-close*))))
-(defvar *section-close-regexp*
+(defparameter *section-close-regexp*
   (new (*reg-exp (+ *tag-open* "\/([^{}]+?)" *tag-close*))))
-(defvar *partial-regexp*
+(defparameter *partial-regexp*
   (new (*reg-exp (+ *tag-open* ">([^{}]+?)" *tag-close*))))
 
 (defun process-element (element)

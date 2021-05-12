@@ -1,59 +1,59 @@
-(defvar *context-slot* 'slot)
-(defvar *context-text* 'text)
-(defvar *context-html* 'html)
-(defvar *context-value* 'value)
-(defvar *context-class* 'class)
-(defvar *context-attribute* 'attribute)
-(defvar *context-data* 'data)
-(defvar *context-event* 'event)
+(defparameter *context-slot* 'slot)
+(defparameter *context-text* 'text)
+(defparameter *context-html* 'html)
+(defparameter *context-value* 'value)
+(defparameter *context-class* 'class)
+(defparameter *context-attribute* 'attribute)
+(defparameter *context-data* 'data)
+(defparameter *context-event* 'event)
 
-(defvar *symbol-mount* (*symbol 'mount))
-(defvar *symbol-unmount* (*symbol 'unmount))
-(defvar *symbol-move* (*symbol 'move))
-(defvar *tag-slot* '*slot*)
+(defparameter *symbol-mount* (*symbol 'mount))
+(defparameter *symbol-unmount* (*symbol 'unmount))
+(defparameter *symbol-move* (*symbol 'move))
+(defparameter *tag-slot* '*slot*)
 
 ;; Condensed form of console.log.
 (defmacro console-log (&body forms) `(chain console (log ,@forms)))
 
 ;; A map of targets to contexts.
-(defvar *target-context-map* (new (*weak-map)))
+(defparameter *target-context-map* (new (*weak-map)))
 
 ;; A map of targets to hash maps keyed by event names and valued by listeners.
-(defvar *target-event-map* (new (*weak-map)))
+(defparameter *target-event-map* (new (*weak-map)))
 
 ;; A map of targets to hash maps keyed by key names and valued by an array of Nodes.
 ;; This is used to keep track of delimiters for slots.
-(defvar *target-delimiter-map* (new (*weak-map)))
+(defparameter *target-delimiter-map* (new (*weak-map)))
 
 ;; A map of proxies to unmount/move functions.
-(defvar *proxy-unmount-map* (new (*weak-map)))
-(defvar *proxy-move-map* (new (*weak-map)))
+(defparameter *proxy-unmount-map* (new (*weak-map)))
+(defparameter *proxy-move-map* (new (*weak-map)))
 
 ;; A map of proxies to arrays of Nodes.
 ;; This is used to keep track of delimiters for individual proxy objects.
 ;; Also holds delimiters for arrays.
-(defvar *proxy-delimiter-map* (new (*weak-map)))
+(defparameter *proxy-delimiter-map* (new (*weak-map)))
 
 ;; A map of array proxies to templates.
-(defvar *proxy-template-map* (new (*weak-map)))
+(defparameter *proxy-template-map* (new (*weak-map)))
 
 ;; A map of array proxies to anchors.
-(defvar *proxy-anchor-map* (new (*weak-map)))
+(defparameter *proxy-anchor-map* (new (*weak-map)))
 
 ;; A map of templates to their processed nodes.
-(defvar *template-processed-map* (new (*weak-map)))
+(defparameter *template-processed-map* (new (*weak-map)))
 
 ;; A map of templates to the paths of their keys.
-(defvar *template-context-map* (new (*weak-map)))
+(defparameter *template-context-map* (new (*weak-map)))
 
-(defvar *proxy-object* (create set set-property delete-property set-property))
-(defvar *proxy-array* (create set set-index delete-property set-index))
+(defparameter *proxy-object* (create set set-property delete-property set-property))
+(defparameter *proxy-array* (create set set-index delete-property set-index))
 
-(defvar *deferred-queue* (list))
+(defparameter *deferred-queue* (list))
 
-(defvar *templates-hash* (create))
+(defparameter *templates-hash* (create))
 
-(defvar *property-handlers* (create))
+(defparameter *property-handlers* (create))
 (setf
  (getprop *property-handlers* *context-text*)
  (lambda (node key value)

@@ -1,47 +1,29 @@
 
-/* (DEFVAR *TAG-OPEN* {{) */
-if ('undefined' === typeof TAGOPEN) {
-    var TAGOPEN = '{{';
-};
-/* (DEFVAR *TAG-CLOSE* }}) */
-if ('undefined' === typeof TAGCLOSE) {
-    var TAGCLOSE = '}}';
-};
-/* (DEFVAR *COMMENT-REGEXP*
+/* (DEFPARAMETER *TAG-OPEN* {{) */
+var TAGOPEN = '{{';
+/* (DEFPARAMETER *TAG-CLOSE* }}) */
+var TAGCLOSE = '}}';
+/* (DEFPARAMETER *COMMENT-REGEXP*
      (NEW (*REG-EXP (+ *TAG-OPEN* !(.+?) *TAG-CLOSE*) gs))) */
-if ('undefined' === typeof COMMENTREGEXP) {
-    var COMMENTREGEXP = new RegExp(TAGOPEN + '!(.+?)' + TAGCLOSE, 'gs');
-};
-/* (DEFVAR *VAR-REGEXP*
+var COMMENTREGEXP = new RegExp(TAGOPEN + '!(.+?)' + TAGCLOSE, 'gs');
+/* (DEFPARAMETER *VAR-REGEXP*
      (NEW (*REG-EXP (+ ^ *TAG-OPEN* ([^{}]+?) *TAG-CLOSE* $)))) */
-if ('undefined' === typeof VARREGEXP) {
-    var VARREGEXP = new RegExp('^' + TAGOPEN + '([^{}]+?)' + TAGCLOSE + '$');
-};
-/* (DEFVAR *VAR-REGEXP-GLOBAL*
+var VARREGEXP = new RegExp('^' + TAGOPEN + '([^{}]+?)' + TAGCLOSE + '$');
+/* (DEFPARAMETER *VAR-REGEXP-GLOBAL*
      (NEW (*REG-EXP (+ ( *TAG-OPEN* {1,2}(?:.+?) *TAG-CLOSE* {1,2})) gm))) */
-if ('undefined' === typeof VARREGEXPGLOBAL) {
-    var VARREGEXPGLOBAL = new RegExp('(' + TAGOPEN + '{1,2}(?:.+?)' + TAGCLOSE + '{1,2})', 'gm');
-};
-/* (DEFVAR *UNESCAPED-VAR-REGEXP*
+var VARREGEXPGLOBAL = new RegExp('(' + TAGOPEN + '{1,2}(?:.+?)' + TAGCLOSE + '{1,2})', 'gm');
+/* (DEFPARAMETER *UNESCAPED-VAR-REGEXP*
      (NEW (*REG-EXP (+ ^ *TAG-OPEN* [{&]([^{}]+?)}? *TAG-CLOSE* $)))) */
-if ('undefined' === typeof UNESCAPEDVARREGEXP) {
-    var UNESCAPEDVARREGEXP = new RegExp('^' + TAGOPEN + '[{&]([^{}]+?)}?' + TAGCLOSE + '$');
-};
-/* (DEFVAR *SECTION-OPEN-REGEXP*
+var UNESCAPEDVARREGEXP = new RegExp('^' + TAGOPEN + '[{&]([^{}]+?)}?' + TAGCLOSE + '$');
+/* (DEFPARAMETER *SECTION-OPEN-REGEXP*
      (NEW (*REG-EXP (+ *TAG-OPEN* #([^{}]+?) *TAG-CLOSE*)))) */
-if ('undefined' === typeof SECTIONOPENREGEXP) {
-    var SECTIONOPENREGEXP = new RegExp(TAGOPEN + '#([^{}]+?)' + TAGCLOSE);
-};
-/* (DEFVAR *SECTION-CLOSE-REGEXP*
+var SECTIONOPENREGEXP = new RegExp(TAGOPEN + '#([^{}]+?)' + TAGCLOSE);
+/* (DEFPARAMETER *SECTION-CLOSE-REGEXP*
      (NEW (*REG-EXP (+ *TAG-OPEN* /([^{}]+?) *TAG-CLOSE*)))) */
-if ('undefined' === typeof SECTIONCLOSEREGEXP) {
-    var SECTIONCLOSEREGEXP = new RegExp(TAGOPEN + '/([^{}]+?)' + TAGCLOSE);
-};
-/* (DEFVAR *PARTIAL-REGEXP*
+var SECTIONCLOSEREGEXP = new RegExp(TAGOPEN + '/([^{}]+?)' + TAGCLOSE);
+/* (DEFPARAMETER *PARTIAL-REGEXP*
      (NEW (*REG-EXP (+ *TAG-OPEN* >([^{}]+?) *TAG-CLOSE*)))) */
-if ('undefined' === typeof PARTIALREGEXP) {
-    var PARTIALREGEXP = new RegExp(TAGOPEN + '>([^{}]+?)' + TAGCLOSE);
-};
+var PARTIALREGEXP = new RegExp(TAGOPEN + '>([^{}]+?)' + TAGCLOSE);
 /* (DEFUN PROCESS-ELEMENT (ELEMENT)
      (LET ((ATTRIBUTE-ENTRIES
             (LOOP FOR ATTRIBUTE IN (@ ELEMENT ATTRIBUTES)

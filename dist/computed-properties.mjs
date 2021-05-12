@@ -1,28 +1,18 @@
 
-/* (DEFVAR *SOURCE-CONTEXT-MAP* (NEW (*WEAK-MAP))) */
-if ('undefined' === typeof SOURCECONTEXTMAP) {
-    var SOURCECONTEXTMAP = new WeakMap();
-};
-/* (DEFVAR *TARGET-SOURCES-MAP* (NEW (*WEAK-MAP))) */
-if ('undefined' === typeof TARGETSOURCESMAP) {
-    var TARGETSOURCESMAP = new WeakMap();
-};
-/* (DEFVAR *READ-STACK* (LIST)) */
-if ('undefined' === typeof READSTACK) {
-    var READSTACK = [];
-};
-/* (DEFVAR *CLEAR-STACK-TIMEOUT* NIL) */
-if ('undefined' === typeof CLEARSTACKTIMEOUT) {
-    var CLEARSTACKTIMEOUT = null;
-};
-/* (DEFVAR *PROXY-SOURCE*
+/* (DEFPARAMETER *SOURCE-CONTEXT-MAP* (NEW (*WEAK-MAP))) */
+var SOURCECONTEXTMAP = new WeakMap();
+/* (DEFPARAMETER *TARGET-SOURCES-MAP* (NEW (*WEAK-MAP))) */
+var TARGETSOURCESMAP = new WeakMap();
+/* (DEFPARAMETER *READ-STACK* (LIST)) */
+var READSTACK = [];
+/* (DEFPARAMETER *CLEAR-STACK-TIMEOUT* NIL) */
+var CLEARSTACKTIMEOUT = null;
+/* (DEFPARAMETER *PROXY-SOURCE*
      (CREATE GET GET-PROPERTY SET SET-PROPERTY DELETE-PROPERTY SET-PROPERTY)) */
-if ('undefined' === typeof PROXYSOURCE) {
-    var PROXYSOURCE = { get : getProperty,
-                        set : setProperty,
-                        deleteProperty : setProperty
-                      };
-};
+var PROXYSOURCE = { get : getProperty,
+                    set : setProperty,
+                    deleteProperty : setProperty
+                  };
 /* (DEFUN CLEAR-STACK ()
      (SETF *CLEAR-STACK-TIMEOUT* NIL)
      (LOOP WHILE (LENGTH *READ-STACK*)
