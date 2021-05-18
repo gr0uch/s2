@@ -100,6 +100,7 @@
 ;; circumstance.
 (defun unmount-object (obj)
   (let ((sources (chain *target-sources-map* (get obj))))
+    (when (not sources) (return-from unmount-object))
     (loop
      for source in sources do
      (let ((context (chain *source-context-map* (get source))))

@@ -164,6 +164,7 @@ function mountObject(obj) {
 };
 /* (DEFUN UNMOUNT-OBJECT (OBJ)
      (LET ((SOURCES (CHAIN *TARGET-SOURCES-MAP* (GET OBJ))))
+       (WHEN (NOT SOURCES) (RETURN-FROM UNMOUNT-OBJECT))
        (LOOP FOR SOURCE IN SOURCES
              DO (LET ((CONTEXT (CHAIN *SOURCE-CONTEXT-MAP* (GET SOURCE))))
                   (LOOP FOR KEY OF CONTEXT
@@ -178,6 +179,9 @@ function mountObject(obj) {
                                                  (SPLICE I 1))))))))))) */
 function unmountObject(obj) {
     var sources = TARGETSOURCESMAP.get(obj);
+    if (!sources) {
+        return;
+    };
     var _js4 = sources.length;
     for (var _js3 = 0; _js3 < _js4; _js3 += 1) {
         var source = sources[_js3];
