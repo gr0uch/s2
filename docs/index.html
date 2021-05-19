@@ -48,9 +48,9 @@
       h1 { font-size: 3em; line-height: var(--l); font-family: var(--f-h); }
       h2 { font-size: calc(1em * 5 / 2); line-height: calc(var(--l) * 5 / 6); font-family: var(--f-h); }
       h3 { font-family: var(--f-h); font-weight: bold; margin-bottom: calc(var(--l) * 1); font-size: calc(1em * 5 / 4); }
-      code { font-family: var(--f-m); font-size: calc(var(--h) - 1px); }
+      code { font-family: var(--f-m); font-size: 0.8em; }
       ul, ol { padding-left: var(--l); }
-      p { margin-bottom: calc(var(--l) * 1); letter-spacing: 0.02em; hyphens: auto; }
+      p, ul, ol { margin-bottom: calc(var(--l) * 1); letter-spacing: 0.02em; hyphens: auto; }
       u.l { text-decoration-color: var(--c-l); }
       u.h { text-decoration-color: var(--c-h); }
       u.j { text-decoration-color: var(--c-j); }
@@ -118,7 +118,7 @@
       #container input::placeholder { color: var(--c-fg); opacity: 0.4; }
       #container button { width: 30%; display: inline-block; text-align: center; background: var(--c-l); color: var(--c-bg); cursor: pointer; }
       #container input, #container button { border-bottom: 1px var(--c-fg) solid; }
-      #container > ul { list-style-type: none; }
+      #container > ul { list-style-type: none; margin: 0; }
       #container > ul > li > div { cursor: pointer; display: inline-block; float: right; user-select: none; color: var(--c-h); }
 
       /* responsive */
@@ -176,7 +176,7 @@
         <hr>
         <header>
           <div>
-            <h2><strong>s&sup2;</strong> is a function for reactive web UI.<br><br><em>Input &larr;</em> <u class="j">object</u>, <u class="l">template element</u><br><em>Output &rarr;</em> <u class="h">proxy</u>, <u class="e">document fragment</u></h2>
+            <h2><strong>s&sup2;</strong> is a function for reactive web UI.<br><br><em>Input &larr;</em> <u class="j"><code>Object</code></u>, <u class="l"><code>&lt;template&gt;</code></u><br><em>Output &rarr;</em> <u class="h"><code>Proxy</code></u>, <u class="e"><code>DocumentFragment</code></u></h2>
             <div id="demo">
               <div>
                 <h4>JS</h4>
@@ -268,10 +268,22 @@ function add(event) {
         </section>
         <section>
           <div>
+            <h3>Templating</h3>
+            <p>By default, there are <code>data-</code> attribute keywords it will look for, but using the <a href="https://github.com/gr0uch/s2/blob/master/src/mustache.lisp">Mustache addon</a> may be preferred. This will convert a subset of Mustache into the data attribute format it expects, with some caveats:</p>
+            <ul>
+              <li>Inverted sections are not supported. This won&apos;t work: <code>{{^section}}{{/section}}</code></li>
+              <li>Partials can only exist as the only child of a section. For example, <code>{{#section}}{{>partial}}{{/section}}</code>.</li>
+              <li>String interpolation is not allowed in attributes. This won&apos;t work: <code>&lt;p style="color: #{{hex}};"&gt;</code>, but this will: <code>&lt;p style="{{style}}"&gt;</code>.</li>
+            </ul>
+            <p>By being aware of the HTML context, this subset of Mustache performs very well and incurs no performance penalty on rendering, unlike prior art which relied on setting <code>innerHTML</code>.</p>
+          </div>
+        </section>
+        <section>
+          <div>
             <h3>Computed Properties</h3>
             <p>Computed properties are an <a href="https://github.com/gr0uch/s2/blob/master/src/computed-properties.lisp">optional addon</a>. It adds automatic dependency tracking by using the <code>get</code> trap, which makes non-local objects reactive. This is mainly an ergonomic feature so that properties that should be propagated in multiple places are updated automatically.</p>
             <style>
-              #computed-demo { display: flex; align-items: center; }
+              #computed-demo { display: flex; align-items: center; margin: var(--l) 0; }
               #computed-demo > :first-child { flex: 1; color: var(--c-e); padding: calc(var(--l) / 4); margin: calc(var(--l) / 4) var(--l) calc(var(--l) / 4) 0; box-shadow: 0 calc(var(--l) / 4) calc(var(--l) / 2) var(--c-e2); }
               #computed-demo > :last-child { flex: 2; display: flex; flex-direction: column; }
               #computed-demo > :last-child > * { display: flex; padding: calc(var(--l) / 4) 0; margin: calc(var(--l) / 2) 0; box-shadow: 0 calc(var(--l) / 4) calc(var(--l) / 2) var(--c-a3); }
@@ -310,6 +322,7 @@ function add(event) {
             </template>
             <div id="computed-demo">
             </div>
+            <p>In the above demo, the source object which contains the scalar value does not need to know about its dependents. When it updates, the hidden dependency tracking will update the dependent computed properties.</p>
           </div>
         </section>
         <section>
