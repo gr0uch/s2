@@ -192,6 +192,12 @@
   add,
 };
 
+// try uncommenting!
+// state.todos.reverse()
+// state.todos.splice(2, 1)
+// state.todos.shift()
+// state.todos.pop()
+
 function remove() {
   const { todos } = proxy;
   const i = todos
@@ -247,7 +253,7 @@ function add(event) {
             <ul>
               <li>The main function is the only function required. Using it beyond that is as simple as using fundamental JavaScript operations and array/object methods.</li>
               <li>Templates are <em>logic-less</em>. This differs from prior art such as JSX where embedded JavaScript is allowed. Due to this constraint, logic-less templating such as <a href="https://mustache.github.io/">Mustache</a> maps well to <strong>s&sup2;</strong>, and there is an optional addon for context-aware Mustache templates.</li>
-              <li>Optimize for different paradigms, mutable/immutable state should work equally well.</li>
+              <li>Optimize for different paradigms, mutable/immutable state should work equally well. Performance benchmarks should be <a href="https://krausest.github.io/js-framework-benchmark/current.html">excellent</a>.</li>
             </ul>
           </div>
         </section>
