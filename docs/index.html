@@ -69,8 +69,7 @@
       #main-nav svg { display: block; height: calc(1rem * var(--u) * 8); width: calc(1rem * var(--u) * 8); }
       #content { flex: 5; }
       #content a, #main-nav h5 a { text-decoration: underline var(--c-l) 2px; }
-      #content > article { display: grid; grid-template-columns: 7fr 3fr; grid-template-rows: min-content; }
-      #content > article { border-bottom: 1px var(--c-a2) solid; }
+      #content > article { display: grid; grid-template-columns: 7fr 3fr; grid-template-rows: min-content; border-bottom: 2px var(--c-a2) solid; }
       #content > article > section { padding: 0 calc(1rem * var(--u) * 16) 0 0; position: relative; }
       #content > article > section:nth-of-type(2n) { background: var(--c-a2); padding: 0 calc(1rem * var(--u) * 4); }
       #content > article > section:last-of-type { padding-bottom: calc(1rem * var(--u) * 16); }
@@ -713,6 +712,11 @@ return {
                 <noscript>JavaScript must be enabled!</noscript>
               </div>
             </aside>
+          </section>
+          <section>
+            <p>Note that in the above example, multiple source objects are used due to the limitation that source objects can only track one-level deep.</p>
+          </section>
+          <section>
           </section>
         </article>
       </main>
