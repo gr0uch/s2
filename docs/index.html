@@ -460,6 +460,10 @@ function increment(event) {
             <hr>
           </section>
           <section>
+            <aside>
+              <h6>Aside</h6>
+              <p>Mount and unmount are defined and run exactly once, even if the object which contained the symbols initially is replaced with another object.</p>
+            </aside>
           </section>
           <section>
             <div class="live-example code" style="min-height: calc(1rem * var(--u) * 132)">
@@ -725,7 +729,7 @@ return {
           <section>
             <h2 id="computed-composition">Computed composition</h2>
             <p>Source objects and computed objects only work on the top-level keys, which makes composition necessary.</p>
-            <p>Here is the todo example from above, where a confirmation dialog needs to be shown before deleting a todo. The record to be deleted is tracked via a key in the source object, so that only one confirmation can be shown at a time.</p>
+            <p>Here is the todo example from above, but refactored to use computed properties. Additionally, a confirmation dialog needs to be shown before deleting a todo. The record to be deleted is tracked via a key in the source object, so that only one confirmation can be shown at a time.</p>
             <hr>
           </section>
           <section>
