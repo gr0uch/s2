@@ -60,12 +60,12 @@
       /* layout */
       .container { position: relative; min-height: 100%; max-width: var(--w); display: flex; margin: auto; hyphens: auto; }
       .container::after { display: block; content: " "; position: absolute; top: 0; left: 100%; height: 100%; width: 100vw; background: var(--c-a2); }
-      #main-nav { position: sticky; top: 0; flex: 1; padding: 0 calc(1rem * var(--u) * 4) 0 calc(1rem * var(--u) * 1); align-self: flex-start; }
+      #main-nav { position: sticky; top: calc(1rem * var(--u) * -14); flex: 1; padding: 0 calc(1rem * var(--u) * 4) 0 calc(1rem * var(--u) * 1); align-self: flex-start; }
       #main-nav h5 { font-size: var(--h2); font-weight: 700; color: var(--c-fg2); }
       #main-nav h5 + h5 { margin-top: var(--l); }
       #main-nav ul { padding: 0; list-style-type: none; font-style: italic; font-size: var(--h2); font-weight: 300; }
       #main-nav li::before { content: "-"; margin-right: calc(1rem * var(--u) * 1); color: var(--c-fg3); }
-      #main-nav .logo { width: calc(1rem * var(--u) * 8); padding-top: calc(1rem * var(--u) * 2); background: var(--c-l); margin-bottom: calc(1rem * 20 * var(--u)); border-bottom: var(--c-l) calc(1rem * var(--u) * 1) solid; border-radius: 0 0 calc(1rem * var(--u)) calc(1rem * var(--u)); }
+      #main-nav .logo { position: sticky; top: 0; width: calc(1rem * var(--u) * 8); padding-top: calc(1rem * var(--u) * 2); background: var(--c-l); margin-bottom: calc(1rem * 24 * var(--u)); border-bottom: var(--c-l) calc(1rem * var(--u) * 1) solid; border-radius: 0 0 calc(1rem * var(--u)) calc(1rem * var(--u)); }
       #main-nav svg { display: block; height: calc(1rem * var(--u) * 8); width: calc(1rem * var(--u) * 8); }
       #content { flex: 5; }
       #content a, #main-nav h5 a { text-decoration: underline var(--c-l) 2px; }
@@ -76,7 +76,7 @@
       #content > article > section:nth-last-of-type(2) > :last-child { margin-bottom: calc(1rem * var(--u) * 16) !important; }
       #content > article > section > :last-child:not(.live-example.code) { margin-bottom: 0; }
       .tagline { color: var(--c-l); padding-top: calc(1rem * var(--u) * 2); }
-      .params { margin: calc(1rem * var(--u) * 20) 0; font-size: calc(1rem * var(--u) * 7); line-height: calc(var(--u) * 8); }
+      .params { margin: calc(1rem * var(--u) * 24) 0; font-size: calc(1rem * var(--u) * 7); line-height: calc(var(--u) * 8); }
       .params b { display: inline-block; width: calc(1rem * var(--u) * 26); }
       .params i { display: inline-block; margin-right: calc(1rem * var(--u) * 2); }
 
@@ -101,6 +101,9 @@
       .live-example.output .nums { display: inline-flex; }
       .live-example.output .nums > * { margin: 0 calc(1rem * var(--u) * 1); }
       .live-example.output .spreadsheet { display: grid; grid-template-columns: 1fr 1fr 1fr; column-gap: calc(1rem * var(--u) * 1); row-gap: calc(1rem * var(--u) * 1); }
+      .live-example.output .todo > :nth-child(2) { display: none; }
+      .live-example.output .todo[data-confirm] > :nth-child(2) { display: block; }
+      .live-example.output .todo[data-confirm] > :nth-child(1) { display: none; }
 
       /* forms */
       form { display: flex; margin: calc(1rem * var(--u) * 4) 0; }
@@ -122,7 +125,7 @@
         .params { margin: calc(1rem * var(--u) * 8) 0; }
         h2 { margin-top: calc(1rem * var(--u) * 6); }
         #main-nav { position: static; }
-        #main-nav .logo { margin-bottom: 0; }
+        #main-nav .logo { margin-bottom: 0; position: static; }
         #main-nav .logo ~ * { display: none; }
         #content { padding: 0 calc(1rem * var(--u) * 1); }
         #content > article { display: block; }
@@ -158,6 +161,7 @@
           <li><a href="#move-symbol"><code>move</code> symbol</a></li>
           <li><a href="#root-target-symbol"><code>root</code>, <code>target</code> symbol</a></li>
           <li><a href="#computed-properties">Computed properties</a></li>
+          <li><a href="#computed-composition">Computed composition</a></li>
         </ul>
       </nav>
       <main id="content">
@@ -197,8 +201,7 @@ function add(event) {
   if (!todo) return;
   todos.unshift({ remove, todo });
   delete this.todo;
-}</textarea><textarea spellcheck="false">
-<form onsubmit="{{add}}">
+}</textarea><textarea spellcheck="false"><form onsubmit="{{add}}">
   <input
     value="{{todo}}"
     placeholder="Todo...">
@@ -234,7 +237,7 @@ function add(event) {
               <li>Templates are logic-less. This differs from prior art such as JSX where embedded JavaScript is allowed. Due to this constraint, logic-less templating maps well to <em>s²</em>, and there is an <a href="https://github.com/gr0uch/s2/blob/master/src/mustache.lisp">addon</a> for context-aware <a href="#mustache-templates">Mustache templates</a>.</li>
               <li>No compile-time tooling needed. Just use import statements to include it.</li>
             </ul>
-            <p>It&apos;s design is influenced by this quote:</p>
+            <p>Its design is influenced by this quote:</p>
             <blockquote>Even the simplest procedural logic is hard for humans to verify, but quite complex data structures are fairly easy to model and reason about... Data is more tractable than program logic. It follows that where you see a choice between complexity in data structures and complexity in code, choose the former. More: in evolving a design, you should actively seek ways to shift complexity from code to data.</blockquote>
             <p>— Eric S. Raymond, <cite><a href="http://www.catb.org/~esr/writings/taoup/html/ch01s06.html">Basics of the Unix Philosophy</a></cite></p>
           </section>
@@ -249,7 +252,7 @@ function add(event) {
 
           <section>
             <h2 id="import-the-module">Import the module</h2>
-            <p>A runtime environment that supports ES Modules is required. The recommended way is to either vendor the library, or import from a CDN using the commit hash in the URL. For convenience, the following example uses the latest version.</p>
+            <p>A runtime environment that supports ES Modules is required without build tooling. The recommended way is to either vendor the library, or import from a CDN using the commit hash in the URL. For convenience, the following example uses the latest version.</p>
             <pre>import s2, {
   // The following are symbols, import when needed.
   root, target, mount, unmount, move,
@@ -588,7 +591,7 @@ function animate(node) {
           <section>
             <h2 id="root-target-symbol"><code>root</code>, <code>target</code> symbol</h2>
             <p>The <code>root</code> symbol exists on each function context, such as event listeners, and mount, unmount, and move functions.</p>
-            <p>It&apos;s purpose is to get a reference to the top-level Proxy. This is particularly useful when there are multiple roots but functions are shared between them.</p>
+            <p>Its purpose is to get a reference to the top-level Proxy. This is particularly useful when there are multiple roots but functions are shared between them.</p>
             <hr>
           </section>
           <section>
@@ -646,7 +649,7 @@ function animate(node) {
 
           <section>
             <h2 id="computed-properties">Computed properties</h2>
-            <p>The computed properties addon derives outputs from inputs, without the need for manually tracking dependencies. It implements reactivity by proxying the object(s) used as inputs. To start, the computed function must be created by passing in the mount and unmount symbols:</p>
+            <p>The computed properties addon derives outputs from inputs, without the need for manually tracking dependencies. It implements reactivity by proxying the objects used as inputs. To start, the computed function must be created by passing in the mount and unmount symbols:</p>
             <pre>const computed = createComputed(mount, unmount);</pre>
             <p>Here is a classic spreadsheet example where there are computed cell values:</p>
             <hr>
@@ -714,7 +717,93 @@ return {
             </aside>
           </section>
           <section>
-            <p>Note that in the above example, multiple source objects are used due to the limitation that source objects can only track one-level deep.</p>
+            <p>Note that in the above example, multiple source objects are used due to the limitation that source objects can only keep track of keys that are one-level deep.</p>
+          </section>
+          <section>
+          </section>
+
+          <section>
+            <h2 id="computed-composition">Computed composition</h2>
+            <p>Source objects and computed objects only work on the top-level keys, which makes composition necessary.</p>
+            <p>Here is the todo example from above, where a confirmation dialog needs to be shown before deleting a todo. The record to be deleted is tracked via a key in the source object, so that only one confirmation can be shown at a time.</p>
+            <hr>
+          </section>
+          <section>
+          </section>
+          <section>
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 184)">
+              <h6>JavaScript</h6>
+              <h6>HTML + Mustache</h6>
+              <textarea spellcheck="false">const src = createSource({
+  todos: [
+    'Sleep', 'Wake up',
+    'Get out of bed', 'Brush teeth',
+    'Get dressed',
+  ],
+});
+return computed({
+  todos() {
+    return src.todos
+      .map((todo, i) => computed({
+        todo, remove, confirmDelete,
+        isConfirming() {
+          return i ===
+            src.indexToDelete ?
+              true : null;
+        },
+      }));
+  },
+  add,
+});
+function remove() {
+  src.todos = src.todos
+    .filter((_, i) =>
+      i !== src.indexToDelete);
+  delete src.indexToDelete;
+}
+function confirmDelete() {
+  src.indexToDelete = src.todos
+    .findIndex(_ => _ === this.todo);
+}
+function add(event) {
+  event.preventDefault();
+  if (!this.todo) return;
+  src.todos =
+    [...src.todos, this.todo];
+  delete this.todo;
+}</textarea><textarea spellcheck="false"><form onsubmit="{{add}}">
+  <input
+    value="{{todo}}"
+    placeholder="Todo...">
+  <button>Add</button>
+</form>
+<ul>
+  {{#todos}}
+    <li
+      class="todo"
+      data-confirm="{{isConfirming}}">
+      <div onclick="{{confirmDelete}}">
+        &#x2715;
+      </div>
+      <div onclick="{{remove}}">
+        Delete?
+      </div>
+      <span>{{todo}}</span>
+    </li>
+  {{/todos}}
+</ul></textarea>
+            </div>
+          </section>
+          <section>
+            <aside class="live-example output">
+              <h6>Output</h6>
+              <div>
+                <noscript>JavaScript must be enabled!</noscript>
+              </div>
+            </aside>
+          </section>
+          <section>
+            <p>Composing source and computed objects allows the user to decouple the data from the view.</p>
           </section>
           <section>
           </section>

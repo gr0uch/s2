@@ -2,6 +2,7 @@
 (defparameter *target-sources-map* (new (*weak-map)))
 (defparameter *read-stack* (list))
 (defparameter *clear-stack-timeout* nil)
+(defparameter *stack-delimiter-symbol* (*symbol 'stack-delimiter))
 
 (defparameter *proxy-source*
   (create get get-property
@@ -14,6 +15,11 @@
   (loop
    while (length *read-stack*) do
    (chain *read-stack* (pop))))
+
+(defun pop-stack ()
+  (loop
+   for i from (- (length *read-stack*) 1) downto 0 do
+   (when (eq (chain *read-stack* (pop)) *stack-delimiter-symbol*) (break))))
 
 
 ;; By coordinating the function calls with the get trap, we can correlate
@@ -44,11 +50,7 @@
             (obj-key (@ key-binding 1))
             (fn (@ key-binding 2))
             (return-value (chain fn (call obj))))
-       (setf (getprop obj obj-key) return-value)
-       ;; Calling the function above will trigger the get trap which will
-       ;; append to the *read-stack*, this is for good measure to avoid
-       ;; memory leaking.
-       (clear-stack))))
+       (setf (getprop obj obj-key) return-value))))
   t)
 
 
@@ -68,15 +70,17 @@
           (is-function (eq (typeof value) 'function)))
      (when is-function
        (when (@ value is-event-listener) (continue))
-       (clear-stack)
+       (chain *read-stack* (push *stack-delimiter-symbol*))
        (let ((return-value (chain value (call obj))))
          (when (not (eq return-value undefined))
            (setf (getprop obj key) return-value))
          (loop
-          for tuple in *read-stack* do
-          (let ((source (@ tuple 0))
-                (source-key (@ tuple 1))
-                (source-context nil))
+          for i from (- (length *read-stack*) 1) downto 0 do
+          (when (eq (typeof (getprop *read-stack* i)) 'symbol) break)
+          (let* ((tuple (getprop *read-stack* i))
+                 (source (@ tuple 0))
+                 (source-key (@ tuple 1))
+                 (source-context nil))
 
             (when (not (chain *target-sources-map* (has obj)))
               (chain *target-sources-map* (set obj (list))))
@@ -90,8 +94,8 @@
               (setf (getprop source-context source-key) (list)))
 
             (let ((key-bindings (getprop source-context source-key)))
-              (chain key-bindings (push (list obj key value))))))))))
-  (clear-stack))
+              (chain key-bindings (push (list obj key value)))))))
+       (pop-stack)))))
 
 
 ;; Careful: this will only remove dependencies if unmount is called! This can
