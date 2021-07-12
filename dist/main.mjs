@@ -21,6 +21,10 @@ var SYMBOLMOUNT = Symbol('mount');
 var SYMBOLUNMOUNT = Symbol('unmount');
 /* (DEFPARAMETER *SYMBOL-MOVE* (*SYMBOL 'MOVE)) */
 var SYMBOLMOVE = Symbol('move');
+/* (DEFPARAMETER *SYMBOL-ROOT* (*SYMBOL 'ROOT)) */
+var SYMBOLROOT = Symbol('root');
+/* (DEFPARAMETER *SYMBOL-TARGET* (*SYMBOL 'TARGET)) */
+var SYMBOLTARGET = Symbol('target');
 /* (DEFPARAMETER *TAG-SLOT* '*SLOT*) */
 var TAGSLOT = 'SLOT';
 /* (DEFMACRO CONSOLE-LOG (&BODY FORMS) `(CHAIN CONSOLE (LOG ,@FORMS))) */
@@ -93,7 +97,13 @@ PROPERTYHANDLERS[CONTEXTDATA] = setData;
        (ENQUEUE (LAMBDA () (SET-INDEX TARGET KEY VALUE RECEIVER T)))
        (RETURN-FROM SET-INDEX T))
      (WHEN (@ MAIN DEBUG) (CONSOLE-LOG 'SET-INDEX ARGUMENTS))
-     (LET* ((NUMKEY (CHAIN *NUMBER (PARSE-INT KEY 10)))
+     (LET* ((NUMKEY
+             (CHAIN *NUMBER
+                    (PARSE-INT
+                     (IF (EQ (TYPEOF KEY) 'STRING)
+                         KEY
+                         NIL)
+                     10)))
             (IS-INDEX (NOT (CHAIN *NUMBER (IS-NA-N NUMKEY))))
             (IS-SETTER (NOT (EQ VALUE UNDEFINED))))
        (WHEN (EQ KEY 'LENGTH)
@@ -118,7 +128,9 @@ PROPERTYHANDLERS[CONTEXTDATA] = setData;
              (LET* ((ANCHOR (CHAIN *PROXY-ANCHOR-MAP* (GET RECEIVER)))
                     (PARENT-NODE (@ ANCHOR PARENT-NODE))
                     (TEMPLATE (CHAIN *PROXY-TEMPLATE-MAP* (GET RECEIVER)))
-                    (RESULT (CREATE-BINDING VALUE TEMPLATE))
+                    (RESULT
+                     (CREATE-BINDING VALUE TEMPLATE
+                      (GETPROP RECEIVER *SYMBOL-ROOT*)))
                     (PROXY (@ RESULT 0))
                     (NODE (@ RESULT 1))
                     (PREVIOUS-PROXY (GETPROP TARGET KEY))
@@ -227,7 +239,7 @@ function setIndex(target, key, value, receiver, isInitializing) {
     if (main.debug) {
         console.log('setIndex', arguments);
     };
-    var numkey = Number.parseInt(key, 10);
+    var numkey = Number.parseInt(typeof key === 'string' ? key : null, 10);
     var isIndex = !Number.isNaN(numkey);
     var isSetter = value !== undefined;
     if (key === 'length') {
@@ -258,7 +270,7 @@ function setIndex(target, key, value, receiver, isInitializing) {
             var anchor = PROXYANCHORMAP.get(receiver);
             var parentNode5 = anchor.parentNode;
             var template = PROXYTEMPLATEMAP.get(receiver);
-            var result = createBinding(value, template);
+            var result = createBinding(value, template, receiver[SYMBOLROOT]);
             var proxy6 = result[0];
             var node = result[1];
             var previousProxy = target[key];
@@ -423,6 +435,7 @@ function enqueue(fn) {
                                                                   (SET-SLOT
                                                                    TARGET KEY
                                                                    VALUE
+                                                                   RECEIVER
                                                                    DESCRIPTOR
                                                                    IS-INITIALIZING)))
                                                              (WHEN PROXY
@@ -499,7 +512,7 @@ function setProperty(target, key, value, receiver, isInitializing) {
                         setEvent(target, value, descriptor, receiver);
                     };
                     if (type === CONTEXTSLOT) {
-                        var proxy = setSlot(target, key, value, descriptor, isInitializing);
+                        var proxy = setSlot(target, key, value, receiver, descriptor, isInitializing);
                         if (proxy) {
                             
                             return Reflect.set(target, key, proxy, receiver);
@@ -610,7 +623,7 @@ function recursiveUnmount(self, shouldUnmount) {
         return unmount ? unmount.call(self) : null;
     };
 };
-/* (DEFUN SET-SLOT (TARGET KEY VALUE DESCRIPTOR IS-INITIALIZING)
+/* (DEFUN SET-SLOT (TARGET KEY VALUE RECEIVER DESCRIPTOR IS-INITIALIZING)
      (WHEN (@ MAIN DEBUG) (CONSOLE-LOG 'SET-SLOT ARGUMENTS))
      (WHEN
          (OR (NOT (OR (GETPROP TARGET KEY) VALUE IS-INITIALIZING))
@@ -657,7 +670,9 @@ function recursiveUnmount(self, shouldUnmount) {
            (IF (OR (NOT PREVIOUS-VALUE) (NOT IS-PREVIOUS-OBJECT)
                    IS-TYPE-MISMATCH)
                (IF (CHAIN *ARRAY (IS-ARRAY VALUE))
-                   (LET* ((RESULT (CREATE-ARRAY VALUE TEMPLATE))
+                   (LET* ((RESULT
+                           (CREATE-ARRAY VALUE TEMPLATE
+                            (GETPROP RECEIVER *SYMBOL-ROOT*)))
                           (NODES (@ RESULT 0))
                           (PROXY (@ RESULT 1)))
                      (LOOP FOR NODE IN NODES
@@ -666,7 +681,9 @@ function recursiveUnmount(self, shouldUnmount) {
                      (CHAIN *PROXY-DELIMITER-MAP*
                             (SET PROXY (GETPROP HASH KEY)))
                      (SETF RETURN-VALUE PROXY))
-                   (LET* ((RESULT (CREATE-BINDING VALUE TEMPLATE))
+                   (LET* ((RESULT
+                           (CREATE-BINDING VALUE TEMPLATE
+                            (GETPROP RECEIVER *SYMBOL-ROOT*)))
                           (PROXY (@ RESULT 0))
                           (NODE (@ RESULT 1)))
                      (CHAIN PARENT-NODE (INSERT-BEFORE NODE ANCHOR))
@@ -703,7 +720,7 @@ function recursiveUnmount(self, shouldUnmount) {
                             ANCHOR))))
        (CHAIN PARENT-NODE (INSERT-BEFORE END-NODE ANCHOR))
        RETURN-VALUE)) */
-function setSlot(target, key, value, descriptor, isInitializing) {
+function setSlot(target, key, value, receiver, descriptor, isInitializing) {
     if (main.debug) {
         console.log('setSlot', arguments);
     };
@@ -754,7 +771,7 @@ function setSlot(target, key, value, descriptor, isInitializing) {
     if (value) {
         if (!previousValue || !isPreviousObject || isTypeMismatch) {
             if (Array.isArray(value)) {
-                var result = createArray(value, template22);
+                var result = createArray(value, template22, receiver[SYMBOLROOT]);
                 var nodes28 = result[0];
                 var proxy29 = result[1];
                 var _js31 = nodes28.length;
@@ -766,7 +783,7 @@ function setSlot(target, key, value, descriptor, isInitializing) {
                 PROXYDELIMITERMAP.set(proxy29, hash[key]);
                 returnValue = proxy29;
             } else {
-                var result32 = createBinding(value, template22);
+                var result32 = createBinding(value, template22, receiver[SYMBOLROOT]);
                 var proxy33 = result32[0];
                 var node34 = result32[1];
                 parentNode23.insertBefore(node34, anchor);
@@ -1067,32 +1084,34 @@ function getPath(node, path) {
     };
     return result;
 };
-/* (DEFUN CREATE-ARRAY (ARRAY TEMPLATE)
+/* (DEFUN CREATE-ARRAY (ARRAY TEMPLATE ROOT)
      (LET* ((NODES (LIST)) (PROXIES (LIST)) (PROXY NIL))
        (LOOP FOR ITEM IN ARRAY
-             DO (LET ((RESULT (CREATE-BINDING ITEM TEMPLATE)))
+             DO (LET ((RESULT (CREATE-BINDING ITEM TEMPLATE ROOT)))
                   (CHAIN PROXIES (PUSH (@ RESULT 0)))
                   (CHAIN NODES (PUSH (@ RESULT 1)))))
        (SETF PROXY (NEW (*PROXY PROXIES *PROXY-ARRAY*)))
+       (SETF (GETPROP PROXY *SYMBOL-ROOT*) ROOT)
        (CHAIN *PROXY-TEMPLATE-MAP* (SET PROXY TEMPLATE))
        (LIST NODES PROXY))) */
-function createArray(array, template) {
+function createArray(array, template, root) {
     var nodes = [];
     var proxies = [];
     var proxy = null;
     var _js44 = array.length;
     for (var _js43 = 0; _js43 < _js44; _js43 += 1) {
         var item = array[_js43];
-        var result = createBinding(item, template);
+        var result = createBinding(item, template, root);
         proxies.push(result[0]);
         nodes.push(result[1]);
     };
     proxy = new Proxy(proxies, PROXYARRAY);
+    proxy[SYMBOLROOT] = root;
     PROXYTEMPLATEMAP.set(proxy, template);
     
     return [nodes, proxy];
 };
-/* (DEFUN CREATE-BINDING (OBJ TEMPLATE)
+/* (DEFUN CREATE-BINDING (OBJ TEMPLATE ROOT)
      (WHEN (NOT (CHAIN *TEMPLATE-PROCESSED-MAP* (GET TEMPLATE)))
        (PROCESS-TEMPLATE TEMPLATE))
      (LET* ((CLONE
@@ -1113,18 +1132,25 @@ function createArray(array, template) {
        (CHAIN *TARGET-CONTEXT-MAP* (SET TARGET CONTEXT))
        (CHAIN *TARGET-EVENT-MAP* (SET TARGET (CREATE)))
        (CHAIN *TARGET-DELIMITER-MAP* (SET TARGET (CREATE)))
+       (SETF (GETPROP PROXY *SYMBOL-ROOT*) (OR ROOT PROXY))
+       (SETF (GETPROP PROXY *SYMBOL-TARGET*) OBJ)
        (LOOP FOR KEY OF OBJ
              DO (WHEN (CHAIN CONTEXT (HAS-OWN-PROPERTY KEY))
                   (CONTINUE)) (SETF (GETPROP TARGET KEY) (GETPROP OBJ KEY)))
        (LOOP FOR KEY OF CONTEXT
              DO (SET-PROPERTY TARGET KEY (GETPROP OBJ KEY) PROXY T))
-       (WHEN MOUNT (CHAIN MOUNT (CALL PROXY CLONE)))
+       (WHEN MOUNT
+         (IF (EQ (@ CLONE NODE-TYPE) (@ *NODE ELEMENT_NODE))
+             (CHAIN MOUNT (CALL PROXY CLONE))
+             (LOOP FOR NODE IN (@ CLONE CHILD-NODES)
+                   DO (WHEN (EQ (@ NODE NODE-TYPE) (@ *NODE ELEMENT_NODE))
+                        (CHAIN MOUNT (CALL PROXY NODE))))))
        (CHAIN FRAGMENT (APPEND-CHILD START-NODE))
        (CHAIN FRAGMENT (APPEND-CHILD CLONE))
        (CHAIN FRAGMENT (APPEND-CHILD END-NODE))
        (CHAIN *PROXY-DELIMITER-MAP* (SET PROXY NODES))
        (LIST PROXY FRAGMENT))) */
-function createBinding(obj, template) {
+function createBinding(obj, template, root) {
     if (!TEMPLATEPROCESSEDMAP.get(template)) {
         processTemplate(template);
     };
@@ -1148,6 +1174,8 @@ function createBinding(obj, template) {
     TARGETCONTEXTMAP.set(target, context);
     TARGETEVENTMAP.set(target, {  });
     TARGETDELIMITERMAP.set(target, {  });
+    proxy[SYMBOLROOT] = root || proxy;
+    proxy[SYMBOLTARGET] = obj;
     for (var key in obj) {
         if (context.hasOwnProperty(key)) {
             continue;
@@ -1158,7 +1186,18 @@ function createBinding(obj, template) {
         setProperty(target, key, obj[key], proxy, true);
     };
     if (mount) {
-        mount.call(proxy, clone);
+        if (clone.nodeType === Node['ELEMENT_NODE']) {
+            mount.call(proxy, clone);
+        } else {
+            var _js45 = clone.childNodes;
+            var _js47 = _js45.length;
+            for (var _js46 = 0; _js46 < _js47; _js46 += 1) {
+                var node = _js45[_js46];
+                if (node.nodeType === Node['ELEMENT_NODE']) {
+                    mount.call(proxy, node);
+                };
+            };
+        };
     };
     fragment.appendChild(startNode);
     fragment.appendChild(clone);
@@ -1218,7 +1257,8 @@ main.debug = !true;
 main.isDeferred = !true;
 /* (EXPORT DEFAULT MAIN NAMES
            ((*SYMBOL-MOUNT* MOUNT) (*SYMBOL-UNMOUNT* UNMOUNT)
-            (*SYMBOL-MOVE* MOVE) (REGISTER-TEMPLATE REGISTER-TEMPLATE))) */
-export { SYMBOLMOUNT as mount, SYMBOLUNMOUNT as unmount, SYMBOLMOVE as move, registerTemplate as registerTemplate, };
+            (*SYMBOL-MOVE* MOVE) (*SYMBOL-ROOT* ROOT) (*SYMBOL-TARGET* TARGET)
+            (REGISTER-TEMPLATE REGISTER-TEMPLATE))) */
+export { SYMBOLMOUNT as mount, SYMBOLUNMOUNT as unmount, SYMBOLMOVE as move, SYMBOLROOT as root, SYMBOLTARGET as target, registerTemplate as registerTemplate, };
 export default main;
 

@@ -145,7 +145,8 @@
     (loop
      while (setf current (chain trimmer (next-node))) do
      (let ((trimmed (chain current node-value (trim))))
-       (setf (@ current node-value) trimmed)
+       ;; Commented out to preserve whitespace in templates.
+       ;; (setf (@ current node-value) trimmed)
        (when (not trimmed) (chain current (remove)))))
     (loop
      while (setf current (chain iterator (next-node))) do

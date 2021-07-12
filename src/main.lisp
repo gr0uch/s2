@@ -10,6 +10,8 @@
 (defparameter *symbol-mount* (*symbol 'mount))
 (defparameter *symbol-unmount* (*symbol 'unmount))
 (defparameter *symbol-move* (*symbol 'move))
+(defparameter *symbol-root* (*symbol 'root))
+(defparameter *symbol-target* (*symbol 'target))
 (defparameter *tag-slot* '*slot*)
 
 ;; Condensed form of console.log.
@@ -87,7 +89,8 @@
     (return-from set-index t))
 
   (when (@ main debug) (console-log 'set-index arguments))
-  (let* ((numkey (chain *number (parse-int key 10)))
+  (let* ((numkey (chain *number (parse-int
+                                 (if (eq (typeof key) 'string) key nil) 10)))
          (is-index (not (chain *number (is-na-n numkey))))
          (is-setter (not (eq value undefined))))
 
@@ -120,7 +123,8 @@
           (let* ((anchor (chain *proxy-anchor-map* (get receiver)))
                  (parent-node (@ anchor parent-node))
                  (template (chain *proxy-template-map* (get receiver)))
-                 (result (create-binding value template))
+                 (result (create-binding
+                          value template (getprop receiver *symbol-root*)))
                  (proxy (@ result 0))
                  (node (@ result 1))
                  (previous-proxy (getprop target key))
@@ -260,7 +264,8 @@
                (set-event target value descriptor receiver))
              (when (eq type *context-slot*)
                (let ((proxy
-                      (set-slot target key value descriptor is-initializing)))
+                      (set-slot
+                       target key value receiver descriptor is-initializing)))
                  (when proxy
                    (return-from
                     set-property
@@ -336,7 +341,7 @@
 ;; on top of a retained mode underlying layer, the DOM. For example, assigning
 ;; a new object where there was a previous object before, will try to make the
 ;; least DOM updates possible.
-(defun set-slot (target key value descriptor is-initializing)
+(defun set-slot (target key value receiver descriptor is-initializing)
   (when (@ main debug) (console-log 'set-slot arguments))
 
   (when (or
@@ -393,7 +398,8 @@
                 is-type-mismatch)
             ;; Create proxies
             (if (chain *array (is-array value))
-                (let* ((result (create-array value template))
+                (let* ((result (create-array
+                                value template (getprop receiver *symbol-root*)))
                        (nodes (@ result 0))
                        (proxy (@ result 1)))
                   (loop for node in nodes do
@@ -401,7 +407,8 @@
                   (chain *proxy-anchor-map* (set proxy anchor))
                   (chain *proxy-delimiter-map* (set proxy (getprop hash key)))
                   (setf return-value proxy))
-              (let* ((result (create-binding value template))
+              (let* ((result (create-binding
+                              value template (getprop receiver *symbol-root*)))
                      (proxy (@ result 0))
                      (node (@ result 1)))
                 (chain parent-node (insert-before node anchor))
@@ -591,21 +598,22 @@
     result))
 
 
-(defun create-array (array template)
+(defun create-array (array template root)
   (let* ((nodes (list))
          (proxies (list))
          (proxy nil))
     (loop
      for item in array do
-     (let ((result (create-binding item template)))
+     (let ((result (create-binding item template root)))
        (chain proxies (push (@ result 0)))
        (chain nodes (push (@ result 1)))))
     (setf proxy (new (*proxy proxies *proxy-array*)))
+    (setf (getprop proxy *symbol-root*) root)
     (chain *proxy-template-map* (set proxy template))
     (list nodes proxy)))
 
 
-(defun create-binding (obj template)
+(defun create-binding (obj template root)
   (when (not (chain *template-processed-map* (get template)))
     (process-template template))
   (let* ((clone (chain (chain *template-processed-map* (get template))
@@ -629,6 +637,8 @@
     (chain *target-delimiter-map* (set target (create)))
 
     ;; Initialization
+    (setf (getprop proxy *symbol-root*) (or root proxy))
+    (setf (getprop proxy *symbol-target*) obj)
     (loop
      for key of obj do
      (when (chain context (has-own-property key)) (continue))
@@ -637,7 +647,14 @@
      for key of context do
      (set-property target key (getprop obj key) proxy t))
 
-    (when mount (chain mount (call proxy clone)))
+    (when mount
+      (if (eq (@ clone node-type) (@ *node "ELEMENT_NODE"))
+          (chain mount (call proxy clone))
+        ;; Handle document fragment.
+        (loop
+         for node in (@ clone child-nodes) do
+         (when (eq (@ node node-type) (@ *node "ELEMENT_NODE"))
+           (chain mount (call proxy node))))))
 
     ;; Each proxy should contain references to its own delimiters.
     (chain fragment (append-child start-node))
@@ -679,4 +696,6 @@
  :names ((*symbol-mount* mount)
          (*symbol-unmount* unmount)
          (*symbol-move* move)
+         (*symbol-root* root)
+         (*symbol-target* target)
          (register-template register-template)))

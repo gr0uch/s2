@@ -327,7 +327,6 @@ function processElement(element) {
             (CURRENT NIL))
        (LOOP WHILE (SETF CURRENT (CHAIN TRIMMER (NEXT-NODE)))
              DO (LET ((TRIMMED (CHAIN CURRENT NODE-VALUE (TRIM))))
-                  (SETF (@ CURRENT NODE-VALUE) TRIMMED)
                   (WHEN (NOT TRIMMED) (CHAIN CURRENT (REMOVE)))))
        (LOOP WHILE (SETF CURRENT (CHAIN ITERATOR (NEXT-NODE)))
              DO (PROCESS-ELEMENT CURRENT)))
@@ -345,7 +344,6 @@ function parse(template) {
     var current = null;
     while (current = trimmer.nextNode()) {
         var trimmed = current.nodeValue.trim();
-        current.nodeValue = trimmed;
         if (!trimmed) {
             current.remove();
         };
