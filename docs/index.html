@@ -660,16 +660,15 @@ function animate(node) {
             </aside>
           </section>
           <section>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 114)">
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 110)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
-              <textarea spellcheck="false">const s = createSource;
-const src = {
+              <textarea spellcheck="false">const src = {
   data: [
-    s({ price: 19.99, tax: 1.08 }),
-    s({ price: 75.00, tax: 1.06 }),
-    s({ price: 2.50, tax: 1.10 }),
-  ],
+    { price: 19.99, tax: 1.08 },
+    { price: 75.00, tax: 1.06 },
+    { price: 2.50, tax: 1.10 },
+  ].map(createSource),
 };
 return {
   rows: src.data.map(d => computed({
