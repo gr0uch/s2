@@ -41,11 +41,10 @@
       ::selection { background: var(--c-j); color: var(--c-fg); }
       * { margin: 0; padding: 0; border: 0; box-sizing: border-box; }
       html { font-size: var(--h); }
-      html, body { height: 100%; }
-      body { line-height: var(--l); background: var(--c-a); color: var(--c-fg); font-family: var(--f-b); overflow-x: hidden; }
+      body { line-height: var(--l); background: var(--c-a); color: var(--c-fg); font-family: var(--f-b); }
       h1, h2, h3, h4, h5, h6 { font-size: inherit; font-weight: inherit; }
       h2 { font-size: calc(1rem * var(--u) * 5); font-weight: 700; margin: calc(1rem * 12 * var(--u)) 0 var(--l); padding: calc(1rem * var(--u) * 2) 0; }
-      h6 { font-size: var(--h2); text-transform: uppercase; font-weight: 300; font-style: italic; letter-spacing: 0.1em; color: var(--c-fg2); }
+      h6 { font-size: var(--h2); text-transform: uppercase; font-weight: 300; font-style: italic; letter-spacing: 0.1rem; color: var(--c-fg2); }
       ul, ol { padding-left: 2rem; }
       p, ul, ol, pre, blockquote { margin-bottom: var(--l); }
       blockquote { color: var(--c-fg2); border-left: calc(1rem * var(--u) * 1) var(--c-fg3) solid; padding-left: calc(1rem * var(--u) * 3); }
@@ -59,7 +58,7 @@
 
       /* layout */
       .container { position: relative; min-height: 100%; max-width: var(--w); display: flex; margin: auto; hyphens: auto; }
-      .container::after { display: block; content: " "; position: absolute; top: 0; left: 100%; height: 100%; width: 100vw; background: var(--c-a2); }
+      body::before { display: block; content: " "; position: fixed; top: 0; right: 0; height: 100%; width: calc((100% - var(--w)) / 2 + 1px); background: var(--c-a2); }
       #main-nav { position: sticky; top: calc(1rem * var(--u) * -14); flex: 1; padding: 0 calc(1rem * var(--u) * 4) 0 calc(1rem * var(--u) * 1); align-self: flex-start; }
       #main-nav h5 { font-size: var(--h2); font-weight: 700; color: var(--c-fg2); }
       #main-nav h5 + h5 { margin-top: var(--l); }
