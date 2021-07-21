@@ -52,8 +52,8 @@
       code, pre { font-family: var(--f-m); }
       textarea, pre { background: none; padding: calc(1rem * var(--u) * 2) calc(1rem * var(--u) * 3); font-family: var(--f-m); font-size: var(--h2); resize: vertical; font-variant-ligatures: none; }
       pre { box-shadow: 0 calc(1rem * var(--u) * 4) calc(1rem * var(--u) * 8) var(--c-a2); border-radius: calc(1rem * var(--u)); white-space: pre-wrap; counter-reset: line; }
-      pre code { display: block; counter-increment: line; position: relative; padding-left: calc(1rem * var(--u) * 6); }
-      pre code::before { content: counter(line); display: inline-block; position: absolute; top: 0; right: calc(100% - 1rem * var(--u) * 4); color: var(--c-fg3); }
+      pre > code { display: block; counter-increment: line; position: relative; padding: 0 0 0 calc(1rem * var(--u) * 6) !important; }
+      pre > code::before { content: counter(line); display: inline-block; position: absolute; top: 0; right: calc(100% - 1rem * var(--u) * 4); color: var(--c-fg3); }
       textarea:focus, input:focus { outline: 1px var(--c-l) solid; }
 
       /* layout */
@@ -74,10 +74,13 @@
       #content > article > section:last-of-type { padding-bottom: calc(1rem * var(--u) * 16); }
       #content > article > section:nth-last-of-type(2) > :last-child { margin-bottom: calc(1rem * var(--u) * 16) !important; }
       #content > article > section > :last-child:not(.live-example.code) { margin-bottom: 0; }
+      #content > article code { background: var(--c-a2); border-radius: calc(1rem * var(--u)); padding: 0 calc(1rem * var(--u)); }
+      #content > article pre code { background: inherit; border-radius: inherit; }
       .tagline { color: var(--c-l); padding-top: calc(1rem * var(--u) * 2); }
       .params { margin: calc(1rem * var(--u) * 24) 0; font-size: calc(1rem * var(--u) * 7); line-height: calc(var(--u) * 8); }
       .params b { display: inline-block; width: calc(1rem * var(--u) * 26); }
       .params i { display: inline-block; margin-right: calc(1rem * var(--u) * 2); }
+      .params code { background: none !important; text-decoration: underline; }
 
       /* examples */
       .live-example.code { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: min-content 1fr; box-shadow: 0 calc(1rem * var(--u) * 4) calc(1rem * var(--u) * 8) var(--c-a2); border-radius: calc(1rem * var(--u)); margin-bottom: calc(1rem * var(--u) * 10); }
@@ -166,7 +169,7 @@
       <main id="content">
         <article>
           <section>
-            <p class="tagline" id="top"><strong>s²</strong> is a function for reactive web UI.</p><p class="params"><em><b>Input</b> <i>&larr;</i></em> <u><code>Object</code></u>, <u><code>&lt;template&gt;</code></u><br><em><b>Output</b> <i>&rarr;</i></em> <u><code>Proxy</code></u>, <u><code>DocumentFragment</code></u></p>
+            <p class="tagline" id="top"><strong>s²</strong> is a function for reactive web UI.</p><p class="params"><em><b>Input</b> <i>&larr;</i></em> <code>Object</code>, <code>&lt;template&gt;</code><br><em><b>Output</b> <i>&rarr;</i></em> <code>Proxy</code>, <code>DocumentFragment</code></p>
             <hr>
           </section>
           <section>
@@ -233,7 +236,7 @@ function add(event) {
             <p>A DOM library can consist of a single function capable of expressing the most complex web applications. <em>s²</em> has a few design goals:</p>
             <ul>
               <li>Add reactivity to plain JS objects using <code>Proxy</code>. Advanced features such as computed properties are implemented as addons.</li>
-              <li>Templates are logic-less. This differs from prior art such as JSX where embedded JavaScript is allowed. Due to this constraint, logic-less templating maps well to <em>s²</em>, and there is an <a href="https://github.com/gr0uch/s2/blob/master/src/mustache.lisp">addon</a> for context-aware <a href="#mustache-templates">Mustache templates</a>.</li>
+              <li>Templates are logic-less. This differs from prior art such as JSX where embedded JavaScript is allowed. Due to this constraint, logic-less templating maps well to <em>s²</em>, and there is an addon for context-aware <a href="#mustache-templates">Mustache templates</a>.</li>
               <li>No compile-time tooling needed. Just use import statements to include it.</li>
             </ul>
             <p>Its design is influenced by this quote:</p>
@@ -347,7 +350,7 @@ return state;</textarea><textarea spellcheck="false"><form onsubmit="{{ignore}}"
 
           <section>
             <h2 id="mustache-templates">Mustache templates</h2>
-            <p>The <a href="https://github.com/gr0uch/s2/blob/master/src/mustache.lisp">Mustache addon</a> translates a subset of Mustache into the <code>data-</code> attributes expected by <em>s²</em>. Unlike the official spec, these templates are context-aware, meaning that it behaves quite differently from string templating.</p>
+            <p>The Mustache addon translates a subset of Mustache into the <code>data-</code> attributes expected by <em>s²</em>. Unlike the official spec, these templates are context-aware, meaning that it behaves quite differently from string templating.</p>
             <p>Here is a quick example:</p>
             <hr>
           </section>
