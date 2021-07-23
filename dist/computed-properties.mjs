@@ -1,20 +1,22 @@
 
-/* (DEFPARAMETER *SOURCE-CONTEXT-MAP* (NEW (*WEAK-MAP))) */
-var SOURCECONTEXTMAP = new WeakMap();
-/* (DEFPARAMETER *TARGET-SOURCES-MAP* (NEW (*WEAK-MAP))) */
-var TARGETSOURCESMAP = new WeakMap();
+/* (DEFPARAMETER *OBSERVABLE-CONTEXT-MAP* (NEW (*WEAK-MAP))) */
+var OBSERVABLECONTEXTMAP = new WeakMap();
+/* (DEFPARAMETER *TARGET-OBSERVABLES-MAP* (NEW (*WEAK-MAP))) */
+var TARGETOBSERVABLESMAP = new WeakMap();
+/* (DEFPARAMETER *OBSERVABLE-CALLBACK-MAP* (NEW (*WEAK-MAP))) */
+var OBSERVABLECALLBACKMAP = new WeakMap();
 /* (DEFPARAMETER *READ-STACK* (LIST)) */
 var READSTACK = [];
 /* (DEFPARAMETER *CLEAR-STACK-TIMEOUT* NIL) */
 var CLEARSTACKTIMEOUT = null;
 /* (DEFPARAMETER *STACK-DELIMITER-SYMBOL* (*SYMBOL 'STACK-DELIMITER)) */
 var STACKDELIMITERSYMBOL = Symbol('stackDelimiter');
-/* (DEFPARAMETER *PROXY-SOURCE*
+/* (DEFPARAMETER *PROXY-OBSERVABLE*
      (CREATE GET GET-PROPERTY SET SET-PROPERTY DELETE-PROPERTY SET-PROPERTY)) */
-var PROXYSOURCE = { get : getProperty,
-                    set : setProperty,
-                    deleteProperty : setProperty
-                  };
+var PROXYOBSERVABLE = { get : getProperty,
+                        set : setProperty,
+                        deleteProperty : setProperty
+                      };
 /* (DEFUN CLEAR-STACK ()
      (SETF *CLEAR-STACK-TIMEOUT* NIL)
      (LOOP WHILE (LENGTH *READ-STACK*)
@@ -54,7 +56,7 @@ function getProperty(target, key, receiver) {
      (IF (NOT (EQ VALUE UNDEFINED))
          (CHAIN *REFLECT (SET TARGET KEY VALUE RECEIVER))
          (CHAIN *REFLECT (DELETE-PROPERTY TARGET KEY)))
-     (LET ((CONTEXT (CHAIN *SOURCE-CONTEXT-MAP* (GET TARGET)))
+     (LET ((CONTEXT (CHAIN *OBSERVABLE-CONTEXT-MAP* (GET TARGET)))
            (KEY-BINDINGS NIL))
        (WHEN (NOT CONTEXT) (RETURN-FROM SET-PROPERTY T))
        (SETF KEY-BINDINGS (OR (GETPROP CONTEXT KEY) (LIST)))
@@ -74,7 +76,7 @@ function setProperty(target, key, value, receiver) {
     } else {
         Reflect.deleteProperty(target, key);
     };
-    var context = SOURCECONTEXTMAP.get(target);
+    var context = OBSERVABLECONTEXTMAP.get(target);
     var keyBindings = null;
     if (!context) {
         return true;
@@ -92,10 +94,10 @@ function setProperty(target, key, value, receiver) {
     return true;
 };
 /* (DEFUN CREATE-SOURCE (OBJ)
-     (LET ((PROXY (NEW (*PROXY OBJ *PROXY-SOURCE*))))
+     (LET ((PROXY (NEW (*PROXY OBJ *PROXY-OBSERVABLE*))))
        PROXY)) */
 function createSource(obj) {
-    var proxy = new Proxy(obj, PROXYSOURCE);
+    var proxy = new Proxy(obj, PROXYOBSERVABLE);
     
     return proxy;
 };
@@ -113,36 +115,36 @@ function createSource(obj) {
                           DO (WHEN
                                  (EQ (TYPEOF (GETPROP *READ-STACK* I)) 'SYMBOL)
                                BREAK) (LET* ((TUPLE (GETPROP *READ-STACK* I))
-                                             (SOURCE (@ TUPLE 0))
-                                             (SOURCE-KEY (@ TUPLE 1))
-                                             (SOURCE-CONTEXT NIL))
+                                             (OBSERVABLE (@ TUPLE 0))
+                                             (OBSERVABLE-KEY (@ TUPLE 1))
+                                             (OBSERVABLE-CONTEXT NIL))
                                         (WHEN
                                             (NOT
-                                             (CHAIN *TARGET-SOURCES-MAP*
+                                             (CHAIN *TARGET-OBSERVABLES-MAP*
                                                     (HAS OBJ)))
-                                          (CHAIN *TARGET-SOURCES-MAP*
+                                          (CHAIN *TARGET-OBSERVABLES-MAP*
                                                  (SET OBJ (LIST))))
-                                        (CHAIN *TARGET-SOURCES-MAP* (GET OBJ)
-                                               (PUSH SOURCE))
+                                        (CHAIN *TARGET-OBSERVABLES-MAP*
+                                               (GET OBJ) (PUSH OBSERVABLE))
                                         (WHEN
                                             (NOT
-                                             (CHAIN *SOURCE-CONTEXT-MAP*
-                                                    (HAS SOURCE)))
-                                          (CHAIN *SOURCE-CONTEXT-MAP*
-                                                 (SET SOURCE (CREATE))))
-                                        (SETF SOURCE-CONTEXT
-                                                (CHAIN *SOURCE-CONTEXT-MAP*
-                                                       (GET SOURCE)))
+                                             (CHAIN *OBSERVABLE-CONTEXT-MAP*
+                                                    (HAS OBSERVABLE)))
+                                          (CHAIN *OBSERVABLE-CONTEXT-MAP*
+                                                 (SET OBSERVABLE (CREATE))))
+                                        (SETF OBSERVABLE-CONTEXT
+                                                (CHAIN *OBSERVABLE-CONTEXT-MAP*
+                                                       (GET OBSERVABLE)))
                                         (WHEN
                                             (NOT
-                                             (GETPROP SOURCE-CONTEXT
-                                              SOURCE-KEY))
-                                          (SETF (GETPROP SOURCE-CONTEXT
-                                                 SOURCE-KEY)
+                                             (GETPROP OBSERVABLE-CONTEXT
+                                              OBSERVABLE-KEY))
+                                          (SETF (GETPROP OBSERVABLE-CONTEXT
+                                                 OBSERVABLE-KEY)
                                                   (LIST)))
                                         (LET ((KEY-BINDINGS
-                                               (GETPROP SOURCE-CONTEXT
-                                                SOURCE-KEY)))
+                                               (GETPROP OBSERVABLE-CONTEXT
+                                                OBSERVABLE-KEY)))
                                           (CHAIN KEY-BINDINGS
                                                  (PUSH
                                                   (LIST OBJ KEY VALUE)))))))
@@ -165,21 +167,21 @@ function mountObject(obj) {
                     break;
                 };
                 var tuple = READSTACK[i];
-                var source = tuple[0];
-                var sourceKey = tuple[1];
-                var sourceContext = null;
-                if (!TARGETSOURCESMAP.has(obj)) {
-                    TARGETSOURCESMAP.set(obj, []);
+                var observable = tuple[0];
+                var observableKey = tuple[1];
+                var observableContext = null;
+                if (!TARGETOBSERVABLESMAP.has(obj)) {
+                    TARGETOBSERVABLESMAP.set(obj, []);
                 };
-                TARGETSOURCESMAP.get(obj).push(source);
-                if (!SOURCECONTEXTMAP.has(source)) {
-                    SOURCECONTEXTMAP.set(source, {  });
+                TARGETOBSERVABLESMAP.get(obj).push(observable);
+                if (!OBSERVABLECONTEXTMAP.has(observable)) {
+                    OBSERVABLECONTEXTMAP.set(observable, {  });
                 };
-                sourceContext = SOURCECONTEXTMAP.get(source);
-                if (!sourceContext[sourceKey]) {
-                    sourceContext[sourceKey] = [];
+                observableContext = OBSERVABLECONTEXTMAP.get(observable);
+                if (!observableContext[observableKey]) {
+                    observableContext[observableKey] = [];
                 };
-                var keyBindings = sourceContext[sourceKey];
+                var keyBindings = observableContext[observableKey];
                 keyBindings.push([obj, key, value]);
             };
             popStack();
@@ -187,10 +189,11 @@ function mountObject(obj) {
     };
 };
 /* (DEFUN UNMOUNT-OBJECT (OBJ)
-     (LET ((SOURCES (CHAIN *TARGET-SOURCES-MAP* (GET OBJ))))
-       (WHEN (NOT SOURCES) (RETURN-FROM UNMOUNT-OBJECT))
-       (LOOP FOR SOURCE IN SOURCES
-             DO (LET ((CONTEXT (CHAIN *SOURCE-CONTEXT-MAP* (GET SOURCE))))
+     (LET ((OBSERVABLES (CHAIN *TARGET-OBSERVABLES-MAP* (GET OBJ))))
+       (WHEN (NOT OBSERVABLES) (RETURN-FROM UNMOUNT-OBJECT))
+       (LOOP FOR OBSERVABLE IN OBSERVABLES
+             DO (LET ((CONTEXT
+                       (CHAIN *OBSERVABLE-CONTEXT-MAP* (GET OBSERVABLE))))
                   (LOOP FOR KEY OF CONTEXT
                         DO (LET ((KEY-BINDINGS (GETPROP CONTEXT KEY)))
                              (LOOP FOR I FROM (- (LENGTH KEY-BINDINGS)
@@ -202,14 +205,14 @@ function mountObject(obj) {
                                           (CHAIN KEY-BINDINGS
                                                  (SPLICE I 1))))))))))) */
 function unmountObject(obj) {
-    var sources = TARGETSOURCESMAP.get(obj);
-    if (!sources) {
+    var observables = TARGETOBSERVABLESMAP.get(obj);
+    if (!observables) {
         return;
     };
-    var _js4 = sources.length;
+    var _js4 = observables.length;
     for (var _js3 = 0; _js3 < _js4; _js3 += 1) {
-        var source = sources[_js3];
-        var context = SOURCECONTEXTMAP.get(source);
+        var observable = observables[_js3];
+        var context = OBSERVABLECONTEXTMAP.get(observable);
         for (var key in context) {
             var keyBindings = context[key];
             for (var i = keyBindings.length - 1; i >= 0; i -= 1) {
@@ -258,6 +261,6 @@ function createComputed(mountSymbol, unmountSymbol) {
     };
     return computed;
 };
-/* (EXPORT NAMES (CREATE-SOURCE CREATE-COMPUTED)) */
-export { createSource, createComputed, };
+/* (EXPORT NAMES ((CREATE-SOURCE OBSERVABLE) CREATE-SOURCE CREATE-COMPUTED)) */
+export { createSource as observable, createSource, createComputed, };
 

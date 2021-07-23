@@ -1,5 +1,5 @@
 import s2, { root, target, mount, unmount, move, registerTemplate } from "./main.min.mjs";
-import { createSource, createComputed } from "./computed-properties.min.mjs";
+import { observable, createComputed } from "./computed-properties.min.mjs";
 import parseMustache from "./mustache.min.mjs";
 
 // s2.debug = true;
@@ -35,10 +35,11 @@ function processExample(element) {
 
 function executeExample({ js, html, output }) {
     const fn = new Function(
-      "root", "target", "mount", "unmount", "move", "createSource", "computed",
+      "root", "target", "mount", "unmount", "move", "createSource", "observable", "computed",
       "registerTemplate", "parseMustache", js);
     const state = fn(
-      root, target, mount, unmount, move, createSource, computed, registerTemplate, parseMustache);
+      root, target, mount, unmount, move, observable, observable, computed,
+      registerTemplate, parseMustache);
     const template = parseMustache(html);
     const [_, fragment] = s2(state, template);
     window.p = _;

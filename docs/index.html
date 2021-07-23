@@ -51,7 +51,7 @@
       a { color: inherit; text-decoration: inherit; }
       code, pre { font-family: var(--f-m); }
       textarea, pre { background: none; padding: calc(1rem * var(--u) * 2) calc(1rem * var(--u) * 3); font-family: var(--f-m); font-size: var(--h2); resize: vertical; font-variant-ligatures: none; }
-      pre { box-shadow: 0 calc(1rem * var(--u) * 4) calc(1rem * var(--u) * 8) var(--c-a2); border-radius: calc(1rem * var(--u)); white-space: pre-wrap; counter-reset: line; }
+      pre { box-shadow: 0 calc(1rem * var(--u) * 3) calc(1rem * var(--u) * 9) var(--c-a2); border-radius: calc(1rem * var(--u)); white-space: pre-wrap; counter-reset: line; }
       pre > code { display: block; counter-increment: line; position: relative; padding: 0 0 0 calc(1rem * var(--u) * 6) !important; }
       pre > code::before { content: counter(line); display: inline-block; position: absolute; top: 0; right: calc(100% - 1rem * var(--u) * 4); color: var(--c-fg3); }
       textarea:focus, input:focus { outline: 1px var(--c-l) solid; }
@@ -59,12 +59,12 @@
       /* layout */
       .container { position: relative; min-height: 100%; max-width: var(--w); display: flex; margin: auto; hyphens: auto; }
       body::before { display: block; content: " "; position: fixed; top: 0; right: 0; height: 100%; width: calc((100% - var(--w)) / 2 + 1px); background: var(--c-a2); }
-      #main-nav { position: sticky; top: calc(1rem * var(--u) * -20); flex: 1; padding: 0 calc(1rem * var(--u) * 4) 0 calc(1rem * var(--u) * 1); align-self: flex-start; }
+      #main-nav { position: sticky; top: calc(1rem * var(--u) * -18); flex: 1; padding: 0 calc(1rem * var(--u) * 4) 0 calc(1rem * var(--u) * 1); align-self: flex-start; }
       #main-nav h5 { font-size: var(--h2); font-weight: 700; color: var(--c-fg2); }
       #main-nav h5 + h5 { margin-top: var(--l); }
       #main-nav ul { padding: 0; list-style-type: none; font-style: italic; font-size: var(--h2); font-weight: 300; }
       #main-nav li::before { content: "-"; margin-right: calc(1rem * var(--u) * 1); color: var(--c-fg3); }
-      #main-nav .logo { position: sticky; top: 0; width: calc(1rem * var(--u) * 8); padding-top: calc(1rem * var(--u) * 2); background: var(--c-l); margin-bottom: calc(1rem * 32 * var(--u)); border-bottom: var(--c-l) calc(1rem * var(--u) * 1) solid; border-radius: 0 0 calc(1rem * var(--u)) calc(1rem * var(--u)); }
+      #main-nav .logo { position: sticky; top: 0; width: calc(1rem * var(--u) * 8); padding-top: calc(1rem * var(--u) * 2); background: var(--c-l); margin-bottom: calc(1rem * 30 * var(--u)); border-bottom: var(--c-l) calc(1rem * var(--u) * 1) solid; border-radius: 0 0 calc(1rem * var(--u)) calc(1rem * var(--u)); }
       #main-nav svg { display: block; height: calc(1rem * var(--u) * 8); width: calc(1rem * var(--u) * 8); }
       #content { flex: 5; }
       #content a, #main-nav h5 a { text-decoration: underline var(--c-l) 2px; }
@@ -77,8 +77,8 @@
       #content > article code { background: var(--c-a2); border-radius: calc(1rem * var(--u)); padding: 0 calc(1rem * var(--u)); }
       #content > article pre code { background: inherit; border-radius: inherit; }
       .tagline { color: var(--c-l); padding-top: calc(1rem * var(--u) * 2); }
-      .params { margin: calc(1rem * var(--u) * 32) 0; font-size: calc(1rem * var(--u) * 7); line-height: calc(var(--u) * 8); }
-      .params b { display: inline-block; width: calc(1rem * var(--u) * 26); }
+      .params { margin: calc(1rem * var(--u) * 30) 0; font-size: calc(1rem * var(--u) * 7); line-height: calc(var(--u) * 8); }
+      .params b { display: inline-block; width: calc(1rem * var(--u) * 27); }
       .params i { display: inline-block; margin-right: calc(1rem * var(--u) * 2); }
       .params code { background: none !important; text-decoration: underline; }
 
@@ -267,7 +267,7 @@ import parseMustache from "https://cdn.jsdelivr.net/gh/gr0uch/s2@latest/dist/mus
 &nbsp;
 // Computed properties implementation.
 import {
-  createSource, createComputed,
+  observable, createComputed,
 } from "https://cdn.jsdelivr.net/gh/gr0uch/s2@latest/dist/computed-properties.min.mjs";</pre>
           </section>
           <section>
@@ -655,8 +655,9 @@ function animate(node) {
 
           <section>
             <h2 id="computed-properties">Computed properties</h2>
-            <p>The computed properties addon derives outputs from inputs, without the need for manually tracking dependencies. It implements reactivity by proxying the objects used as inputs. To start, the computed function must be created by passing in the mount and unmount symbols:</p>
+            <p>The computed properties addon derives outputs from inputs, without the need for manually tracking dependencies. It implements reactivity by proxying the objects used as inputs via <code>observable</code>. To start, the computed function must be created by passing in the mount and unmount symbols:</p>
             <pre>const computed = createComputed(mount, unmount);</pre>
+            <p>In <em>s²</em>, an <code>observable</code> is an object whose keys are automatically tracked by computed properties when they are read. A <code>computed</code> object&apos;s <em>methods</em> are run automatically when its dependencies change.</p>
             <p>Here is a classic spreadsheet example where there are computed cell values:</p>
             <hr>
           </section>
@@ -664,7 +665,7 @@ function animate(node) {
             <aside>
               <h6>Aside</h6>
               <p>For any application with non-trivial complexity, computed properties are essential to writing maintainable code.</p>
-              <p>Caveat: source objects are only tracked at the top level, deeply nested source objects aren&apos;t tracked.</p>
+              <p>Caveat: observable objects are only tracked at the top level, deeply nested observable objects aren&apos;t tracked.</p>
             </aside>
           </section>
           <section>
@@ -676,7 +677,7 @@ function animate(node) {
     { price: 19.99, tax: 1.08 },
     { price: 75.00, tax: 1.06 },
     { price: 2.50, tax: 1.10 },
-  ].map(createSource),
+  ].map(observable),
 };
 return {
   rows: src.data.map(d => computed({
@@ -723,15 +724,15 @@ return {
             </aside>
           </section>
           <section>
-            <p>Note that in the above example, multiple source objects are used due to the limitation that source objects can only keep track of keys that are one-level deep.</p>
+            <p>Note that in the above example, multiple observable objects are used due to the limitation that observable objects can only keep track of keys that are one-level deep.</p>
           </section>
           <section>
           </section>
 
           <section>
             <h2 id="computed-composition">Computed composition</h2>
-            <p>Source objects and computed objects only work on the top-level keys, which makes composition necessary.</p>
-            <p>Here is the todo example from above, but refactored to use computed properties. Additionally, a confirmation dialog needs to be shown before deleting a todo. The record to be deleted is tracked via a key in the source object, so that only one confirmation can be shown at a time.</p>
+            <p>Observable objects and computed objects only work on the top-level keys, which makes composition necessary.</p>
+            <p>Here is the todo example from above, but refactored to use computed properties. Additionally, a confirmation dialog needs to be shown before deleting a todo. The record to be deleted is tracked via a key in the observable object, so that only one confirmation can be shown at a time.</p>
             <hr>
           </section>
           <section>
@@ -740,7 +741,7 @@ return {
             <div class="live-example code" style="min-height: calc(1rem * var(--u) * 184)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
-              <textarea spellcheck="false">const src = createSource({
+              <textarea spellcheck="false">const src = observable({
   todos: [
     'Sleep', 'Wake up',
     'Get out of bed', 'Brush teeth',
@@ -809,7 +810,7 @@ function add(event) {
             </aside>
           </section>
           <section>
-            <p>Composing source and computed objects allows the user to decouple the data from the view.</p>
+            <p>Composing observable and computed objects allows the user to decouple the data from the view.</p>
           </section>
           <section>
           </section>

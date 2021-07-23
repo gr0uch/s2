@@ -1,10 +1,11 @@
-(defparameter *source-context-map* (new (*weak-map)))
-(defparameter *target-sources-map* (new (*weak-map)))
+(defparameter *observable-context-map* (new (*weak-map)))
+(defparameter *target-observables-map* (new (*weak-map)))
+(defparameter *observable-callback-map* (new (*weak-map)))
 (defparameter *read-stack* (list))
 (defparameter *clear-stack-timeout* nil)
 (defparameter *stack-delimiter-symbol* (*symbol 'stack-delimiter))
 
-(defparameter *proxy-source*
+(defparameter *proxy-observable*
   (create get get-property
           set set-property
           delete-property set-property))
@@ -23,7 +24,7 @@
 
 
 ;; By coordinating the function calls with the get trap, we can correlate
-;; computed properties to their sources.
+;; computed properties to their observables.
 (defun get-property (target key receiver)
   (chain *read-stack* (push (list target key)))
   ;; Prevent possible memory leaks from reading.
@@ -39,7 +40,7 @@
   (if (not (eq value undefined))
       (chain *reflect (set target key value receiver))
     (chain *reflect (delete-property target key)))
-  (let ((context (chain *source-context-map* (get target)))
+  (let ((context (chain *observable-context-map* (get target)))
         (key-bindings nil))
     (when (not context)
       (return-from set-property t))
@@ -54,9 +55,9 @@
   t)
 
 
-;; Source objects are sources of data that control computed properties.
+;; Observable objects are sources of data that control computed properties.
 (defun create-source (obj)
-  (let ((proxy (new (*proxy obj *proxy-source*))))
+  (let ((proxy (new (*proxy obj *proxy-observable*))))
     proxy))
 
 
@@ -78,22 +79,23 @@
           for i from (- (length *read-stack*) 1) downto 0 do
           (when (eq (typeof (getprop *read-stack* i)) 'symbol) break)
           (let* ((tuple (getprop *read-stack* i))
-                 (source (@ tuple 0))
-                 (source-key (@ tuple 1))
-                 (source-context nil))
+                 (observable (@ tuple 0))
+                 (observable-key (@ tuple 1))
+                 (observable-context nil))
 
-            (when (not (chain *target-sources-map* (has obj)))
-              (chain *target-sources-map* (set obj (list))))
-            (chain *target-sources-map* (get obj) (push source))
+            (when (not (chain *target-observables-map* (has obj)))
+              (chain *target-observables-map* (set obj (list))))
+            (chain *target-observables-map* (get obj) (push observable))
 
-            (when (not (chain *source-context-map* (has source)))
-              (chain *source-context-map* (set source (create))))
-            (setf source-context (chain *source-context-map* (get source)))
+            (when (not (chain *observable-context-map* (has observable)))
+              (chain *observable-context-map* (set observable (create))))
+            (setf observable-context
+                  (chain *observable-context-map* (get observable)))
 
-            (when (not (getprop source-context source-key))
-              (setf (getprop source-context source-key) (list)))
+            (when (not (getprop observable-context observable-key))
+              (setf (getprop observable-context observable-key) (list)))
 
-            (let ((key-bindings (getprop source-context source-key)))
+            (let ((key-bindings (getprop observable-context observable-key)))
               (chain key-bindings (push (list obj key value)))))))
        (pop-stack)))))
 
@@ -103,11 +105,11 @@
 ;; recursively, so it should not be necessary to directly call it in any
 ;; circumstance.
 (defun unmount-object (obj)
-  (let ((sources (chain *target-sources-map* (get obj))))
-    (when (not sources) (return-from unmount-object))
+  (let ((observables (chain *target-observables-map* (get obj))))
+    (when (not observables) (return-from unmount-object))
     (loop
-     for source in sources do
-     (let ((context (chain *source-context-map* (get source))))
+     for observable in observables do
+     (let ((context (chain *observable-context-map* (get observable))))
        (loop
         for key of context do
         (let ((key-bindings (getprop context key)))
@@ -139,4 +141,6 @@
   computed)
 
 
-(export :names (create-source create-computed))
+(export :names
+        ((create-source observable)
+         create-source create-computed))
