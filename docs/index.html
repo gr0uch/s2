@@ -17,7 +17,7 @@
     <script type="module" src="./docs.mjs" defer></script>
     <style type="text/css">
       :root {
-        --w: 76rem;
+        --w: 74rem;
         --h: 19px;
         --h2: 14px;
         --l: calc(1rem * var(--u) * 7);
@@ -59,12 +59,12 @@
       /* layout */
       .container { position: relative; min-height: 100%; max-width: var(--w); display: flex; margin: auto; hyphens: auto; }
       body::before { display: block; content: " "; position: fixed; top: 0; right: 0; height: 100%; width: calc((100% - var(--w)) / 2 + 1px); background: var(--c-a2); }
-      #main-nav { position: sticky; top: calc(1rem * var(--u) * -14); flex: 1; padding: 0 calc(1rem * var(--u) * 4) 0 calc(1rem * var(--u) * 1); align-self: flex-start; }
+      #main-nav { position: sticky; top: calc(1rem * var(--u) * -20); flex: 1; padding: 0 calc(1rem * var(--u) * 4) 0 calc(1rem * var(--u) * 1); align-self: flex-start; }
       #main-nav h5 { font-size: var(--h2); font-weight: 700; color: var(--c-fg2); }
       #main-nav h5 + h5 { margin-top: var(--l); }
       #main-nav ul { padding: 0; list-style-type: none; font-style: italic; font-size: var(--h2); font-weight: 300; }
       #main-nav li::before { content: "-"; margin-right: calc(1rem * var(--u) * 1); color: var(--c-fg3); }
-      #main-nav .logo { position: sticky; top: 0; width: calc(1rem * var(--u) * 8); padding-top: calc(1rem * var(--u) * 2); background: var(--c-l); margin-bottom: calc(1rem * 24 * var(--u)); border-bottom: var(--c-l) calc(1rem * var(--u) * 1) solid; border-radius: 0 0 calc(1rem * var(--u)) calc(1rem * var(--u)); }
+      #main-nav .logo { position: sticky; top: 0; width: calc(1rem * var(--u) * 8); padding-top: calc(1rem * var(--u) * 2); background: var(--c-l); margin-bottom: calc(1rem * 32 * var(--u)); border-bottom: var(--c-l) calc(1rem * var(--u) * 1) solid; border-radius: 0 0 calc(1rem * var(--u)) calc(1rem * var(--u)); }
       #main-nav svg { display: block; height: calc(1rem * var(--u) * 8); width: calc(1rem * var(--u) * 8); }
       #content { flex: 5; }
       #content a, #main-nav h5 a { text-decoration: underline var(--c-l) 2px; }
@@ -77,7 +77,7 @@
       #content > article code { background: var(--c-a2); border-radius: calc(1rem * var(--u)); padding: 0 calc(1rem * var(--u)); }
       #content > article pre code { background: inherit; border-radius: inherit; }
       .tagline { color: var(--c-l); padding-top: calc(1rem * var(--u) * 2); }
-      .params { margin: calc(1rem * var(--u) * 24) 0; font-size: calc(1rem * var(--u) * 7); line-height: calc(var(--u) * 8); }
+      .params { margin: calc(1rem * var(--u) * 32) 0; font-size: calc(1rem * var(--u) * 7); line-height: calc(var(--u) * 8); }
       .params b { display: inline-block; width: calc(1rem * var(--u) * 26); }
       .params i { display: inline-block; margin-right: calc(1rem * var(--u) * 2); }
       .params code { background: none !important; text-decoration: underline; }
