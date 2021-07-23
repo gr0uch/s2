@@ -70,7 +70,7 @@
       #content a, #main-nav h5 a { text-decoration: underline var(--c-l) 2px; }
       #content > article { display: grid; grid-template-columns: 7fr 3fr; grid-template-rows: min-content; border-bottom: 2px var(--c-a2) solid; }
       #content > article > section { padding: 0 calc(1rem * var(--u) * 16) 0 0; position: relative; }
-      #content > article > section:nth-of-type(2n) { background: var(--c-a2); padding: 0 calc(1rem * var(--u) * 4); }
+      #content > article > section:nth-of-type(2n) { background: var(--c-a2); padding: 0 var(--l); }
       #content > article > section:last-of-type { padding-bottom: calc(1rem * var(--u) * 16); }
       #content > article > section:nth-last-of-type(2) > :last-child { margin-bottom: calc(1rem * var(--u) * 16) !important; }
       #content > article > section > :last-child:not(.live-example.code) { margin-bottom: 0; }
@@ -657,14 +657,14 @@ function animate(node) {
             <h2 id="computed-properties">Computed properties</h2>
             <p>The computed properties addon derives outputs from inputs, without the need for manually tracking dependencies. It implements reactivity by proxying the objects used as inputs via <code>observable</code>. To start, the computed function must be created by passing in the mount and unmount symbols:</p>
             <pre>const computed = createComputed(mount, unmount);</pre>
-            <p>In <em>s²</em>, an <code>observable</code> is an object whose keys are automatically tracked by computed properties when they are read. A <code>computed</code> object&apos;s <em>methods</em> are run automatically when its dependencies change.</p>
+            <p>In the computed properties addon, an <code>observable</code> is an object whose keys are automatically tracked by computed properties when they are read. A <code>computed</code> object&apos;s <em>methods</em> are run automatically when its dependencies change.</p>
             <p>Here is a classic spreadsheet example where there are computed cell values:</p>
             <hr>
           </section>
           <section>
             <aside>
               <h6>Aside</h6>
-              <p>For any application with non-trivial complexity, computed properties are essential to writing maintainable code.</p>
+              <p>For any application with non-trivial complexity, computed properties are essential to writing maintainable code. However, it is not strictly necessary.</p>
               <p>Caveat: observable objects are only tracked at the top level, deeply nested observable objects aren&apos;t tracked.</p>
             </aside>
           </section>
