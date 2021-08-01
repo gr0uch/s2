@@ -44,6 +44,7 @@
       body { line-height: var(--l); background: var(--c-a); color: var(--c-fg); font-family: var(--f-b); }
       h1, h2, h3, h4, h5, h6 { font-size: inherit; font-weight: inherit; }
       h2 { font-size: calc(1rem * var(--u) * 5); font-weight: 700; margin: calc(1rem * 12 * var(--u)) 0 var(--l); padding: calc(1rem * var(--u) * 2) 0; }
+      h3 { font-size: 1rem; font-weight: 700; margin: 0 0 var(--l); }
       h6 { font-size: var(--h2); text-transform: uppercase; font-weight: 300; font-style: italic; letter-spacing: 0.1rem; color: var(--c-fg2); }
       ul, ol { padding-left: 2rem; }
       p, ul, ol, pre, blockquote { margin-bottom: var(--l); }
@@ -102,7 +103,7 @@
       .live-example.output .out { animation: char-out 0.5s; }
       .live-example.output .nums { display: inline-flex; }
       .live-example.output .nums > * { margin: 0 calc(1rem * var(--u) * 1); }
-      .live-example.output .spreadsheet { display: grid; grid-template-columns: 1fr 1fr 1fr; column-gap: calc(1rem * var(--u) * 1); row-gap: calc(1rem * var(--u) * 1); }
+      .live-example.output .spreadsheet { display: grid; grid-template-columns: 1fr 1fr 1fr; column-gap: calc(1rem * var(--u) * 3); row-gap: calc(1rem * var(--u) * 1); }
       .live-example.output .todo > :nth-child(2) { display: none; }
       .live-example.output .todo[data-confirm] > :nth-child(2) { display: block; }
       .live-example.output .todo[data-confirm] > :nth-child(1) { display: none; }
@@ -811,8 +812,73 @@ function add(event) {
           </section>
           <section>
             <p>Composing observable and computed objects allows the user to decouple the data from the view.</p>
+            <h3>Nesting observables in computed</h3>
+            <p>How the objects are arranged is up to you, here is an example where the observable objects are nested inside of the computed objects:</p><hr>
           </section>
           <section>
+            <aside>
+              <h6>Aside</h6>
+              <p>If your computed property requires using <code>this</code>, then arrow functions will not work.</p>
+            </aside>
+          </section>
+          <section>
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 136)">
+              <h6>JavaScript</h6>
+              <h6>HTML + Mustache</h6>
+              <textarea spellcheck="false">const data = [
+  { usd: 19.99 }, { usd: 75.00 },
+  { usd: 2.50 }, { usd: 100.00 },
+];
+const cny = new Intl.NumberFormat(
+  "zh-CN", { style: "currency",
+             currency: "CNY" });
+const jpy = new Intl.NumberFormat(
+  "jp-JP", { style: "currency",
+             currency: "JPY" });
+return {
+  rows: data.map(d => computed({
+    data: observable(d),
+    displayCNY() {
+      return cny
+        .format(this.data.usd * 6.5);
+    },
+    displayJPY() {
+      return jpy
+        .format(this.data.usd * 109);
+    },
+    usd: d.usd,
+    setUSD() {
+      this.data.usd = this.usd;
+    },
+  })),
+};</textarea><textarea spellcheck="false">
+<div class="spreadsheet">
+  <div>USD</div>
+  <div>CNY</div>
+  <div>JPY</div>
+  {{#rows}}
+    <input
+      type="number"
+      step="0.01"
+      value="{{usd}}"
+      oninput="{{setUSD}}">
+    <div>
+      {{displayCNY}}
+    </div>
+    <div>
+      {{displayJPY}}
+    </div>
+  {{/rows}}
+</div></textarea>
+            </div>
+          </section>
+          <section>
+            <aside class="live-example output">
+              <h6>Output</h6>
+              <div>
+                <noscript>JavaScript must be enabled!</noscript>
+              </div>
+            </aside>
           </section>
         </article>
       </main>
