@@ -469,7 +469,7 @@ function increment(event) {
             </aside>
           </section>
           <section>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 132)">
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 136)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">const msg = "s2_is_great!";
@@ -491,7 +491,8 @@ return {
   chars: [],
 };
 function mountChar(node) {
-  node.classList.add("in");
+  node.firstElementChild
+    .classList.add("in");
 }
 async function unmountChar(node) {
   node.classList.add("out");

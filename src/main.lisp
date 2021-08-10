@@ -647,14 +647,17 @@
      for key of context do
      (set-property target key (getprop obj key) proxy t))
 
-    (when mount
-      (if (eq (@ clone node-type) (@ *node "ELEMENT_NODE"))
-          (chain mount (call proxy clone))
-        ;; Handle document fragment.
-        (loop
-         for node in (@ clone child-nodes) do
-         (when (eq (@ node node-type) (@ *node "ELEMENT_NODE"))
-           (chain mount (call proxy node))))))
+    ;; The following is commented out because it does not seem to work in all
+    ;; cases, and exhibits bugs such as at the top level mount.
+    ;; (when mount
+    ;;   (if (eq (@ clone node-type) (@ *node "ELEMENT_NODE"))
+    ;;       (chain mount (call proxy clone))
+    ;;     ;; Handle document fragment.
+    ;;     (loop
+    ;;      for node in (@ clone child-nodes) do
+    ;;      (when (eq (@ node node-type) (@ *node "ELEMENT_NODE"))
+    ;;        (chain mount (call proxy node))))))
+    (when mount (chain mount (call proxy clone)))
 
     ;; Each proxy should contain references to its own delimiters.
     (chain fragment (append-child start-node))

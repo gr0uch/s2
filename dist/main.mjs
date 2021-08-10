@@ -1139,12 +1139,7 @@ function createArray(array, template, root) {
                   (CONTINUE)) (SETF (GETPROP TARGET KEY) (GETPROP OBJ KEY)))
        (LOOP FOR KEY OF CONTEXT
              DO (SET-PROPERTY TARGET KEY (GETPROP OBJ KEY) PROXY T))
-       (WHEN MOUNT
-         (IF (EQ (@ CLONE NODE-TYPE) (@ *NODE ELEMENT_NODE))
-             (CHAIN MOUNT (CALL PROXY CLONE))
-             (LOOP FOR NODE IN (@ CLONE CHILD-NODES)
-                   DO (WHEN (EQ (@ NODE NODE-TYPE) (@ *NODE ELEMENT_NODE))
-                        (CHAIN MOUNT (CALL PROXY NODE))))))
+       (WHEN MOUNT (CHAIN MOUNT (CALL PROXY CLONE)))
        (CHAIN FRAGMENT (APPEND-CHILD START-NODE))
        (CHAIN FRAGMENT (APPEND-CHILD CLONE))
        (CHAIN FRAGMENT (APPEND-CHILD END-NODE))
@@ -1186,18 +1181,7 @@ function createBinding(obj, template, root) {
         setProperty(target, key, obj[key], proxy, true);
     };
     if (mount) {
-        if (clone.nodeType === Node['ELEMENT_NODE']) {
-            mount.call(proxy, clone);
-        } else {
-            var _js45 = clone.childNodes;
-            var _js47 = _js45.length;
-            for (var _js46 = 0; _js46 < _js47; _js46 += 1) {
-                var node = _js45[_js46];
-                if (node.nodeType === Node['ELEMENT_NODE']) {
-                    mount.call(proxy, node);
-                };
-            };
-        };
+        mount.call(proxy, clone);
     };
     fragment.appendChild(startNode);
     fragment.appendChild(clone);

@@ -39,8 +39,10 @@
 
 <template id="container">
   <slot name="box">
-    <span data-text="content" data-wot="content"></span>
-    <span data-text="content2"></span>
+    <div>
+      <span data-text="content" data-wot="content" data-event-click="select"></span>
+      <span data-text="content2"></span>
+    </div>
   </slot>
 </template>
 

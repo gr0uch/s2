@@ -1,10 +1,10 @@
 import s2, { mount, unmount, move, registerTemplate } from "../dist/main.mjs";
 import depCheck from "../dist/dep-check.mjs";
 import parseMustache from "../dist/mustache.mjs";
-import { createSource, createComputed } from "../dist/computed-properties.mjs";
+import { observable, createComputed } from "../dist/computed-properties.mjs";
 import test from "./runner.mjs";
 
-// s2.debug = true;
+s2.debug = true;
 s2.isDeferred = true;
 depCheck();
 cleanupTemplates();
@@ -73,8 +73,9 @@ const initialThings = [
 
 test.initialThings = initialThings;
 
-const source = createSource({
+const source = observable({
   showBox: true,
+  selectedIndex: 0,
   content: 'f',
 });
 const computed = createComputed(mount, unmount);
@@ -112,15 +113,22 @@ const [proxy, node] = s2({
   container: computed({
     box() {
       if (!source.showBox) return null;
-      return new Array(10).fill().map(() => computed({
+      return new Array(10).fill().map((_, i) => computed({
         content() {
-          return source.content;
+          return `${source.content} ${i}`;
         },
-        content2: '%',
+        content2() {
+          return source.selectedIndex === i ? '%' : null;
+        },
+        select() {
+          source.selectedIndex = i;
+        }
       }));
     },
   }),
-  reg: { a: 1 },
+  reg: {
+    a: 1,
+  },
   [mount]: function spam(node) {
     // return null;
     const t = {};
