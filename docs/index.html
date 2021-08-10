@@ -107,6 +107,9 @@
       .live-example.output .todo > :nth-child(2) { display: none; }
       .live-example.output .todo[data-confirm] > :nth-child(2) { display: block; }
       .live-example.output .todo[data-confirm] > :nth-child(1) { display: none; }
+      .live-example.output .example-list { max-height: calc(var(--l) * 8); overflow: auto; }
+      .live-example.output .example-list > * { cursor: pointer; }
+      .live-example.output .example-list [data-selected="false"] { display: none; }
 
       /* forms */
       form { display: flex; margin: calc(1rem * var(--u) * 4) 0; }
@@ -165,6 +168,10 @@
           <li><a href="#root-target-symbol"><code>root</code>, <code>target</code> symbol</a></li>
           <li><a href="#computed-properties">Computed properties</a></li>
           <li><a href="#computed-composition">Computed composition</a></li>
+        </ul>
+        <h5>Addendum</h5>
+        <ul>
+          <li><a href="#performance-pitfalls">Performance pitfalls</a></li>
         </ul>
       </nav>
       <main id="content">
@@ -460,6 +467,8 @@ function increment(event) {
           <section>
             <h2 id="mount-unmount-symbols"><code>mount</code>, <code>unmount</code> symbols</h2>
             <p>The symbols <code>mount</code> and <code>unmount</code> allow user-defined behavior to run as elements are appended and removed from the DOM. This allows for animations and arbitrary code such as integrating with third-party libraries on these events. The unmount function is particularly useful for implementing exiting animations, as it will wait for a promise to resolve before removing the node.</p>
+            <p>Both <code>mount</code> and <code>unmount</code> functions have <code>node</code> as an argument, <em>but it is not the same node</em>. On mount, the node is a <code>DocumentFragment</code> before the fragment is inserted into the DOM. On unmount, the node is any <code>Node</code> before the node is removed from the DOM.</p>
+            <p>On unmount, the unmount function is called recursively on each child that is removed, to ensure that unmount will always be called.</p>
             <hr>
           </section>
           <section>
@@ -880,6 +889,115 @@ return {
                 <noscript>JavaScript must be enabled!</noscript>
               </div>
             </aside>
+          </section>
+        </article>
+
+        <article>
+          <section>
+            <h2 id="performance-pitfalls">Performance pitfalls</h2>
+            <p>When using computed properties, be careful about where observable properties are read from. Try to compose computed properties to be as granular as possible.</p>
+            <p>Here is an example of an unoptimized list, the problem is that it does not try to reduce the amount of work done in a single computed property.</p>
+            <hr>
+          </section>
+          <section>
+          </section>
+          <section>
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 86)">
+              <h6>JavaScript</h6>
+              <h6>HTML + Mustache</h6>
+              <textarea spellcheck="false">const data = observable({
+  rows: new Array(300).fill(),
+  selectedIndex: 0,
+});
+return computed({
+  rows() {
+    return data.rows.map((_, i) => ({
+      label: `Item ${i}`,
+      isSelected:
+        data.selectedIndex === i,
+      select() {
+        data.selectedIndex = i;
+      },
+    }));
+  }
+});</textarea><textarea spellcheck="false"><ul class="example-list">
+  {{#rows}}
+    <li onclick="{{select}}">
+      {{label}}
+      <span
+        data-selected="{{isSelected}}"
+      >
+        selected
+      </span>
+    </li>
+  {{/rows}}
+</ul></textarea>
+            </div>
+          </section>
+          <section>
+            <aside class="live-example output">
+              <h6>Output</h6>
+              <div>
+                <noscript>JavaScript must be enabled!</noscript>
+              </div>
+            </aside>
+          </section>
+          <section>
+            <p>Here is the same example from above, but optimized to reduce the amount of work done in a single computed property.</p>
+            <hr>
+          </section>
+          <section>
+          </section>
+          <section>
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 104)">
+              <h6>JavaScript</h6>
+              <h6>HTML + Mustache</h6>
+              <textarea spellcheck="false">const data = observable({
+  rows: new Array(300).fill(),
+  selectedIndex: 0,
+});
+return computed({
+  rows() {
+    return data.rows.map((_, i) => {
+      return computed({
+        label: `Item ${i}`,
+        isSelected() {
+          return data.selectedIndex
+            === i;
+        },
+        select() {
+          data.selectedIndex = i;
+        },
+      });
+    });
+  }
+});</textarea><textarea spellcheck="false"><ul class="example-list">
+  {{#rows}}
+    <li onclick="{{select}}">
+      {{label}}
+      <span
+        data-selected="{{isSelected}}"
+      >
+        selected
+      </span>
+    </li>
+  {{/rows}}
+</ul></textarea>
+            </div>
+          </section>
+          <section>
+            <aside class="live-example output">
+              <h6>Output</h6>
+              <div>
+                <noscript>JavaScript must be enabled!</noscript>
+              </div>
+            </aside>
+          </section>
+          <section>
+            <p>The only changes made were to add a <code>computed</code> object on each list item, and to turn <code>isSelected</code> into a computed property.</p>
+            <hr>
+          </section>
+          <section>
           </section>
         </article>
       </main>
