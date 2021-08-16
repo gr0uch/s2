@@ -126,9 +126,8 @@ const [proxy, node] = s2({
       }));
     },
   }),
-  reg: {
-    a: 1,
-  },
+  reg: { a: 1 },
+  useHref: "#foo-test",
   [mount]: function spam(node) {
     // return null;
     const t = {};

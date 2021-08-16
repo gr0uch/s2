@@ -14,8 +14,8 @@ build: $(SRC_DIR)*.lisp
 	mkdir -p $(DIST_DIR)
 	for f in $^; do \
 		./psbuild $${f} > $(DIST_DIR)`basename $${f%%.*}`.mjs; \
-		sed -i 's/var __PS_MV_REG;//g' $(DIST_DIR)`basename $${f%%.*}`.mjs; \
-		sed -i 's/__PS_MV_REG = \[\];//g' $(DIST_DIR)`basename $${f%%.*}`.mjs; \
+		sed -i '' 's/var __PS_MV_REG;//g' $(DIST_DIR)`basename $${f%%.*}`.mjs; \
+		sed -i '' 's/__PS_MV_REG = \[\];//g' $(DIST_DIR)`basename $${f%%.*}`.mjs; \
 	done
 
 min:

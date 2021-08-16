@@ -290,9 +290,7 @@
 
 (defun set-attribute (node name value)
   (if (not (or (eq value nil) (eq value undefined)))
-      ;; intentional use of `in`
-      (if (in name node) (setf (getprop node name) value)
-        (chain node (set-attribute name value)))
+      (chain node (set-attribute name value))
     (chain node (remove-attribute name))))
 
 
