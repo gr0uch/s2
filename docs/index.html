@@ -179,11 +179,16 @@
       <main id="content">
         <article>
           <section>
-            <p class="tagline" id="top"><strong>s²</strong> is a function for reactive web UI.</p><p class="params"><em><b>Input</b> <i>&larr;</i></em> <code>Object</code>, <code>&lt;template&gt;</code><br><em><b>Output</b> <i>&rarr;</i></em> <code>Proxy</code>, <code>DocumentFragment</code></p>
+            <p class="tagline" id="top">A function for reactive web UI.</p>
+            <p class="params">
+              <em>s²</em> &mdash; Bind data to a template.<br><br>
+              <em><b>Input</b> <i>&larr;</i></em> <code>Object</code>, <code>&lt;template&gt;</code><br>
+              <em><b>Output</b> <i>&rarr;</i></em> <code>Proxy</code>, <code>DocumentFragment</code>
+            </p>
             <hr>
           </section>
           <section class="alt">
-            <p class="tagline">&copy; 2021</p>
+            <!--<p class="tagline">&copy; 2021</p>-->
           </section>
           <section>
             <div class="live-example code" style="min-height: calc(1rem * var(--u) * 68)">
@@ -418,6 +423,10 @@ return state;</textarea><textarea spellcheck="false"><form onsubmit="{{ignore}}"
             <hr>
           </section>
           <section>
+            <aside>
+              <h6>Aside</h6>
+              <p>The advantage of re-using templates in this way is so that it uses the same template in different places under the hood, resulting in less memory usage.</p>
+            </aside>
           </section>
           <section>
             <div class="live-example code" style="min-height: calc(1rem * var(--u) * 82)">
