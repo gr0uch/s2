@@ -79,7 +79,7 @@
       #content > article pre code { background: inherit; border-radius: inherit; }
       .tagline { color: var(--c-l); padding-top: calc(1rem * var(--u) * 2); }
       .alt .tagline { color: var(--c-fg3); font-size: var(--h2); }
-      .params { margin: calc(1rem * var(--u) * 30) 0 calc(1rem * var(--u) * 24); font-size: calc(1rem * var(--u) * 6); line-height: calc(1rem * var(--u) * 12); }
+      .params { margin: calc(1rem * var(--u) * 30) 0; font-size: calc(1rem * var(--u) * 6); line-height: calc(1rem * var(--u) * 12); }
       .params b { display: inline-block; width: calc(1rem * var(--u) * 27); }
       .params i { display: inline-block; margin-right: calc(1rem * var(--u) * 2); }
       .params code { background: none !important; text-decoration: underline; }
@@ -215,8 +215,8 @@ function remove() {
 function add(event) {
   event.preventDefault();
   const { todo } = this;
-  const { todos } = this[root];
   if (!todo) return;
+  const { todos } = this[root];
   todos.unshift({ remove, todo });
   delete this.todo;
 }</textarea><textarea spellcheck="false"><form onsubmit="{{add}}">
