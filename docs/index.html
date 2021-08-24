@@ -60,12 +60,12 @@
       /* layout */
       .container { position: relative; min-height: 100%; max-width: var(--w); display: flex; margin: auto; hyphens: auto; }
       body::before { display: block; content: " "; position: fixed; top: 0; right: 0; height: 100%; width: calc((100% - var(--w)) / 2 + 1px); background: var(--c-a2); }
-      #main-nav { position: sticky; top: calc(1rem * var(--u) * -18); flex: 1; padding: 0 calc(1rem * var(--u) * 4) 0 calc(1rem * var(--u) * 1); align-self: flex-start; color: var(--c-fg2); }
+      #main-nav { position: sticky; top: calc(1rem * var(--u) * -16); flex: 1; padding: 0 calc(1rem * var(--u) * 4) 0 calc(1rem * var(--u) * 1); align-self: flex-start; color: var(--c-fg2); }
       #main-nav h5 { font-size: var(--h2); font-weight: 700; }
       #main-nav h5 + h5 { margin-top: var(--l); }
       #main-nav ul { padding: 0; list-style-type: none; font-style: italic; font-size: var(--h2); font-weight: 300; }
       #main-nav li::before { content: "-"; margin-right: calc(1rem * var(--u) * 1); color: var(--c-fg3); }
-      #main-nav .logo { position: sticky; top: 0; width: calc(1rem * var(--u) * 8); padding-top: calc(1rem * var(--u) * 2); background: var(--c-l); margin-bottom: calc(1rem * 30 * var(--u)); border-bottom: var(--c-l) calc(1rem * var(--u) * 1) solid; border-radius: 0 0 calc(1rem * var(--u)) calc(1rem * var(--u)); }
+      #main-nav .logo { position: sticky; top: 0; width: calc(1rem * var(--u) * 8); padding-top: calc(1rem * var(--u) * 2); background: var(--c-l); margin-bottom: calc(1rem * 28 * var(--u)); border-bottom: var(--c-l) calc(1rem * var(--u) * 1) solid; border-radius: 0 0 calc(1rem * var(--u)) calc(1rem * var(--u)); }
       #main-nav svg { display: block; height: calc(1rem * var(--u) * 8); width: calc(1rem * var(--u) * 8); }
       #content { flex: 5; }
       #content a, #main-nav h5 a { text-decoration: underline var(--c-l) 2px; }
@@ -79,20 +79,20 @@
       #content > article pre code { background: inherit; border-radius: inherit; }
       .tagline { color: var(--c-l); padding-top: calc(1rem * var(--u) * 2); }
       .alt .tagline { color: var(--c-fg3); font-size: var(--h2); }
-      .params { margin: calc(1rem * var(--u) * 30) 0; font-size: calc(1rem * var(--u) * 6); line-height: calc(1rem * var(--u) * 12); }
+      .params { margin: calc(1rem * var(--u) * 28) 0 calc(1rem * var(--u) * 26); font-size: calc(1rem * var(--u) * 6); line-height: calc(1rem * var(--u) * 12); }
       .params b { display: inline-block; width: calc(1rem * var(--u) * 27); }
       .params i { display: inline-block; margin-right: calc(1rem * var(--u) * 2); }
       .params code { background: none !important; text-decoration: underline; }
 
       /* examples */
       .live-example.code { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: min-content 1fr; box-shadow: 0 calc(1rem * var(--u) * 4) calc(1rem * var(--u) * 8) var(--c-a2); border-radius: calc(1rem * var(--u)); margin-bottom: calc(1rem * var(--u) * 10); }
-      .live-example.code h6 { background: var(--c-bg); padding: calc(1rem * var(--u) * 2) calc(1rem * var(--u) * 3); border-bottom: 1px var(--c-a2) solid; border-right: 1px var(--c-a2) solid; }
+      .live-example.code h6 { background: var(--c-bg); padding: calc(1rem * var(--u) * 1) calc(1rem * var(--u) * 3); border-bottom: 1px var(--c-a2) solid; border-right: 1px var(--c-a2) solid; }
       .live-example.code h6:first-of-type { border-radius: calc(1rem * var(--u)) 0 0 0; }
       .live-example.code h6:last-of-type { border-radius: 0 calc(1rem * var(--u)) 0 0; border-right: none; }
       .live-example.code textarea { height: 100%; border-right: 1px var(--c-a2) solid; }
       .live-example.code textarea:last-of-type { border-right: none; }
       aside { color: var(--c-fg2); font-size: var(--h2); }
-      aside h6 { padding: calc(1rem * var(--u) * 2) 0; margin-bottom: calc(1rem * var(--u) * 2); border-bottom: 1px var(--c-fg3) solid; }
+      aside h6 { padding: calc(1rem * var(--u) * 1) 0; margin-bottom: calc(1rem * var(--u) * 2); border-bottom: 1px var(--c-fg3) solid; }
       .live-example.output ul { list-style-type: circle; padding: 0 0 0 calc(1rem * var(--u) * 4); margin: 0; }
       .live-example.output li > div { float: right; color: var(--c-h); cursor: pointer; }
       aside:not(.output) { margin-top: calc(1rem * var(--u) * 16); }
