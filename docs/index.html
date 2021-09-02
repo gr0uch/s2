@@ -37,6 +37,7 @@
         --c-l: #3fb68b;
         --c-h: #e34c26;
         --c-e: #6e40c9;
+        --c-e2: #5d33b0;
       }
       ::selection { background: var(--c-j); color: var(--c-fg); }
       * { margin: 0; padding: 0; border: 0; box-sizing: border-box; }
@@ -77,9 +78,8 @@
       #content > article > section > :last-child:not(.live-example.code) { margin-bottom: 0; }
       #content > article code { background: var(--c-a2); border-radius: calc(1rem * var(--u)); padding: 0 calc(1rem * var(--u)); }
       #content > article pre code { background: inherit; border-radius: inherit; }
-      .tagline { color: var(--c-l); padding-top: calc(1rem * var(--u) * 2); }
-      .alt .tagline { color: var(--c-fg3); font-size: var(--h2); }
-      .params { margin: calc(1rem * var(--u) * 28) 0 calc(1rem * var(--u) * 26); font-size: calc(1rem * var(--u) * 6); line-height: calc(1rem * var(--u) * 12); }
+      .tagline { color: var(--c-fg3); padding-top: calc(1rem * var(--u) * 2); }
+      .params { position: relative; z-index: 100; margin: calc(1rem * var(--u) * 28) calc((100% * -3 / 7) - 1rem * var(--u) * 16) calc(1rem * var(--u) * 26) 0; font-size: calc(1rem * var(--u) * 6); line-height: calc(1rem * var(--u) * 12); border-radius: calc(1rem * var(--u)); color: var(--c-l); background: var(--c-bg); padding: calc(1rem * var(--u) * 10) calc(1rem * var(--u) * 16); box-shadow: 0 calc(1rem * var(--u) * 4) calc(1rem * var(--u) * 8) var(--c-a2); }
       .params b { display: inline-block; width: calc(1rem * var(--u) * 27); }
       .params i { display: inline-block; margin-right: calc(1rem * var(--u) * 2); }
       .params code { background: none !important; text-decoration: underline; }
@@ -130,7 +130,7 @@
         }
         .alt { display: none; }
         .container { flex-direction: column; }
-        .params { margin: calc(1rem * var(--u) * 8) 0; }
+        .params { margin: calc(1rem * var(--u) * 8) 0; padding: calc(var(--l) * 1 / 2); }
         h2 { margin-top: calc(1rem * var(--u) * 6); }
         #main-nav { position: static; }
         #main-nav .logo { margin-bottom: 0; position: static; }
@@ -337,7 +337,7 @@ return state;</textarea><textarea spellcheck="false"><form onsubmit="{{ignore}}"
             </aside>
           </section>
           <section>
-            <p>In the above example, it demonstrates propagating changes in one direction, from an input to an output. The <a href="#computed-properties">computed properties</a> addon will demononstrate how to go in the opposite direction, deriving output from input, without manual dependency tracking.</p>
+            <p>In the above example, it demonstrates propagating changes in one direction, from an input to an output. The <a href="#computed-properties">computed properties</a> addon will demonstrate how to go in the opposite direction, deriving output from input, without manual dependency tracking.</p>
           </section>
           <section>
           </section>
@@ -570,7 +570,7 @@ async function unmountChar(node) {
     event.preventDefault();
     this.nums.sort((a, b) =>
       Math.random() < 0.5 ? -1 : 1);
-  }
+  },
 };
 function animate(node) {
   if (this.isMoving) return;
