@@ -955,7 +955,7 @@ return computed({
             </aside>
           </section>
           <section>
-            <p>Here is the same example from above, but optimized to reduce the amount of work done in a single computed property.</p>
+            <p>The problem is that there is just one computed property that returns a new instance of each nested object, and the slowdown is noticeable due to the event listener update occuring between each iteration. Here is the same example from above, but optimized to reduce the amount of work done in a single computed property.</p>
             <hr>
           </section>
           <section>
@@ -1006,7 +1006,8 @@ return computed({
             </aside>
           </section>
           <section>
-            <p>The only changes made were to add a <code>computed</code> object on each list item, and to turn <code>isSelected</code> into a computed property.</p>
+            <p>The only changes made were to add a <code>computed</code> object on each list item, and to turn <code>isSelected</code> into a computed property. This fixes the problem by only recomputing one property by <code>n</code> times.</p>
+            <p>There is still a potential slowdown even with this approach: if the length of the list changes, then each list item needs to be recomputed. This is best worked around by manually mutating the list using array methods.</p>
             <p>Computed properties are faster than just replacing a large data structure, because it allows for small, granular updates, versus updating an entire data structure.</p>
             <hr>
           </section>
