@@ -176,19 +176,19 @@ var PARTIALREGEXP = new RegExp(TAGOPEN + '>([^{}]+?)' + TAGCLOSE);
                                 (CHAIN NODE (REMOVE)))))) */
 function processElement(element) {
     var attributeEntries = (function () {
-        var _js5 = element.attributes;
-        var _js7 = _js5.length;
-        var collect8 = [];
-        for (var _js6 = 0; _js6 < _js7; _js6 += 1) {
-            var attribute = _js5[_js6];
-            collect8.push([attribute.name, attribute.value]);
+        var _js1 = element.attributes;
+        var _js3 = _js1.length;
+        var collect4 = [];
+        for (var _js2 = 0; _js2 < _js3; _js2 += 1) {
+            var attribute = _js1[_js2];
+            collect4.push([attribute.name, attribute.value]);
         };
         
-        return collect8;
+        return collect4;
     })();
-    var _js10 = attributeEntries.length;
-    for (var _js9 = 0; _js9 < _js10; _js9 += 1) {
-        var attribute = attributeEntries[_js9];
+    var _js6 = attributeEntries.length;
+    for (var _js5 = 0; _js5 < _js6; _js5 += 1) {
+        var attribute = attributeEntries[_js5];
         var name = attribute[0];
         var value = attribute[1];
         var result = value.match(VARREGEXP);
@@ -235,45 +235,45 @@ function processElement(element) {
         };
     };
     var nodes = (function () {
-        var _js11 = element.childNodes;
-        var _js13 = _js11.length;
-        var collect14 = [];
-        for (var _js12 = 0; _js12 < _js13; _js12 += 1) {
-            var node = _js11[_js12];
-            collect14.push(node);
+        var _js7 = element.childNodes;
+        var _js9 = _js7.length;
+        var collect10 = [];
+        for (var _js8 = 0; _js8 < _js9; _js8 += 1) {
+            var node = _js7[_js8];
+            collect10.push(node);
         };
         
-        return collect14;
+        return collect10;
     })();
     var container = [];
     var lastOpened = [];
-    var _js16 = nodes.length;
-    for (var _js15 = 0; _js15 < _js16; _js15 += 1) {
-        var node = nodes[_js15];
+    var _js12 = nodes.length;
+    for (var _js11 = 0; _js11 < _js12; _js11 += 1) {
+        var node = nodes[_js11];
         if (node.nodeType !== Node['TEXT_NODE']) {
             if (container.length) {
                 container[0].appendChild(node);
             };
             continue;
         };
-        var text17 = node.nodeValue;
-        var tokens = text17.split(VARREGEXPGLOBAL).filter(function (s) {
+        var text13 = node.nodeValue;
+        var tokens = text13.split(VARREGEXPGLOBAL).filter(function (s) {
             return s.trim();
         });
-        var _js19 = tokens.length;
-        for (var _js18 = 0; _js18 < _js19; _js18 += 1) {
-            var token = tokens[_js18];
+        var _js15 = tokens.length;
+        for (var _js14 = 0; _js14 < _js15; _js14 += 1) {
+            var token = tokens[_js14];
             var newNode = null;
             var matchOpen = token.match(SECTIONOPENREGEXP);
             var matchClose = token.match(SECTIONCLOSEREGEXP);
             var matchPartial = token.match(PARTIALREGEXP);
-            var matchVar20 = token.match(VARREGEXP);
-            var matchUnescapedVar21 = token.match(UNESCAPEDVARREGEXP);
+            var matchVar16 = token.match(VARREGEXP);
+            var matchUnescapedVar17 = token.match(UNESCAPEDVARREGEXP);
             if (matchOpen) {
                 newNode = document.createElement('slot');
-                var name22 = matchOpen[1].trim();
-                lastOpened.unshift(name22);
-                newNode.setAttribute('name', name22);
+                var name18 = matchOpen[1].trim();
+                lastOpened.unshift(name18);
+                newNode.setAttribute('name', name18);
                 if (container.length) {
                     container[0].appendChild(newNode);
                 } else {
@@ -291,15 +291,15 @@ function processElement(element) {
                 container.shift();
                 continue;
             };
-            if (matchVar20) {
+            if (matchVar16) {
                 newNode = document.createElement('span');
-                newNode.dataset.text = matchVar20[1];
+                newNode.dataset.text = matchVar16[1];
                 node.parentNode.insertBefore(newNode, node);
                 continue;
             };
-            if (matchUnescapedVar21) {
+            if (matchUnescapedVar17) {
                 newNode = document.createElement('span');
-                newNode.dataset.unsafeHtml = matchUnescapedVar21[1];
+                newNode.dataset.unsafeHtml = matchUnescapedVar17[1];
                 node.parentNode.insertBefore(newNode, node);
                 continue;
             };
@@ -338,9 +338,9 @@ function parse(template) {
         template = element;
     };
     template.innerHTML = template.innerHTML.replace(COMMENTREGEXP, '');
-    var content17 = template.content;
-    var trimmer = document.createNodeIterator(content17, NodeFilter['SHOW_TEXT']);
-    var iterator = document.createNodeIterator(content17, NodeFilter['SHOW_ELEMENT']);
+    var content13 = template.content;
+    var trimmer = document.createNodeIterator(content13, NodeFilter['SHOW_TEXT']);
+    var iterator = document.createNodeIterator(content13, NodeFilter['SHOW_ELEMENT']);
     var current = null;
     while (current = trimmer.nextNode()) {
         var trimmed = current.nodeValue.trim();
