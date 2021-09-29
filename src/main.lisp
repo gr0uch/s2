@@ -14,8 +14,9 @@
 (defparameter *symbol-target* (*symbol 'target))
 (defparameter *tag-slot* '*slot*)
 
-;; Condensed form of console.log.
+;; Condensed form of console methods.
 (defmacro console-log (&body forms) `(chain console (log ,@forms)))
+(defmacro console-warn (&body forms) `(chain console (warn ,@forms)))
 
 ;; A map of targets to contexts.
 (defparameter *target-context-map* (new (*weak-map)))
@@ -507,8 +508,12 @@
                   (chain template-node (append-child child-node)))))
 
              (chain parent-node (insert-before anchor node))
-             (when (not (chain context (has-own-property slot-name)))
-               (setf (getprop context slot-name) (list)))
+             (if (not (chain context (has-own-property slot-name)))
+               (setf (getprop context slot-name) (list))
+               (throw
+                (new (*error
+                      (+ "The key \"" slot-name "\" was used in a template "
+                         "more than once, which is not allowed.")))))
              (chain
               (getprop context slot-name)
               (push

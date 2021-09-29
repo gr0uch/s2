@@ -29,6 +29,8 @@ var SYMBOLTARGET = Symbol('target');
 var TAGSLOT = 'SLOT';
 /* (DEFMACRO CONSOLE-LOG (&BODY FORMS) `(CHAIN CONSOLE (LOG ,@FORMS))) */
 
+/* (DEFMACRO CONSOLE-WARN (&BODY FORMS) `(CHAIN CONSOLE (WARN ,@FORMS))) */
+
 /* (DEFPARAMETER *TARGET-CONTEXT-MAP* (NEW (*WEAK-MAP))) */
 var TARGETCONTEXTMAP = new WeakMap();
 /* (DEFPARAMETER *TARGET-EVENT-MAP* (NEW (*WEAK-MAP))) */
@@ -891,9 +893,14 @@ function setEvent(target, value, descriptor, receiver) {
                                      (CHAIN TEMPLATE-NODE
                                             (APPEND-CHILD CHILD-NODE)))))
                         (CHAIN PARENT-NODE (INSERT-BEFORE ANCHOR NODE))
-                        (WHEN
-                            (NOT (CHAIN CONTEXT (HAS-OWN-PROPERTY SLOT-NAME)))
-                          (SETF (GETPROP CONTEXT SLOT-NAME) (LIST)))
+                        (IF (NOT (CHAIN CONTEXT (HAS-OWN-PROPERTY SLOT-NAME)))
+                            (SETF (GETPROP CONTEXT SLOT-NAME) (LIST))
+                            (THROW
+                                (NEW
+                                 (*ERROR
+                                  (+ The key " SLOT-NAME
+                                     " was used in a template
+                                     more than once, which is not allowed.)))))
                         (CHAIN (GETPROP CONTEXT SLOT-NAME)
                                (PUSH
                                 (CREATE PATH (CHAIN PATH (CONCAT I)) SLOT
@@ -974,6 +981,8 @@ function processTemplate(template) {
                 parentNode.insertBefore(anchor, node);
                 if (!context.hasOwnProperty(slotName)) {
                     context[slotName] = [];
+                } else {
+                    throw new Error('The key \"' + slotName + '\" was used in a template ' + 'more than once, which is not allowed.');
                 };
                 context[slotName].push({ path : path.concat(i),
                                          slot : templateSelector ? node : document.createElement('div'),
