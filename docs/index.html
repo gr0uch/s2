@@ -174,6 +174,7 @@
         <h5>Addendum</h5>
         <ul>
           <li><a href="#performance-pitfalls">Performance pitfalls</a></li>
+          <li><a href="#object-re-use">Object re-use</a></li>
         </ul>
       </nav>
       <main id="content">
@@ -425,7 +426,7 @@ return state;</textarea><textarea spellcheck="false"><form onsubmit="{{ignore}}"
           <section>
             <aside>
               <h6>Aside</h6>
-              <p>The advantage of re-using templates in this way is so that it uses the same template in different places under the hood, resulting in less memory usage.</p>
+              <p>The advantage of re-using templates like this is to use the same template in different places under the hood, resulting in less memory usage. It also avoids copypasting.</p>
             </aside>
           </section>
           <section>
@@ -1009,6 +1010,75 @@ return computed({
             <p>The only changes made were to add a <code>computed</code> object on each list item, and to turn <code>isSelected</code> into a computed property. This fixes the problem by only recomputing one property by <code>n</code> times.</p>
             <p>There is still a potential slowdown even with this approach: if the length of the list changes, then each list item needs to be recomputed. This is best worked around by manually mutating the list using array methods.</p>
             <p>Computed properties are faster than just replacing a large data structure, because it allows for small, granular updates, versus updating an entire data structure.</p>
+            <hr>
+          </section>
+          <section>
+          </section>
+
+          <section>
+            <h2 id="object-re-use">Object re-use</h2>
+            <p>Re-using an object multiple times in the same template requires use of computed properties.</p>
+            <hr>
+          </section>
+          <section>
+          </section>
+          <section>
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 112)">
+              <h6>JavaScript</h6>
+              <h6>HTML + Mustache</h6>
+              <textarea spellcheck="false">const data = observable({
+  firstName: "Deli",
+  lastName: "Meats",
+});
+function cData() {
+  const obj = {};
+  for (const key in data) {
+    obj[key] = () => data[key];
+  }
+  return computed(obj);
+}
+return {
+  display1: cData(),
+  display2: cData(),
+  reverse(event) {
+    event.preventDefault();
+    data.firstName = data.firstName
+      .split("").reverse().join("");
+    data.lastName = data.lastName
+      .split("").reverse().join("");
+  },
+};</textarea><textarea spellcheck="false"><div>
+  {{#display1}}
+    <div>
+      Given name first:
+      {{firstName}},
+      {{lastName}}
+    </div>
+  {{/display1}}
+  {{#display2}}
+    <div>
+      Surname first:
+      {{lastName}},
+      {{firstName}}
+    </div>
+  {{/display2}}
+    Action:
+    <button onclick="{{reverse}}">
+      Reverse
+    </button>
+</div></textarea>
+            </div>
+          </section>
+          <section>
+            <aside class="live-example output">
+              <h6>Output</h6>
+              <div>
+                <noscript>JavaScript must be enabled!</noscript>
+              </div>
+            </aside>
+          </section>
+          <section>
+            <p>The main reason for restricting objects to only appear once in a template is due to objects being mapped to a single DOM node internally.</p>
             <hr>
           </section>
           <section>
