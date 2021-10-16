@@ -175,6 +175,7 @@
         <ul>
           <li><a href="#performance-pitfalls">Performance pitfalls</a></li>
           <li><a href="#object-re-use">Object re-use</a></li>
+          <li><a href="#computed-of-computed">Computed of computed</a></li>
         </ul>
       </nav>
       <main id="content">
@@ -1082,6 +1083,56 @@ return {
             <hr>
           </section>
           <section>
+          </section>
+
+          <section>
+            <h2 id="computed-of-computed">Computed of computed</h2>
+            <p>Computed objects are <strong>not</strong> observable, but they can set properties on observables. By doing so, it is possible to create computed properties of computed properties.</p>
+            <hr>
+          </section>
+          <section>
+          </section>
+          <section>
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 102)">
+              <h6>JavaScript</h6>
+              <h6>HTML + Mustache</h6>
+              <textarea spellcheck="false">const data = observable({
+  number: 1,
+});
+return computed({
+  number() {
+    return data.number;
+  },
+  double() {
+    const x = data.number * 2;
+    data.double = x;
+    return x;
+  },
+  quadruple() {
+    return data.double * 2;
+  },
+  increment(event) {
+    event.preventDefault();
+    data.number++;
+  },
+});</textarea><textarea spellcheck="false"><div>
+    Number: {{number}}<br>
+    Double: {{double}}<br>
+    Quadruple: {{quadruple}}<br>
+    Action:
+    <button onclick="{{increment}}">
+      Increment
+    </button>
+</div></textarea>
+            </div>
+          </section>
+          <section>
+            <aside class="live-example output">
+              <h6>Output</h6>
+              <div>
+                <noscript>JavaScript must be enabled!</noscript>
+              </div>
+            </aside>
           </section>
         </article>
       </main>
