@@ -57,7 +57,7 @@
 
 ;; Observable objects are sources of data that control computed properties.
 (defun create-source (obj)
-  (let ((proxy (new (*proxy obj *proxy-observable*))))
+  (let ((proxy (new (*proxy (or obj (create)) *proxy-observable*))))
     proxy))
 
 

@@ -94,10 +94,10 @@ function setProperty(target, key, value, receiver) {
     return true;
 };
 /* (DEFUN CREATE-SOURCE (OBJ)
-     (LET ((PROXY (NEW (*PROXY OBJ *PROXY-OBSERVABLE*))))
+     (LET ((PROXY (NEW (*PROXY (OR OBJ (CREATE)) *PROXY-OBSERVABLE*))))
        PROXY)) */
 function createSource(obj) {
-    var proxy = new Proxy(obj, PROXYOBSERVABLE);
+    var proxy = new Proxy(obj || {  }, PROXYOBSERVABLE);
     
     return proxy;
 };

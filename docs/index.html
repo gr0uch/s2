@@ -1093,23 +1093,24 @@ return {
           <section>
           </section>
           <section>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 102)">
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 106)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">const data = observable({
   number: 1,
 });
 return computed({
+  internal: observable(),
   number() {
     return data.number;
   },
   double() {
     const x = data.number * 2;
-    data.double = x;
+    this.internal.double = x;
     return x;
   },
   quadruple() {
-    return data.double * 2;
+    return this.internal.double * 2;
   },
   increment(event) {
     event.preventDefault();
