@@ -19,7 +19,9 @@
       :root {
         --w: 74rem;
         --h: 19px;
-        --h2: 14px;
+        --h2: 17px;
+        --h3: 13px;
+        --h4: 12px;
         --l: calc(1rem * var(--u) * 7);
         --u: calc(1 / 4);
 
@@ -35,6 +37,7 @@
         --c-a2: rgb(225, 225, 225);
         --c-j: #f1e05a;
         --c-l: #3fb68b;
+        --c-l2: rgba(63, 182, 139, 0.08);
         --c-h: #e34c26;
         --c-e: #6e40c9;
         --c-e2: #5d33b0;
@@ -45,16 +48,17 @@
       body { line-height: var(--l); background: var(--c-a); color: var(--c-fg); font-family: var(--f-b); }
       h1, h2, h3, h4, h5, h6 { font-size: inherit; font-weight: inherit; }
       h2 { font-size: calc(1rem * var(--u) * 5); font-weight: 700; margin: calc(1rem * 12 * var(--u)) 0 var(--l); padding: calc(1rem * var(--u) * 2) 0; }
+      h2 code { font-size: inherit; }
       h3 { font-size: 1rem; font-weight: 700; margin: 0 0 var(--l); }
-      h6 { font-size: var(--h2); text-transform: uppercase; font-weight: 300; font-style: italic; letter-spacing: 0.1rem; color: var(--c-fg2); }
+      h6 { font-size: var(--h3); text-transform: uppercase; font-weight: 300; font-style: italic; letter-spacing: 0.1rem; color: var(--c-fg2); }
       ul, ol { padding-left: 2rem; }
       p, ul, ol, pre, blockquote { margin-bottom: var(--l); }
       blockquote { color: var(--c-fg2); border-left: calc(1rem * var(--u) * 1) var(--c-fg3) solid; padding-left: calc(1rem * var(--u) * 3); }
       a { color: inherit; text-decoration: inherit; }
-      code, pre { font-family: var(--f-m); }
-      textarea, pre { background: none; padding: calc(1rem * var(--u) * 2) calc(1rem * var(--u) * 3); font-family: var(--f-m); font-size: var(--h2); resize: vertical; font-variant-ligatures: none; }
+      code, pre { font-family: var(--f-m); font-size: var(--h2); }
+      textarea, pre { background: none; padding: calc(1rem * var(--u) * 2) calc(1rem * var(--u) * 3); font-family: var(--f-m); font-size: var(--h3); resize: vertical; font-variant-ligatures: none; }
       pre { box-shadow: 0 calc(1rem * var(--u) * 3) calc(1rem * var(--u) * 9) var(--c-a2); border-radius: calc(1rem * var(--u)); white-space: pre-wrap; counter-reset: line; }
-      pre > code { display: block; counter-increment: line; position: relative; padding: 0 0 0 calc(1rem * var(--u) * 6) !important; }
+      pre > code { display: block; counter-increment: line; position: relative; padding: 0 0 0 calc(1rem * var(--u) * 6) !important; font-size: inherit; }
       pre > code::before { content: counter(line); display: inline-block; position: absolute; top: 0; right: calc(100% - 1rem * var(--u) * 4); color: var(--c-fg3); }
       textarea:focus, input:focus { outline: 1px var(--c-l) solid; }
 
@@ -62,9 +66,10 @@
       .container { position: relative; min-height: 100%; max-width: var(--w); display: flex; margin: auto; hyphens: auto; }
       body::before { display: block; content: " "; position: fixed; top: 0; right: 0; height: 100%; width: calc((100% - var(--w)) / 2 + 1px); background: var(--c-a2); }
       #main-nav { position: sticky; top: calc(1rem * var(--u) * -16); flex: 1; padding: 0 calc(1rem * var(--u) * 4) 0 calc(1rem * var(--u) * 1); align-self: flex-start; color: var(--c-fg2); }
-      #main-nav h5 { font-size: var(--h2); font-weight: 700; }
+      #main-nav h5 { font-size: var(--h3); font-weight: 700; }
+      #main-nav code { font-size: var(--h4); }
       #main-nav h5 + h5 { margin-top: var(--l); }
-      #main-nav ul { padding: 0; list-style-type: none; font-style: italic; font-size: var(--h2); font-weight: 300; }
+      #main-nav ul { padding: 0; list-style-type: none; font-style: italic; font-size: var(--h3); font-weight: 300; }
       #main-nav li::before { content: "-"; margin-right: calc(1rem * var(--u) * 1); color: var(--c-fg3); }
       #main-nav .logo { position: sticky; top: 0; width: calc(1rem * var(--u) * 8); padding-top: calc(1rem * var(--u) * 2); background: var(--c-l); margin-bottom: calc(1rem * 28 * var(--u)); border-bottom: var(--c-l) calc(1rem * var(--u) * 1) solid; border-radius: 0 0 calc(1rem * var(--u)) calc(1rem * var(--u)); }
       #main-nav svg { display: block; height: calc(1rem * var(--u) * 8); width: calc(1rem * var(--u) * 8); }
@@ -72,17 +77,18 @@
       #content a, #main-nav h5 a { text-decoration: underline var(--c-l) 2px; }
       #content > article { display: grid; grid-template-columns: 7fr 3fr; grid-template-rows: min-content; border-bottom: 2px var(--c-a2) solid; }
       #content > article > section { padding: 0 calc(1rem * var(--u) * 16) 0 0; position: relative; }
-      #content > article > section:nth-of-type(2n) { background: var(--c-a2); padding: 0 var(--l); }
+      #content > article > section:nth-of-type(2n) { padding: 0 var(--l); }
+      #content > article > section:nth-of-type(2n)::before { display: block; content: " "; position: absolute; top: 0; l;left: 0; width: 100%; height: 100%; background: var(--c-a2); z-index: -1; }
       #content > article > section:last-of-type { padding-bottom: calc(1rem * var(--u) * 16); }
       #content > article > section:nth-last-of-type(2) > :last-child { margin-bottom: calc(1rem * var(--u) * 16) !important; }
       #content > article > section > :last-child:not(.live-example.code) { margin-bottom: 0; }
       #content > article code { background: var(--c-a2); border-radius: calc(1rem * var(--u)); padding: 0 calc(1rem * var(--u)); }
       #content > article pre code { background: inherit; border-radius: inherit; }
       .tagline { color: var(--c-fg3); padding-top: calc(1rem * var(--u) * 2); }
-      .params { position: relative; z-index: 100; margin: calc(1rem * var(--u) * 28) calc((100% * -3 / 7) - 1rem * var(--u) * 16) calc(1rem * var(--u) * 26) 0; font-size: calc(1rem * var(--u) * 6); line-height: calc(1rem * var(--u) * 12); border-radius: calc(1rem * var(--u)); color: var(--c-l); background: var(--c-bg); padding: calc(1rem * var(--u) * 10) calc(1rem * var(--u) * 16); box-shadow: 0 calc(1rem * var(--u) * 4) calc(1rem * var(--u) * 8) var(--c-a2); }
-      .params b { display: inline-block; width: calc(1rem * var(--u) * 27); }
+      .params { position: relative; z-index: 0; margin: calc(1rem * var(--u) * 28) calc((100% * -3 / 7) - 1rem * var(--u) * 0) calc(1rem * var(--u) * -45) 0; font-size: calc(1rem * var(--u) * 5); line-height: calc(1rem * var(--u) * 10); border-radius: calc(1rem * var(--u)); color: var(--c-e2); background: var(--c-bg); padding: calc(1rem * var(--u) * 12) calc(1rem * var(--u) * 16) calc(1rem * var(--u) * 63); box-shadow: 0 calc(1rem * var(--u) * 4) calc(1rem * var(--u) * 8) var(--c-a2); }
+      .params b { display: inline-block; width: calc(1rem * var(--u) * 24); }
       .params i { display: inline-block; margin-right: calc(1rem * var(--u) * 2); }
-      .params code { background: none !important; text-decoration: underline; }
+      .params code { background: none !important; text-decoration: underline; font-size: inherit; }
 
       /* examples */
       .live-example.code { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: min-content 1fr; box-shadow: 0 calc(1rem * var(--u) * 4) calc(1rem * var(--u) * 8) var(--c-a2); border-radius: calc(1rem * var(--u)); margin-bottom: calc(1rem * var(--u) * 10); }
@@ -91,10 +97,11 @@
       .live-example.code h6:last-of-type { border-radius: 0 calc(1rem * var(--u)) 0 0; border-right: none; }
       .live-example.code textarea { height: 100%; border-right: 1px var(--c-a2) solid; }
       .live-example.code textarea:last-of-type { border-right: none; }
-      aside { color: var(--c-fg2); font-size: var(--h2); }
+      aside { color: var(--c-fg2); font-size: var(--h3); }
+      aside code { font-size: inherit; }
       aside h6 { padding: calc(1rem * var(--u) * 1) 0; margin-bottom: calc(1rem * var(--u) * 2); border-bottom: 1px var(--c-fg3) solid; }
       .live-example.output ul { list-style-type: circle; padding: 0 0 0 calc(1rem * var(--u) * 4); margin: 0; }
-      .live-example.output li > div { float: right; color: var(--c-h); cursor: pointer; }
+      .live-example.output li > div { float: right; color: var(--c-h); cursor: pointer; font-weight: 700; }
       aside:not(.output) { margin-top: calc(1rem * var(--u) * 16); }
       .live-example.output .chars { display: inline-flex; }
       .live-example.output .chars > * { pointer-events: none; }
@@ -112,6 +119,14 @@
       .live-example.output .example-list > * { cursor: pointer; }
       .live-example.output .example-list [data-selected="false"] { display: none; }
 
+      /* primary */
+      .live-example.primary.code { position: relative; left: calc(1rem * var(--u) * 13); margin-right: calc(1rem * var(--u) * -3); }
+      .live-example.primary.code h6 { background: var(--c-l2); }
+      .live-example.primary.code textarea { background: var(--c-a); }
+      .live-example.primary.output { background: var(--c-e); margin: 0 calc(1rem * var(--u) * -4); padding: 0 calc(1rem * var(--u) * 4) calc(1rem * var(--u) * 4); border-radius: calc(1rem * var(--u)); color: var(--c-bg); }
+      .live-example.primary.output h6, .live-example.primary.code h6 { color: var(--c-l); border-bottom-color: var(--c-l); font-weight: 700; font-style: inherit; }
+      .live-example.primary.output input { background: var(--c-e2); }
+
       /* forms */
       form { display: flex; margin: calc(1rem * var(--u) * 4) 0; }
       form > :first-child { border-radius: calc(1rem * var(--u)) 0 0 calc(1rem * var(--u)); }
@@ -120,21 +135,21 @@
       form button { background: var(--c-bg); }
       form input { width: 0; }
       input { background: var(--c-a); height: calc(1rem * var(--u) * 7); padding: 0 calc(1rem * var(--u) * 2); flex: 1; width: 100%; border-radius: calc(1rem * var(--u)); }
-      button { cursor: pointer; padding: 0 calc(1rem * var(--u) * 3); color: var(--c-e); }
+      button { cursor: pointer; padding: 0 calc(1rem * var(--u) * 3); color: var(--c-e); font-weight: 700; }
 
       /* rEspoNsiVe */
       @media (max-width: 1240px) {
         :root {
           --h: 17px;
-          --h2: 12px;
+          --h3: 12px;
         }
-        .alt { display: none; }
         .container { flex-direction: column; }
         .params { margin: calc(1rem * var(--u) * 8) 0; padding: calc(var(--l) * 1 / 2); }
         h2 { margin-top: calc(1rem * var(--u) * 6); }
         #main-nav { position: static; }
         #main-nav .logo { margin-bottom: 0; position: static; }
         #main-nav .logo ~ * { display: none; }
+        .live-example.primary.code { position: inherit; left: 0; margin-right: 0; }
         #content { padding: 0 calc(1rem * var(--u) * 1); }
         #content > article { display: block; }
         #content > article > section { padding: 0; }
@@ -155,7 +170,7 @@
         <ul>
           <li><a href="#rationale">Rationale</a></li>
           <li><a href="#import-the-module">Import the module</a></li>
-          <li><a href="#reactivity">Reactivity</a></li>
+          <li><a href="#reactive-templating">Reactive templating</a></li>
         </ul>
         <h5>Templating</h5>
         <ul>
@@ -183,46 +198,37 @@
           <section>
             <p class="tagline" id="top">A function for reactive web UI.</p>
             <p class="params">
-              <em>s²</em> &mdash; Bind data to a template.<br><br>
+              <em>s²</em> &mdash; Reactive templating function.<br><br>
               <em><b>Input</b> <i>&larr;</i></em> <code>Object</code>, <code>&lt;template&gt;</code><br>
               <em><b>Output</b> <i>&rarr;</i></em> <code>Proxy</code>, <code>DocumentFragment</code>
             </p>
             <hr>
           </section>
-          <section class="alt">
-            <!--<p class="tagline">&copy; 2021</p>-->
-          </section>
+          <section></section>
           <section>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 68)">
+            <div class="live-example primary code" style="min-height: calc(1rem * var(--u) * 66)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">return {
-  todos: [
-    'Sleep',
-    'Wake up',
+  add, todos: [
+    'Sleep', 'Wake up',
     'Get out of bed',
-    'Brush teeth',
-    'Get dressed',
+    'Brush teeth', 'Get dressed',
   ].map(todo => ({ todo, remove })),
-  add,
 };
-
-function remove() {
-  const { todos } = this[root];
-  const i = todos
-    .findIndex(_ => _ === this);
-  todos.splice(i, 1);
-}
-
 function add(event) {
   event.preventDefault();
-  const { todo } = this;
-  if (!todo) return;
-  const { todos } = this[root];
-  todos.unshift({ remove, todo });
+  if (!this.todo) return;
+  this[root].todos.unshift({
+    todo: this.todo, remove });
   delete this.todo;
+}
+function remove() {
+  const i = this[root].todos
+    .findIndex(_ => _ === this);
+  this[root].todos.splice(i, 1);
 }</textarea><textarea spellcheck="false"><form onsubmit="{{add}}">
-  <input
+  <input required
     value="{{todo}}"
     placeholder="Todo...">
   <button>Add</button>
@@ -239,7 +245,7 @@ function add(event) {
             </div>
           </section>
           <section>
-            <aside class="live-example output">
+            <aside class="live-example primary output" style="min-height: calc(1rem * var(--u) * 66)">
               <h6>Output</h6>
               <div>
                 <noscript>JavaScript must be enabled!</noscript>
@@ -251,11 +257,10 @@ function add(event) {
         <article>
           <section>
             <h2 id="rationale">Rationale</h2>
-            <p>A DOM library can consist of a single function capable of expressing the most complex web applications. <em>s²</em> has a few design goals:</p>
+            <p>A single function is capable of expressing the most complex web applications. <em>s²</em> has a few design goals:</p>
             <ul>
-              <li>Add reactivity to plain JS objects using <code>Proxy</code>. Advanced features such as computed properties are implemented as addons.</li>
-              <li>Templates are logic-less. This differs from prior art such as JSX where embedded JavaScript is allowed. Due to this constraint, logic-less templating maps well to <em>s²</em>, and there is an addon for context-aware <a href="#mustache-templates">Mustache templates</a>.</li>
-              <li>No compile-time tooling needed. Just use import statements to include it.</li>
+              <li>The only required API is its main function. Advanced features such as computed properties are implemented as addons.</li>
+              <li>Templates are logic-less. This differs from prior art such as JSX where embedded JavaScript is allowed. Due to this constraint, logic-less templating maps well to <em>s²</em>, and there is an addon for <a href="#mustache-templates">Mustache templates</a> that is aware of HTML context.</li>
             </ul>
             <p>Its design is influenced by this quote:</p>
             <blockquote>Even the simplest procedural logic is hard for humans to verify, but quite complex data structures are fairly easy to model and reason about... Data is more tractable than program logic. It follows that where you see a choice between complexity in data structures and complexity in code, choose the former. More: in evolving a design, you should actively seek ways to shift complexity from code to data.</blockquote>
@@ -296,14 +301,14 @@ import {
           </section>
 
           <section>
-            <h2 id="reactivity">Reactivity</h2>
-            <p>The way that the reactivity model works is that mutations on the <code>Proxy</code> object returned by <em>s²</em> reflect in the DOM. This works at arbitrary levels of nesting, as well. This is how it works without calling functions explicitly, it calls the handler functions on the <code>Proxy</code> implicitly.</p>
+            <h2 id="reactive-templating">Reactive templating</h2>
+            <p>The way that the reactivity model works is that mutations on the <code>Proxy</code> object returned by <em>s²</em> reflect in the DOM. This works at arbitrary levels of nesting, as well. After initializing the template, there is no need to call functions explicitly, setting keys on the <code>Proxy</code> calls the handler functions implicitly.</p>
             <hr>
           </section>
           <section>
           </section>
           <section>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 74)">
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 68)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">const state = {
@@ -317,7 +322,7 @@ import {
     event.preventDefault();
   },
 };
-state.input.call(state);
+state.input();
 return state;</textarea><textarea spellcheck="false"><form onsubmit="{{ignore}}">
   <input
     value="{{fullName}}"
@@ -353,7 +358,7 @@ return state;</textarea><textarea spellcheck="false"><form onsubmit="{{ignore}}"
               <li><code>data-key</code>, <code>data-template</code>: for binding keys valued by objects to templates.</li>
               <li><code>data-text</code>, <code>data-unsafe-html</code>: for setting text and HTML.</li>
               <li><code>data-class</code>: shorthand for setting class attribute.</li>
-              <li><code>data-value</code>: for setting input values, also handles binding to input event automatically.</li>
+              <li><code>data-value</code>: for setting input values, also handles binding to <code>input</code> event automatically.</li>
               <li><code>data-event-*</code>: for adding event listeners.</li>
               <li><code>data-attribute-*</code>: for setting arbitrary attributes.</li>
               <li><code>data-*</code>: for setting data attributes (reflection).</li>
@@ -375,7 +380,7 @@ return state;</textarea><textarea spellcheck="false"><form onsubmit="{{ignore}}"
           <section>
           </section>
           <section>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 56)">
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 52)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">return {
@@ -431,7 +436,7 @@ return state;</textarea><textarea spellcheck="false"><form onsubmit="{{ignore}}"
             </aside>
           </section>
           <section>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 82)">
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 78)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">registerTemplate(
@@ -481,7 +486,7 @@ function increment(event) {
           <section>
             <h2 id="mount-unmount-symbols"><code>mount</code>, <code>unmount</code> symbols</h2>
             <p>The symbols <code>mount</code> and <code>unmount</code> allow user-defined behavior to run as elements are appended and removed from the DOM. This allows for animations and arbitrary code such as integrating with third-party libraries on these events. The unmount function is particularly useful for implementing exiting animations, as it will wait for a promise to resolve before removing the node.</p>
-            <p>Both <code>mount</code> and <code>unmount</code> functions have <code>node</code> as an argument, <em>but it is not the same node</em>. On mount, the node is a <code>DocumentFragment</code> before the fragment is inserted into the DOM. On unmount, the node is any <code>Node</code> before the node is removed from the DOM.</p>
+            <p>Both <code>mount</code> and <code>unmount</code> functions have <code>node</code> as an argument, <em>but it is not the same node</em>. On mount, the node is a <code>DocumentFragment</code> before the fragment is inserted into the DOM. On unmount, the node is any top-level <code>Node</code> before the node is removed from the DOM.</p>
             <p>On unmount, the unmount function is called recursively on each child that is removed, to ensure that unmount will always be called.</p>
             <hr>
           </section>
@@ -492,7 +497,7 @@ function increment(event) {
             </aside>
           </section>
           <section>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 136)">
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 128)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">const msg = "s2_is_great!";
@@ -557,7 +562,7 @@ async function unmountChar(node) {
           <section>
           </section>
           <section>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 172)">
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 162)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">return {
@@ -636,31 +641,34 @@ function animate(node) {
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">return {
-  top: "Top-level value!",
-  n1: {
-    n2: {
-      n3: {
-        value: "Empty",
-        read(event) {
-          event.preventDefault();
-          this.value =
-            this[root].top;
-        },
-      },
-    },
+  count: 1,
+  increment(event) {
+    event.preventDefault();
+    this.count++;
   },
-};</textarea><textarea spellcheck="false">
-<div>
-  {{#n1}}
-    {{#n2}}
-      {{#n3}}
-        <b>{{value}}</b>
-        <button onclick="{{read}}">
-          Read
-        </button>
-      {{/n3}}
-    {{/n2}}
-  {{/n1}}
+  views: new Array(3).fill()
+    .map((_, i) => ({
+      ordinal: i + 1,
+      value: "Empty", read,
+    })),
+};
+function read(event) {
+  event.preventDefault();
+  this.value = this[root].count;
+}</textarea><textarea spellcheck="false"><div>
+  Count - <b>{{count}}</b>
+  <button onclick="{{increment}}">
+    Increment
+  </button>
+  {{#views}}
+    <div>
+      View {{ordinal}} -
+      <b>{{value}}</b>
+      <button onclick="{{read}}">
+        Read
+      </button>
+    </div>
+  {{/views}}
 </div></textarea>
             </div>
           </section>
@@ -694,7 +702,7 @@ function animate(node) {
             </aside>
           </section>
           <section>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 110)">
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 102)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">const src = {
@@ -763,7 +771,7 @@ return {
           <section>
           </section>
           <section>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 184)">
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 174)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">const src = observable({
@@ -846,7 +854,7 @@ function add(event) {
             </aside>
           </section>
           <section>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 136)">
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 128)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">const data = [
@@ -916,7 +924,7 @@ return {
           <section>
           </section>
           <section>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 86)">
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 82)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">const data = observable({
@@ -963,7 +971,7 @@ return computed({
           <section>
           </section>
           <section>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 104)">
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 98)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">const data = observable({
@@ -1024,7 +1032,7 @@ return computed({
           <section>
           </section>
           <section>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 112)">
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 106)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">const data = observable({
@@ -1093,7 +1101,7 @@ return {
           <section>
           </section>
           <section>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 106)">
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 102)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">const data = observable({

@@ -1,3 +1,5 @@
+;; This is the main entry point for s2.
+
 (defparameter *context-slot* 'slot)
 (defparameter *context-text* 'text)
 (defparameter *context-html* 'html)

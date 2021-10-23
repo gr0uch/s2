@@ -1,3 +1,6 @@
+;; OPTIONAL MODULE
+;; Computed properties implementation.
+
 (defparameter *observable-context-map* (new (*weak-map)))
 (defparameter *target-observables-map* (new (*weak-map)))
 (defparameter *observable-callback-map* (new (*weak-map)))

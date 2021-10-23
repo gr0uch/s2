@@ -1,3 +1,7 @@
+;; OPTIONAL MODULE
+;; This function converts a subset of Mustache into data attributes, as
+;; expected by s2.
+
 (defparameter *tag-open* "{{")
 (defparameter *tag-close* "}}")
 (defparameter *comment-regexp*

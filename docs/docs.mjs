@@ -17,7 +17,11 @@ for (const entry of Array.prototype.reduce.call(
     },
     [],
 )) {
-    executeExample(entry);
+    try {
+        executeExample(entry);
+    } catch (e) {
+        console.error(e);
+    }
 }
 
 function processExample(element) {
