@@ -17,7 +17,7 @@
     <script type="module" src="./docs.mjs" defer></script>
     <style type="text/css">
       :root {
-        --w: 74rem;
+        --w: 78rem;
         --h: 19px;
         --h2: 17px;
         --h3: 13px;
@@ -82,10 +82,12 @@
       #content > article > section:last-of-type { padding-bottom: calc(1rem * var(--u) * 16); }
       #content > article > section:nth-last-of-type(2) > :last-child { margin-bottom: calc(1rem * var(--u) * 16) !important; }
       #content > article > section > :last-child:not(.live-example.code) { margin-bottom: 0; }
+      #content > article > section > footer { padding: var(--l) 0 0; color: var(--c-fg3); text-align: center; }
+      #content > article > section > footer > span { font-size: 2em; }
       #content > article code { background: var(--c-a2); border-radius: calc(1rem * var(--u)); padding: 0 calc(1rem * var(--u)); }
       #content > article pre code { background: inherit; border-radius: inherit; }
       .tagline { color: var(--c-fg3); padding-top: calc(1rem * var(--u) * 2); }
-      .params { position: relative; z-index: 0; margin: calc(1rem * var(--u) * 28) calc((100% * -3 / 7) - 1rem * var(--u) * 0) calc(1rem * var(--u) * -45) 0; font-size: calc(1rem * var(--u) * 5); line-height: calc(1rem * var(--u) * 10); border-radius: calc(1rem * var(--u)); color: var(--c-e2); background: var(--c-bg); padding: calc(1rem * var(--u) * 12) calc(1rem * var(--u) * 16) calc(1rem * var(--u) * 63); box-shadow: 0 calc(1rem * var(--u) * 4) calc(1rem * var(--u) * 8) var(--c-a2); }
+      .params { position: relative; z-index: 0; margin: calc(1rem * var(--u) * 28) calc((100% * -3 / 7) - 1rem * var(--u) * 0) calc(1rem * var(--u) * -45) 0; font-size: calc(1rem * var(--u) * 5); line-height: calc(1rem * var(--u) * 10); border-radius: calc(1rem * var(--u)); color: var(--c-e2); background: var(--c-bg); padding: calc(1rem * var(--u) * 12) calc(1rem * var(--u) * 16) calc(1rem * var(--u) * 61); box-shadow: 0 calc(1rem * var(--u) * 4) calc(1rem * var(--u) * 8) var(--c-a2); }
       .params b { display: inline-block; width: calc(1rem * var(--u) * 24); }
       .params i { display: inline-block; margin-right: calc(1rem * var(--u) * 2); }
       .params code { background: none !important; text-decoration: underline; font-size: inherit; }
@@ -1143,6 +1145,16 @@ return computed({
               </div>
             </aside>
           </section>
+        </article>
+
+        <article>
+          <section>
+            <footer>
+              <span>␄</span>
+            </footer>
+            <hr>
+          </section>
+          <section></section>
         </article>
       </main>
     </div>
