@@ -292,8 +292,8 @@
 
 
 (defun set-attribute (node name value)
-  (if (not (or (eq value nil) (eq value undefined)))
-      (chain node (set-attribute name value))
+  (if (not (or (eq value nil) (eq value undefined) (eq value false)))
+      (chain node (set-attribute name (if (eq value t) "" value)))
     (chain node (remove-attribute name))))
 
 
