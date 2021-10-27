@@ -17,7 +17,7 @@
     <script type="module" src="./docs.mjs" defer></script>
     <style type="text/css">
       :root {
-        --w: 78rem;
+        --w: 77rem;
         --h: 19px;
         --h2: 17px;
         --h3: 13px;
@@ -75,7 +75,7 @@
       #main-nav svg { display: block; height: calc(1rem * var(--u) * 8); width: calc(1rem * var(--u) * 8); }
       #content { flex: 5; }
       #content a, #main-nav h5 a { text-decoration: underline var(--c-l) 2px; }
-      #content > article { display: grid; grid-template-columns: 7fr 3fr; grid-template-rows: min-content; border-bottom: 2px var(--c-a2) solid; }
+      #content > article { display: grid; grid-template-columns: 5fr 2fr; grid-template-rows: min-content; border-bottom: 2px var(--c-a2) solid; }
       #content > article > section { padding: 0 calc(1rem * var(--u) * 16) 0 0; position: relative; }
       #content > article > section:nth-of-type(2n) { padding: 0 var(--l); }
       #content > article > section:nth-of-type(2n)::before { display: block; content: " "; position: absolute; top: 0; l;left: 0; width: 100%; height: 100%; background: var(--c-a2); z-index: -1; }
@@ -87,7 +87,7 @@
       #content > article code { background: var(--c-a2); border-radius: calc(1rem * var(--u)); padding: 0 calc(1rem * var(--u)); }
       #content > article pre code { background: inherit; border-radius: inherit; }
       .tagline { color: var(--c-fg3); padding-top: calc(1rem * var(--u) * 2); }
-      .params { position: relative; z-index: 0; margin: calc(1rem * var(--u) * 28) calc((100% * -3 / 7) - 1rem * var(--u) * 0) calc(1rem * var(--u) * -45) 0; font-size: calc(1rem * var(--u) * 5); line-height: calc(1rem * var(--u) * 10); border-radius: calc(1rem * var(--u)); color: var(--c-e2); background: var(--c-bg); padding: calc(1rem * var(--u) * 12) calc(1rem * var(--u) * 16) calc(1rem * var(--u) * 61); box-shadow: 0 calc(1rem * var(--u) * 4) calc(1rem * var(--u) * 8) var(--c-a2); }
+      .params { position: relative; z-index: 0; margin: calc(1rem * var(--u) * 28) calc((100% * -3 / 7) - 1rem * var(--u) * 0) calc(1rem * var(--u) * -54) 0; font-size: calc(1rem * var(--u) * 5); line-height: calc(1rem * var(--u) * 10); border-radius: calc(1rem * var(--u)); color: var(--c-e2); background: var(--c-bg); padding: calc(1rem * var(--u) * 12) calc(1rem * var(--u) * 16) calc(1rem * var(--u) * 71); box-shadow: 0 calc(1rem * var(--u) * 4) calc(1rem * var(--u) * 8) var(--c-a2); }
       .params b { display: inline-block; width: calc(1rem * var(--u) * 24); }
       .params i { display: inline-block; margin-right: calc(1rem * var(--u) * 2); }
       .params code { background: none !important; text-decoration: underline; font-size: inherit; }
@@ -122,12 +122,12 @@
       .live-example.output .example-list [data-selected="false"] { display: none; }
 
       /* primary */
-      .live-example.primary.code { position: relative; left: calc(1rem * var(--u) * 13); margin-right: calc(1rem * var(--u) * -3); }
+      .live-example.primary.code { position: relative; left: calc(1rem * var(--u) * 13); margin-right: calc(1rem * var(--u) * -0); }
       .live-example.primary.code h6 { background: var(--c-l2); }
       .live-example.primary.code textarea { background: var(--c-a); }
       .live-example.primary.output { background: var(--c-e); margin: 0 calc(1rem * var(--u) * -4); padding: 0 calc(1rem * var(--u) * 4) calc(1rem * var(--u) * 4); border-radius: calc(1rem * var(--u)); color: var(--c-bg); }
-      .live-example.primary.output h6, .live-example.primary.code h6 { color: var(--c-l); border-bottom-color: var(--c-l); font-weight: 700; font-style: inherit; }
       .live-example.primary.output input { background: var(--c-e2); }
+      .live-example.primary h6 { color: var(--c-l); border-bottom-color: var(--c-l); font-weight: 700; font-style: inherit; padding-top: calc(1rem * var(--u) * 2); padding-bottom: calc(1rem * var(--u) * 2); }
 
       /* forms */
       form { display: flex; margin: calc(1rem * var(--u) * 4) 0; }
@@ -208,7 +208,7 @@
           </section>
           <section></section>
           <section>
-            <div class="live-example primary code" style="min-height: calc(1rem * var(--u) * 66)">
+            <div class="live-example primary code" style="min-height: calc(1rem * var(--u) * 72)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">return {
@@ -247,7 +247,7 @@ function remove() {
             </div>
           </section>
           <section>
-            <aside class="live-example primary output" style="min-height: calc(1rem * var(--u) * 66)">
+            <aside class="live-example primary output" style="min-height: calc(1rem * var(--u) * 72)">
               <h6>Output</h6>
               <div>
                 <noscript>JavaScript must be enabled!</noscript>
@@ -286,7 +286,7 @@ function remove() {
   // The following function is for referring to templates by name.
   registerTemplate,
 } from "https://cdn.jsdelivr.net/gh/gr0uch/s2@latest/dist/main.min.mjs";</pre>
-            <p>Only the default export is required, the named exports are optional. Optional addons are as follows:</p>
+            <p>Optional addons are as follows:</p>
             <pre>// Parse a subset of Mustache for templating.
 import parseMustache from "https://cdn.jsdelivr.net/gh/gr0uch/s2@latest/dist/mustache.min.mjs";
 &nbsp;
