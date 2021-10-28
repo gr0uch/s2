@@ -14,13 +14,13 @@
     <meta property="og:type" content="website">
     <meta property="og:image" content="https://gr0uch.github.io/s2/s2.png">
     <meta property="og:image:type" content="image/png">
-    <script type="module" src="./docs.mjs" defer></script>
-    <style type="text/css">
+    <script type="module" src="./docs.mjs"></script>
+    <style>
       :root {
         --w: 77rem;
         --h: 19px;
         --h2: 17px;
-        --h3: 13px;
+        --h3: 14px;
         --h4: 12px;
         --l: calc(1rem * var(--u) * 7);
         --u: calc(1 / 4);
@@ -65,29 +65,29 @@
       /* layout */
       .container { position: relative; min-height: 100%; max-width: var(--w); display: flex; margin: auto; hyphens: auto; }
       body::before { display: block; content: " "; position: fixed; top: 0; right: 0; height: 100%; width: calc((100% - var(--w)) / 2 + 1px); background: var(--c-a2); }
-      #main-nav { position: sticky; top: calc(1rem * var(--u) * -16); flex: 1; padding: 0 calc(1rem * var(--u) * 4) 0 calc(1rem * var(--u) * 1); align-self: flex-start; color: var(--c-fg2); }
+      #main-nav { position: sticky; top: calc(1rem * var(--u) * -10); flex: 1; padding: 0 calc(1rem * var(--u) * 4) 0 calc(1rem * var(--u) * 1); align-self: flex-start; color: var(--c-fg2); }
       #main-nav h5 { font-size: var(--h3); font-weight: 700; }
       #main-nav code { font-size: var(--h4); }
       #main-nav h5 + h5 { margin-top: var(--l); }
       #main-nav ul { padding: 0; list-style-type: none; font-style: italic; font-size: var(--h3); font-weight: 300; }
       #main-nav li::before { content: "-"; margin-right: calc(1rem * var(--u) * 1); color: var(--c-fg3); }
-      #main-nav .logo { position: sticky; top: 0; width: calc(1rem * var(--u) * 8); padding-top: calc(1rem * var(--u) * 2); background: var(--c-l); margin-bottom: calc(1rem * 28 * var(--u)); border-bottom: var(--c-l) calc(1rem * var(--u) * 1) solid; border-radius: 0 0 calc(1rem * var(--u)) calc(1rem * var(--u)); }
+      #main-nav .logo { position: sticky; top: 0; width: calc(1rem * var(--u) * 8); padding-top: calc(1rem * var(--u) * 2); background: var(--c-l); margin-bottom: calc(1rem * 20 * var(--u)); border-bottom: var(--c-l) calc(1rem * var(--u) * 1) solid; border-radius: 0 0 calc(1rem * var(--u)) calc(1rem * var(--u)); }
       #main-nav svg { display: block; height: calc(1rem * var(--u) * 8); width: calc(1rem * var(--u) * 8); }
       #content { flex: 5; }
       #content a, #main-nav h5 a { text-decoration: underline var(--c-l) 2px; }
-      #content > article { display: grid; grid-template-columns: 5fr 2fr; grid-template-rows: min-content; border-bottom: 2px var(--c-a2) solid; }
-      #content > article > section { padding: 0 calc(1rem * var(--u) * 16) 0 0; position: relative; }
-      #content > article > section:nth-of-type(2n) { padding: 0 var(--l); }
-      #content > article > section:nth-of-type(2n)::before { display: block; content: " "; position: absolute; top: 0; l;left: 0; width: 100%; height: 100%; background: var(--c-a2); z-index: -1; }
-      #content > article > section:last-of-type { padding-bottom: calc(1rem * var(--u) * 16); }
-      #content > article > section:nth-last-of-type(2) > :last-child { margin-bottom: calc(1rem * var(--u) * 16) !important; }
-      #content > article > section > :last-child:not(.live-example.code) { margin-bottom: 0; }
-      #content > article > section > footer { padding: var(--l) 0 0; color: var(--c-fg3); text-align: center; }
-      #content > article > section > footer > span { font-size: 2em; }
-      #content > article code { background: var(--c-a2); border-radius: calc(1rem * var(--u)); padding: 0 calc(1rem * var(--u)); }
-      #content > article pre code { background: inherit; border-radius: inherit; }
-      .tagline { color: var(--c-fg3); padding-top: calc(1rem * var(--u) * 2); }
-      .params { position: relative; z-index: 0; margin: calc(1rem * var(--u) * 28) calc((100% * -3 / 7) - 1rem * var(--u) * 0) calc(1rem * var(--u) * -54) 0; font-size: calc(1rem * var(--u) * 5); line-height: calc(1rem * var(--u) * 10); border-radius: calc(1rem * var(--u)); color: var(--c-e2); background: var(--c-bg); padding: calc(1rem * var(--u) * 12) calc(1rem * var(--u) * 16) calc(1rem * var(--u) * 71); box-shadow: 0 calc(1rem * var(--u) * 4) calc(1rem * var(--u) * 8) var(--c-a2); }
+      #content > section { display: grid; grid-template-columns: 5fr 2fr; grid-template-rows: min-content; border-bottom: 2px var(--c-a2) solid; }
+      #content > section > div { padding: 0 calc(1rem * var(--u) * 16) 0 0; position: relative; }
+      #content > section > div:nth-of-type(2n) { padding: 0 var(--l); }
+      #content > section > div:nth-of-type(2n)::before { display: block; content: " "; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--c-a2); z-index: -1; }
+      #content > section > div:last-of-type { padding-bottom: calc(1rem * var(--u) * 16); }
+      #content > section > div:nth-last-of-type(2) > :last-child { margin-bottom: calc(1rem * var(--u) * 16) !important; }
+      #content > section > div > :last-child:not(.live-example.code) { margin-bottom: 0; }
+      #content > section > div > footer { padding: var(--l) 0 0; color: var(--c-fg3); text-align: center; }
+      #content > section > div > footer > h4 { font-size: 2em; }
+      #content > section code { background: var(--c-a2); border-radius: calc(1rem * var(--u)); padding: 0 calc(1rem * var(--u)); }
+      #content > section pre code { background: inherit; border-radius: inherit; }
+      .tagline { color: var(--c-fg3); font-size: var(--h3); padding-top: calc(1rem * var(--u) * 2); }
+      .params { position: relative; z-index: 0; margin: calc(1rem * var(--u) * 20) calc((100% * -3 / 7) - 1rem * var(--u) * 0) calc(1rem * var(--u) * -22) 0; font-size: calc(1rem * var(--u) * 5); line-height: calc(1rem * var(--u) * 10); border-radius: calc(1rem * var(--u)); color: var(--c-l); padding: calc(1rem * var(--u) * 0) calc(1rem * var(--u) * 16) calc(1rem * var(--u) * 38) 0; }
       .params b { display: inline-block; width: calc(1rem * var(--u) * 24); }
       .params i { display: inline-block; margin-right: calc(1rem * var(--u) * 2); }
       .params code { background: none !important; text-decoration: underline; font-size: inherit; }
@@ -122,12 +122,13 @@
       .live-example.output .example-list [data-selected="false"] { display: none; }
 
       /* primary */
-      .live-example.primary.code { position: relative; left: calc(1rem * var(--u) * 13); margin-right: calc(1rem * var(--u) * -0); }
+      .live-example.primary.code { position: relative; left: calc(1rem * var(--u) * 0); margin-right: calc(1rem * var(--u) * 0); }
       .live-example.primary.code h6 { background: var(--c-l2); }
       .live-example.primary.code textarea { background: var(--c-a); }
-      .live-example.primary.output { background: var(--c-e); margin: 0 calc(1rem * var(--u) * -4); padding: 0 calc(1rem * var(--u) * 4) calc(1rem * var(--u) * 4); border-radius: calc(1rem * var(--u)); color: var(--c-bg); }
-      .live-example.primary.output input { background: var(--c-e2); }
-      .live-example.primary h6 { color: var(--c-l); border-bottom-color: var(--c-l); font-weight: 700; font-style: inherit; padding-top: calc(1rem * var(--u) * 2); padding-bottom: calc(1rem * var(--u) * 2); }
+      .live-example.primary.output { background: var(--c-l2); backdrop-filter: blur(var(--h4)); margin: 0 calc(1rem * var(--u) * -4); padding: 0 calc(1rem * var(--u) * 4) calc(1rem * var(--u) * 4); border-radius: calc(1rem * var(--u)); }
+      .live-example.primary.output input { background: var(--c-bg); }
+      .live-example.primary.output input:focus { outline: none; }
+      .live-example.primary h6 { color: var(--c-l); border-bottom-width: 2px; border-bottom-color: var(--c-l); font-weight: 700; font-style: inherit; padding-top: calc(1rem * var(--u) * 2); }
 
       /* forms */
       form { display: flex; margin: calc(1rem * var(--u) * 4) 0; }
@@ -153,11 +154,11 @@
         #main-nav .logo ~ * { display: none; }
         .live-example.primary.code { position: inherit; left: 0; margin-right: 0; }
         #content { padding: 0 calc(1rem * var(--u) * 1); }
-        #content > article { display: block; }
-        #content > article > section { padding: 0; }
-        #content > article > section:nth-child(2) { padding-top: 0; }
-        #content > article > section:last-of-type { padding-bottom: 0; }
-        #content > article > section:nth-of-type(2n + 1) > :last-child { margin-bottom: calc(1rem * var(--u) * 8); }
+        #content > section { display: block; }
+        #content > section > div { padding: 0; }
+        #content > section > div:nth-child(2) { padding-top: 0; }
+        #content > section > div:last-of-type { padding-bottom: 0; }
+        #content > section > div:nth-of-type(2n + 1) > :last-child { margin-bottom: calc(1rem * var(--u) * 8); }
       }
     </style>
   </head>
@@ -165,7 +166,7 @@
     <div class="container">
       <nav id="main-nav">
         <div class="logo">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 4.2333333 4.2333333"><g><path fill="#3fb68b" fill-rule="evenodd" d="M0 0h4.233v4.233h-4.233z"/><path d="M1.416.831q-.403.3-.403.646 0 .444.32.444.114 0 .362-.196t.486-.196q.227 0 .367.119.14.114.14.305 0 .181-.181.382-.181.196-.641.45-.46.248-.584.331-.124.088-.212.212l-.026-.031.031-.062.036-.078-.088-.103q-.083-.078-.222-.078-.258 0-.408.269l-.026.031-.031-.031q0-.083.233-.32.238-.243.563-.243.243 0 .424.155l.041.026.072-.041q.346-.181.444-.331.098-.15.098-.315 0-.181-.109-.284-.103-.109-.274-.109-.124 0-.377.196-.248.196-.46.196-.165 0-.284-.129-.119-.134-.119-.315 0-.258.227-.517.227-.258.816-.568.289-.155.403-.326l.016-.021.021.041-.093.124-.088.124q.171.145.279.145.134 0 .284-.103l.021.031q0 .026-.243.243-.238.212-.372.212-.124 0-.444-.284z" style="line-height:1.25;-inkscape-font-specification:Parchment;paint-order:normal" font-size="10.583" font-family="Parchment" stroke="#fff" stroke-width=".132" stroke-linecap="square" fill="none"/><path d="M1.883 3.956l.432-.397.34-.327q.302-.286.4-.495.098-.21.098-.448 0-.267-.111-.422-.108-.156-.318-.156-.152 0-.286.083-.13.079-.13.171 0 .152.165.152.121 0 .194.073.076.07.076.184 0 .143-.098.238t-.241.095q-.178 0-.295-.102-.117-.105-.117-.273 0-.197.133-.356.133-.162.298-.235.168-.073.295-.092l.276-.022q.384 0 .654.171t.27.495q0 .203-.127.362-.124.159-.279.241-.156.079-.479.206-.321.124-.356.181v.013l.181-.01.222-.003h.502q.156 0 .219-.038l.092-.108.051-.137.038-.111h.041l-.203 1.086h-1.937z" style="line-height:1.25;-inkscape-font-specification:Elephant" font-size="3.175" font-family="Elephant"/></g></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 4.2333333 4.2333333"><g><path fill="#3fb68b" fill-rule="evenodd" d="M0 0h4.233v4.233h-4.233z"/><path d="M1.416.831q-.403.3-.403.646 0 .444.32.444.114 0 .362-.196t.486-.196q.227 0 .367.119.14.114.14.305 0 .181-.181.382-.181.196-.641.45-.46.248-.584.331-.124.088-.212.212l-.026-.031.031-.062.036-.078-.088-.103q-.083-.078-.222-.078-.258 0-.408.269l-.026.031-.031-.031q0-.083.233-.32.238-.243.563-.243.243 0 .424.155l.041.026.072-.041q.346-.181.444-.331.098-.15.098-.315 0-.181-.109-.284-.103-.109-.274-.109-.124 0-.377.196-.248.196-.46.196-.165 0-.284-.129-.119-.134-.119-.315 0-.258.227-.517.227-.258.816-.568.289-.155.403-.326l.016-.021.021.041-.093.124-.088.124q.171.145.279.145.134 0 .284-.103l.021.031q0 .026-.243.243-.238.212-.372.212-.124 0-.444-.284z" stroke="#fff" stroke-width=".132" stroke-linecap="square" fill="none"/><path d="M1.883 3.956l.432-.397.34-.327q.302-.286.4-.495.098-.21.098-.448 0-.267-.111-.422-.108-.156-.318-.156-.152 0-.286.083-.13.079-.13.171 0 .152.165.152.121 0 .194.073.076.07.076.184 0 .143-.098.238t-.241.095q-.178 0-.295-.102-.117-.105-.117-.273 0-.197.133-.356.133-.162.298-.235.168-.073.295-.092l.276-.022q.384 0 .654.171t.27.495q0 .203-.127.362-.124.159-.279.241-.156.079-.479.206-.321.124-.356.181v.013l.181-.01.222-.003h.502q.156 0 .219-.038l.092-.108.051-.137.038-.111h.041l-.203 1.086h-1.937z" /></g></svg>
         </div>
         <h5><a href="https://github.com/gr0uch/s2">GitHub: gr0uch/s2</a></h5>
         <h5>Intro</h5>
@@ -196,8 +197,8 @@
         </ul>
       </nav>
       <main id="content">
-        <article>
-          <section>
+        <section>
+          <div>
             <p class="tagline" id="top">A function for reactive web UI.</p>
             <p class="params">
               <em>s²</em> &mdash; Reactive templating function.<br><br>
@@ -205,16 +206,15 @@
               <em><b>Output</b> <i>&rarr;</i></em> <code>Proxy</code>, <code>DocumentFragment</code>
             </p>
             <hr>
-          </section>
-          <section></section>
-          <section>
+          </div>
+          <div></div>
+          <div>
             <div class="live-example primary code" style="min-height: calc(1rem * var(--u) * 72)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">return {
   add, todos: [
     'Sleep', 'Wake up',
-    'Get out of bed',
     'Brush teeth', 'Get dressed',
   ].map(todo => ({ todo, remove })),
 };
@@ -245,19 +245,19 @@ function remove() {
   {{/todos}}
 </ul></textarea>
             </div>
-          </section>
-          <section>
+          </div>
+          <div>
             <aside class="live-example primary output" style="min-height: calc(1rem * var(--u) * 72)">
               <h6>Output</h6>
               <div>
                 <noscript>JavaScript must be enabled!</noscript>
               </div>
             </aside>
-          </section>
-        </article>
+          </div>
+        </section>
 
-        <article>
-          <section>
+        <section>
+          <div>
             <h2 id="rationale">Rationale</h2>
             <p>A single function is capable of expressing the most complex web applications. <em>s²</em> has a few design goals:</p>
             <ul>
@@ -267,17 +267,17 @@ function remove() {
             <p>Its design is influenced by this quote:</p>
             <blockquote>Even the simplest procedural logic is hard for humans to verify, but quite complex data structures are fairly easy to model and reason about... Data is more tractable than program logic. It follows that where you see a choice between complexity in data structures and complexity in code, choose the former. More: in evolving a design, you should actively seek ways to shift complexity from code to data.</blockquote>
             <p>— Eric S. Raymond, <cite><a href="http://www.catb.org/~esr/writings/taoup/html/ch01s06.html">Basics of the Unix Philosophy</a></cite></p>
-          </section>
-          <section>
+          </div>
+          <div>
             <aside>
               <h6>Aside</h6>
-              <p><em>s²</em> is tiny in size (<3kb), and implements comparatively little compared to JS frameworks.</p>
+              <p><em>s²</em> is tiny in size (~3kb), and implements comparatively little compared to JS frameworks.</p>
               <p>The intended use case is for highly interactive UI that needs to re-render often.</p>
               <p>It <a href="https://krausest.github.io/js-framework-benchmark/current.html">performs well</a> in benchmarks.</p>
             </aside>
-          </section>
+          </div>
 
-          <section>
+          <div>
             <h2 id="import-the-module">Import the module</h2>
             <p>A runtime environment that supports ES Modules is required without build tooling. The recommended way is to either vendor the library, or import from a CDN using the commit hash in the URL. For convenience, the following example uses the latest version.</p>
             <pre>import s2, {
@@ -294,23 +294,23 @@ import parseMustache from "https://cdn.jsdelivr.net/gh/gr0uch/s2@latest/dist/mus
 import {
   observable, createComputed,
 } from "https://cdn.jsdelivr.net/gh/gr0uch/s2@latest/dist/computed-properties.min.mjs";</pre>
-          </section>
-          <section>
+          </div>
+          <div>
             <aside>
               <h6>Aside</h6>
               <p>Although only the main import is necessary, most practical use cases will involve Mustache templating for better ergonomics, and computed properties for state management.</p>
             </aside>
-          </section>
+          </div>
 
-          <section>
+          <div>
             <h2 id="reactive-templating">Reactive templating</h2>
             <p>The way that the reactivity model works is that mutations on the <code>Proxy</code> object returned by <em>s²</em> reflect in the DOM. This works at arbitrary levels of nesting, as well. After initializing the template, there is no need to call functions explicitly, setting keys on the <code>Proxy</code> calls the handler functions implicitly.</p>
             <hr>
-          </section>
-          <section>
-          </section>
-          <section>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 68)">
+          </div>
+          <div>
+          </div>
+          <div>
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 72)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">const state = {
@@ -336,24 +336,24 @@ return state;</textarea><textarea spellcheck="false"><form onsubmit="{{ignore}}"
   <br>Last name: <b>{{lastName}}</b>
 </div></textarea>
             </div>
-          </section>
-          <section>
+          </div>
+          <div>
             <aside class="live-example output">
               <h6>Output</h6>
               <div>
                 <noscript>JavaScript must be enabled!</noscript>
               </div>
             </aside>
-          </section>
-          <section>
+          </div>
+          <div>
             <p>In the above example, it demonstrates propagating changes in one direction, from an input to an output. The <a href="#computed-properties">computed properties</a> addon will demonstrate how to go in the opposite direction, deriving output from input, without manual dependency tracking.</p>
-          </section>
-          <section>
-          </section>
-        </article>
+          </div>
+          <div>
+          </div>
+        </section>
 
-        <article>
-          <section>
+        <section>
+          <div>
             <h2 id="html-templates">HTML templates</h2>
             <p>By default, <code>data-</code> attributes are used for templating. This section exists for reference.</p>
             <ul>
@@ -365,24 +365,24 @@ return state;</textarea><textarea spellcheck="false"><form onsubmit="{{ignore}}"
               <li><code>data-attribute-*</code>: for setting arbitrary attributes.</li>
               <li><code>data-*</code>: for setting data attributes (reflection).</li>
             </ul>
-          </section>
-          <section>
+          </div>
+          <div>
             <aside>
               <h6>Aside</h6>
               <p>The Mustache addon will translate templates to use <code>data-</code> attributes internally.</p>
             </aside>
-          </section>
+          </div>
 
-          <section>
+          <div>
             <h2 id="mustache-templates">Mustache templates</h2>
             <p>The Mustache addon translates a subset of Mustache into the <code>data-</code> attributes expected by <em>s²</em>. Unlike the official spec, these templates are context-aware, meaning that it behaves quite differently from string templating.</p>
-            <p>Here is a quick example:</p>
+            <p>Here is a quick example, notice that the <code>onclick</code> attribute actually adds an event listener:</p>
             <hr>
-          </section>
-          <section>
-          </section>
-          <section>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 52)">
+          </div>
+          <div>
+          </div>
+          <div>
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 54)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">return {
@@ -404,16 +404,16 @@ return state;</textarea><textarea spellcheck="false"><form onsubmit="{{ignore}}"
   {{/counter}}
 </div></textarea>
             </div>
-          </section>
-          <section>
+          </div>
+          <div>
             <aside class="live-example output">
               <h6>Output</h6>
               <div>
                 <noscript>JavaScript must be enabled!</noscript>
               </div>
             </aside>
-          </section>
-          <section>
+          </div>
+          <div>
             <p>There are some caveats due to the limitations of the HTML templating:</p>
             <ul>
               <li>Inverted sections are not supported. This won&apos;t work: <code>{{^section}}{{/section}}</code>.</li>
@@ -421,24 +421,25 @@ return state;</textarea><textarea spellcheck="false"><form onsubmit="{{ignore}}"
               <li>String interpolation is not allowed in attributes. This won&apos;t work: <code>&lt;p style="color: #{{hex}};"&gt;</code>, but this will: <code>&lt;p style="{{style}}"&gt;</code>.</li>
               <li>Dot notation is not supported. This includes: <code>{{.}}</code> and <code>{{key.nestedKey}}</code>.</li>
             </ul>
-          </section>
-          <section>
-          </section>
+            <p>Since the addon implements a subset of Mustache, it is generally safe to use Mustache implementations to output the same template.</p>
+          </div>
+          <div>
+          </div>
 
-          <section>
+          <div>
             <h2 id="registering-templates">Registering templates</h2>
             <p>For organizing and re-using templates, each template can be broken up into smaller templates, which can be referred to by name.</p>
             <p>Here is the same example from above, extended by using a registered template:</p>
             <hr>
-          </section>
-          <section>
+          </div>
+          <div>
             <aside>
               <h6>Aside</h6>
               <p>The advantage of re-using templates like this is to use the same template in different places under the hood, resulting in less memory usage. It also avoids copypasting.</p>
             </aside>
-          </section>
-          <section>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 78)">
+          </div>
+          <div>
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 80)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">registerTemplate(
@@ -468,38 +469,38 @@ function increment(event) {
   {{/counter2}}
 </div></textarea>
             </div>
-          </section>
-          <section>
+          </div>
+          <div>
             <aside class="live-example output">
               <h6>Output</h6>
               <div>
                 <noscript>JavaScript must be enabled!</noscript>
               </div>
             </aside>
-          </section>
-          <section>
+          </div>
+          <div>
             <p>This provides an abstraction for template re-use. However, what it does not provide is &ldquo;components&rdquo; in any sense. <em>s²</em> stays agnostic about <a href="https://developer.mozilla.org/en-US/docs/Web/Web_Components">Web Components</a>, or even implementing its own concept of components in general. It is entirely feasible to build Web Components using <em>s²</em> without any conceptual mismatch.</p>
-          </section>
-          <section>
-          </section>
-        </article>
+          </div>
+          <div>
+          </div>
+        </section>
 
-        <article>
-          <section>
+        <section>
+          <div>
             <h2 id="mount-unmount-symbols"><code>mount</code>, <code>unmount</code> symbols</h2>
             <p>The symbols <code>mount</code> and <code>unmount</code> allow user-defined behavior to run as elements are appended and removed from the DOM. This allows for animations and arbitrary code such as integrating with third-party libraries on these events. The unmount function is particularly useful for implementing exiting animations, as it will wait for a promise to resolve before removing the node.</p>
             <p>Both <code>mount</code> and <code>unmount</code> functions have <code>node</code> as an argument, <em>but it is not the same node</em>. On mount, the node is a <code>DocumentFragment</code> before the fragment is inserted into the DOM. On unmount, the node is any top-level <code>Node</code> before the node is removed from the DOM.</p>
             <p>On unmount, the unmount function is called recursively on each child that is removed, to ensure that unmount will always be called.</p>
             <hr>
-          </section>
-          <section>
+          </div>
+          <div>
             <aside>
               <h6>Aside</h6>
               <p>Mount and unmount are defined and run exactly once, even if the object which contained the symbols initially is replaced with another object.</p>
             </aside>
-          </section>
-          <section>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 128)">
+          </div>
+          <div>
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 134)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">const msg = "s2_is_great!";
@@ -546,25 +547,25 @@ async function unmountChar(node) {
   </div>
 </div></textarea>
             </div>
-          </section>
-          <section>
+          </div>
+          <div>
             <aside class="live-example output">
               <h6>Output</h6>
               <div>
                 <noscript>JavaScript must be enabled!</noscript>
               </div>
             </aside>
-          </section>
+          </div>
 
-          <section>
+          <div>
             <h2 id="move-symbol"><code>move</code> symbol</h2>
             <p>The <code>move</code> symbol allows user-defined behavior to run as objects in arrays have their index changed. This allows for animations to run on this event. It is especially useful when combined with a technique called <a href="https://aerotwist.com/blog/flip-your-animations/">First, Last, Invert, Play</a> (FLIP).</p>
             <hr>
-          </section>
-          <section>
-          </section>
-          <section>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 162)">
+          </div>
+          <div>
+          </div>
+          <div>
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 168)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">return {
@@ -616,30 +617,30 @@ function animate(node) {
   </div>
 </div></textarea>
             </div>
-          </section>
-          <section>
+          </div>
+          <div>
             <aside class="live-example output">
               <h6>Output</h6>
               <div>
                 <noscript>JavaScript must be enabled!</noscript>
               </div>
             </aside>
-          </section>
+          </div>
 
-          <section>
+          <div>
             <h2 id="root-target-symbol"><code>root</code>, <code>target</code> symbol</h2>
             <p>The <code>root</code> symbol exists on each function context, such as event listeners, and mount, unmount, and move functions.</p>
             <p>Its purpose is to get a reference to the top-level Proxy. This is particularly useful when there are multiple roots but functions are shared between them.</p>
             <hr>
-          </section>
-          <section>
+          </div>
+          <div>
             <aside>
               <h6>Aside</h6>
               <p>You should generally use this instead of referring to the Proxy returned by <em>s²</em>.</p>
             </aside>
-          </section>
-          <section>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 82)">
+          </div>
+          <div>
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 86)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">return {
@@ -673,38 +674,38 @@ function read(event) {
   {{/views}}
 </div></textarea>
             </div>
-          </section>
-          <section>
+          </div>
+          <div>
             <aside class="live-example output">
               <h6>Output</h6>
               <div>
                 <noscript>JavaScript must be enabled!</noscript>
               </div>
             </aside>
-          </section>
-          <section>
+          </div>
+          <div>
             <p>The <code>target</code> symbol is of limited utility, it provides a way to access the target object from the Proxy. There is no built-in way in JavaScript to do this.</p>
-          </section>
-          <section>
-          </section>
+          </div>
+          <div>
+          </div>
 
-          <section>
+          <div>
             <h2 id="computed-properties">Computed properties</h2>
             <p>The computed properties addon derives outputs from inputs, without the need for manually tracking dependencies. It implements reactivity by proxying the objects used as inputs via <code>observable</code>. To start, the computed function must be created by passing in the mount and unmount symbols:</p>
             <pre>const computed = createComputed(mount, unmount);</pre>
             <p>In the computed properties addon, an <code>observable</code> is an object whose keys are automatically tracked by computed properties when they are read. A <code>computed</code> object&apos;s <em>methods</em> are run automatically when its dependencies change.</p>
             <p>Here is a classic spreadsheet example where there are computed cell values:</p>
             <hr>
-          </section>
-          <section>
+          </div>
+          <div>
             <aside>
               <h6>Aside</h6>
               <p>For any application with non-trivial complexity, computed properties are essential to writing maintainable code. However, it is not strictly necessary.</p>
               <p>Caveat: observable objects are only tracked at the top level, deeply nested observable objects aren&apos;t tracked.</p>
             </aside>
-          </section>
-          <section>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 102)">
+          </div>
+          <div>
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 108)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">const src = {
@@ -749,31 +750,31 @@ return {
   {{/rows}}
 </div></textarea>
             </div>
-          </section>
-          <section>
+          </div>
+          <div>
             <aside class="live-example output">
               <h6>Output</h6>
               <div>
                 <noscript>JavaScript must be enabled!</noscript>
               </div>
             </aside>
-          </section>
-          <section>
+          </div>
+          <div>
             <p>Note that in the above example, multiple observable objects are used due to the limitation that observable objects can only keep track of keys that are one-level deep.</p>
-          </section>
-          <section>
-          </section>
+          </div>
+          <div>
+          </div>
 
-          <section>
+          <div>
             <h2 id="computed-composition">Computed composition</h2>
             <p>Observable objects and computed objects only work on the top-level keys, which makes composition necessary.</p>
             <p>Here is the todo example from above, but refactored to use computed properties. Additionally, a confirmation dialog needs to be shown before deleting a todo. The record to be deleted is tracked via a key in the observable object, so that only one confirmation can be shown at a time.</p>
             <hr>
-          </section>
-          <section>
-          </section>
-          <section>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 174)">
+          </div>
+          <div>
+          </div>
+          <div>
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 182)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">const src = observable({
@@ -835,28 +836,28 @@ function add(event) {
   {{/todos}}
 </ul></textarea>
             </div>
-          </section>
-          <section>
+          </div>
+          <div>
             <aside class="live-example output">
               <h6>Output</h6>
               <div>
                 <noscript>JavaScript must be enabled!</noscript>
               </div>
             </aside>
-          </section>
-          <section>
+          </div>
+          <div>
             <p>Composing observable and computed objects allows the user to decouple the data from the view.</p>
             <h3>Nesting observables in computed</h3>
             <p>How the objects are arranged is up to you, here is an example where the observable objects are nested inside of the computed objects:</p><hr>
-          </section>
-          <section>
+          </div>
+          <div>
             <aside>
               <h6>Aside</h6>
               <p>If your computed property requires using <code>this</code>, then arrow functions will not work.</p>
             </aside>
-          </section>
-          <section>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 128)">
+          </div>
+          <div>
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 134)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">const data = [
@@ -905,28 +906,28 @@ return {
   {{/rows}}
 </div></textarea>
             </div>
-          </section>
-          <section>
+          </div>
+          <div>
             <aside class="live-example output">
               <h6>Output</h6>
               <div>
                 <noscript>JavaScript must be enabled!</noscript>
               </div>
             </aside>
-          </section>
-        </article>
+          </div>
+        </section>
 
-        <article>
-          <section>
+        <section>
+          <div>
             <h2 id="performance-pitfalls">Performance pitfalls</h2>
             <p>When using computed properties, be careful about where observable properties are read from. Try to compose computed properties to be as granular as possible.</p>
             <p>Here is an example of an unoptimized list, the problem is that it does not try to reduce the amount of work done in a single computed property.</p>
             <hr>
-          </section>
-          <section>
-          </section>
-          <section>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 82)">
+          </div>
+          <div>
+          </div>
+          <div>
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 86)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">const data = observable({
@@ -957,23 +958,23 @@ return computed({
   {{/rows}}
 </ul></textarea>
             </div>
-          </section>
-          <section>
+          </div>
+          <div>
             <aside class="live-example output">
               <h6>Output</h6>
               <div>
                 <noscript>JavaScript must be enabled!</noscript>
               </div>
             </aside>
-          </section>
-          <section>
+          </div>
+          <div>
             <p>The problem is that there is just one computed property that returns a new instance of each nested object, and the slowdown is noticeable due to the event listener update occuring between each iteration. Here is the same example from above, but optimized to reduce the amount of work done in a single computed property.</p>
             <hr>
-          </section>
-          <section>
-          </section>
-          <section>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 98)">
+          </div>
+          <div>
+          </div>
+          <div>
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 102)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">const data = observable({
@@ -1008,33 +1009,33 @@ return computed({
   {{/rows}}
 </ul></textarea>
             </div>
-          </section>
-          <section>
+          </div>
+          <div>
             <aside class="live-example output">
               <h6>Output</h6>
               <div>
                 <noscript>JavaScript must be enabled!</noscript>
               </div>
             </aside>
-          </section>
-          <section>
+          </div>
+          <div>
             <p>The only changes made were to add a <code>computed</code> object on each list item, and to turn <code>isSelected</code> into a computed property. This fixes the problem by only recomputing one property by <code>n</code> times.</p>
             <p>There is still a potential slowdown even with this approach: if the length of the list changes, then each list item needs to be recomputed. This is best worked around by manually mutating the list using array methods.</p>
             <p>Computed properties are faster than just replacing a large data structure, because it allows for small, granular updates, versus updating an entire data structure.</p>
             <hr>
-          </section>
-          <section>
-          </section>
+          </div>
+          <div>
+          </div>
 
-          <section>
+          <div>
             <h2 id="object-re-use">Object re-use</h2>
             <p>Re-using an object multiple times in the same template requires use of computed properties.</p>
             <hr>
-          </section>
-          <section>
-          </section>
-          <section>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 106)">
+          </div>
+          <div>
+          </div>
+          <div>
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 112)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">const data = observable({
@@ -1079,31 +1080,31 @@ return {
     </button>
 </div></textarea>
             </div>
-          </section>
-          <section>
+          </div>
+          <div>
             <aside class="live-example output">
               <h6>Output</h6>
               <div>
                 <noscript>JavaScript must be enabled!</noscript>
               </div>
             </aside>
-          </section>
-          <section>
+          </div>
+          <div>
             <p>The main reason for restricting objects to only appear once in a template is due to objects being mapped to a single DOM node internally.</p>
             <hr>
-          </section>
-          <section>
-          </section>
+          </div>
+          <div>
+          </div>
 
-          <section>
+          <div>
             <h2 id="computed-of-computed">Computed of computed</h2>
             <p>Computed objects are <strong>not</strong> observable, but they can set properties on observables. By doing so, it is possible to create computed properties of computed properties.</p>
             <hr>
-          </section>
-          <section>
-          </section>
-          <section>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 102)">
+          </div>
+          <div>
+          </div>
+          <div>
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 108)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">const data = observable({
@@ -1136,26 +1137,26 @@ return computed({
     </button>
 </div></textarea>
             </div>
-          </section>
-          <section>
+          </div>
+          <div>
             <aside class="live-example output">
               <h6>Output</h6>
               <div>
                 <noscript>JavaScript must be enabled!</noscript>
               </div>
             </aside>
-          </section>
-        </article>
+          </div>
+        </section>
 
-        <article>
-          <section>
+        <section>
+          <div>
             <footer>
-              <span>␄</span>
+              <h4>␄</h4>
             </footer>
             <hr>
-          </section>
-          <section></section>
-        </article>
+          </div>
+          <div></div>
+        </section>
       </main>
     </div>
   </body>
