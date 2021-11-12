@@ -14,6 +14,7 @@ See [js-framework-benchmark results table](https://krausest.github.io/js-framewo
 
 - `s2.debug`: turn on messages in the console. Warning: has a performance impact.
 - `s2.isDeferred` (experimental): this will defer setting proxy values until the next frame. This might be preferable if there is significant blocking in between updates. However, it can break functionality in case there are updates that depend on a previous update in the same tick.
+- `s2.window`: set a different global object for server-side rendering.
 
 
 ## Name

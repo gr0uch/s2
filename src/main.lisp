@@ -227,7 +227,9 @@
 ;; When using deferred mode.
 (defun enqueue (fn)
   (when (not (length *deferred-queue*))
-    (request-animation-frame
+    (chain
+     main window
+     (request-animation-frame
      (lambda ()
        (let ((q (length *deferred-queue*)))
          (loop
@@ -235,7 +237,7 @@
           (let ((func (chain *deferred-queue* (shift))))
             (func)))
          (when (@ main debug)
-           (console-log "queue flushed" q))))))
+           (console-log "queue flushed" q)))))))
   (chain *deferred-queue* (push fn)))
 
 
@@ -481,17 +483,21 @@
        ;; backwards iteration avoids problems with removing nodes.
        for i from 0 to (- (length (@ parent-node child-nodes)) 1) do
        (let ((node (getprop (@ parent-node child-nodes) i)))
-         (when (not (eq (@ node node-type) (@ *node "ELEMENT_NODE"))) (continue))
+         (when (not (eq (@ node node-type)
+                        (@ main window *node "ELEMENT_NODE")))
+           (continue))
          (when (or (eq (@ node tag-name) *tag-slot*)
                    (@ node dataset key))
-           (let* ((slot-name (or (@ node dataset key) (@ node name)))
+           (let* ((slot-name (or (@ node dataset key)
+                                 (chain node (get-attribute 'name))))
                   (anchor (create-anchor 2 slot-name))
                   (template-selector (@ node dataset template))
                   (template-node
                    ;; Special case: when `data-key` exists and template is nested.
                    (if template-selector
                        (or (getprop *templates-hash* template-selector)
-                           (chain document (query-selector template-selector)))
+                           (chain main window document
+                                  (query-selector template-selector)))
                      node)))
              (when (eq slot-name undefined)
                (throw (new (*type-error
@@ -503,10 +509,11 @@
              ;; Move slot contents into document fragment.
              (when (and (not template-selector)
                         (eq (@ node tag-name) *tag-slot*))
-               (setf template-node (chain document (create-document-fragment)))
+               (setf template-node (chain main window document
+                                          (create-document-fragment)))
                (loop
-                while (length (@ node child-nodes)) do
-                (let ((child-node (@ node child-nodes 0)))
+                while (@ node first-child) do
+                (let ((child-node (@ node first-child)))
                   (chain template-node (append-child child-node)))))
 
              (chain parent-node (insert-before anchor node))
@@ -524,13 +531,13 @@
                 ;; This is for the placeholder content. If the template is nested,
                 ;; then we need to make a dummy placeholder.
                 slot (if template-selector node
-                       (chain document (create-element 'div)))
+                       (chain main window document (create-element 'div)))
                 template template-node
                 type *context-slot*)))
              (chain node (remove)))
            (continue))
 
-         (when (length (@ node children))
+         (when (@ node first-child)
            (walk node (chain path (concat i))))
 
          (loop
@@ -632,7 +639,7 @@
          (mount (getprop obj *symbol-mount*))
          (unmount (getprop obj *symbol-unmount*))
          (move (getprop obj *symbol-move*))
-         (fragment (chain document (create-document-fragment))))
+         (fragment (chain main window document (create-document-fragment))))
 
     (when unmount (chain *proxy-unmount-map* (set proxy unmount)))
     (when move (chain *proxy-move-map* (set proxy move)))
@@ -678,13 +685,13 @@
       (let ((comment (+ (if (eq type 0) 'start
                           (if (eq type 1) 'end 'anchor))
                         " " key)))
-        (chain document (create-comment comment)))
-    (chain document (create-text-node ""))))
+        (chain main window document (create-comment comment)))
+    (chain main window document (create-text-node ""))))
 
 
 (defun register-template (name template)
   (when (eq (typeof template) 'string)
-    (let ((element (chain document (create-element 'template))))
+    (let ((element (chain main window document (create-element 'template))))
       (setf (@ element inner-h-t-m-l) template
             template element)))
   (setf (getprop *templates-hash* name) template))
@@ -696,7 +703,8 @@
   (create-binding origin template))
 
 (setf (@ main debug) (not t)
-      (@ main is-deferred) (not t))
+      (@ main is-deferred) (not t)
+      (@ main window) window)
 
 
 (export

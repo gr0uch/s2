@@ -9,6 +9,7 @@
     ((*node prototype append-child) function)
     ((*node prototype insert-before) function)
     ((*node prototype next-sibling) property)
+    ((*node prototype first-child) property)
     ((*element prototype remove) function)
     ((document query-selector) function)
     ((document create-text-node) function)

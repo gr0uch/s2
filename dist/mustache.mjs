@@ -22,8 +22,8 @@ var SECTIONOPENREGEXP = new RegExp(TAGOPEN + '#([^{}]+?)' + TAGCLOSE);
      (NEW (*REG-EXP (+ *TAG-OPEN* /([^{}]+?) *TAG-CLOSE*)))) */
 var SECTIONCLOSEREGEXP = new RegExp(TAGOPEN + '/([^{}]+?)' + TAGCLOSE);
 /* (DEFPARAMETER *PARTIAL-REGEXP*
-     (NEW (*REG-EXP (+ *TAG-OPEN* >([^{}]+?) *TAG-CLOSE*)))) */
-var PARTIALREGEXP = new RegExp(TAGOPEN + '>([^{}]+?)' + TAGCLOSE);
+     (NEW (*REG-EXP (+ *TAG-OPEN* (?:>|&gt;)([^{}]+?) *TAG-CLOSE*)))) */
+var PARTIALREGEXP = new RegExp(TAGOPEN + '(?:>|&gt;)([^{}]+?)' + TAGCLOSE);
 /* (DEFUN PROCESS-ELEMENT (ELEMENT)
      (LET ((ATTRIBUTE-ENTRIES
             (LOOP FOR ATTRIBUTE IN (@ ELEMENT ATTRIBUTES)
@@ -56,9 +56,10 @@ var PARTIALREGEXP = new RegExp(TAGOPEN + '>([^{}]+?)' + TAGCLOSE);
                   (WHEN (NOT (EQ SPECIAL-CASE 2))
                     (CHAIN ELEMENT (REMOVE-ATTRIBUTE NAME))))))
      (WHEN
-         (AND (LENGTH (@ ELEMENT CHILD-NODES))
-              (EQ (@ ELEMENT CHILD-NODES 0 NODE-TYPE) (@ *NODE TEXT_NODE)))
-       (LET* ((TEXT (CHAIN (@ ELEMENT CHILD-NODES 0 NODE-VALUE) (TRIM)))
+         (AND (@ ELEMENT FIRST-CHILD)
+              (EQ (@ ELEMENT FIRST-CHILD NODE-TYPE)
+                  (@ PARSE WINDOW *NODE TEXT_NODE)))
+       (LET* ((TEXT (CHAIN (@ ELEMENT FIRST-CHILD NODE-VALUE) (TRIM)))
               (MATCH-VAR (CHAIN (@ ELEMENT TEXT-CONTENT) (MATCH *VAR-REGEXP*)))
               (MATCH-UNESCAPED-VAR
                (CHAIN (@ ELEMENT TEXT-CONTENT) (MATCH *UNESCAPED-VAR-REGEXP*))))
@@ -69,12 +70,13 @@ var PARTIALREGEXP = new RegExp(TAGOPEN + '>([^{}]+?)' + TAGCLOSE);
            (SETF (@ ELEMENT DATASET UNSAFE-HTML) (@ MATCH-UNESCAPED-VAR 1)
                  (@ ELEMENT TEXT-CONTENT) ))))
      (LET* ((NODES
-             (LOOP FOR NODE IN (@ ELEMENT CHILD-NODES)
-                   COLLECT NODE))
+             (CHAIN *ARRAY PROTOTYPE SLICE (CALL (@ ELEMENT CHILD-NODES))))
             (CONTAINER (LIST))
             (LAST-OPENED (LIST)))
        (LOOP FOR NODE IN NODES
-             DO (WHEN (NOT (EQ (@ NODE NODE-TYPE) (@ *NODE TEXT_NODE)))
+             DO (WHEN
+                    (NOT
+                     (EQ (@ NODE NODE-TYPE) (@ PARSE WINDOW *NODE TEXT_NODE)))
                   (WHEN (LENGTH CONTAINER)
                     (CHAIN (@ CONTAINER 0) (APPEND-CHILD NODE)))
                   (CONTINUE)) (LET* ((TEXT (@ NODE NODE-VALUE))
@@ -105,7 +107,8 @@ var PARTIALREGEXP = new RegExp(TAGOPEN + '>([^{}]+?)' + TAGCLOSE);
                                                         *UNESCAPED-VAR-REGEXP*))))
                                            (WHEN MATCH-OPEN
                                              (SETF NEW-NODE
-                                                     (CHAIN DOCUMENT
+                                                     (CHAIN PARSE WINDOW
+                                                            DOCUMENT
                                                             (CREATE-ELEMENT
                                                              'SLOT)))
                                              (LET ((NAME
@@ -145,7 +148,8 @@ var PARTIALREGEXP = new RegExp(TAGOPEN + '>([^{}]+?)' + TAGCLOSE);
                                              (CONTINUE))
                                            (WHEN MATCH-VAR
                                              (SETF NEW-NODE
-                                                     (CHAIN DOCUMENT
+                                                     (CHAIN PARSE WINDOW
+                                                            DOCUMENT
                                                             (CREATE-ELEMENT
                                                              'SPAN))
                                                    (@ NEW-NODE DATASET TEXT)
@@ -156,7 +160,8 @@ var PARTIALREGEXP = new RegExp(TAGOPEN + '>([^{}]+?)' + TAGCLOSE);
                                              (CONTINUE))
                                            (WHEN MATCH-UNESCAPED-VAR
                                              (SETF NEW-NODE
-                                                     (CHAIN DOCUMENT
+                                                     (CHAIN PARSE WINDOW
+                                                            DOCUMENT
                                                             (CREATE-ELEMENT
                                                              'SPAN))
                                                    (@ NEW-NODE DATASET
@@ -167,7 +172,7 @@ var PARTIALREGEXP = new RegExp(TAGOPEN + '>([^{}]+?)' + TAGCLOSE);
                                                      NODE))
                                              (CONTINUE))
                                            (SETF NEW-NODE
-                                                   (CHAIN DOCUMENT
+                                                   (CHAIN PARSE WINDOW DOCUMENT
                                                           (CREATE-TEXT-NODE
                                                            TOKEN)))
                                            (CHAIN NODE PARENT-NODE
@@ -221,8 +226,8 @@ function processElement(element) {
             element.removeAttribute(name);
         };
     };
-    if (element.childNodes.length && element.childNodes[0].nodeType === Node['TEXT_NODE']) {
-        var text = element.childNodes[0].nodeValue.trim();
+    if (element.firstChild && element.firstChild.nodeType === parse.window.Node['TEXT_NODE']) {
+        var text = element.firstChild.nodeValue.trim();
         var matchVar = element.textContent.match(VARREGEXP);
         var matchUnescapedVar = element.textContent.match(UNESCAPEDVARREGEXP);
         if (matchVar) {
@@ -234,46 +239,36 @@ function processElement(element) {
             element.textContent = '';
         };
     };
-    var nodes = (function () {
-        var _js7 = element.childNodes;
-        var _js9 = _js7.length;
-        var collect10 = [];
-        for (var _js8 = 0; _js8 < _js9; _js8 += 1) {
-            var node = _js7[_js8];
-            collect10.push(node);
-        };
-        
-        return collect10;
-    })();
+    var nodes = Array.prototype.slice.call(element.childNodes);
     var container = [];
     var lastOpened = [];
-    var _js12 = nodes.length;
-    for (var _js11 = 0; _js11 < _js12; _js11 += 1) {
-        var node = nodes[_js11];
-        if (node.nodeType !== Node['TEXT_NODE']) {
+    var _js8 = nodes.length;
+    for (var _js7 = 0; _js7 < _js8; _js7 += 1) {
+        var node = nodes[_js7];
+        if (node.nodeType !== parse.window.Node['TEXT_NODE']) {
             if (container.length) {
                 container[0].appendChild(node);
             };
             continue;
         };
-        var text13 = node.nodeValue;
-        var tokens = text13.split(VARREGEXPGLOBAL).filter(function (s) {
+        var text9 = node.nodeValue;
+        var tokens = text9.split(VARREGEXPGLOBAL).filter(function (s) {
             return s.trim();
         });
-        var _js15 = tokens.length;
-        for (var _js14 = 0; _js14 < _js15; _js14 += 1) {
-            var token = tokens[_js14];
+        var _js11 = tokens.length;
+        for (var _js10 = 0; _js10 < _js11; _js10 += 1) {
+            var token = tokens[_js10];
             var newNode = null;
             var matchOpen = token.match(SECTIONOPENREGEXP);
             var matchClose = token.match(SECTIONCLOSEREGEXP);
             var matchPartial = token.match(PARTIALREGEXP);
-            var matchVar16 = token.match(VARREGEXP);
-            var matchUnescapedVar17 = token.match(UNESCAPEDVARREGEXP);
+            var matchVar12 = token.match(VARREGEXP);
+            var matchUnescapedVar13 = token.match(UNESCAPEDVARREGEXP);
             if (matchOpen) {
-                newNode = document.createElement('slot');
-                var name18 = matchOpen[1].trim();
-                lastOpened.unshift(name18);
-                newNode.setAttribute('name', name18);
+                newNode = parse.window.document.createElement('slot');
+                var name14 = matchOpen[1].trim();
+                lastOpened.unshift(name14);
+                newNode.setAttribute('name', name14);
                 if (container.length) {
                     container[0].appendChild(newNode);
                 } else {
@@ -291,19 +286,19 @@ function processElement(element) {
                 container.shift();
                 continue;
             };
-            if (matchVar16) {
-                newNode = document.createElement('span');
-                newNode.dataset.text = matchVar16[1];
+            if (matchVar12) {
+                newNode = parse.window.document.createElement('span');
+                newNode.dataset.text = matchVar12[1];
                 node.parentNode.insertBefore(newNode, node);
                 continue;
             };
-            if (matchUnescapedVar17) {
-                newNode = document.createElement('span');
-                newNode.dataset.unsafeHtml = matchUnescapedVar17[1];
+            if (matchUnescapedVar13) {
+                newNode = parse.window.document.createElement('span');
+                newNode.dataset.unsafeHtml = matchUnescapedVar13[1];
                 node.parentNode.insertBefore(newNode, node);
                 continue;
             };
-            newNode = document.createTextNode(token);
+            newNode = parse.window.document.createTextNode(token);
             node.parentNode.insertBefore(newNode, node);
         };
         node.remove();
@@ -311,19 +306,16 @@ function processElement(element) {
 };
 /* (DEFUN PARSE (TEMPLATE)
      (WHEN (EQ (TYPEOF TEMPLATE) 'STRING)
-       (LET ((ELEMENT (CHAIN DOCUMENT (CREATE-ELEMENT 'TEMPLATE))))
+       (LET ((ELEMENT (CHAIN PARSE WINDOW DOCUMENT (CREATE-ELEMENT 'TEMPLATE))))
          (SETF (@ ELEMENT INNER-H-T-M-L) TEMPLATE
                TEMPLATE ELEMENT)))
      (SETF (@ TEMPLATE INNER-H-T-M-L)
              (CHAIN TEMPLATE INNER-H-T-M-L (REPLACE *COMMENT-REGEXP* )))
      (LET* ((CONTENT (@ TEMPLATE CONTENT))
             (TRIMMER
-             (CHAIN DOCUMENT
-                    (CREATE-NODE-ITERATOR CONTENT (@ *NODE-FILTER SHOW_TEXT))))
+             (CHAIN PARSE WINDOW DOCUMENT (CREATE-NODE-ITERATOR CONTENT 4)))
             (ITERATOR
-             (CHAIN DOCUMENT
-                    (CREATE-NODE-ITERATOR CONTENT
-                     (@ *NODE-FILTER SHOW_ELEMENT))))
+             (CHAIN PARSE WINDOW DOCUMENT (CREATE-NODE-ITERATOR CONTENT 1)))
             (CURRENT NIL))
        (LOOP WHILE (SETF CURRENT (CHAIN TRIMMER (NEXT-NODE)))
              DO (LET ((TRIMMED (CHAIN CURRENT NODE-VALUE (TRIM))))
@@ -333,14 +325,14 @@ function processElement(element) {
      TEMPLATE) */
 function parse(template) {
     if (typeof template === 'string') {
-        var element = document.createElement('template');
+        var element = parse.window.document.createElement('template');
         element.innerHTML = template;
         template = element;
     };
     template.innerHTML = template.innerHTML.replace(COMMENTREGEXP, '');
-    var content13 = template.content;
-    var trimmer = document.createNodeIterator(content13, NodeFilter['SHOW_TEXT']);
-    var iterator = document.createNodeIterator(content13, NodeFilter['SHOW_ELEMENT']);
+    var content9 = template.content;
+    var trimmer = parse.window.document.createNodeIterator(content9, 4);
+    var iterator = parse.window.document.createNodeIterator(content9, 1);
     var current = null;
     while (current = trimmer.nextNode()) {
         var trimmed = current.nodeValue.trim();
@@ -354,6 +346,8 @@ function parse(template) {
     
     return template;
 };
+/* (SETF (@ PARSE WINDOW) WINDOW) */
+parse.window = window;
 /* (EXPORT DEFAULT PARSE) */
 export default parse;
 

@@ -17,7 +17,7 @@
 (defparameter *section-close-regexp*
   (new (*reg-exp (+ *tag-open* "\/([^{}]+?)" *tag-close*))))
 (defparameter *partial-regexp*
-  (new (*reg-exp (+ *tag-open* ">([^{}]+?)" *tag-close*))))
+  (new (*reg-exp (+ *tag-open* "(?:>|\&gt;)([^{}]+?)" *tag-close*))))
 
 (defun process-element (element)
   ;; match attributes
@@ -54,10 +54,10 @@
        (when (not (eq special-case 2))
          (chain element (remove-attribute name))))))
   ;; match text
-  (when (and (length (@ element child-nodes))
-             (eq (@ element child-nodes 0 node-type)
-                 (@ *node "TEXT_NODE")))
-    (let* ((text (chain (@ element child-nodes 0 node-value) (trim)))
+  (when (and (@ element first-child)
+             (eq (@ element first-child node-type)
+                 (@ parse window *node "TEXT_NODE")))
+    (let* ((text (chain (@ element first-child node-value) (trim)))
            (match-var (chain (@ element text-content)
                              (match *var-regexp*)))
            (match-unescaped-var (chain (@ element text-content)
@@ -70,14 +70,14 @@
               (@ element text-content) ""))))
   ;; match sections
   (let* ((nodes
-          (loop for node in (@ element child-nodes) collect node))
+          (chain *array prototype slice (call (@ element child-nodes))))
          ;; these are stacks
          (container (list))
          (last-opened (list)))
     ;; first pass: tokenize text
     (loop
      for node in nodes do
-     (when (not (eq (@ node node-type) (@ *node "TEXT_NODE")))
+     (when (not (eq (@ node node-type) (@ parse window *node "TEXT_NODE")))
        (when (length container)
          (chain (@ container 0) (append-child node)))
        (continue))
@@ -97,7 +97,7 @@
               (match-unescaped-var
                (chain token (match *unescaped-var-regexp*))))
           (when match-open
-            (setf new-node (chain document (create-element 'slot)))
+            (setf new-node (chain parse window document (create-element 'slot)))
             (let ((name (chain (@ match-open 1) (trim))))
               (chain last-opened (unshift name))
               (chain new-node (set-attribute 'name name)))
@@ -117,22 +117,22 @@
             (continue))
           ;; interpolate free vars as span elements
           (when match-var
-            (setf new-node (chain document (create-element 'span))
+            (setf new-node (chain parse window document (create-element 'span))
                   (@ new-node dataset text) (@ match-var 1))
             (chain node parent-node (insert-before new-node node))
             (continue))
           (when match-unescaped-var
-            (setf new-node (chain document (create-element 'span))
+            (setf new-node (chain parse window document (create-element 'span))
                   (@ new-node dataset unsafe-html) (@ match-unescaped-var 1))
             (chain node parent-node (insert-before new-node node))
             (continue))
-          (setf new-node (chain document (create-text-node token)))
+          (setf new-node (chain parse window document (create-text-node token)))
           (chain node parent-node (insert-before new-node node))))
        (chain node (remove))))))
 
 (defun parse (template)
   (when (eq (typeof template) 'string)
-    (let ((element (chain document (create-element 'template))))
+    (let ((element (chain parse window document (create-element 'template))))
       (setf (@ element inner-h-t-m-l) template
             template element)))
 
@@ -141,10 +141,18 @@
         (chain template inner-h-t-m-l (replace *comment-regexp* "")))
 
   (let* ((content (@ template content))
-         (trimmer (chain document (create-node-iterator
-                                   content (@ *node-filter "SHOW_TEXT"))))
-         (iterator (chain document (create-node-iterator
-                                    content (@ *node-filter "SHOW_ELEMENT"))))
+         (trimmer (chain parse window document
+                         (create-node-iterator
+                          content
+                          ;; Hardcoding value here.
+                          ;; (@ parse window *node-filter "SHOW_TEXT")
+                          4)))
+         (iterator (chain parse window document
+                          (create-node-iterator
+                           content
+                           ;; Hardcoding value here.
+                           ;; (@ parse window *node-filter "SHOW_ELEMENT")
+                           1)))
          (current nil))
     (loop
      while (setf current (chain trimmer (next-node))) do
@@ -156,5 +164,7 @@
      while (setf current (chain iterator (next-node))) do
      (process-element current)))
   template)
+
+(setf (@ parse window) window)
 
 (export :default parse)

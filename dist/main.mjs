@@ -371,17 +371,18 @@ function setIndex(target, key, value, receiver, isInitializing) {
 };
 /* (DEFUN ENQUEUE (FN)
      (WHEN (NOT (LENGTH *DEFERRED-QUEUE*))
-       (REQUEST-ANIMATION-FRAME
-        (LAMBDA ()
-          (LET ((Q (LENGTH *DEFERRED-QUEUE*)))
-            (LOOP WHILE (LENGTH *DEFERRED-QUEUE*)
-                  DO (LET ((FUNC (CHAIN *DEFERRED-QUEUE* (SHIFT))))
-                       (FUNC)))
-            (WHEN (@ MAIN DEBUG) (CONSOLE-LOG queue flushed Q))))))
+       (CHAIN MAIN WINDOW
+              (REQUEST-ANIMATION-FRAME
+               (LAMBDA ()
+                 (LET ((Q (LENGTH *DEFERRED-QUEUE*)))
+                   (LOOP WHILE (LENGTH *DEFERRED-QUEUE*)
+                         DO (LET ((FUNC (CHAIN *DEFERRED-QUEUE* (SHIFT))))
+                              (FUNC)))
+                   (WHEN (@ MAIN DEBUG) (CONSOLE-LOG queue flushed Q)))))))
      (CHAIN *DEFERRED-QUEUE* (PUSH FN))) */
 function enqueue(fn) {
     if (!DEFERREDQUEUE.length) {
-        requestAnimationFrame(function () {
+        main.window.requestAnimationFrame(function () {
             var q = DEFERREDQUEUE.length;
             while (DEFERREDQUEUE.length) {
                 var func = DEFERREDQUEUE.shift();
@@ -391,7 +392,6 @@ function enqueue(fn) {
             return main.debug ? console.log('queue flushed', q) : null;
         });
     };
-    
     return DEFERREDQUEUE.push(fn);
 };
 /* (DEFUN SET-PROPERTY (TARGET KEY VALUE RECEIVER IS-INITIALIZING)
@@ -869,20 +869,24 @@ function setEvent(target, value, descriptor, receiver) {
        (DEFUN WALK (PARENT-NODE PATH)
          (LOOP FOR I FROM 0 TO (- (LENGTH (@ PARENT-NODE CHILD-NODES)) 1)
                DO (LET ((NODE (GETPROP (@ PARENT-NODE CHILD-NODES) I)))
-                    (WHEN (NOT (EQ (@ NODE NODE-TYPE) (@ *NODE ELEMENT_NODE)))
+                    (WHEN
+                        (NOT
+                         (EQ (@ NODE NODE-TYPE)
+                             (@ MAIN WINDOW *NODE ELEMENT_NODE)))
                       (CONTINUE))
                     (WHEN
                         (OR (EQ (@ NODE TAG-NAME) *TAG-SLOT*)
                             (@ NODE DATASET KEY))
                       (LET* ((SLOT-NAME
-                              (OR (@ NODE DATASET KEY) (@ NODE NAME)))
+                              (OR (@ NODE DATASET KEY)
+                                  (CHAIN NODE (GET-ATTRIBUTE 'NAME))))
                              (ANCHOR (CREATE-ANCHOR 2 SLOT-NAME))
                              (TEMPLATE-SELECTOR (@ NODE DATASET TEMPLATE))
                              (TEMPLATE-NODE
                               (IF TEMPLATE-SELECTOR
                                   (OR
                                    (GETPROP *TEMPLATES-HASH* TEMPLATE-SELECTOR)
-                                   (CHAIN DOCUMENT
+                                   (CHAIN MAIN WINDOW DOCUMENT
                                           (QUERY-SELECTOR TEMPLATE-SELECTOR)))
                                   NODE)))
                         (WHEN (EQ SLOT-NAME UNDEFINED)
@@ -895,9 +899,10 @@ function setEvent(target, value, descriptor, receiver) {
                             (AND (NOT TEMPLATE-SELECTOR)
                                  (EQ (@ NODE TAG-NAME) *TAG-SLOT*))
                           (SETF TEMPLATE-NODE
-                                  (CHAIN DOCUMENT (CREATE-DOCUMENT-FRAGMENT)))
-                          (LOOP WHILE (LENGTH (@ NODE CHILD-NODES))
-                                DO (LET ((CHILD-NODE (@ NODE CHILD-NODES 0)))
+                                  (CHAIN MAIN WINDOW DOCUMENT
+                                         (CREATE-DOCUMENT-FRAGMENT)))
+                          (LOOP WHILE (@ NODE FIRST-CHILD)
+                                DO (LET ((CHILD-NODE (@ NODE FIRST-CHILD)))
                                      (CHAIN TEMPLATE-NODE
                                             (APPEND-CHILD CHILD-NODE)))))
                         (CHAIN PARENT-NODE (INSERT-BEFORE ANCHOR NODE))
@@ -914,11 +919,12 @@ function setEvent(target, value, descriptor, receiver) {
                                 (CREATE PATH (CHAIN PATH (CONCAT I)) SLOT
                                  (IF TEMPLATE-SELECTOR
                                      NODE
-                                     (CHAIN DOCUMENT (CREATE-ELEMENT 'DIV)))
+                                     (CHAIN MAIN WINDOW DOCUMENT
+                                            (CREATE-ELEMENT 'DIV)))
                                  TEMPLATE TEMPLATE-NODE TYPE *CONTEXT-SLOT*)))
                         (CHAIN NODE (REMOVE)))
                       (CONTINUE))
-                    (WHEN (LENGTH (@ NODE CHILDREN))
+                    (WHEN (@ NODE FIRST-CHILD)
                       (WALK NODE (CHAIN PATH (CONCAT I))))
                     (LOOP FOR KEY OF (@ NODE DATASET)
                           DO (LET ((VALUE (GETPROP (@ NODE DATASET) KEY))
@@ -967,22 +973,22 @@ function processTemplate(template) {
         var _js41 = parentNode.childNodes.length - 1;
         for (var i = 0; i <= _js41; i += 1) {
             var node = parentNode.childNodes[i];
-            if (node.nodeType !== Node['ELEMENT_NODE']) {
+            if (node.nodeType !== main.window.Node['ELEMENT_NODE']) {
                 continue;
             };
             if (node.tagName === TAGSLOT || node.dataset.key) {
-                var slotName = node.dataset.key || node.name;
+                var slotName = node.dataset.key || node.getAttribute('name');
                 var anchor = createAnchor(2, slotName);
                 var templateSelector = node.dataset.template;
-                var templateNode = templateSelector ? TEMPLATESHASH[templateSelector] || document.querySelector(templateSelector) : node;
+                var templateNode = templateSelector ? TEMPLATESHASH[templateSelector] || main.window.document.querySelector(templateSelector) : node;
                 if (slotName === undefined) {
                     throw new TypeError('Missing `name` or `data-key` for slot.');
                 };
                 delete node.dataset.key;
                 if (!templateSelector && node.tagName === TAGSLOT) {
-                    templateNode = document.createDocumentFragment();
-                    while (node.childNodes.length) {
-                        var childNode = node.childNodes[0];
+                    templateNode = main.window.document.createDocumentFragment();
+                    while (node.firstChild) {
+                        var childNode = node.firstChild;
                         templateNode.appendChild(childNode);
                     };
                 };
@@ -993,14 +999,14 @@ function processTemplate(template) {
                     throw new Error('The key \"' + slotName + '\" was used in a template ' + 'more than once, which is not allowed.');
                 };
                 context[slotName].push({ path : path.concat(i),
-                                         slot : templateSelector ? node : document.createElement('div'),
+                                         slot : templateSelector ? node : main.window.document.createElement('div'),
                                          template : templateNode,
                                          type : CONTEXTSLOT
                                        });
                 node.remove();
                 continue;
             };
-            if (node.children.length) {
+            if (node.firstChild) {
                 walk(node, path.concat(i));
             };
             for (var key in node.dataset) {
@@ -1137,7 +1143,7 @@ function createArray(array, template, root) {
             (MOUNT (GETPROP OBJ *SYMBOL-MOUNT*))
             (UNMOUNT (GETPROP OBJ *SYMBOL-UNMOUNT*))
             (MOVE (GETPROP OBJ *SYMBOL-MOVE*))
-            (FRAGMENT (CHAIN DOCUMENT (CREATE-DOCUMENT-FRAGMENT))))
+            (FRAGMENT (CHAIN MAIN WINDOW DOCUMENT (CREATE-DOCUMENT-FRAGMENT))))
        (WHEN UNMOUNT (CHAIN *PROXY-UNMOUNT-MAP* (SET PROXY UNMOUNT)))
        (WHEN MOVE (CHAIN *PROXY-MOVE-MAP* (SET PROXY MOVE)))
        (CHAIN *TARGET-CONTEXT-MAP* (SET TARGET CONTEXT))
@@ -1170,7 +1176,7 @@ function createBinding(obj, template, root) {
     var mount = obj[SYMBOLMOUNT];
     var unmount = obj[SYMBOLUNMOUNT];
     var move = obj[SYMBOLMOVE];
-    var fragment = document.createDocumentFragment();
+    var fragment = main.window.document.createDocumentFragment();
     if (unmount) {
         PROXYUNMOUNTMAP.set(proxy, unmount);
     };
@@ -1211,25 +1217,25 @@ function createBinding(obj, template, root) {
                          'END
                          'ANCHOR))
                    KEY)))
-           (CHAIN DOCUMENT (CREATE-COMMENT COMMENT)))
-         (CHAIN DOCUMENT (CREATE-TEXT-NODE )))) */
+           (CHAIN MAIN WINDOW DOCUMENT (CREATE-COMMENT COMMENT)))
+         (CHAIN MAIN WINDOW DOCUMENT (CREATE-TEXT-NODE )))) */
 function createAnchor(type, key) {
     if (main.debug) {
         var comment = (type === 0 ? 'start' : (type === 1 ? 'end' : 'anchor')) + ' ' + key;
-        return document.createComment(comment);
+        return main.window.document.createComment(comment);
     } else {
-        return document.createTextNode('');
+        return main.window.document.createTextNode('');
     };
 };
 /* (DEFUN REGISTER-TEMPLATE (NAME TEMPLATE)
      (WHEN (EQ (TYPEOF TEMPLATE) 'STRING)
-       (LET ((ELEMENT (CHAIN DOCUMENT (CREATE-ELEMENT 'TEMPLATE))))
+       (LET ((ELEMENT (CHAIN MAIN WINDOW DOCUMENT (CREATE-ELEMENT 'TEMPLATE))))
          (SETF (@ ELEMENT INNER-H-T-M-L) TEMPLATE
                TEMPLATE ELEMENT)))
      (SETF (GETPROP *TEMPLATES-HASH* NAME) TEMPLATE)) */
 function registerTemplate(name, template) {
     if (typeof template === 'string') {
-        var element = document.createElement('template');
+        var element = main.window.document.createElement('template');
         element.innerHTML = template;
         template = element;
     };
@@ -1247,9 +1253,11 @@ function main(origin, template) {
     return createBinding(origin, template);
 };
 /* (SETF (@ MAIN DEBUG) (NOT T)
-         (@ MAIN IS-DEFERRED) (NOT T)) */
+         (@ MAIN IS-DEFERRED) (NOT T)
+         (@ MAIN WINDOW) WINDOW) */
 main.debug = !true;
 main.isDeferred = !true;
+main.window = window;
 /* (EXPORT DEFAULT MAIN NAMES
            ((*SYMBOL-MOUNT* MOUNT) (*SYMBOL-UNMOUNT* UNMOUNT)
             (*SYMBOL-MOVE* MOVE) (*SYMBOL-ROOT* ROOT) (*SYMBOL-TARGET* TARGET)

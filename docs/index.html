@@ -421,7 +421,7 @@ return state;</textarea><textarea spellcheck="false"><form onsubmit="{{ignore}}"
               <li>String interpolation is not allowed in attributes. This won&apos;t work: <code>&lt;p style="color: #{{hex}};"&gt;</code>, but this will: <code>&lt;p style="{{style}}"&gt;</code>.</li>
               <li>Dot notation is not supported. This includes: <code>{{.}}</code> and <code>{{key.nestedKey}}</code>.</li>
             </ul>
-            <p>Since the addon implements a subset of Mustache, it is generally safe to use Mustache implementations to output the same template.</p>
+            <p>Since the addon implements a subset of Mustache, it is generally safe to use Mustache implementations to output the same template. However, be careful about input data: event listener functions should be removed, and computed properties need to be run manually.</p>
           </div>
           <div>
           </div>
