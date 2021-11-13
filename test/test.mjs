@@ -4,8 +4,8 @@ import parseMustache from "../dist/mustache.mjs";
 import { observable, createComputed } from "../dist/computed-properties.mjs";
 import test from "./runner.mjs";
 
-s2.debug = true;
-s2.isDeferred = true;
+// s2.debug = true;
+// s2.isDeferred = true;
 depCheck();
 cleanupTemplates();
 
@@ -82,7 +82,7 @@ const computed = createComputed(mount, unmount);
 
 const template = document.querySelector("#root");
 
-const [proxy, node] = s2({
+const [reactiveObject, node] = s2({
   title: "Hello, <em>world!</em>",
   titleClass: "title",
   fooBar: "bar",
@@ -106,7 +106,7 @@ const [proxy, node] = s2({
     runText: 'Run test',
     test,
     [mount]: function(node) {
-      console.log('Mount called', node, this);
+      console.log('Mount called');
     },
     [unmount]: delayUnmount,
   },
@@ -146,7 +146,7 @@ const [proxy, node] = s2({
 document.body.appendChild(node);
 console.log(`Mounted in ${performance.now() - start} ms`);
 
-window.p = proxy;
+window.p = reactiveObject;
 window.s = source;
 
 async function delayUnmount(node) {

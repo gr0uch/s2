@@ -480,8 +480,7 @@ function enqueue(fn) {
                                                                                                    T))))
        (IF IS-SETTER
            (CHAIN *REFLECT (SET TARGET KEY VALUE RECEIVER))
-           (DELETE (GETPROP TARGET KEY))))
-     T) */
+           (CHAIN *REFLECT (DELETE-PROPERTY TARGET KEY))))) */
 function setProperty(target, key, value, receiver, isInitializing) {
     if (main.isDeferred && !isInitializing) {
         enqueue(function () {
@@ -530,13 +529,8 @@ function setProperty(target, key, value, receiver, isInitializing) {
             };
         };
     };
-    if (isSetter) {
-        Reflect.set(target, key, value, receiver);
-    } else {
-        delete target[key];
-    };
     
-    return true;
+    return isSetter ? Reflect.set(target, key, value, receiver) : Reflect.deleteProperty(target, key);
 };
 /* (DEFUN SET-ATTRIBUTE (NODE NAME VALUE)
      (IF (NOT (OR (EQ VALUE NIL) (EQ VALUE UNDEFINED) (EQ VALUE FALSE)))

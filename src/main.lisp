@@ -289,8 +289,7 @@
 
     (if is-setter
         (chain *reflect (set target key value receiver))
-      (delete (getprop target key))))
-  t)
+      (chain *reflect (delete-property target key)))))
 
 
 (defun set-attribute (node name value)
