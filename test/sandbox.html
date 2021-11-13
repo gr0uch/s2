@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>s2 sandbox</title>
+<script type="module">
+import s2 from "../dist/main.mjs";
+
+const template = document.querySelector("#root");
+const [reactiveObject, node] = s2({
+    add(event) {
+        event.preventDefault();
+        this.things.push({ asdf: "asdf" });
+    },
+    remove(event) {
+        event.preventDefault();
+        this.things.pop();
+    },
+    things: [],
+}, template);
+
+document.body.appendChild(node);
+</script>
+
+<template id="root">
+  <button data-event-click="add">add</button>
+  <button data-event-click="remove">remove</button>
+  <slot name="things">
+    <div data-text="asdf"></div>
+  </slot>
+</template>

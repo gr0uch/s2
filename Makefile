@@ -24,7 +24,7 @@ min:
 	done
 
 copy:
-	for f in $(MIN_MODULES); do \
+	for f in $(ORIGINAL_MODULES); do \
 		cp $${f} $(DOCS_DIR)`basename $${f}`; \
 	done
 

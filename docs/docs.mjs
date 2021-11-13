@@ -1,6 +1,6 @@
-import s2, { root, target, mount, unmount, move, registerTemplate } from "./main.min.mjs";
-import { observable, createComputed } from "./computed-properties.min.mjs";
-import parseMustache from "./mustache.min.mjs";
+import s2, { root, target, mount, unmount, move, registerTemplate } from "./main.mjs";
+import { observable, createComputed } from "./computed-properties.mjs";
+import parseMustache from "./mustache.mjs";
 
 // s2.debug = true;
 
@@ -46,7 +46,6 @@ function executeExample({ js, html, output }) {
       registerTemplate, parseMustache);
     const template = parseMustache(html);
     const [_, fragment] = s2(state, template);
-    window.p = _;
     output.innerHTML = "";
     output.appendChild(fragment);
 }
