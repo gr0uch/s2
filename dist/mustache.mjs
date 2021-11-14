@@ -3,351 +3,134 @@
 var TAGOPEN = '{{';
 /* (DEFPARAMETER *TAG-CLOSE* }}) */
 var TAGCLOSE = '}}';
+/* (DEFPARAMETER *TAG-TEXT-OPEN* {{2,3}) */
+var TAGTEXTOPEN = '{{2,3}';
+/* (DEFPARAMETER *TAG-TEXT-CLOSE* }{2,3}) */
+var TAGTEXTCLOSE = '}{2,3}';
 /* (DEFPARAMETER *COMMENT-REGEXP*
-     (NEW (*REG-EXP (+ *TAG-OPEN* !(.+?) *TAG-CLOSE*) gs))) */
-var COMMENTREGEXP = new RegExp(TAGOPEN + '!(.+?)' + TAGCLOSE, 'gs');
-/* (DEFPARAMETER *VAR-REGEXP*
-     (NEW (*REG-EXP (+ ^ *TAG-OPEN* ([^{}]+?) *TAG-CLOSE* $)))) */
-var VARREGEXP = new RegExp('^' + TAGOPEN + '([^{}]+?)' + TAGCLOSE + '$');
-/* (DEFPARAMETER *VAR-REGEXP-GLOBAL*
-     (NEW (*REG-EXP (+ ( *TAG-OPEN* {1,2}(?:.+?) *TAG-CLOSE* {1,2})) gm))) */
-var VARREGEXPGLOBAL = new RegExp('(' + TAGOPEN + '{1,2}(?:.+?)' + TAGCLOSE + '{1,2})', 'gm');
-/* (DEFPARAMETER *UNESCAPED-VAR-REGEXP*
-     (NEW (*REG-EXP (+ ^ *TAG-OPEN* [{&]([^{}]+?)}? *TAG-CLOSE* $)))) */
-var UNESCAPEDVARREGEXP = new RegExp('^' + TAGOPEN + '[{&]([^{}]+?)}?' + TAGCLOSE + '$');
-/* (DEFPARAMETER *SECTION-OPEN-REGEXP*
-     (NEW (*REG-EXP (+ *TAG-OPEN* #([^{}]+?) *TAG-CLOSE*)))) */
-var SECTIONOPENREGEXP = new RegExp(TAGOPEN + '#([^{}]+?)' + TAGCLOSE);
-/* (DEFPARAMETER *SECTION-CLOSE-REGEXP*
-     (NEW (*REG-EXP (+ *TAG-OPEN* /([^{}]+?) *TAG-CLOSE*)))) */
-var SECTIONCLOSEREGEXP = new RegExp(TAGOPEN + '/([^{}]+?)' + TAGCLOSE);
+     (NEW (*REG-EXP (+ *TAG-OPEN* !(.*?) *TAG-CLOSE*) gs))) */
+var COMMENTREGEXP = new RegExp(TAGOPEN + '!(.*?)' + TAGCLOSE, 'gs');
+/* (DEFPARAMETER *ATTR-REGEXP*
+     (NEW (*REG-EXP (+ \s([^< ]+?)=['"] *TAG-OPEN* (.*?) *TAG-CLOSE* ['"]) gm))) */
+var ATTRREGEXP = new RegExp('\\s([^< ]+?)=[\'\"]' + TAGOPEN + '(.*?)' + TAGCLOSE + '[\'\"]', 'gm');
+/* (DEFPARAMETER *FREE-TEXT-REGEXP*
+     (NEW (*REG-EXP (+ *TAG-TEXT-OPEN* (.*?) *TAG-TEXT-CLOSE*) gm))) */
+var FREETEXTREGEXP = new RegExp(TAGTEXTOPEN + '(.*?)' + TAGTEXTCLOSE, 'gm');
+/* (DEFPARAMETER *UNESCAPED-TEXT-REGEXP* (NEW (*REG-EXP {{{(.*?)}}}))) */
+var UNESCAPEDTEXTREGEXP = new RegExp('{{{(.*?)}}}');
+/* (DEFPARAMETER *ENCLOSED-TEXT-REGEXP*
+     (NEW
+      (*REG-EXP
+       (+ <(.+?)>\s* *TAG-TEXT-OPEN* (.*?) *TAG-TEXT-CLOSE* \s*</(.+?)>) gm))) */
+var ENCLOSEDTEXTREGEXP = new RegExp('<(.+?)>\\s*' + TAGTEXTOPEN + '(.*?)' + TAGTEXTCLOSE + '\\s*</(.+?)>', 'gm');
 /* (DEFPARAMETER *PARTIAL-REGEXP*
-     (NEW (*REG-EXP (+ *TAG-OPEN* (?:>|&gt;)([^{}]+?) *TAG-CLOSE*)))) */
-var PARTIALREGEXP = new RegExp(TAGOPEN + '(?:>|&gt;)([^{}]+?)' + TAGCLOSE);
-/* (DEFUN PROCESS-ELEMENT (ELEMENT)
-     (LET ((ATTRIBUTE-ENTRIES
-            (LOOP FOR ATTRIBUTE IN (@ ELEMENT ATTRIBUTES)
-                  COLLECT (LIST (@ ATTRIBUTE NAME) (@ ATTRIBUTE VALUE)))))
-       (LOOP FOR ATTRIBUTE IN ATTRIBUTE-ENTRIES
-             DO (LET* ((NAME (@ ATTRIBUTE 0))
-                       (VALUE (@ ATTRIBUTE 1))
-                       (RESULT (CHAIN VALUE (MATCH *VAR-REGEXP*)))
-                       (TRIMMED NIL)
-                       (SPECIAL-CASE 0))
-                  (WHEN (NOT RESULT) (CONTINUE))
-                  (SETF TRIMMED (CHAIN (@ RESULT 1) (TRIM)))
-                  (WHEN (EQ NAME 'CLASS)
-                    (SETF (@ ELEMENT DATASET CLASS) TRIMMED
-                          SPECIAL-CASE 1))
-                  (WHEN (EQ NAME 'VALUE)
-                    (SETF (@ ELEMENT DATASET VALUE) TRIMMED
-                          SPECIAL-CASE 1))
-                  (WHEN (CHAIN NAME (STARTS-WITH on))
-                    (CHAIN ELEMENT
-                           (SET-ATTRIBUTE
-                            (+ data-event- (CHAIN NAME (SLICE 2))) TRIMMED))
-                    (SETF SPECIAL-CASE 1))
-                  (WHEN (CHAIN NAME (STARTS-WITH data-))
-                    (CHAIN ELEMENT (SET-ATTRIBUTE NAME TRIMMED))
-                    (SETF SPECIAL-CASE 2))
-                  (WHEN (NOT SPECIAL-CASE)
-                    (CHAIN ELEMENT
-                           (SET-ATTRIBUTE (+ data-attribute- NAME) TRIMMED)))
-                  (WHEN (NOT (EQ SPECIAL-CASE 2))
-                    (CHAIN ELEMENT (REMOVE-ATTRIBUTE NAME))))))
-     (WHEN
-         (AND (@ ELEMENT FIRST-CHILD)
-              (EQ (@ ELEMENT FIRST-CHILD NODE-TYPE)
-                  (@ PARSE WINDOW *NODE TEXT_NODE)))
-       (LET* ((TEXT (CHAIN (@ ELEMENT FIRST-CHILD NODE-VALUE) (TRIM)))
-              (MATCH-VAR (CHAIN (@ ELEMENT TEXT-CONTENT) (MATCH *VAR-REGEXP*)))
-              (MATCH-UNESCAPED-VAR
-               (CHAIN (@ ELEMENT TEXT-CONTENT) (MATCH *UNESCAPED-VAR-REGEXP*))))
-         (WHEN MATCH-VAR
-           (SETF (@ ELEMENT DATASET TEXT) (@ MATCH-VAR 1)
-                 (@ ELEMENT TEXT-CONTENT) ))
-         (WHEN MATCH-UNESCAPED-VAR
-           (SETF (@ ELEMENT DATASET UNSAFE-HTML) (@ MATCH-UNESCAPED-VAR 1)
-                 (@ ELEMENT TEXT-CONTENT) ))))
-     (LET* ((NODES
-             (CHAIN *ARRAY PROTOTYPE SLICE (CALL (@ ELEMENT CHILD-NODES))))
-            (CONTAINER (LIST))
-            (LAST-OPENED (LIST)))
-       (LOOP FOR NODE IN NODES
-             DO (WHEN
-                    (NOT
-                     (EQ (@ NODE NODE-TYPE) (@ PARSE WINDOW *NODE TEXT_NODE)))
-                  (WHEN (LENGTH CONTAINER)
-                    (CHAIN (@ CONTAINER 0) (APPEND-CHILD NODE)))
-                  (CONTINUE)) (LET* ((TEXT (@ NODE NODE-VALUE))
-                                     (TOKENS
-                                      (CHAIN TEXT (SPLIT *VAR-REGEXP-GLOBAL*)
-                                             (FILTER
-                                              (LAMBDA (S) (CHAIN S (TRIM)))))))
-                                (LOOP FOR TOKEN IN TOKENS
-                                      DO (LET ((NEW-NODE NIL)
-                                               (MATCH-OPEN
-                                                (CHAIN TOKEN
-                                                       (MATCH
-                                                        *SECTION-OPEN-REGEXP*)))
-                                               (MATCH-CLOSE
-                                                (CHAIN TOKEN
-                                                       (MATCH
-                                                        *SECTION-CLOSE-REGEXP*)))
-                                               (MATCH-PARTIAL
-                                                (CHAIN TOKEN
-                                                       (MATCH
-                                                        *PARTIAL-REGEXP*)))
-                                               (MATCH-VAR
-                                                (CHAIN TOKEN
-                                                       (MATCH *VAR-REGEXP*)))
-                                               (MATCH-UNESCAPED-VAR
-                                                (CHAIN TOKEN
-                                                       (MATCH
-                                                        *UNESCAPED-VAR-REGEXP*))))
-                                           (WHEN MATCH-OPEN
-                                             (SETF NEW-NODE
-                                                     (CHAIN PARSE WINDOW
-                                                            DOCUMENT
-                                                            (CREATE-ELEMENT
-                                                             'SLOT)))
-                                             (LET ((NAME
-                                                    (CHAIN (@ MATCH-OPEN 1)
-                                                           (TRIM))))
-                                               (CHAIN LAST-OPENED
-                                                      (UNSHIFT NAME))
-                                               (CHAIN NEW-NODE
-                                                      (SET-ATTRIBUTE 'NAME
-                                                       NAME)))
-                                             (IF (LENGTH CONTAINER)
-                                                 (CHAIN CONTAINER 0
-                                                        (APPEND-CHILD
-                                                         NEW-NODE))
-                                                 (CHAIN NODE PARENT-NODE
-                                                        (INSERT-BEFORE NEW-NODE
-                                                         NODE)))
-                                             (CHAIN CONTAINER
-                                                    (UNSHIFT NEW-NODE))
-                                             (CONTINUE))
-                                           (WHEN
-                                               (AND MATCH-PARTIAL
-                                                    (LENGTH CONTAINER))
-                                             (SETF (@ CONTAINER 0 DATASET
-                                                    TEMPLATE)
-                                                     (CHAIN (@ MATCH-PARTIAL 1)
-                                                            (TRIM)))
-                                             (CONTINUE))
-                                           (WHEN
-                                               (AND MATCH-CLOSE
-                                                    (EQ
-                                                     (CHAIN (@ MATCH-CLOSE 1)
-                                                            (TRIM))
-                                                     (@ LAST-OPENED 0)))
-                                             (CHAIN LAST-OPENED (SHIFT))
-                                             (CHAIN CONTAINER (SHIFT))
-                                             (CONTINUE))
-                                           (WHEN MATCH-VAR
-                                             (SETF NEW-NODE
-                                                     (CHAIN PARSE WINDOW
-                                                            DOCUMENT
-                                                            (CREATE-ELEMENT
-                                                             'SPAN))
-                                                   (@ NEW-NODE DATASET TEXT)
-                                                     (@ MATCH-VAR 1))
-                                             (CHAIN NODE PARENT-NODE
-                                                    (INSERT-BEFORE NEW-NODE
-                                                     NODE))
-                                             (CONTINUE))
-                                           (WHEN MATCH-UNESCAPED-VAR
-                                             (SETF NEW-NODE
-                                                     (CHAIN PARSE WINDOW
-                                                            DOCUMENT
-                                                            (CREATE-ELEMENT
-                                                             'SPAN))
-                                                   (@ NEW-NODE DATASET
-                                                    UNSAFE-HTML)
-                                                     (@ MATCH-UNESCAPED-VAR 1))
-                                             (CHAIN NODE PARENT-NODE
-                                                    (INSERT-BEFORE NEW-NODE
-                                                     NODE))
-                                             (CONTINUE))
-                                           (SETF NEW-NODE
-                                                   (CHAIN PARSE WINDOW DOCUMENT
-                                                          (CREATE-TEXT-NODE
-                                                           TOKEN)))
-                                           (CHAIN NODE PARENT-NODE
-                                                  (INSERT-BEFORE NEW-NODE
-                                                   NODE))))
-                                (CHAIN NODE (REMOVE)))))) */
-function processElement(element) {
-    var attributeEntries = (function () {
-        var _js1 = element.attributes;
-        var _js3 = _js1.length;
-        var collect4 = [];
-        for (var _js2 = 0; _js2 < _js3; _js2 += 1) {
-            var attribute = _js1[_js2];
-            collect4.push([attribute.name, attribute.value]);
-        };
-        
-        return collect4;
-    })();
-    var _js6 = attributeEntries.length;
-    for (var _js5 = 0; _js5 < _js6; _js5 += 1) {
-        var attribute = attributeEntries[_js5];
-        var name = attribute[0];
-        var value = attribute[1];
-        var result = value.match(VARREGEXP);
-        var trimmed = null;
-        var specialCase = 0;
-        if (!result) {
-            continue;
-        };
-        trimmed = result[1].trim();
-        if (name === 'class') {
-            element.dataset['class'] = trimmed;
-            specialCase = 1;
-        };
-        if (name === 'value') {
-            element.dataset.value = trimmed;
-            specialCase = 1;
-        };
-        if (name.startsWith('on')) {
-            element.setAttribute('data-event-' + name.slice(2), trimmed);
-            specialCase = 1;
-        };
-        if (name.startsWith('data-')) {
-            element.setAttribute(name, trimmed);
-            specialCase = 2;
-        };
-        if (!specialCase) {
-            element.setAttribute('data-attribute-' + name, trimmed);
-        };
-        if (specialCase !== 2) {
-            element.removeAttribute(name);
-        };
+     (NEW
+      (*REG-EXP
+       (+ *TAG-OPEN* #(.*?) *TAG-CLOSE* \s* *TAG-OPEN* >(.*?) *TAG-CLOSE* \s*
+          *TAG-OPEN* /(.*?) *TAG-CLOSE*)
+       gm))) */
+var PARTIALREGEXP = new RegExp(TAGOPEN + '#(.*?)' + TAGCLOSE + '\\s*' + TAGOPEN + '>(.*?)' + TAGCLOSE + '\\s*' + TAGOPEN + '/(.*?)' + TAGCLOSE, 'gm');
+/* (DEFPARAMETER *SECTION-OPEN-REGEXP*
+     (NEW (*REG-EXP (+ *TAG-OPEN* #(.*?) *TAG-CLOSE*) gm))) */
+var SECTIONOPENREGEXP = new RegExp(TAGOPEN + '#(.*?)' + TAGCLOSE, 'gm');
+/* (DEFPARAMETER *SECTION-CLOSE-REGEXP*
+     (NEW (*REG-EXP (+ *TAG-OPEN* /(.*?) *TAG-CLOSE*) gm))) */
+var SECTIONCLOSEREGEXP = new RegExp(TAGOPEN + '/(.*?)' + TAGCLOSE, 'gm');
+/* (DEFUN REPLACE-ATTR (MATCH ATTR KEY)
+     (SETF ATTR (CHAIN ATTR (TRIM))
+           KEY (CHAIN KEY (TRIM)))
+     (LET ((PREFIX attribute-))
+       (WHEN (CHAIN ATTR (STARTS-WITH on))
+         (SETF PREFIX event-
+               ATTR (CHAIN ATTR (SLICE 2))))
+       (WHEN (CHAIN ATTR (STARTS-WITH data-))
+         (SETF PREFIX
+               ATTR (CHAIN ATTR (SLICE 5))))
+       (WHEN (OR (EQ ATTR class) (EQ ATTR value)) (SETF PREFIX ))
+       (+  data- PREFIX ATTR =" KEY "))) */
+function replaceAttr(match, attr, key) {
+    attr = attr.trim();
+    key = key.trim();
+    var prefix = 'attribute-';
+    if (attr.startsWith('on')) {
+        prefix = 'event-';
+        attr = attr.slice(2);
     };
-    if (element.firstChild && element.firstChild.nodeType === parse.window.Node['TEXT_NODE']) {
-        var text = element.firstChild.nodeValue.trim();
-        var matchVar = element.textContent.match(VARREGEXP);
-        var matchUnescapedVar = element.textContent.match(UNESCAPEDVARREGEXP);
-        if (matchVar) {
-            element.dataset.text = matchVar[1];
-            element.textContent = '';
-        };
-        if (matchUnescapedVar) {
-            element.dataset.unsafeHtml = matchUnescapedVar[1];
-            element.textContent = '';
-        };
+    if (attr.startsWith('data-')) {
+        prefix = '';
+        attr = attr.slice(5);
     };
-    var nodes = Array.prototype.slice.call(element.childNodes);
-    var container = [];
-    var lastOpened = [];
-    var _js8 = nodes.length;
-    for (var _js7 = 0; _js7 < _js8; _js7 += 1) {
-        var node = nodes[_js7];
-        if (node.nodeType !== parse.window.Node['TEXT_NODE']) {
-            if (container.length) {
-                container[0].appendChild(node);
-            };
-            continue;
-        };
-        var text9 = node.nodeValue;
-        var tokens = text9.split(VARREGEXPGLOBAL).filter(function (s) {
-            return s.trim();
-        });
-        var _js11 = tokens.length;
-        for (var _js10 = 0; _js10 < _js11; _js10 += 1) {
-            var token = tokens[_js10];
-            var newNode = null;
-            var matchOpen = token.match(SECTIONOPENREGEXP);
-            var matchClose = token.match(SECTIONCLOSEREGEXP);
-            var matchPartial = token.match(PARTIALREGEXP);
-            var matchVar12 = token.match(VARREGEXP);
-            var matchUnescapedVar13 = token.match(UNESCAPEDVARREGEXP);
-            if (matchOpen) {
-                newNode = parse.window.document.createElement('slot');
-                var name14 = matchOpen[1].trim();
-                lastOpened.unshift(name14);
-                newNode.setAttribute('name', name14);
-                if (container.length) {
-                    container[0].appendChild(newNode);
-                } else {
-                    node.parentNode.insertBefore(newNode, node);
-                };
-                container.unshift(newNode);
-                continue;
-            };
-            if (matchPartial && container.length) {
-                container[0].dataset.template = matchPartial[1].trim();
-                continue;
-            };
-            if (matchClose && matchClose[1].trim() === lastOpened[0]) {
-                lastOpened.shift();
-                container.shift();
-                continue;
-            };
-            if (matchVar12) {
-                newNode = parse.window.document.createElement('span');
-                newNode.dataset.text = matchVar12[1];
-                node.parentNode.insertBefore(newNode, node);
-                continue;
-            };
-            if (matchUnescapedVar13) {
-                newNode = parse.window.document.createElement('span');
-                newNode.dataset.unsafeHtml = matchUnescapedVar13[1];
-                node.parentNode.insertBefore(newNode, node);
-                continue;
-            };
-            newNode = parse.window.document.createTextNode(token);
-            node.parentNode.insertBefore(newNode, node);
-        };
-        node.remove();
+    if (attr === 'class' || attr === 'value') {
+        prefix = '';
     };
+    return ' data-' + prefix + attr + '=\"' + key + '\"';
 };
-/* (DEFUN PARSE (TEMPLATE)
-     (WHEN (EQ (TYPEOF TEMPLATE) 'STRING)
-       (LET ((ELEMENT (CHAIN PARSE WINDOW DOCUMENT (CREATE-ELEMENT 'TEMPLATE))))
-         (SETF (@ ELEMENT INNER-H-T-M-L) TEMPLATE
-               TEMPLATE ELEMENT)))
-     (SETF (@ TEMPLATE INNER-H-T-M-L)
-             (CHAIN TEMPLATE INNER-H-T-M-L (REPLACE *COMMENT-REGEXP* )))
-     (LET* ((CONTENT (@ TEMPLATE CONTENT))
-            (TRIMMER
-             (CHAIN PARSE WINDOW DOCUMENT (CREATE-NODE-ITERATOR CONTENT 4)))
-            (ITERATOR
-             (CHAIN PARSE WINDOW DOCUMENT (CREATE-NODE-ITERATOR CONTENT 1)))
-            (CURRENT NIL))
-       (LOOP WHILE (SETF CURRENT (CHAIN TRIMMER (NEXT-NODE)))
-             DO (LET ((TRIMMED (CHAIN CURRENT NODE-VALUE (TRIM))))
-                  (WHEN (NOT TRIMMED) (CHAIN CURRENT (REMOVE)))))
-       (LOOP WHILE (SETF CURRENT (CHAIN ITERATOR (NEXT-NODE)))
-             DO (PROCESS-ELEMENT CURRENT)))
-     TEMPLATE) */
-function parse(template) {
-    if (typeof template === 'string') {
-        var element = parse.window.document.createElement('template');
-        element.innerHTML = template;
-        template = element;
+/* (DEFUN REPLACE-FREE-TEXT (MATCH KEY)
+     (LET ((ATTR text))
+       (WHEN (CHAIN MATCH (MATCH *UNESCAPED-TEXT-REGEXP*))
+         (SETF ATTR unsafe-html))
+       (+ <span data- ATTR =" (CHAIN KEY (TRIM)) "></span>))) */
+function replaceFreeText(match, key) {
+    var attr = 'text';
+    if (match.match(UNESCAPEDTEXTREGEXP)) {
+        attr = 'unsafe-html';
     };
-    template.innerHTML = template.innerHTML.replace(COMMENTREGEXP, '');
-    var content9 = template.content;
-    var trimmer = parse.window.document.createNodeIterator(content9, 4);
-    var iterator = parse.window.document.createNodeIterator(content9, 1);
-    var current = null;
-    while (current = trimmer.nextNode()) {
-        var trimmed = current.nodeValue.trim();
-        if (!trimmed) {
-            current.remove();
-        };
+    return '<span data-' + attr + '=\"' + key.trim() + '\"></span>';
+};
+/* (DEFUN REPLACE-ENCLOSED-TEXT (MATCH OPENING-TAG KEY CLOSING-TAG)
+     (LET ((ATTR text))
+       (WHEN (CHAIN MATCH (MATCH *UNESCAPED-TEXT-REGEXP*))
+         (SETF ATTR unsafe-html))
+       (+ < OPENING-TAG  data- ATTR =" (CHAIN KEY (TRIM)) "></ CLOSING-TAG >))) */
+function replaceEnclosedText(match, openingTag, key, closingTag) {
+    var attr = 'text';
+    if (match.match(UNESCAPEDTEXTREGEXP)) {
+        attr = 'unsafe-html';
     };
-    while (current = iterator.nextNode()) {
-        processElement(current);
-    };
+    return '<' + openingTag + ' data-' + attr + '=\"' + key.trim() + '\"></' + closingTag + '>';
+};
+/* (DEFUN REPLACE-PARTIAL (MATCH KEY PARTIAL)
+     (+ <slot name=" (CHAIN KEY (TRIM)) " data-template="
+        (CHAIN PARTIAL (TRIM)) "></slot>)) */
+function replacePartial(match, key, partial) {
+    return '<slot name=\"' + key.trim() + '\" data-template=\"' + partial.trim() + '\"></slot>';
+};
+/* (DEFUN REPLACE-SECTION-OPEN (MATCH KEY)
+     (+ <slot name=" (CHAIN KEY (TRIM)) ">)) */
+function replaceSectionOpen(match, key) {
+    return '<slot name=\"' + key.trim() + '\">';
+};
+/* (DEFUN REPLACE-SECTION-CLOSE (MATCH) (PROGN </slot>)) */
+function replaceSectionClose(match) {
+    return '</slot>';
+};
+/* (DEFUN PARSE-MUSTACHE (TEMPLATE)
+     (LET ((ELEMENT
+            (CHAIN PARSE-MUSTACHE WINDOW DOCUMENT (CREATE-ELEMENT 'TEMPLATE))))
+       (SETF TEMPLATE (PROCESS-MUSTACHE TEMPLATE)
+             (@ ELEMENT INNER-H-T-M-L) TEMPLATE)
+       ELEMENT)) */
+function parseMustache(template) {
+    var element = parseMustache.window.document.createElement('template');
+    template = processMustache(template);
+    element.innerHTML = template;
     
-    return template;
+    return element;
 };
-/* (SETF (@ PARSE WINDOW) WINDOW) */
-parse.window = window;
-/* (EXPORT DEFAULT PARSE) */
-export default parse;
+/* (DEFUN PROCESS-MUSTACHE (TEMPLATE)
+     (CHAIN TEMPLATE (REPLACE *COMMENT-REGEXP* )
+            (REPLACE-ALL *PARTIAL-REGEXP* REPLACE-PARTIAL)
+            (REPLACE-ALL *SECTION-OPEN-REGEXP* REPLACE-SECTION-OPEN)
+            (REPLACE-ALL *SECTION-CLOSE-REGEXP* REPLACE-SECTION-CLOSE)
+            (REPLACE-ALL *ATTR-REGEXP* REPLACE-ATTR)
+            (REPLACE-ALL *ENCLOSED-TEXT-REGEXP* REPLACE-ENCLOSED-TEXT)
+            (REPLACE-ALL *FREE-TEXT-REGEXP* REPLACE-FREE-TEXT))) */
+function processMustache(template) {
+    return template.replace(COMMENTREGEXP, '').replaceAll(PARTIALREGEXP, replacePartial).replaceAll(SECTIONOPENREGEXP, replaceSectionOpen).replaceAll(SECTIONCLOSEREGEXP, replaceSectionClose).replaceAll(ATTRREGEXP, replaceAttr).replaceAll(ENCLOSEDTEXTREGEXP, replaceEnclosedText).replaceAll(FREETEXTREGEXP, replaceFreeText);
+};
+/* (SETF (@ PARSE-MUSTACHE WINDOW) WINDOW) */
+parseMustache.window = window;
+/* (EXPORT DEFAULT PARSE-MUSTACHE NAMES (PROCESS-MUSTACHE)) */
+export { processMustache, };
+export default parseMustache;
 

@@ -194,6 +194,7 @@
           <li><a href="#performance-pitfalls">Performance pitfalls</a></li>
           <li><a href="#object-re-use">Object re-use</a></li>
           <li><a href="#computed-of-computed">Computed of computed</a></li>
+          <li><a href="#server-side-rendering">Server-side rendering</a></li>
         </ul>
       </nav>
       <main id="content">
@@ -220,7 +221,6 @@
 };
 function add(event) {
   event.preventDefault();
-  if (!this.todo) return;
   this[root].todos.unshift({
     todo: this.todo, remove });
   delete this.todo;
@@ -421,7 +421,6 @@ return state;</textarea><textarea spellcheck="false"><form onsubmit="{{ignore}}"
               <li>String interpolation is not allowed in attributes. This won&apos;t work: <code>&lt;p style="color: #{{hex}};"&gt;</code>, but this will: <code>&lt;p style="{{style}}"&gt;</code>.</li>
               <li>Dot notation is not supported. This includes: <code>{{.}}</code> and <code>{{key.nestedKey}}</code>.</li>
             </ul>
-            <p>Since the addon implements a subset of Mustache, it is generally safe to use Mustache implementations to output the same template. However, be careful about input data: event listener functions should be removed, and computed properties need to be run manually.</p>
           </div>
           <div>
           </div>
@@ -500,7 +499,7 @@ function increment(event) {
             </aside>
           </div>
           <div>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 134)">
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 138)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">const msg = "s2_is_great!";
@@ -526,6 +525,7 @@ function mountChar(node) {
     .classList.add("in");
 }
 async function unmountChar(node) {
+  if (node.nodeType !== 1) return;
   node.classList.add("out");
   await new Promise(resolve =>
     setTimeout(resolve, 500));
@@ -565,7 +565,7 @@ async function unmountChar(node) {
           <div>
           </div>
           <div>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 168)">
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 174)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">return {
@@ -583,7 +583,8 @@ async function unmountChar(node) {
   },
 };
 function animate(node) {
-  if (this.isMoving) return;
+  if (this.isMoving ||
+    node.nodeType !== 1) return;
   this.isMoving = true;
   const b1 =
     node.getBoundingClientRect();
@@ -1144,6 +1145,37 @@ return computed({
               <div>
                 <noscript>JavaScript must be enabled!</noscript>
               </div>
+            </aside>
+          </div>
+
+          <div>
+            <h2 id="server-side-rendering">Server-side rendering</h2>
+            <p>A DOM implementation is required for server-side rendering. <strong>The recommended implementation is <a href="https://github.com/WebReflection/linkedom">linkedom</a>.</strong> Since s² is designed with DOM in mind, it is safer to emulate the DOM than to pretend it does not exist.</p>
+            <p>By setting the <code>window</code> property on the default import, the entire context can be changed in runtime. This allows client-side apps to be rendered with one line of code.</p>
+            <pre>import { parseHTML } from "https://cdn.jsdelivr.net/gh/WebReflection/linkedom@latest/worker.js";
+&nbsp;
+const { window } = parseHTML(...);
+s2.window = window;</pre>
+            <p>If you are using the Mustache addon, it requires something similar.</p>
+            <pre>// For Mustache, either set window or import processMustache.
+import parseMustache, { processMustache } from "https://cdn.jsdelivr.net/gh/gr0uch/s2@latest/dist/mustache.min.mjs";
+&nbsp;
+// Option 1 (recommended approach)
+parseMustache.window = window;
+&nbsp;
+// Option 2
+const template = window.document.createElement("template");
+template.innerHTML = processMustache(...);</pre>
+            <p>To get the output of the rendered HTML page:</p>
+            <pre>window.document.toString()</pre>
+            <hr>
+          </div>
+          <div>
+            <aside>
+              <h6>Aside</h6>
+              <p>Server-side rendering with s² is simply rendering the client-side application.</p>
+              <p>One way to think about it, is to export the client-side app so that the server-side can import it and change its window.</p>
+              <p>This also means that you will have to implement APIs to set the current URL and wait for data to load before rendering.</p>
             </aside>
           </div>
         </section>

@@ -6,10 +6,8 @@ import { parseHTML } from "https://cdn.jsdelivr.net/gh/WebReflection/linkedom@la
 
 const computed = createComputed(mount, unmount);
 
-const { window, document } = parseHTML(`
-<!DOCTYPE html>
-<html></html>
-`);
+const { window } = parseHTML(`<!DOCTYPE html><html></html>`);
+const { document } = window;
 
 s2.window = parseMustache.window = window;
 // s2.debug = true;
@@ -29,38 +27,26 @@ const obj = {
     }),
 };
 
-// TODO: currently, linkedom doesn't play well with the mustache parser
-// const template = parseMustache(`
-// <div
-//   foo="{{foo}}"
-// >
-//   wtf {{yo}}
-//   {{#comp}}
-//     wololo
-//     {{y}}
-//     {{x}}
-//   {{/comp}}
-// </div>
-// `);
-
-const template = document.createElement("div");
-template.innerHTML = `
-<div data-foo="foo">
-  wtf <span data-text="yo"></span>
-  <slot name="comp" data-template="comp"></slot>
+const template = parseMustache(`
+<div
+  foo="{{foo}}"
+>
+  {{!lol}}
+  wtf <b>{{{yo}}}</b>
+  {{#ayy}}
+    {{>lmao}}
+  {{/ayy}}
+  {{!kek}}
+  {{#comp}}
+    wololo
+    {{{y}}}
+    {{x}}
+  {{/comp}}
 </div>
-`;
-
-const comp = document.createElement("div");
-comp.innerHTML = `
-wololo
-<span data-text="y"></span>
-<span data-text="x"></span>
-`;
-
-registerTemplate("comp", comp);
+`);
 
 const [proxy, fragment] = s2(obj, template);
 
 document.body.appendChild(fragment);
+
 console.log(document.toString());

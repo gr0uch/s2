@@ -8,11 +8,23 @@ const template = document.querySelector("#root");
 const [reactiveObject, node] = s2({
     add(event) {
         event.preventDefault();
-        this.things.push({ asdf: "asdf" });
+        for (let i = 0; i < 1000; i++) {
+            this.things.push({ asdf: "asdf" });
+        }
     },
     remove(event) {
         event.preventDefault();
         this.things.pop();
+    },
+    update(event) {
+        event.preventDefault();
+        for (let i = 0; i < this.things.length; i++) {
+            this.things[i].asdf = "jkl";
+        }
+    },
+    clear(event) {
+        event.preventDefault();
+        this.things = [];
     },
     things: [],
 }, template);
@@ -23,6 +35,8 @@ document.body.appendChild(node);
 <template id="root">
   <button data-event-click="add">add</button>
   <button data-event-click="remove">remove</button>
+  <button data-event-click="update">update</button>
+  <button data-event-click="clear">clear</button>
   <slot name="things">
     <div data-text="asdf"></div>
   </slot>
