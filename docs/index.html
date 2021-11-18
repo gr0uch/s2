@@ -1105,25 +1105,26 @@ return {
           <div>
           </div>
           <div>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 108)">
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 112)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">const data = observable({
   number: 1,
 });
+
+computed({
+  calcDouble() {
+    data.x2 = data.number * 2;
+  },
+  calcQuadruple() {
+    data.x4 = data.x2 * 2;
+  }
+})[mount]();
+
 return computed({
-  internal: observable(),
-  number() {
-    return data.number;
-  },
-  double() {
-    const x = data.number * 2;
-    this.internal.double = x;
-    return x;
-  },
-  quadruple() {
-    return this.internal.double * 2;
-  },
+  number: () => data.number,
+  double: () => data.x2,
+  quadruple: () => data.x4,
   increment(event) {
     event.preventDefault();
     data.number++;
@@ -1146,6 +1147,12 @@ return computed({
                 <noscript>JavaScript must be enabled!</noscript>
               </div>
             </aside>
+          </div>
+          <div>
+            <p>Note that this pattern should be implemented in a way that is UI agnostic. If computed of computed is used in UI, then it depends on the UI being rendered to function. It should be done in a computed object that is <strong>not</strong> mounted, and its <code>mount</code> method should be called manually.</p>
+            <hr>
+          </div>
+          <div>
           </div>
 
           <div>
