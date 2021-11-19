@@ -146,4 +146,7 @@
 
 (export :names
         ((create-source observable)
+         (*proxy-observable* observable-traps)
+         ;; TODO: the `create-source` should probably be deprecated in favor
+         ;; of `observable`.
          create-source create-computed))

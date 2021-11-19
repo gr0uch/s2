@@ -82,9 +82,9 @@ function setProperty(target, key, value, receiver) {
         return true;
     };
     keyBindings = context[key] || [];
-    var _js2 = keyBindings.length;
-    for (var _js1 = 0; _js1 < _js2; _js1 += 1) {
-        var keyBinding = keyBindings[_js1];
+    var _js6 = keyBindings.length;
+    for (var _js5 = 0; _js5 < _js6; _js5 += 1) {
+        var keyBinding = keyBindings[_js5];
         var obj = keyBinding[0];
         var objKey = keyBinding[1];
         var fn = keyBinding[2];
@@ -209,9 +209,9 @@ function unmountObject(obj) {
     if (!observables) {
         return;
     };
-    var _js4 = observables.length;
-    for (var _js3 = 0; _js3 < _js4; _js3 += 1) {
-        var observable = observables[_js3];
+    var _js8 = observables.length;
+    for (var _js7 = 0; _js7 < _js8; _js7 += 1) {
+        var observable = observables[_js7];
         var context = OBSERVABLECONTEXTMAP.get(observable);
         for (var key in context) {
             var keyBindings = context[key];
@@ -261,6 +261,8 @@ function createComputed(mountSymbol, unmountSymbol) {
     };
     return computed;
 };
-/* (EXPORT NAMES ((CREATE-SOURCE OBSERVABLE) CREATE-SOURCE CREATE-COMPUTED)) */
-export { createSource as observable, createSource, createComputed, };
+/* (EXPORT NAMES
+           ((CREATE-SOURCE OBSERVABLE) (*PROXY-OBSERVABLE* OBSERVABLE-TRAPS)
+            CREATE-SOURCE CREATE-COMPUTED)) */
+export { createSource as observable, PROXYOBSERVABLE as observableTraps, createSource, createComputed, };
 
