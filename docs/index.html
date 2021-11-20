@@ -87,9 +87,9 @@
       #content > section code { background: var(--c-a2); border-radius: calc(1rem * var(--u)); padding: 0 calc(1rem * var(--u)); }
       #content > section pre code { background: inherit; border-radius: inherit; }
       .tagline { color: var(--c-fg3); font-size: var(--h3); padding-top: calc(1rem * var(--u) * 2); }
-      .params { position: relative; z-index: 0; margin: calc(1rem * var(--u) * 20) calc((100% * -3 / 7) - 1rem * var(--u) * 0) calc(1rem * var(--u) * -22) 0; font-size: calc(1rem * var(--u) * 5); line-height: calc(1rem * var(--u) * 10); border-radius: calc(1rem * var(--u)); color: var(--c-l); padding: calc(1rem * var(--u) * 0) calc(1rem * var(--u) * 16) calc(1rem * var(--u) * 38) 0; }
-      .params b { display: inline-block; width: calc(1rem * var(--u) * 24); }
-      .params i { display: inline-block; margin-right: calc(1rem * var(--u) * 2); }
+      .params { position: relative; z-index: 0; margin: calc(1rem * var(--u) * 20) 0 calc(1rem * var(--u) * 18) 0; font-size: calc(1rem * var(--u) * 5); line-height: calc(1rem * var(--u) * 10); border-radius: calc(1rem * var(--u)); color: var(--c-l); }
+      .params b { display: inline-block; width: calc(1rem * var(--u) * 20); }
+      .params i { display: inline-block; margin: 0 calc(1rem * var(--u) * 2); }
       .params code { background: none !important; text-decoration: underline; font-size: inherit; }
 
       /* examples */
@@ -259,8 +259,9 @@ function remove() {
         <section>
           <div>
             <h2 id="rationale">Rationale</h2>
-            <p>A single function is capable of expressing the most complex web applications. <em>s²</em> has a few design goals:</p>
+            <p><em>s²</em> is a single function capable of expressing the most complex web applications. It enables the user to think of the front-end entirely in terms of state, rather than mixing logic in with the presentation layer (templates, components). <em>s²</em> has a few design goals:</p>
             <ul>
+              <li>Enable separation of application logic from the presentation layer. For example, unlike React which combines hooks, templates (JSX), and arbitrary code in a render function, <em>s²</em> has data, functions that operate on the data, and declarative templates.</li>
               <li>The only required API is its main function. Advanced features such as computed properties are implemented as addons.</li>
               <li>Templates are logic-less. This differs from prior art such as JSX where embedded JavaScript is allowed. Due to this constraint, logic-less templating maps well to <em>s²</em>, and there is an addon for <a href="#mustache-templates">Mustache templates</a> that is aware of HTML context.</li>
             </ul>
@@ -292,7 +293,7 @@ import parseMustache from "https://cdn.jsdelivr.net/gh/gr0uch/s2@latest/dist/mus
 &nbsp;
 // Computed properties implementation.
 import {
-  observable, createComputed,
+  observable, createComputed, observableTraps,
 } from "https://cdn.jsdelivr.net/gh/gr0uch/s2@latest/dist/computed-properties.min.mjs";</pre>
           </div>
           <div>
