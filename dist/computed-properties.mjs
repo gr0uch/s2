@@ -261,8 +261,6 @@ function createComputed(mountSymbol, unmountSymbol) {
     };
     return computed;
 };
-/* (EXPORT NAMES
-           ((CREATE-SOURCE OBSERVABLE) (*PROXY-OBSERVABLE* OBSERVABLE-TRAPS)
-            CREATE-SOURCE CREATE-COMPUTED)) */
-export { createSource as observable, PROXYOBSERVABLE as observableTraps, createSource, createComputed, };
+/* (EXPORT NAMES ((CREATE-SOURCE OBSERVABLE) CREATE-SOURCE CREATE-COMPUTED)) */
+export { createSource as observable, createSource, createComputed, };
 

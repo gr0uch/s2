@@ -293,7 +293,7 @@ import parseMustache from "https://cdn.jsdelivr.net/gh/gr0uch/s2@latest/dist/mus
 &nbsp;
 // Computed properties implementation.
 import {
-  observable, createComputed, observableTraps,
+  observable, createComputed,
 } from "https://cdn.jsdelivr.net/gh/gr0uch/s2@latest/dist/computed-properties.min.mjs";</pre>
           </div>
           <div>
@@ -763,7 +763,6 @@ return {
           </div>
           <div>
             <p>Note that in the above example, multiple observable objects are used due to the limitation that observable objects can only keep track of keys that are one-level deep.</p>
-            <p><strong>Advanced usage</strong>: there is an <code>observableTraps</code> export, if you want to combine the observable with your own Proxy.</p>
             <hr>
           </div>
           <div>
