@@ -289,7 +289,7 @@ function remove() {
 } from "https://cdn.jsdelivr.net/gh/gr0uch/s2@latest/dist/main.min.mjs";</pre>
             <p>Optional addons are as follows:</p>
             <pre>// Parse a subset of Mustache for templating.
-import parseMustache from "https://cdn.jsdelivr.net/gh/gr0uch/s2@latest/dist/mustache.min.mjs";
+import parseMustache, { createMustacheTag } from "https://cdn.jsdelivr.net/gh/gr0uch/s2@latest/dist/mustache.min.mjs";
 &nbsp;
 // Computed properties implementation.
 import {
@@ -480,6 +480,11 @@ function increment(event) {
           </div>
           <div>
             <p>This provides an abstraction for template re-use. However, what it does not provide is &ldquo;components&rdquo; in any sense. <em>s²</em> stays agnostic about <a href="https://developer.mozilla.org/en-US/docs/Web/Web_Components">Web Components</a>, or even implementing its own concept of components in general. It is entirely feasible to build Web Components using <em>s²</em> without any conceptual mismatch.</p>
+            <p>For improved ergonomics, there is the <code>createMustacheTag</code> function, which will allow one to re-use templates without naming them, and also interpolate templates in tagged template literals.</p>
+            <pre>const mustache = createMustacheTag(registerTemplate);
+const name = mustache`{{firstName}} {{lastName}}`;
+const greeting = mustache`Hello {{#person}}${name}{{/person}}!`;</pre>
+            <p>In the above example, <em>name</em> will be a separate template which is referred to by <em>greeting</em>, they are connected by an internal hash.</p>
           </div>
           <div>
           </div>

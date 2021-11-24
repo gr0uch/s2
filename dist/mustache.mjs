@@ -36,6 +36,8 @@ var SECTIONOPENREGEXP = new RegExp(TAGOPEN + '#(.*?)' + TAGCLOSE, 'gm');
 /* (DEFPARAMETER *SECTION-CLOSE-REGEXP*
      (NEW (*REG-EXP (+ *TAG-OPEN* /(.*?) *TAG-CLOSE*) gm))) */
 var SECTIONCLOSEREGEXP = new RegExp(TAGOPEN + '/(.*?)' + TAGCLOSE, 'gm');
+/* (DEFPARAMETER *TEMPLATE-HASH-MAP* (NEW (*WEAK-MAP))) */
+var TEMPLATEHASHMAP = new WeakMap();
 /* (DEFUN REPLACE-ATTR (MATCH ATTR KEY)
      (SETF ATTR (CHAIN ATTR (TRIM))
            KEY (CHAIN KEY (TRIM)))
@@ -104,6 +106,22 @@ function replaceSectionOpen(match, key) {
 function replaceSectionClose(match) {
     return '</slot>';
 };
+/* (DEFUN HASH-STR (STR)
+     (LET ((I -1) (H 2))
+       (LOOP WHILE (< I (1- (LENGTH STR)))
+             DO (SETF H
+                        (ASH (+ (* 3 H) (CHAIN STR (CHAR-CODE-AT (INCF I))))
+                             0)))
+       (ABS H))) */
+function hashStr(str) {
+    var i = -1;
+    var h = 2;
+    while (i < str.length - 1) {
+        h = 3 * h + str.charCodeAt(++i) >> 0;
+    };
+    
+    return Math.abs(h);
+};
 /* (DEFUN PARSE-MUSTACHE (TEMPLATE)
      (LET ((ELEMENT
             (CHAIN PARSE-MUSTACHE WINDOW DOCUMENT (CREATE-ELEMENT 'TEMPLATE))))
@@ -128,9 +146,59 @@ function parseMustache(template) {
 function processMustache(template) {
     return template.replace(COMMENTREGEXP, '').replaceAll(PARTIALREGEXP, replacePartial).replaceAll(SECTIONOPENREGEXP, replaceSectionOpen).replaceAll(SECTIONCLOSEREGEXP, replaceSectionClose).replaceAll(ATTRREGEXP, replaceAttr).replaceAll(ENCLOSEDTEXTREGEXP, replaceEnclosedText).replaceAll(FREETEXTREGEXP, replaceFreeText);
 };
+/* (DEFUN CREATE-MUSTACHE-TAG (REGISTER-TEMPLATE)
+     (DEFUN TAGGED-MUSTACHE (STRS)
+       (LET ((RESULT (LIST (ELT STRS 0)))
+             (ARGS
+              (CHAIN *ARRAY PROTOTYPE SLICE (CALL ARGUMENTS 1)
+                     (MAP
+                      (LAMBDA (ELEMENT)
+                        (CHAIN *TEMPLATE-HASH-MAP* (GET ELEMENT))))))
+             (ELEMENT NIL)
+             (HASH NIL))
+         (LOOP FOR HASH IN ARGS
+               FOR I FROM 1 TO (LENGTH STRS)
+               DO (CHAIN RESULT (PUSH (+ {{> HASH }}) (ELT STRS I))))
+         (SETF RESULT (CHAIN RESULT (JOIN ))
+               ELEMENT (PARSE-MUSTACHE RESULT)
+               HASH (+ template (HASH-STR RESULT)))
+         (CHAIN *TEMPLATE-HASH-MAP* (SET ELEMENT HASH))
+         (REGISTER-TEMPLATE HASH ELEMENT)
+         ELEMENT))
+     TAGGED-MUSTACHE) */
+function createMustacheTag(registerTemplate) {
+    function taggedMustache(strs) {
+        var result = [strs[0]];
+        var args = Array.prototype.slice.call(arguments, 1).map(function (element) {
+            return TEMPLATEHASHMAP.get(element);
+        });
+        var element1 = null;
+        var hash = null;
+        var _js3 = args.length;
+        var _js4 = strs.length;
+        var FIRST5 = true;
+        for (var _js2 = 0; _js2 < _js3; _js2 += 1) {
+            var hash6 = args[_js2];
+            var i = FIRST5 ? 1 : i + 1;
+            if (i > _js4) {
+                break;
+            };
+            result.push('{{>' + hash6 + '}}', strs[i]);
+            FIRST5 = null;
+        };
+        result = result.join('');
+        element1 = parseMustache(result);
+        hash = 'template' + hashStr(result);
+        TEMPLATEHASHMAP.set(element1, hash);
+        registerTemplate(hash, element1);
+        
+        return element1;
+    };
+    return taggedMustache;
+};
 /* (SETF (@ PARSE-MUSTACHE WINDOW) WINDOW) */
 parseMustache.window = window;
-/* (EXPORT DEFAULT PARSE-MUSTACHE NAMES (PROCESS-MUSTACHE)) */
-export { processMustache, };
+/* (EXPORT DEFAULT PARSE-MUSTACHE NAMES (PROCESS-MUSTACHE CREATE-MUSTACHE-TAG)) */
+export { processMustache, createMustacheTag, };
 export default parseMustache;
 

@@ -1,6 +1,6 @@
 import s2, { mount, unmount, move, registerTemplate } from "../dist/main.mjs";
 import depCheck from "../dist/dep-check.mjs";
-import parseMustache from "../dist/mustache.mjs";
+import parseMustache, { createMustacheTag } from "../dist/mustache.mjs";
 import { observable, createComputed } from "../dist/computed-properties.mjs";
 import test from "./runner.mjs";
 
@@ -37,8 +37,8 @@ const mustacheStr = `
   {{{danger}}}
 </div>
 `;
-const mustache = parseMustache(mustacheStr);
-registerTemplate('must', mustache);
+const mustacheTmpl = parseMustache(mustacheStr);
+registerTemplate('must', mustacheTmpl);
 
 import('https://unpkg.com/mustache@4.2.0/mustache.mjs').then(mod => {
   const { default: Mustache } = mod;
@@ -62,8 +62,18 @@ import('https://unpkg.com/mustache@4.2.0/mustache.mjs').then(mod => {
   const div = document.createElement('div');
   div.appendChild(fragment);
   console.log('^^ mustache', output);
-  console.log('^^ s2', div.innerHTML, mustache);
+  console.log('^^ s2', div.innerHTML, mustacheTmpl);
 });
+
+(() => {
+  const mustache = createMustacheTag(registerTemplate);
+  const p1 = mustache`{{a}} {{b}}`;
+  const p2 = mustache`tagged template {{#name}}${p1}{{/name}}`;
+  const [_, fragment] = s2({ name: { a: "a", b: "b" } }, p2);
+  const div = document.createElement('div');
+  div.appendChild(fragment);
+  console.log(div.innerHTML);
+})();
 
 const initialThings = [
   { text: 'a', [move]: moveThing },

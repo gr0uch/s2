@@ -28,6 +28,8 @@
 (defparameter *section-close-regexp*
   (new (*reg-exp (+ *tag-open* "\/(.*?)" *tag-close*) "gm")))
 
+(defparameter *template-hash-map* (new (*weak-map)))
+
 (defun replace-attr (match attr key)
   (setf attr (chain attr (trim))
         key (chain key (trim)))
@@ -66,6 +68,13 @@
 (defun replace-section-close (match)
   (progn "</slot>"))
 
+(defun hash-str (str)
+  (let ((i -1)
+        (h 2))
+    (loop while (< i (1- (length str))) do
+          (setf h (ash (+ (* 3 h) (chain str (char-code-at (incf i)))) 0)))
+    (abs h)))
+
 (defun parse-mustache (template)
   (let ((element (chain parse-mustache window document
                         (create-element 'template))))
@@ -89,7 +98,28 @@
    (replace-all *enclosed-text-regexp* replace-enclosed-text)
    (replace-all *free-text-regexp* replace-free-text)))
 
+(defun create-mustache-tag (register-template)
+  (defun tagged-mustache (strs)
+    (let ((result (list (elt strs 0)))
+          (args (chain *array prototype slice
+                       (call arguments 1)
+                       (map (lambda (element)
+                              (chain *template-hash-map* (get element))))))
+          (element nil)
+          (hash nil))
+      (loop for hash in args
+            for i from 1 to (length strs) do
+            (chain result (push (+ "{{>" hash "}}") (elt strs i))))
+      (setf result (chain result (join ""))
+            element (parse-mustache result)
+            hash (+ "template" (hash-str result)))
+      (chain *template-hash-map* (set element hash))
+      (register-template hash element)
+      element))
+  tagged-mustache)
+
 (setf (@ parse-mustache window) window)
 
 (export :default parse-mustache
-        :names (process-mustache))
+        :names (process-mustache
+                create-mustache-tag))
