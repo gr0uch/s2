@@ -28,6 +28,7 @@
     ((*symbol) function)
     ((*reflect) object)
     ((*weak-map) function)
+    ((*weak-set) function)
     ((*proxy) function)))
 
 (defun dep-check ()

@@ -325,15 +325,18 @@
                        (then (lambda () (chain old-node (remove)))))
               (chain old-node (remove)))))
     (chain end-node (remove)))
-  (recursive-unmount self))
+  (recursive-unmount self false (new (*weak-set))))
 
 
-(defun recursive-unmount (self should-unmount)
+(defun recursive-unmount (self should-unmount cycle-set)
+  (chain cycle-set (add self))
   (loop
    for key of self do
    (let ((value (getprop self key)))
-     (when (and (eq (typeof value) 'object) (not (eq value nil)))
-       (recursive-unmount value t))))
+     (when (and (eq (typeof value) 'object)
+                (not (eq value nil))
+                (not (chain cycle-set (has value))))
+       (recursive-unmount value t cycle-set))))
   (when should-unmount
     (let ((unmount (chain *proxy-unmount-map* (get self))))
       (when unmount (chain unmount (call self))))))
