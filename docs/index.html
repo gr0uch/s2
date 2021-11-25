@@ -209,6 +209,28 @@
             <hr>
           </div>
           <div></div>
+        </section>
+
+        <section>
+          <div>
+            <h2 id="rationale">Rationale</h2>
+            <p><em>s²</em> is a single function capable of expressing the most complex web applications. It enables the user to think of the front-end entirely in terms of state, rather than mixing logic in with the presentation layer (templates, components). <em>s²</em> has a few design goals:</p>
+            <ul>
+              <li>Enable separation of application logic from the presentation layer. For example, unlike React which combines hooks, templates (JSX), and arbitrary code in a render function, <em>s²</em> has data, functions that operate on the data, and declarative templates.</li>
+              <li>The only required API is its main function. Advanced features such as computed properties are implemented as addons.</li>
+              <li>Templates are logic-less. This differs from prior art such as JSX where embedded JavaScript is allowed. Due to this constraint, logic-less templating maps well to <em>s²</em>, and there is an addon for <a href="#mustache-templates">Mustache templates</a> that is aware of HTML context.</li>
+            </ul>
+            <p>Here is a sample to-do app built with <em>s²</em>:</p>
+            <hr>
+          </div>
+          <div>
+            <aside>
+              <h6>Aside</h6>
+              <p><em>s²</em> is tiny in size (~3kb), and implements comparatively little compared to JS frameworks.</p>
+              <p>The intended use case is for highly interactive UI that needs to re-render often.</p>
+              <p>It <a href="https://krausest.github.io/js-framework-benchmark/current.html">performs well</a> in benchmarks.</p>
+            </aside>
+          </div>
           <div>
             <div class="live-example primary code" style="min-height: calc(1rem * var(--u) * 72)">
               <h6>JavaScript</h6>
@@ -254,29 +276,12 @@ function remove() {
               </div>
             </aside>
           </div>
-        </section>
-
-        <section>
           <div>
-            <h2 id="rationale">Rationale</h2>
-            <p><em>s²</em> is a single function capable of expressing the most complex web applications. It enables the user to think of the front-end entirely in terms of state, rather than mixing logic in with the presentation layer (templates, components). <em>s²</em> has a few design goals:</p>
-            <ul>
-              <li>Enable separation of application logic from the presentation layer. For example, unlike React which combines hooks, templates (JSX), and arbitrary code in a render function, <em>s²</em> has data, functions that operate on the data, and declarative templates.</li>
-              <li>The only required API is its main function. Advanced features such as computed properties are implemented as addons.</li>
-              <li>Templates are logic-less. This differs from prior art such as JSX where embedded JavaScript is allowed. Due to this constraint, logic-less templating maps well to <em>s²</em>, and there is an addon for <a href="#mustache-templates">Mustache templates</a> that is aware of HTML context.</li>
-            </ul>
             <p>Its design is influenced by this quote:</p>
             <blockquote>Even the simplest procedural logic is hard for humans to verify, but quite complex data structures are fairly easy to model and reason about... Data is more tractable than program logic. It follows that where you see a choice between complexity in data structures and complexity in code, choose the former. More: in evolving a design, you should actively seek ways to shift complexity from code to data.</blockquote>
             <p>— Eric S. Raymond, <cite><a href="http://www.catb.org/~esr/writings/taoup/html/ch01s06.html">Basics of the Unix Philosophy</a></cite></p>
           </div>
-          <div>
-            <aside>
-              <h6>Aside</h6>
-              <p><em>s²</em> is tiny in size (~3kb), and implements comparatively little compared to JS frameworks.</p>
-              <p>The intended use case is for highly interactive UI that needs to re-render often.</p>
-              <p>It <a href="https://krausest.github.io/js-framework-benchmark/current.html">performs well</a> in benchmarks.</p>
-            </aside>
-          </div>
+          <div></div>
 
           <div>
             <h2 id="import-the-module">Import the module</h2>

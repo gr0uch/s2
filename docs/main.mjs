@@ -1259,7 +1259,7 @@ main.window = window;
 /* (EXPORT DEFAULT MAIN NAMES
            ((*SYMBOL-MOUNT* MOUNT) (*SYMBOL-UNMOUNT* UNMOUNT)
             (*SYMBOL-MOVE* MOVE) (*SYMBOL-ROOT* ROOT) (*SYMBOL-TARGET* TARGET)
-            (REGISTER-TEMPLATE REGISTER-TEMPLATE))) */
-export { SYMBOLMOUNT as mount, SYMBOLUNMOUNT as unmount, SYMBOLMOVE as move, SYMBOLROOT as root, SYMBOLTARGET as target, registerTemplate as registerTemplate, };
+            REGISTER-TEMPLATE)) */
+export { SYMBOLMOUNT as mount, SYMBOLUNMOUNT as unmount, SYMBOLMOVE as move, SYMBOLROOT as root, SYMBOLTARGET as target, registerTemplate, };
 export default main;
 

@@ -716,4 +716,4 @@
          (*symbol-move* move)
          (*symbol-root* root)
          (*symbol-target* target)
-         (register-template register-template)))
+         register-template))
