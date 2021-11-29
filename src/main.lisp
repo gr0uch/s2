@@ -325,7 +325,8 @@
                        (then (lambda () (chain old-node (remove)))))
               (chain old-node (remove)))))
     (chain end-node (remove)))
-  (recursive-unmount self false (new (*weak-set))))
+  (when self (recursive-unmount self false (new (*weak-set))))
+  nil)
 
 
 (defun recursive-unmount (self should-unmount cycle-set)

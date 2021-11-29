@@ -581,7 +581,8 @@ function setClass(node, name, value) {
                              (THEN (LAMBDA () (CHAIN OLD-NODE (REMOVE)))))
                       (CHAIN OLD-NODE (REMOVE)))))
        (CHAIN END-NODE (REMOVE)))
-     (RECURSIVE-UNMOUNT SELF FALSE (NEW (*WEAK-SET)))) */
+     (WHEN SELF (RECURSIVE-UNMOUNT SELF FALSE (NEW (*WEAK-SET))))
+     NIL) */
 function removeBetweenDelimiters(startNode, endNode, unmount, self) {
     var node = startNode;
     var firstNode = node;
@@ -597,8 +598,11 @@ function removeBetweenDelimiters(startNode, endNode, unmount, self) {
         })();
     };
     endNode.remove();
+    if (self) {
+        recursiveUnmount(self, false, new WeakSet());
+    };
     
-    return recursiveUnmount(self, false, new WeakSet());
+    return null;
 };
 /* (DEFUN RECURSIVE-UNMOUNT (SELF SHOULD-UNMOUNT CYCLE-SET)
      (CHAIN CYCLE-SET (ADD SELF))
