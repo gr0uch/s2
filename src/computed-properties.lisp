@@ -29,10 +29,16 @@
 ;; By coordinating the function calls with the get trap, we can correlate
 ;; computed properties to their observables.
 (defun get-property (target key receiver)
-  (chain *read-stack* (push (list target key)))
-  ;; Prevent possible memory leaks from reading.
-  (when (not *clear-stack-timeout*)
-    (setf *clear-stack-timeout* (set-timeout clear-stack 0)))
+  ;; Qualifying if a key has already been read or not means we don't have to
+  ;; re-compute when the same key is read multiple times.
+  (when (not (chain *read-stack*
+                    (find (lambda (tuple)
+                            (and (eq (elt tuple 0) target)
+                                 (eq (elt tuple 1) key))))))
+    (chain *read-stack* (push (list target key)))
+    ;; Prevent possible memory leaks from reading.
+    (when (not *clear-stack-timeout*)
+      (setf *clear-stack-timeout* (set-timeout clear-stack 0))))
   (chain *reflect (get target key receiver)))
 
 

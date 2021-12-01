@@ -39,14 +39,24 @@ function popStack() {
     };
 };
 /* (DEFUN GET-PROPERTY (TARGET KEY RECEIVER)
-     (CHAIN *READ-STACK* (PUSH (LIST TARGET KEY)))
-     (WHEN (NOT *CLEAR-STACK-TIMEOUT*)
-       (SETF *CLEAR-STACK-TIMEOUT* (SET-TIMEOUT CLEAR-STACK 0)))
+     (WHEN
+         (NOT
+          (CHAIN *READ-STACK*
+                 (FIND
+                  (LAMBDA (TUPLE)
+                    (AND (EQ (ELT TUPLE 0) TARGET) (EQ (ELT TUPLE 1) KEY))))))
+       (CHAIN *READ-STACK* (PUSH (LIST TARGET KEY)))
+       (WHEN (NOT *CLEAR-STACK-TIMEOUT*)
+         (SETF *CLEAR-STACK-TIMEOUT* (SET-TIMEOUT CLEAR-STACK 0))))
      (CHAIN *REFLECT (GET TARGET KEY RECEIVER))) */
 function getProperty(target, key, receiver) {
-    READSTACK.push([target, key]);
-    if (!CLEARSTACKTIMEOUT) {
-        CLEARSTACKTIMEOUT = setTimeout(clearStack, 0);
+    if (!READSTACK.find(function (tuple) {
+        return tuple[0] === target && tuple[1] === key;
+    })) {
+        READSTACK.push([target, key]);
+        if (!CLEARSTACKTIMEOUT) {
+            CLEARSTACKTIMEOUT = setTimeout(clearStack, 0);
+        };
     };
     
     return Reflect.get(target, key, receiver);
