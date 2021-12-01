@@ -705,9 +705,10 @@
     (setf template (getprop *templates-hash* template)))
   (create-binding origin template))
 
+
 (setf (@ main debug) (not t)
       (@ main is-deferred) (not t)
-      (@ main window) window)
+      (@ main window) (if (not (eq (typeof window) 'undefined)) window nil))
 
 
 (export

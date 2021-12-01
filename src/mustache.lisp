@@ -118,7 +118,8 @@
       element))
   tagged-mustache)
 
-(setf (@ parse-mustache window) window)
+(setf (@ parse-mustache window)
+      (if (not (eq (typeof window) 'undefined)) window nil))
 
 (export :default parse-mustache
         :names (process-mustache
