@@ -2,10 +2,29 @@
 <meta charset="utf-8">
 <title>s2 sandbox</title>
 <script type="module">
-import s2 from "../dist/main.mjs";
+import s2, { mount, unmount } from "../dist/main.mjs";
+import { createComputed, observable } from "../dist/computed-properties.mjs";
+
+const computed = createComputed(mount, unmount);
+
+const s = observable({
+  thing1: 1,
+  thing2: 1,
+  n: {
+    v: "a",
+  },
+}, true);
+
+window.s = s;
+
+// computed({
+//   calcThing() {
+//     s.thing3 = s.thing1 + s.thing2;
+//   }
+// })[mount]();
 
 const template = document.querySelector("#root");
-const [reactiveObject, node] = s2({
+const [reactiveObject, node] = s2(computed({
     add(event) {
         event.preventDefault();
         for (let i = 0; i < 1000; i++) {
@@ -27,7 +46,10 @@ const [reactiveObject, node] = s2({
         this.things = [];
     },
     things: [],
-}, template);
+    reader() {
+      return s.n.v;
+    },
+}), template);
 
 document.body.appendChild(node);
 </script>
@@ -40,4 +62,5 @@ document.body.appendChild(node);
   <slot name="things">
     <div data-text="asdf"></div>
   </slot>
+  <div data-text="reader"></div>
 </template>

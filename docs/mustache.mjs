@@ -172,27 +172,27 @@ function createMustacheTag(registerTemplate) {
         var args = Array.prototype.slice.call(arguments, 1).map(function (element) {
             return TEMPLATEHASHMAP.get(element);
         });
-        var element5 = null;
+        var element1 = null;
         var hash = null;
-        var _js7 = args.length;
-        var _js8 = strs.length;
-        var FIRST9 = true;
-        for (var _js6 = 0; _js6 < _js7; _js6 += 1) {
-            var hash10 = args[_js6];
-            var i = FIRST9 ? 1 : i + 1;
-            if (i > _js8) {
+        var _js3 = args.length;
+        var _js4 = strs.length;
+        var FIRST5 = true;
+        for (var _js2 = 0; _js2 < _js3; _js2 += 1) {
+            var hash6 = args[_js2];
+            var i = FIRST5 ? 1 : i + 1;
+            if (i > _js4) {
                 break;
             };
-            result.push('{{>' + hash10 + '}}', strs[i]);
-            FIRST9 = null;
+            result.push('{{>' + hash6 + '}}', strs[i]);
+            FIRST5 = null;
         };
         result = result.join('');
-        element5 = parseMustache(result);
+        element1 = parseMustache(result);
         hash = 'template' + hashStr(result);
-        TEMPLATEHASHMAP.set(element5, hash);
-        registerTemplate(hash, element5);
+        TEMPLATEHASHMAP.set(element1, hash);
+        registerTemplate(hash, element1);
         
-        return element5;
+        return element1;
     };
     return taggedMustache;
 };

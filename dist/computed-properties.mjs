@@ -12,11 +12,27 @@ var CLEARSTACKTIMEOUT = null;
 /* (DEFPARAMETER *STACK-DELIMITER-SYMBOL* (*SYMBOL 'STACK-DELIMITER)) */
 var STACKDELIMITERSYMBOL = Symbol('stackDelimiter');
 /* (DEFPARAMETER *PROXY-OBSERVABLE*
-     (CREATE GET GET-PROPERTY SET SET-PROPERTY DELETE-PROPERTY SET-PROPERTY)) */
-var PROXYOBSERVABLE = { get : getProperty,
-                        set : setProperty,
-                        deleteProperty : setProperty
-                      };
+     (LET ((SET-PROPERTY (MAKE-SET-PROPERTY)))
+       (CREATE GET GET-PROPERTY SET SET-PROPERTY DELETE-PROPERTY SET-PROPERTY))) */
+var PROXYOBSERVABLE = (function () {
+    var setProperty = makeSetProperty();
+    
+    return { get : getProperty,
+             set : setProperty,
+             deleteProperty : setProperty
+           };
+})();
+/* (DEFPARAMETER *PROXY-DEEP-OBSERVABLE*
+     (LET ((SET-PROPERTY (MAKE-SET-PROPERTY T)))
+       (CREATE GET GET-PROPERTY SET SET-PROPERTY DELETE-PROPERTY SET-PROPERTY))) */
+var PROXYDEEPOBSERVABLE = (function () {
+    var setProperty = makeSetProperty(true);
+    
+    return { get : getProperty,
+             set : setProperty,
+             deleteProperty : setProperty
+           };
+})();
 /* (DEFUN CLEAR-STACK ()
      (SETF *CLEAR-STACK-TIMEOUT* NIL)
      (LOOP WHILE (LENGTH *READ-STACK*)
@@ -61,53 +77,128 @@ function getProperty(target, key, receiver) {
     
     return Reflect.get(target, key, receiver);
 };
-/* (DEFUN SET-PROPERTY (TARGET KEY VALUE RECEIVER)
-     (WHEN (EQ (GETPROP TARGET KEY) VALUE) (RETURN-FROM SET-PROPERTY T))
-     (IF (NOT (EQ VALUE UNDEFINED))
-         (CHAIN *REFLECT (SET TARGET KEY VALUE RECEIVER))
-         (CHAIN *REFLECT (DELETE-PROPERTY TARGET KEY)))
-     (LET ((CONTEXT (CHAIN *OBSERVABLE-CONTEXT-MAP* (GET TARGET)))
-           (KEY-BINDINGS NIL))
-       (WHEN (NOT CONTEXT) (RETURN-FROM SET-PROPERTY T))
-       (SETF KEY-BINDINGS (OR (GETPROP CONTEXT KEY) (LIST)))
-       (LOOP FOR KEY-BINDING IN KEY-BINDINGS
-             DO (LET* ((OBJ (@ KEY-BINDING 0))
-                       (OBJ-KEY (@ KEY-BINDING 1))
-                       (FN (@ KEY-BINDING 2))
-                       (RETURN-VALUE (CHAIN FN (CALL OBJ))))
-                  (SETF (GETPROP OBJ OBJ-KEY) RETURN-VALUE))))
-     T) */
-function setProperty(target, key, value, receiver) {
-    if (target[key] === value) {
+/* (DEFUN MAKE-SET-PROPERTY (IS-DEEP)
+     (DEFUN SET-PROPERTY (TARGET KEY VALUE RECEIVER)
+       (LET ((OLD-VALUE (GETPROP TARGET KEY)))
+         (WHEN (EQ OLD-VALUE VALUE) (RETURN-FROM SET-PROPERTY T))
+         (WHEN
+             (AND IS-DEEP OLD-VALUE VALUE (EQ (TYPEOF VALUE) 'OBJECT)
+                  (EQ (TYPEOF OLD-VALUE) 'OBJECT))
+           (DEEP-REPLACE (GETPROP RECEIVER KEY) VALUE)
+           (RETURN-FROM SET-PROPERTY T)))
+       (IF (NOT (EQ VALUE UNDEFINED))
+           (CHAIN *REFLECT (SET TARGET KEY VALUE RECEIVER))
+           (CHAIN *REFLECT (DELETE-PROPERTY TARGET KEY)))
+       (LET ((CONTEXT (CHAIN *OBSERVABLE-CONTEXT-MAP* (GET TARGET)))
+             (KEY-BINDINGS NIL))
+         (WHEN (NOT CONTEXT) (RETURN-FROM SET-PROPERTY T))
+         (SETF KEY-BINDINGS (OR (GETPROP CONTEXT KEY) (LIST)))
+         (LOOP FOR KEY-BINDING IN KEY-BINDINGS
+               DO (LET* ((OBJ (@ KEY-BINDING 0))
+                         (OBJ-KEY (@ KEY-BINDING 1))
+                         (FN (@ KEY-BINDING 2))
+                         (RETURN-VALUE (CHAIN FN (CALL OBJ))))
+                    (SETF (GETPROP OBJ OBJ-KEY) RETURN-VALUE))))
+       T)
+     SET-PROPERTY) */
+function makeSetProperty(isDeep) {
+    function setProperty(target, key, value, receiver) {
+        var oldValue = target[key];
+        if (oldValue === value) {
+            return true;
+        };
+        if (isDeep && oldValue && value && typeof value === 'object' && typeof oldValue === 'object') {
+            deepReplace(receiver[key], value);
+            
+            return true;
+        };
+        if (value !== undefined) {
+            Reflect.set(target, key, value, receiver);
+        } else {
+            Reflect.deleteProperty(target, key);
+        };
+        var context = OBSERVABLECONTEXTMAP.get(target);
+        var keyBindings = null;
+        if (!context) {
+            
+            return true;
+        };
+        keyBindings = context[key] || [];
+        var _js2 = keyBindings.length;
+        for (var _js1 = 0; _js1 < _js2; _js1 += 1) {
+            var keyBinding = keyBindings[_js1];
+            var obj = keyBinding[0];
+            var objKey = keyBinding[1];
+            var fn = keyBinding[2];
+            var returnValue = fn.call(obj);
+            obj[objKey] = returnValue;
+        };
+        
         return true;
     };
-    if (value !== undefined) {
-        Reflect.set(target, key, value, receiver);
-    } else {
-        Reflect.deleteProperty(target, key);
-    };
-    var context = OBSERVABLECONTEXTMAP.get(target);
-    var keyBindings = null;
-    if (!context) {
-        return true;
-    };
-    keyBindings = context[key] || [];
-    var _js6 = keyBindings.length;
-    for (var _js5 = 0; _js5 < _js6; _js5 += 1) {
-        var keyBinding = keyBindings[_js5];
-        var obj = keyBinding[0];
-        var objKey = keyBinding[1];
-        var fn = keyBinding[2];
-        var returnValue = fn.call(obj);
-        obj[objKey] = returnValue;
-    };
-    return true;
+    return setProperty;
 };
-/* (DEFUN CREATE-SOURCE (OBJ)
-     (LET ((PROXY (NEW (*PROXY (OR OBJ (CREATE)) *PROXY-OBSERVABLE*))))
+/* (DEFUN DEEP-REPLACE (PROXY OBJ)
+     (LOOP FOR KEY OF OBJ
+           DO (LET* ((VALUE (GETPROP OBJ KEY))
+                     (OLD-VALUE (GETPROP PROXY KEY))
+                     (IS-VALUE-OBJECT (AND VALUE (EQ (TYPEOF VALUE) 'OBJECT)))
+                     (IS-OLD-VALUE-OBJECT
+                      (AND OLD-VALUE (EQ (TYPEOF OLD-VALUE) 'OBJECT))))
+                (IF (AND IS-VALUE-OBJECT IS-OLD-VALUE-OBJECT)
+                    (DEEP-REPLACE OLD-VALUE VALUE)
+                    (SETF (GETPROP PROXY KEY)
+                            (IF IS-VALUE-OBJECT
+                                (CREATE-SOURCE VALUE T)
+                                VALUE)))))
+     (LOOP FOR KEY OF PROXY
+           DO (WHEN (NOT (CHAIN OBJ (HAS-OWN-PROPERTY KEY)))
+                (DELETE (GETPROP PROXY KEY))))) */
+function deepReplace(proxy, obj) {
+    for (var key in obj) {
+        var value = obj[key];
+        var oldValue = proxy[key];
+        var isValueObject = value && typeof value === 'object';
+        var isOldValueObject = oldValue && typeof oldValue === 'object';
+        if (isValueObject && isOldValueObject) {
+            deepReplace(oldValue, value);
+        } else {
+            proxy[key] = isValueObject ? createSource(value, true) : value;
+        };
+    };
+    for (var key in proxy) {
+        if (!obj.hasOwnProperty(key)) {
+            delete proxy[key];
+        };
+    };
+};
+/* (DEFUN CREATE-SOURCE (OBJ IS-DEEP)
+     (WHEN (NOT OBJ) (SETF OBJ (CREATE)))
+     (LET ((PROXY
+            (NEW
+             (*PROXY OBJ
+              (IF IS-DEEP
+                  *PROXY-DEEP-OBSERVABLE*
+                  *PROXY-OBSERVABLE*)))))
+       (WHEN IS-DEEP
+         (LOOP FOR KEY OF OBJ
+               DO (LET ((VALUE (GETPROP OBJ KEY)))
+                    (WHEN (AND VALUE (EQ (TYPEOF VALUE) 'OBJECT))
+                      (SETF (GETPROP OBJ KEY) (CREATE-SOURCE VALUE T))))))
        PROXY)) */
-function createSource(obj) {
-    var proxy = new Proxy(obj || {  }, PROXYOBSERVABLE);
+function createSource(obj, isDeep) {
+    if (!obj) {
+        obj = {  };
+    };
+    var proxy = new Proxy(obj, isDeep ? PROXYDEEPOBSERVABLE : PROXYOBSERVABLE);
+    if (isDeep) {
+        for (var key in obj) {
+            var value = obj[key];
+            if (value && typeof value === 'object') {
+                obj[key] = createSource(value, true);
+            };
+        };
+    };
     
     return proxy;
 };
@@ -219,9 +310,9 @@ function unmountObject(obj) {
     if (!observables) {
         return;
     };
-    var _js8 = observables.length;
-    for (var _js7 = 0; _js7 < _js8; _js7 += 1) {
-        var observable = observables[_js7];
+    var _js4 = observables.length;
+    for (var _js3 = 0; _js3 < _js4; _js3 += 1) {
+        var observable = observables[_js3];
         var context = OBSERVABLECONTEXTMAP.get(observable);
         for (var key in context) {
             var keyBindings = context[key];

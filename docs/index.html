@@ -713,20 +713,20 @@ function read(event) {
             <aside>
               <h6>Aside</h6>
               <p>For any application with non-trivial complexity, computed properties are essential to writing maintainable code. However, it is not strictly necessary.</p>
-              <p>Caveat: observable objects are only tracked at the top level, deeply nested observable objects aren&apos;t tracked.</p>
+              <p>Observable objects are only tracked at the top level by default, it can be deeply nested by passing in the second argument as <code>true</code>.</p>
             </aside>
           </div>
           <div>
             <div class="live-example code" style="min-height: calc(1rem * var(--u) * 108)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
-              <textarea spellcheck="false">const src = {
+              <textarea spellcheck="false">const src = observable({
   data: [
     { price: 19.99, tax: 1.08 },
     { price: 75.00, tax: 1.06 },
     { price: 2.50, tax: 1.10 },
-  ].map(observable),
-};
+  ],
+}, true);
 return {
   rows: src.data.map(d => computed({
     total: () => `$${
@@ -772,7 +772,7 @@ return {
             </aside>
           </div>
           <div>
-            <p>Note that in the above example, multiple observable objects are used due to the limitation that observable objects can only keep track of keys that are one-level deep.</p>
+            <p>Note that in the above example, the observable object has a second argument passed in as <code>true</code>. This tells the observable to be <em>deeply observable</em>, including nested objects.</p>
             <hr>
           </div>
           <div>
@@ -780,7 +780,7 @@ return {
 
           <div>
             <h2 id="computed-composition">Computed composition</h2>
-            <p>Observable objects and computed objects only work on the top-level keys, which makes composition necessary.</p>
+            <p>Computed properties only work on the top-level keys, which makes composition necessary.</p>
             <p>Here is the todo example from above, but refactored to use computed properties. Additionally, a confirmation dialog needs to be shown before deleting a todo. The record to be deleted is tracked via a key in the observable object, so that only one confirmation can be shown at a time.</p>
             <hr>
           </div>

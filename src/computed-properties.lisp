@@ -9,9 +9,16 @@
 (defparameter *stack-delimiter-symbol* (*symbol 'stack-delimiter))
 
 (defparameter *proxy-observable*
-  (create get get-property
-          set set-property
-          delete-property set-property))
+  (let ((set-property (make-set-property)))
+    (create get get-property
+            set set-property
+            delete-property set-property)))
+
+(defparameter *proxy-deep-observable*
+  (let ((set-property (make-set-property t)))
+    (create get get-property
+            set set-property
+            delete-property set-property)))
 
 
 (defun clear-stack ()
@@ -41,32 +48,69 @@
       (setf *clear-stack-timeout* (set-timeout clear-stack 0))))
   (chain *reflect (get target key receiver)))
 
+(defun make-set-property (is-deep)
+  (defun set-property (target key value receiver)
+    (let ((old-value (getprop target key)))
+      ;; Skip if nothing changed.
+      (when (eq old-value value) (return-from set-property t))
 
-(defun set-property (target key value receiver)
-  ;; Skip if nothing changed.
-  (when (eq (getprop target key) value) (return-from set-property t))
+      ;; Just overwrite keys on deep observables.
+      (when (and is-deep old-value value
+                 (eq (typeof value) 'object)
+                 (eq (typeof old-value) 'object))
+        (deep-replace (getprop receiver key) value)
+        (return-from set-property t)))
 
-  (if (not (eq value undefined))
-      (chain *reflect (set target key value receiver))
-    (chain *reflect (delete-property target key)))
-  (let ((context (chain *observable-context-map* (get target)))
-        (key-bindings nil))
-    (when (not context)
-      (return-from set-property t))
-    (setf key-bindings (or (getprop context key) (list)))
-    (loop
-     for key-binding in key-bindings do
-     (let* ((obj (@ key-binding 0))
-            (obj-key (@ key-binding 1))
-            (fn (@ key-binding 2))
-            (return-value (chain fn (call obj))))
-       (setf (getprop obj obj-key) return-value))))
-  t)
+    (if (not (eq value undefined))
+        (chain *reflect (set target key value receiver))
+      (chain *reflect (delete-property target key)))
+    (let ((context (chain *observable-context-map* (get target)))
+          (key-bindings nil))
+      (when (not context)
+        (return-from set-property t))
+      (setf key-bindings (or (getprop context key) (list)))
+      (loop
+       for key-binding in key-bindings do
+       (let* ((obj (@ key-binding 0))
+              (obj-key (@ key-binding 1))
+              (fn (@ key-binding 2))
+              (return-value (chain fn (call obj))))
+         (setf (getprop obj obj-key) return-value))))
+    t)
+  set-property)
+
+
+(defun deep-replace (proxy obj)
+  (loop
+   for key of obj do
+   (let* ((value (getprop obj key))
+          (old-value (getprop proxy key))
+          (is-value-object (and value (eq (typeof value) 'object)))
+          (is-old-value-object
+           (and old-value (eq (typeof old-value) 'object))))
+     (if (and is-value-object is-old-value-object)
+         (deep-replace old-value value)
+       (setf (getprop proxy key)
+             (if is-value-object
+                 (create-source value t)
+               value)))))
+  (loop
+   for key of proxy do
+   (when (not (chain obj (has-own-property key)))
+     (delete (getprop proxy key)))))
 
 
 ;; Observable objects are sources of data that control computed properties.
-(defun create-source (obj)
-  (let ((proxy (new (*proxy (or obj (create)) *proxy-observable*))))
+(defun create-source (obj is-deep)
+  (when (not obj) (setf obj (create)))
+  (let ((proxy (new (*proxy obj
+                            (if is-deep *proxy-deep-observable*
+                              *proxy-observable*)))))
+    (when is-deep
+      (loop for key of obj do
+            (let ((value (getprop obj key)))
+              (when (and value (eq (typeof value) 'object))
+                (setf (getprop obj key) (create-source value t))))))
     proxy))
 
 
