@@ -47,7 +47,7 @@ const [reactiveObject, node] = s2(computed({
     },
     things: [],
     reader() {
-      return s.n.v;
+      return s.n?.v;
     },
 }), template);
 

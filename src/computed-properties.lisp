@@ -55,11 +55,18 @@
       (when (eq old-value value) (return-from set-property t))
 
       ;; Just overwrite keys on deep observables.
-      (when (and is-deep old-value value
-                 (eq (typeof value) 'object)
-                 (eq (typeof old-value) 'object))
-        (deep-replace (getprop receiver key) value)
-        (return-from set-property t)))
+      (when (and is-deep
+                 value (eq (typeof value) 'object))
+        (if (and old-value (eq (typeof old-value) 'object))
+            (progn
+              (deep-replace (getprop receiver key) value)
+              (return-from set-property t))
+          (setf value (create-source value t)))))
+
+    ;; TODO: There is currently an unhandled edge case if a nested observable
+    ;; is deleted and added back, it will only recompute once and never again.
+    ;; This could be solved by not allowing nested observables to be deleted.
+    ;; It also happens when nested observables are newly added.
 
     (if (not (eq value undefined))
         (chain *reflect (set target key value receiver))

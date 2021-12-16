@@ -81,11 +81,10 @@ function getProperty(target, key, receiver) {
      (DEFUN SET-PROPERTY (TARGET KEY VALUE RECEIVER)
        (LET ((OLD-VALUE (GETPROP TARGET KEY)))
          (WHEN (EQ OLD-VALUE VALUE) (RETURN-FROM SET-PROPERTY T))
-         (WHEN
-             (AND IS-DEEP OLD-VALUE VALUE (EQ (TYPEOF VALUE) 'OBJECT)
-                  (EQ (TYPEOF OLD-VALUE) 'OBJECT))
-           (DEEP-REPLACE (GETPROP RECEIVER KEY) VALUE)
-           (RETURN-FROM SET-PROPERTY T)))
+         (WHEN (AND IS-DEEP VALUE (EQ (TYPEOF VALUE) 'OBJECT))
+           (IF (AND OLD-VALUE (EQ (TYPEOF OLD-VALUE) 'OBJECT))
+               (PROGN (DEEP-REPLACE (GETPROP RECEIVER KEY) VALUE))
+               (SETF VALUE (CREATE-SOURCE VALUE T)))))
        (IF (NOT (EQ VALUE UNDEFINED))
            (CHAIN *REFLECT (SET TARGET KEY VALUE RECEIVER))
            (CHAIN *REFLECT (DELETE-PROPERTY TARGET KEY)))
@@ -107,10 +106,12 @@ function makeSetProperty(isDeep) {
         if (oldValue === value) {
             return true;
         };
-        if (isDeep && oldValue && value && typeof value === 'object' && typeof oldValue === 'object') {
-            deepReplace(receiver[key], value);
-            
-            return true;
+        if (isDeep && value && typeof value === 'object') {
+            if (oldValue && typeof oldValue === 'object') {
+                deepReplace(receiver[key], value);
+            } else {
+                value = createSource(value, true);
+            };
         };
         if (value !== undefined) {
             Reflect.set(target, key, value, receiver);
@@ -124,9 +125,9 @@ function makeSetProperty(isDeep) {
             return true;
         };
         keyBindings = context[key] || [];
-        var _js2 = keyBindings.length;
-        for (var _js1 = 0; _js1 < _js2; _js1 += 1) {
-            var keyBinding = keyBindings[_js1];
+        var _js6 = keyBindings.length;
+        for (var _js5 = 0; _js5 < _js6; _js5 += 1) {
+            var keyBinding = keyBindings[_js5];
             var obj = keyBinding[0];
             var objKey = keyBinding[1];
             var fn = keyBinding[2];
@@ -310,9 +311,9 @@ function unmountObject(obj) {
     if (!observables) {
         return;
     };
-    var _js4 = observables.length;
-    for (var _js3 = 0; _js3 < _js4; _js3 += 1) {
-        var observable = observables[_js3];
+    var _js8 = observables.length;
+    for (var _js7 = 0; _js7 < _js8; _js7 += 1) {
+        var observable = observables[_js7];
         var context = OBSERVABLECONTEXTMAP.get(observable);
         for (var key in context) {
             var keyBindings = context[key];
