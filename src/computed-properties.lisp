@@ -77,11 +77,6 @@
                    (is-object old-value))
           (throw-deep-remove-error key))))
 
-    ;; TODO: There is currently an unhandled edge case if a nested observable
-    ;; is deleted and added back, it will only recompute once and never again.
-    ;; This could be solved by not allowing nested observables to be deleted.
-    ;; It also happens when nested observables are newly added.
-
     (if (not (eq value undefined))
         (chain *reflect (set target key value receiver))
       (chain *reflect (delete-property target key)))
