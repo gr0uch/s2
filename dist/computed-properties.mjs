@@ -77,14 +77,33 @@ function getProperty(target, key, receiver) {
     
     return Reflect.get(target, key, receiver);
 };
+/* (DEFUN THROW-DEEP-ADD-ERROR (KEY)
+     (THROW (NEW (*ERROR (+ Can not upgrade " KEY " to an observable.))))) */
+function throwDeepAddError(key) {
+    throw new Error('Can not upgrade \"' + key + '\" to an observable.');
+};
+/* (DEFUN THROW-DEEP-REMOVE-ERROR (KEY)
+     (THROW (NEW (*ERROR (+ Can not downgrade " KEY " from an observable.))))) */
+function throwDeepRemoveError(key) {
+    throw new Error('Can not downgrade \"' + key + '\" from an observable.');
+};
+/* (DEFUN IS-OBJECT (OBJ) (AND OBJ (EQ (TYPEOF OBJ) 'OBJECT))) */
+function isObject(obj) {
+    return obj && typeof obj === 'object';
+};
 /* (DEFUN MAKE-SET-PROPERTY (IS-DEEP)
      (DEFUN SET-PROPERTY (TARGET KEY VALUE RECEIVER)
        (LET ((OLD-VALUE (GETPROP TARGET KEY)))
          (WHEN (EQ OLD-VALUE VALUE) (RETURN-FROM SET-PROPERTY T))
-         (WHEN (AND IS-DEEP VALUE (EQ (TYPEOF VALUE) 'OBJECT))
-           (IF (AND OLD-VALUE (EQ (TYPEOF OLD-VALUE) 'OBJECT))
-               (PROGN (DEEP-REPLACE (GETPROP RECEIVER KEY) VALUE))
-               (SETF VALUE (CREATE-SOURCE VALUE T)))))
+         (WHEN IS-DEEP
+           (WHEN (IS-OBJECT VALUE)
+             (IF (IS-OBJECT OLD-VALUE)
+                 (PROGN
+                  (DEEP-REPLACE (GETPROP RECEIVER KEY) VALUE)
+                  (RETURN-FROM SET-PROPERTY T))
+                 (THROW-DEEP-ADD-ERROR KEY)))
+           (WHEN (AND (EQ VALUE UNDEFINED) (IS-OBJECT OLD-VALUE))
+             (THROW-DEEP-REMOVE-ERROR KEY))))
        (IF (NOT (EQ VALUE UNDEFINED))
            (CHAIN *REFLECT (SET TARGET KEY VALUE RECEIVER))
            (CHAIN *REFLECT (DELETE-PROPERTY TARGET KEY)))
@@ -106,11 +125,18 @@ function makeSetProperty(isDeep) {
         if (oldValue === value) {
             return true;
         };
-        if (isDeep && value && typeof value === 'object') {
-            if (oldValue && typeof oldValue === 'object') {
-                deepReplace(receiver[key], value);
-            } else {
-                value = createSource(value, true);
+        if (isDeep) {
+            if (isObject(value)) {
+                if (isObject(oldValue)) {
+                    deepReplace(receiver[key], value);
+                    
+                    return true;
+                } else {
+                    throwDeepAddError(key);
+                };
+            };
+            if (value === undefined && isObject(oldValue)) {
+                throwDeepRemoveError(key);
             };
         };
         if (value !== undefined) {
@@ -141,34 +167,38 @@ function makeSetProperty(isDeep) {
 };
 /* (DEFUN DEEP-REPLACE (PROXY OBJ)
      (LOOP FOR KEY OF OBJ
-           DO (LET* ((VALUE (GETPROP OBJ KEY))
-                     (OLD-VALUE (GETPROP PROXY KEY))
-                     (IS-VALUE-OBJECT (AND VALUE (EQ (TYPEOF VALUE) 'OBJECT)))
-                     (IS-OLD-VALUE-OBJECT
-                      (AND OLD-VALUE (EQ (TYPEOF OLD-VALUE) 'OBJECT))))
-                (IF (AND IS-VALUE-OBJECT IS-OLD-VALUE-OBJECT)
+           DO (LET ((VALUE (GETPROP OBJ KEY)) (OLD-VALUE (GETPROP PROXY KEY)))
+                (IF (AND (IS-OBJECT VALUE) (IS-OBJECT OLD-VALUE))
                     (DEEP-REPLACE OLD-VALUE VALUE)
-                    (SETF (GETPROP PROXY KEY)
-                            (IF IS-VALUE-OBJECT
-                                (CREATE-SOURCE VALUE T)
-                                VALUE)))))
+                    (IF (IS-OBJECT VALUE)
+                        (THROW-DEEP-ADD-ERROR KEY)
+                        (SETF (GETPROP PROXY KEY) VALUE)))))
      (LOOP FOR KEY OF PROXY
-           DO (WHEN (NOT (CHAIN OBJ (HAS-OWN-PROPERTY KEY)))
-                (DELETE (GETPROP PROXY KEY))))) */
+           DO (LET ((OLD-VALUE (GETPROP PROXY KEY)))
+                (WHEN (NOT (CHAIN OBJ (HAS-OWN-PROPERTY KEY)))
+                  (IF (IS-OBJECT OLD-VALUE)
+                      (THROW-DEEP-REMOVE-ERROR KEY))
+                  (DELETE (GETPROP PROXY KEY)))))) */
 function deepReplace(proxy, obj) {
     for (var key in obj) {
         var value = obj[key];
         var oldValue = proxy[key];
-        var isValueObject = value && typeof value === 'object';
-        var isOldValueObject = oldValue && typeof oldValue === 'object';
-        if (isValueObject && isOldValueObject) {
+        if (isObject(value) && isObject(oldValue)) {
             deepReplace(oldValue, value);
         } else {
-            proxy[key] = isValueObject ? createSource(value, true) : value;
+            if (isObject(value)) {
+                throwDeepAddError(key);
+            } else {
+                proxy[key] = value;
+            };
         };
     };
     for (var key in proxy) {
+        var oldValue7 = proxy[key];
         if (!obj.hasOwnProperty(key)) {
+            if (isObject(oldValue7)) {
+                throwDeepRemoveError(key);
+            };
             delete proxy[key];
         };
     };
@@ -184,7 +214,7 @@ function deepReplace(proxy, obj) {
        (WHEN IS-DEEP
          (LOOP FOR KEY OF OBJ
                DO (LET ((VALUE (GETPROP OBJ KEY)))
-                    (WHEN (AND VALUE (EQ (TYPEOF VALUE) 'OBJECT))
+                    (WHEN (IS-OBJECT VALUE)
                       (SETF (GETPROP OBJ KEY) (CREATE-SOURCE VALUE T))))))
        PROXY)) */
 function createSource(obj, isDeep) {
@@ -195,7 +225,7 @@ function createSource(obj, isDeep) {
     if (isDeep) {
         for (var key in obj) {
             var value = obj[key];
-            if (value && typeof value === 'object') {
+            if (isObject(value)) {
                 obj[key] = createSource(value, true);
             };
         };

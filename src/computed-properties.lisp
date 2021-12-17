@@ -48,6 +48,17 @@
       (setf *clear-stack-timeout* (set-timeout clear-stack 0))))
   (chain *reflect (get target key receiver)))
 
+(defun throw-deep-add-error (key)
+  (throw (new (*error
+               (+ "Can not upgrade \"" key "\" to an observable.")))))
+
+(defun throw-deep-remove-error (key)
+  (throw (new (*error
+               (+ "Can not downgrade \"" key "\" from an observable.")))))
+
+(defun is-object (obj)
+  (and obj (eq (typeof obj) 'object)))
+
 (defun make-set-property (is-deep)
   (defun set-property (target key value receiver)
     (let ((old-value (getprop target key)))
@@ -55,13 +66,16 @@
       (when (eq old-value value) (return-from set-property t))
 
       ;; Just overwrite keys on deep observables.
-      (when (and is-deep
-                 value (eq (typeof value) 'object))
-        (if (and old-value (eq (typeof old-value) 'object))
-            (progn
-              (deep-replace (getprop receiver key) value)
-              (return-from set-property t))
-          (setf value (create-source value t)))))
+      (when is-deep
+        (when (is-object value)
+          (if (is-object old-value)
+              (progn
+                (deep-replace (getprop receiver key) value)
+                (return-from set-property t))
+            (throw-deep-add-error key)))
+        (when (and (eq value undefined)
+                   (is-object old-value))
+          (throw-deep-remove-error key))))
 
     ;; TODO: There is currently an unhandled edge case if a nested observable
     ;; is deleted and added back, it will only recompute once and never again.
@@ -90,21 +104,20 @@
 (defun deep-replace (proxy obj)
   (loop
    for key of obj do
-   (let* ((value (getprop obj key))
-          (old-value (getprop proxy key))
-          (is-value-object (and value (eq (typeof value) 'object)))
-          (is-old-value-object
-           (and old-value (eq (typeof old-value) 'object))))
-     (if (and is-value-object is-old-value-object)
+   (let ((value (getprop obj key))
+         (old-value (getprop proxy key)))
+     (if (and (is-object value) (is-object old-value))
          (deep-replace old-value value)
-       (setf (getprop proxy key)
-             (if is-value-object
-                 (create-source value t)
-               value)))))
+       (if (is-object value)
+           (throw-deep-add-error key)
+         (setf (getprop proxy key) value)))))
   (loop
    for key of proxy do
-   (when (not (chain obj (has-own-property key)))
-     (delete (getprop proxy key)))))
+   (let ((old-value (getprop proxy key)))
+     (when (not (chain obj (has-own-property key)))
+       (if (is-object old-value)
+           (throw-deep-remove-error key))
+       (delete (getprop proxy key))))))
 
 
 ;; Observable objects are sources of data that control computed properties.
@@ -116,7 +129,7 @@
     (when is-deep
       (loop for key of obj do
             (let ((value (getprop obj key)))
-              (when (and value (eq (typeof value) 'object))
+              (when (is-object value)
                 (setf (getprop obj key) (create-source value t))))))
     proxy))
 
