@@ -773,6 +773,7 @@ return {
           </div>
           <div>
             <p>Note that in the above example, the observable object has a second argument passed in as <code>true</code>. This tells the observable to be <em>deeply observable</em>, including nested objects.</p>
+            <p><strong>Caveat:</strong> deep observables can not change shape after initialization. Nested objects can not be added or removed, only replaced (enforced by runtime checks). This is because the dependencies of computed properties are memoized, and do not re-calculate on subsequent runs. Only use deep observables if you know the shape of the data up front.</p>
             <hr>
           </div>
           <div>
@@ -944,7 +945,7 @@ return {
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">const data = observable({
-  rows: new Array(300).fill(),
+  rows: new Array(100).fill(),
   selectedIndex: 0,
 });
 return computed({
@@ -981,7 +982,7 @@ return computed({
             </aside>
           </div>
           <div>
-            <p>The problem is that there is just one computed property that returns a new instance of each nested object, and the slowdown is noticeable due to the event listener update occuring between each iteration. Here is the same example from above, but optimized to reduce the amount of work done in a single computed property.</p>
+            <p>The problem is that there is just one computed property that returns a new instance of each nested object, and there is a slight slowdown due to diffing the entire data. Here is the same example from above, but optimized to reduce the amount of work done in a single computed property.</p>
             <hr>
           </div>
           <div>
@@ -991,7 +992,7 @@ return computed({
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">const data = observable({
-  rows: new Array(300).fill(),
+  rows: new Array(100).fill(),
   selectedIndex: 0,
 });
 return computed({
@@ -1033,7 +1034,7 @@ return computed({
           </div>
           <div>
             <p>The only changes made were to add a <code>computed</code> object on each list item, and to turn <code>isSelected</code> into a computed property. This fixes the problem by only recomputing one property by <code>n</code> times.</p>
-            <p>There is still a potential slowdown even with this approach: if the length of the list changes, then each list item needs to be recomputed. This is best worked around by manually mutating the list using array methods.</p>
+            <p>There is still a potential slowdown even with this approach: if the length of the list changes, then each list item needs to be recomputed. This is best worked around by manually mutating the list using array methods, because there is no way that the computed function knows that only a few values changed up front.</p>
             <p>Computed properties are faster than just replacing a large data structure, because it allows for small, granular updates, versus updating an entire data structure.</p>
             <hr>
           </div>

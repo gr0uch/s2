@@ -45,8 +45,14 @@ const template = parseMustache(`
 </div>
 `);
 
+const iterator = document.createNodeIterator(template.content, 4);
+let currentNode;
+while ((currentNode = iterator.nextNode())) {
+    currentNode.textContent = currentNode.textContent.trim();
+    if (!currentNode.textContent) currentNode.remove();
+}
+
 const [proxy, fragment] = s2(obj, template);
-
 document.body.appendChild(fragment);
-
-console.log(document.toString());
+const node = document.body.querySelector("div[foo]");
+console.log(node.toString());
