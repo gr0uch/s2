@@ -3,8 +3,6 @@
 var OBSERVABLECONTEXTMAP = new WeakMap();
 /* (DEFPARAMETER *TARGET-OBSERVABLES-MAP* (NEW (*WEAK-MAP))) */
 var TARGETOBSERVABLESMAP = new WeakMap();
-/* (DEFPARAMETER *OBSERVABLE-CALLBACK-MAP* (NEW (*WEAK-MAP))) */
-var OBSERVABLECALLBACKMAP = new WeakMap();
 /* (DEFPARAMETER *READ-STACK* (LIST)) */
 var READSTACK = [];
 /* (DEFPARAMETER *CLEAR-STACK-TIMEOUT* NIL) */
@@ -77,16 +75,6 @@ function getProperty(target, key, receiver) {
     
     return Reflect.get(target, key, receiver);
 };
-/* (DEFUN THROW-DEEP-ADD-ERROR (KEY)
-     (THROW (NEW (*ERROR (+ Can not upgrade " KEY " to an observable.))))) */
-function throwDeepAddError(key) {
-    throw new Error('Can not upgrade \"' + key + '\" to an observable.');
-};
-/* (DEFUN THROW-DEEP-REMOVE-ERROR (KEY)
-     (THROW (NEW (*ERROR (+ Can not downgrade " KEY " from an observable.))))) */
-function throwDeepRemoveError(key) {
-    throw new Error('Can not downgrade \"' + key + '\" from an observable.');
-};
 /* (DEFUN IS-OBJECT (OBJ) (AND OBJ (EQ (TYPEOF OBJ) 'OBJECT))) */
 function isObject(obj) {
     return obj && typeof obj === 'object';
@@ -95,15 +83,12 @@ function isObject(obj) {
      (DEFUN SET-PROPERTY (TARGET KEY VALUE RECEIVER)
        (LET ((OLD-VALUE (GETPROP TARGET KEY)))
          (WHEN (EQ OLD-VALUE VALUE) (RETURN-FROM SET-PROPERTY T))
-         (WHEN IS-DEEP
-           (WHEN (IS-OBJECT VALUE)
-             (IF (IS-OBJECT OLD-VALUE)
-                 (PROGN
-                  (DEEP-REPLACE (GETPROP RECEIVER KEY) VALUE)
-                  (RETURN-FROM SET-PROPERTY T))
-                 (THROW-DEEP-ADD-ERROR KEY)))
-           (WHEN (AND (EQ VALUE UNDEFINED) (IS-OBJECT OLD-VALUE))
-             (THROW-DEEP-REMOVE-ERROR KEY))))
+         (WHEN (AND IS-DEEP (IS-OBJECT VALUE))
+           (IF (IS-OBJECT OLD-VALUE)
+               (PROGN
+                (DEEP-REPLACE (GETPROP RECEIVER KEY) VALUE)
+                (RETURN-FROM SET-PROPERTY T))
+               (SETF VALUE (CREATE-SOURCE VALUE T)))))
        (IF (NOT (EQ VALUE UNDEFINED))
            (CHAIN *REFLECT (SET TARGET KEY VALUE RECEIVER))
            (CHAIN *REFLECT (DELETE-PROPERTY TARGET KEY)))
@@ -114,9 +99,8 @@ function isObject(obj) {
          (LOOP FOR KEY-BINDING IN KEY-BINDINGS
                DO (LET* ((OBJ (@ KEY-BINDING 0))
                          (OBJ-KEY (@ KEY-BINDING 1))
-                         (FN (@ KEY-BINDING 2))
-                         (RETURN-VALUE (CHAIN FN (CALL OBJ))))
-                    (SETF (GETPROP OBJ OBJ-KEY) RETURN-VALUE))))
+                         (FN (@ KEY-BINDING 2)))
+                    (COMPUTE-DEPENDENCIES OBJ OBJ-KEY FN))))
        T)
      SET-PROPERTY) */
 function makeSetProperty(isDeep) {
@@ -125,18 +109,13 @@ function makeSetProperty(isDeep) {
         if (oldValue === value) {
             return true;
         };
-        if (isDeep) {
-            if (isObject(value)) {
-                if (isObject(oldValue)) {
-                    deepReplace(receiver[key], value);
-                    
-                    return true;
-                } else {
-                    throwDeepAddError(key);
-                };
-            };
-            if (value === undefined && isObject(oldValue)) {
-                throwDeepRemoveError(key);
+        if (isDeep && isObject(value)) {
+            if (isObject(oldValue)) {
+                deepReplace(receiver[key], value);
+                
+                return true;
+            } else {
+                value = createSource(value, true);
             };
         };
         if (value !== undefined) {
@@ -157,8 +136,7 @@ function makeSetProperty(isDeep) {
             var obj = keyBinding[0];
             var objKey = keyBinding[1];
             var fn = keyBinding[2];
-            var returnValue = fn.call(obj);
-            obj[objKey] = returnValue;
+            computeDependencies(obj, objKey, fn);
         };
         
         return true;
@@ -170,14 +148,10 @@ function makeSetProperty(isDeep) {
            DO (LET ((VALUE (GETPROP OBJ KEY)) (OLD-VALUE (GETPROP PROXY KEY)))
                 (IF (AND (IS-OBJECT VALUE) (IS-OBJECT OLD-VALUE))
                     (DEEP-REPLACE OLD-VALUE VALUE)
-                    (IF (IS-OBJECT VALUE)
-                        (THROW-DEEP-ADD-ERROR KEY)
-                        (SETF (GETPROP PROXY KEY) VALUE)))))
+                    (SETF (GETPROP PROXY KEY) VALUE))))
      (LOOP FOR KEY OF PROXY
            DO (LET ((OLD-VALUE (GETPROP PROXY KEY)))
                 (WHEN (NOT (CHAIN OBJ (HAS-OWN-PROPERTY KEY)))
-                  (IF (IS-OBJECT OLD-VALUE)
-                      (THROW-DEEP-REMOVE-ERROR KEY))
                   (DELETE (GETPROP PROXY KEY)))))) */
 function deepReplace(proxy, obj) {
     for (var key in obj) {
@@ -186,19 +160,12 @@ function deepReplace(proxy, obj) {
         if (isObject(value) && isObject(oldValue)) {
             deepReplace(oldValue, value);
         } else {
-            if (isObject(value)) {
-                throwDeepAddError(key);
-            } else {
-                proxy[key] = value;
-            };
+            proxy[key] = value;
         };
     };
     for (var key in proxy) {
         var oldValue7 = proxy[key];
         if (!obj.hasOwnProperty(key)) {
-            if (isObject(oldValue7)) {
-                throwDeepRemoveError(key);
-            };
             delete proxy[key];
         };
     };
@@ -239,48 +206,7 @@ function createSource(obj, isDeep) {
                      (IS-FUNCTION (EQ (TYPEOF VALUE) 'FUNCTION)))
                 (WHEN IS-FUNCTION
                   (WHEN (@ VALUE IS-EVENT-LISTENER) (CONTINUE))
-                  (CHAIN *READ-STACK* (PUSH *STACK-DELIMITER-SYMBOL*))
-                  (LET ((RETURN-VALUE (CHAIN VALUE (CALL OBJ))))
-                    (WHEN (NOT (EQ RETURN-VALUE UNDEFINED))
-                      (SETF (GETPROP OBJ KEY) RETURN-VALUE))
-                    (LOOP FOR I FROM (- (LENGTH *READ-STACK*) 1) DOWNTO 0
-                          DO (WHEN
-                                 (EQ (TYPEOF (GETPROP *READ-STACK* I)) 'SYMBOL)
-                               BREAK) (LET* ((TUPLE (GETPROP *READ-STACK* I))
-                                             (OBSERVABLE (@ TUPLE 0))
-                                             (OBSERVABLE-KEY (@ TUPLE 1))
-                                             (OBSERVABLE-CONTEXT NIL))
-                                        (WHEN
-                                            (NOT
-                                             (CHAIN *TARGET-OBSERVABLES-MAP*
-                                                    (HAS OBJ)))
-                                          (CHAIN *TARGET-OBSERVABLES-MAP*
-                                                 (SET OBJ (LIST))))
-                                        (CHAIN *TARGET-OBSERVABLES-MAP*
-                                               (GET OBJ) (PUSH OBSERVABLE))
-                                        (WHEN
-                                            (NOT
-                                             (CHAIN *OBSERVABLE-CONTEXT-MAP*
-                                                    (HAS OBSERVABLE)))
-                                          (CHAIN *OBSERVABLE-CONTEXT-MAP*
-                                                 (SET OBSERVABLE (CREATE))))
-                                        (SETF OBSERVABLE-CONTEXT
-                                                (CHAIN *OBSERVABLE-CONTEXT-MAP*
-                                                       (GET OBSERVABLE)))
-                                        (WHEN
-                                            (NOT
-                                             (GETPROP OBSERVABLE-CONTEXT
-                                              OBSERVABLE-KEY))
-                                          (SETF (GETPROP OBSERVABLE-CONTEXT
-                                                 OBSERVABLE-KEY)
-                                                  (LIST)))
-                                        (LET ((KEY-BINDINGS
-                                               (GETPROP OBSERVABLE-CONTEXT
-                                                OBSERVABLE-KEY)))
-                                          (CHAIN KEY-BINDINGS
-                                                 (PUSH
-                                                  (LIST OBJ KEY VALUE)))))))
-                  (POP-STACK))))) */
+                  (COMPUTE-DEPENDENCIES OBJ KEY VALUE))))) */
 function mountObject(obj) {
     for (var key in obj) {
         var value = obj[key];
@@ -289,36 +215,96 @@ function mountObject(obj) {
             if (value.isEventListener) {
                 continue;
             };
-            READSTACK.push(STACKDELIMITERSYMBOL);
-            var returnValue = value.call(obj);
-            if (returnValue !== undefined) {
-                obj[key] = returnValue;
-            };
-            for (var i = READSTACK.length - 1; i >= 0; i -= 1) {
-                if (typeof READSTACK[i] === 'symbol') {
-                    break;
-                };
-                var tuple = READSTACK[i];
-                var observable = tuple[0];
-                var observableKey = tuple[1];
-                var observableContext = null;
-                if (!TARGETOBSERVABLESMAP.has(obj)) {
-                    TARGETOBSERVABLESMAP.set(obj, []);
-                };
-                TARGETOBSERVABLESMAP.get(obj).push(observable);
-                if (!OBSERVABLECONTEXTMAP.has(observable)) {
-                    OBSERVABLECONTEXTMAP.set(observable, {  });
-                };
-                observableContext = OBSERVABLECONTEXTMAP.get(observable);
-                if (!observableContext[observableKey]) {
-                    observableContext[observableKey] = [];
-                };
-                var keyBindings = observableContext[observableKey];
-                keyBindings.push([obj, key, value]);
-            };
-            popStack();
+            computeDependencies(obj, key, value);
         };
     };
+};
+/* (DEFUN COMPUTE-DEPENDENCIES (OBJ KEY FN)
+     (CHAIN *READ-STACK* (PUSH *STACK-DELIMITER-SYMBOL*))
+     (LET ((RETURN-VALUE (CHAIN FN (CALL OBJ))))
+       (IF (NOT (EQ RETURN-VALUE UNDEFINED))
+           (SETF (GETPROP OBJ KEY) RETURN-VALUE)
+           (DELETE (GETPROP OBJ KEY)))
+       (LOOP FOR I FROM (- (LENGTH *READ-STACK*) 1) DOWNTO 0
+             DO (WHEN (EQ (TYPEOF (GETPROP *READ-STACK* I)) 'SYMBOL)
+                  BREAK) (LET* ((TUPLE (GETPROP *READ-STACK* I))
+                                (OBSERVABLE (@ TUPLE 0))
+                                (OBSERVABLE-KEY (@ TUPLE 1))
+                                (OBSERVABLE-CONTEXT NIL))
+                           (WHEN
+                               (NOT (CHAIN *TARGET-OBSERVABLES-MAP* (HAS OBJ)))
+                             (CHAIN *TARGET-OBSERVABLES-MAP* (SET OBJ (LIST))))
+                           (LET ((OBSERVABLES
+                                  (CHAIN *TARGET-OBSERVABLES-MAP* (GET OBJ))))
+                             (WHEN
+                                 (NOT
+                                  (CHAIN OBSERVABLES (INCLUDES OBSERVABLE)))
+                               (CHAIN OBSERVABLES (PUSH OBSERVABLE))))
+                           (WHEN
+                               (NOT
+                                (CHAIN *OBSERVABLE-CONTEXT-MAP*
+                                       (HAS OBSERVABLE)))
+                             (CHAIN *OBSERVABLE-CONTEXT-MAP*
+                                    (SET OBSERVABLE (CREATE))))
+                           (SETF OBSERVABLE-CONTEXT
+                                   (CHAIN *OBSERVABLE-CONTEXT-MAP*
+                                          (GET OBSERVABLE)))
+                           (WHEN
+                               (NOT
+                                (GETPROP OBSERVABLE-CONTEXT OBSERVABLE-KEY))
+                             (SETF (GETPROP OBSERVABLE-CONTEXT OBSERVABLE-KEY)
+                                     (LIST)))
+                           (LET ((KEY-BINDINGS
+                                  (GETPROP OBSERVABLE-CONTEXT OBSERVABLE-KEY)))
+                             (WHEN
+                                 (NOT
+                                  (CHAIN KEY-BINDINGS
+                                         (FIND
+                                          (LAMBDA (ENTRY)
+                                            (AND (EQ (ELT ENTRY 0) OBJ)
+                                                 (EQ (ELT ENTRY 1) KEY))))))
+                               (CHAIN KEY-BINDINGS
+                                      (PUSH (LIST OBJ KEY FN))))))))
+     (POP-STACK)) */
+function computeDependencies(obj, key, fn) {
+    READSTACK.push(STACKDELIMITERSYMBOL);
+    var returnValue = fn.call(obj);
+    if (returnValue !== undefined) {
+        obj[key] = returnValue;
+    } else {
+        delete obj[key];
+    };
+    for (var i = READSTACK.length - 1; i >= 0; i -= 1) {
+        if (typeof READSTACK[i] === 'symbol') {
+            break;
+        };
+        var tuple = READSTACK[i];
+        var observable = tuple[0];
+        var observableKey = tuple[1];
+        var observableContext = null;
+        if (!TARGETOBSERVABLESMAP.has(obj)) {
+            TARGETOBSERVABLESMAP.set(obj, []);
+        };
+        var observables = TARGETOBSERVABLESMAP.get(obj);
+        if (!observables.includes(observable)) {
+            observables.push(observable);
+        };
+        if (!OBSERVABLECONTEXTMAP.has(observable)) {
+            OBSERVABLECONTEXTMAP.set(observable, {  });
+        };
+        observableContext = OBSERVABLECONTEXTMAP.get(observable);
+        if (!observableContext[observableKey]) {
+            observableContext[observableKey] = [];
+        };
+        var keyBindings = observableContext[observableKey];
+        if (!keyBindings.find(function (entry) {
+            return entry[0] === obj && entry[1] === key;
+        })) {
+            keyBindings.push([obj, key, fn]);
+        };
+    };
+    
+    return popStack();
 };
 /* (DEFUN UNMOUNT-OBJECT (OBJ)
      (LET ((OBSERVABLES (CHAIN *TARGET-OBSERVABLES-MAP* (GET OBJ))))

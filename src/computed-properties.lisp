@@ -3,7 +3,6 @@
 
 (defparameter *observable-context-map* (new (*weak-map)))
 (defparameter *target-observables-map* (new (*weak-map)))
-(defparameter *observable-callback-map* (new (*weak-map)))
 (defparameter *read-stack* (list))
 (defparameter *clear-stack-timeout* nil)
 (defparameter *stack-delimiter-symbol* (*symbol 'stack-delimiter))
@@ -48,14 +47,6 @@
       (setf *clear-stack-timeout* (set-timeout clear-stack 0))))
   (chain *reflect (get target key receiver)))
 
-(defun throw-deep-add-error (key)
-  (throw (new (*error
-               (+ "Can not upgrade \"" key "\" to an observable.")))))
-
-(defun throw-deep-remove-error (key)
-  (throw (new (*error
-               (+ "Can not downgrade \"" key "\" from an observable.")))))
-
 (defun is-object (obj)
   (and obj (eq (typeof obj) 'object)))
 
@@ -66,16 +57,12 @@
       (when (eq old-value value) (return-from set-property t))
 
       ;; Just overwrite keys on deep observables.
-      (when is-deep
-        (when (is-object value)
-          (if (is-object old-value)
-              (progn
-                (deep-replace (getprop receiver key) value)
-                (return-from set-property t))
-            (throw-deep-add-error key)))
-        (when (and (eq value undefined)
-                   (is-object old-value))
-          (throw-deep-remove-error key))))
+      (when (and is-deep (is-object value))
+        (if (is-object old-value)
+            (progn
+              (deep-replace (getprop receiver key) value)
+              (return-from set-property t))
+          (setf value (create-source value t)))))
 
     (if (not (eq value undefined))
         (chain *reflect (set target key value receiver))
@@ -89,9 +76,8 @@
        for key-binding in key-bindings do
        (let* ((obj (@ key-binding 0))
               (obj-key (@ key-binding 1))
-              (fn (@ key-binding 2))
-              (return-value (chain fn (call obj))))
-         (setf (getprop obj obj-key) return-value))))
+              (fn (@ key-binding 2)))
+         (compute-dependencies obj obj-key fn))))
     t)
   set-property)
 
@@ -103,15 +89,11 @@
          (old-value (getprop proxy key)))
      (if (and (is-object value) (is-object old-value))
          (deep-replace old-value value)
-       (if (is-object value)
-           (throw-deep-add-error key)
-         (setf (getprop proxy key) value)))))
+       (setf (getprop proxy key) value))))
   (loop
    for key of proxy do
    (let ((old-value (getprop proxy key)))
      (when (not (chain obj (has-own-property key)))
-       (if (is-object old-value)
-           (throw-deep-remove-error key))
        (delete (getprop proxy key))))))
 
 
@@ -139,33 +121,43 @@
           (is-function (eq (typeof value) 'function)))
      (when is-function
        (when (@ value is-event-listener) (continue))
-       (chain *read-stack* (push *stack-delimiter-symbol*))
-       (let ((return-value (chain value (call obj))))
-         (when (not (eq return-value undefined))
-           (setf (getprop obj key) return-value))
-         (loop
-          for i from (- (length *read-stack*) 1) downto 0 do
-          (when (eq (typeof (getprop *read-stack* i)) 'symbol) break)
-          (let* ((tuple (getprop *read-stack* i))
-                 (observable (@ tuple 0))
-                 (observable-key (@ tuple 1))
-                 (observable-context nil))
+       (compute-dependencies obj key value)))))
 
-            (when (not (chain *target-observables-map* (has obj)))
-              (chain *target-observables-map* (set obj (list))))
-            (chain *target-observables-map* (get obj) (push observable))
+(defun compute-dependencies (obj key fn)
+  (chain *read-stack* (push *stack-delimiter-symbol*))
+  (let ((return-value (chain fn (call obj))))
+    (if (not (eq return-value undefined))
+        (setf (getprop obj key) return-value)
+      (delete (getprop obj key)))
+    (loop
+     for i from (- (length *read-stack*) 1) downto 0 do
+     (when (eq (typeof (getprop *read-stack* i)) 'symbol) break)
+     (let* ((tuple (getprop *read-stack* i))
+            (observable (@ tuple 0))
+            (observable-key (@ tuple 1))
+            (observable-context nil))
 
-            (when (not (chain *observable-context-map* (has observable)))
-              (chain *observable-context-map* (set observable (create))))
-            (setf observable-context
-                  (chain *observable-context-map* (get observable)))
+       (when (not (chain *target-observables-map* (has obj)))
+         (chain *target-observables-map* (set obj (list))))
+       (let ((observables (chain *target-observables-map* (get obj))))
+         (when (not (chain observables (includes observable)))
+           (chain observables (push observable))))
 
-            (when (not (getprop observable-context observable-key))
-              (setf (getprop observable-context observable-key) (list)))
+       (when (not (chain *observable-context-map* (has observable)))
+         (chain *observable-context-map* (set observable (create))))
+       (setf observable-context
+             (chain *observable-context-map* (get observable)))
 
-            (let ((key-bindings (getprop observable-context observable-key)))
-              (chain key-bindings (push (list obj key value)))))))
-       (pop-stack)))))
+       (when (not (getprop observable-context observable-key))
+         (setf (getprop observable-context observable-key) (list)))
+
+       (let ((key-bindings (getprop observable-context observable-key)))
+         (when (not (chain key-bindings
+                           (find (lambda (entry)
+                                   (and (eq (elt entry 0) obj)
+                                        (eq (elt entry 1) key))))))
+           (chain key-bindings (push (list obj key fn))))))))
+  (pop-stack))
 
 
 ;; Careful: this will only remove dependencies if unmount is called! This can

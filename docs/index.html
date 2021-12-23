@@ -772,8 +772,7 @@ return {
             </aside>
           </div>
           <div>
-            <p>Note that in the above example, the observable object has a second argument passed in as <code>true</code>. This tells the observable to be <em>deeply observable</em>, including nested objects.</p>
-            <p><strong>Caveat:</strong> deep observables can not change shape after initialization. Nested objects can not be added or removed, only replaced (enforced by runtime checks). This is because the dependencies of computed properties are memoized, and do not re-calculate on subsequent runs. Only use deep observables if you know the shape of the data up front.</p>
+            <p>Note that in the above example, the observable object has a second argument passed in as <code>true</code>. This tells the observable to be <em>deeply observable</em>, including nested objects. When using deep observables, it is possible to delete observables and replace them with new observables. This is because dependencies are tracked on every run of the computed function.</p>
             <hr>
           </div>
           <div>
@@ -826,7 +825,7 @@ function add(event) {
   event.preventDefault();
   if (!this.todo) return;
   src.todos =
-    [...src.todos, this.todo];
+    [this.todo, ...src.todos];
   delete this.todo;
 }</textarea><textarea spellcheck="false"><form onsubmit="{{add}}">
   <input
