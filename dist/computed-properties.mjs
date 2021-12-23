@@ -130,9 +130,9 @@ function makeSetProperty(isDeep) {
             return true;
         };
         keyBindings = context[key] || [];
-        var _js6 = keyBindings.length;
-        for (var _js5 = 0; _js5 < _js6; _js5 += 1) {
-            var keyBinding = keyBindings[_js5];
+        var _js2 = keyBindings.length;
+        for (var _js1 = 0; _js1 < _js2; _js1 += 1) {
+            var keyBinding = keyBindings[_js1];
             var obj = keyBinding[0];
             var objKey = keyBinding[1];
             var fn = keyBinding[2];
@@ -164,7 +164,7 @@ function deepReplace(proxy, obj) {
         };
     };
     for (var key in proxy) {
-        var oldValue7 = proxy[key];
+        var oldValue3 = proxy[key];
         if (!obj.hasOwnProperty(key)) {
             delete proxy[key];
         };
@@ -221,45 +221,37 @@ function mountObject(obj) {
 };
 /* (DEFUN COMPUTE-DEPENDENCIES (OBJ KEY FN)
      (CHAIN *READ-STACK* (PUSH *STACK-DELIMITER-SYMBOL*))
-     (LET ((RETURN-VALUE (CHAIN FN (CALL OBJ))))
+     (LET ((RETURN-VALUE (CHAIN FN (CALL OBJ))) (OBSERVABLES (LIST)))
        (IF (NOT (EQ RETURN-VALUE UNDEFINED))
            (SETF (GETPROP OBJ KEY) RETURN-VALUE)
            (DELETE (GETPROP OBJ KEY)))
+       (CHAIN *TARGET-OBSERVABLES-MAP* (SET OBJ OBSERVABLES))
        (LOOP FOR I FROM (- (LENGTH *READ-STACK*) 1) DOWNTO 0
              DO (WHEN (EQ (TYPEOF (GETPROP *READ-STACK* I)) 'SYMBOL)
                   BREAK) (LET* ((TUPLE (GETPROP *READ-STACK* I))
                                 (OBSERVABLE (@ TUPLE 0))
                                 (OBSERVABLE-KEY (@ TUPLE 1))
-                                (OBSERVABLE-CONTEXT NIL))
+                                (CONTEXT NIL))
                            (WHEN
-                               (NOT (CHAIN *TARGET-OBSERVABLES-MAP* (HAS OBJ)))
-                             (CHAIN *TARGET-OBSERVABLES-MAP* (SET OBJ (LIST))))
-                           (LET ((OBSERVABLES
-                                  (CHAIN *TARGET-OBSERVABLES-MAP* (GET OBJ))))
-                             (WHEN
-                                 (NOT
-                                  (CHAIN OBSERVABLES (INCLUDES OBSERVABLE)))
-                               (CHAIN OBSERVABLES (PUSH OBSERVABLE))))
+                               (NOT (CHAIN OBSERVABLES (INCLUDES OBSERVABLE)))
+                             (CHAIN OBSERVABLES (PUSH OBSERVABLE)))
                            (WHEN
                                (NOT
                                 (CHAIN *OBSERVABLE-CONTEXT-MAP*
                                        (HAS OBSERVABLE)))
                              (CHAIN *OBSERVABLE-CONTEXT-MAP*
                                     (SET OBSERVABLE (CREATE))))
-                           (SETF OBSERVABLE-CONTEXT
+                           (SETF CONTEXT
                                    (CHAIN *OBSERVABLE-CONTEXT-MAP*
                                           (GET OBSERVABLE)))
-                           (WHEN
-                               (NOT
-                                (GETPROP OBSERVABLE-CONTEXT OBSERVABLE-KEY))
-                             (SETF (GETPROP OBSERVABLE-CONTEXT OBSERVABLE-KEY)
-                                     (LIST)))
+                           (WHEN (NOT (GETPROP CONTEXT OBSERVABLE-KEY))
+                             (SETF (GETPROP CONTEXT OBSERVABLE-KEY) (LIST)))
                            (LET ((KEY-BINDINGS
-                                  (GETPROP OBSERVABLE-CONTEXT OBSERVABLE-KEY)))
+                                  (GETPROP CONTEXT OBSERVABLE-KEY)))
                              (WHEN
                                  (NOT
                                   (CHAIN KEY-BINDINGS
-                                         (FIND
+                                         (SOME
                                           (LAMBDA (ENTRY)
                                             (AND (EQ (ELT ENTRY 0) OBJ)
                                                  (EQ (ELT ENTRY 1) KEY))))))
@@ -269,11 +261,13 @@ function mountObject(obj) {
 function computeDependencies(obj, key, fn) {
     READSTACK.push(STACKDELIMITERSYMBOL);
     var returnValue = fn.call(obj);
+    var observables = [];
     if (returnValue !== undefined) {
         obj[key] = returnValue;
     } else {
         delete obj[key];
     };
+    TARGETOBSERVABLESMAP.set(obj, observables);
     for (var i = READSTACK.length - 1; i >= 0; i -= 1) {
         if (typeof READSTACK[i] === 'symbol') {
             break;
@@ -281,23 +275,19 @@ function computeDependencies(obj, key, fn) {
         var tuple = READSTACK[i];
         var observable = tuple[0];
         var observableKey = tuple[1];
-        var observableContext = null;
-        if (!TARGETOBSERVABLESMAP.has(obj)) {
-            TARGETOBSERVABLESMAP.set(obj, []);
-        };
-        var observables = TARGETOBSERVABLESMAP.get(obj);
+        var context = null;
         if (!observables.includes(observable)) {
             observables.push(observable);
         };
         if (!OBSERVABLECONTEXTMAP.has(observable)) {
             OBSERVABLECONTEXTMAP.set(observable, {  });
         };
-        observableContext = OBSERVABLECONTEXTMAP.get(observable);
-        if (!observableContext[observableKey]) {
-            observableContext[observableKey] = [];
+        context = OBSERVABLECONTEXTMAP.get(observable);
+        if (!context[observableKey]) {
+            context[observableKey] = [];
         };
-        var keyBindings = observableContext[observableKey];
-        if (!keyBindings.find(function (entry) {
+        var keyBindings = context[observableKey];
+        if (!keyBindings.some(function (entry) {
             return entry[0] === obj && entry[1] === key;
         })) {
             keyBindings.push([obj, key, fn]);
@@ -327,9 +317,9 @@ function unmountObject(obj) {
     if (!observables) {
         return;
     };
-    var _js8 = observables.length;
-    for (var _js7 = 0; _js7 < _js8; _js7 += 1) {
-        var observable = observables[_js7];
+    var _js4 = observables.length;
+    for (var _js3 = 0; _js3 < _js4; _js3 += 1) {
+        var observable = observables[_js3];
         var context = OBSERVABLECONTEXTMAP.get(observable);
         for (var key in context) {
             var keyBindings = context[key];

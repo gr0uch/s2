@@ -773,6 +773,8 @@ return {
           </div>
           <div>
             <p>Note that in the above example, the observable object has a second argument passed in as <code>true</code>. This tells the observable to be <em>deeply observable</em>, including nested objects. When using deep observables, it is possible to delete observables and replace them with new observables. This is because dependencies are tracked on every run of the computed function.</p>
+            <h3>Deep observability</h3>
+            <p>When an observable is deeply observable, any arbitrary path may be used in computed properties. This means that paths can be deleted, replaced with different objects, mutated, and the dependent computed properties would still react to changes.</p>
             <hr>
           </div>
           <div>

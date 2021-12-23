@@ -128,35 +128,37 @@
 ;; If a dependency re-appears it should not be duplicated.
 (defun compute-dependencies (obj key fn)
   (chain *read-stack* (push *stack-delimiter-symbol*))
-  (let ((return-value (chain fn (call obj))))
+  (let ((return-value (chain fn (call obj)))
+        (observables (list)))
     (if (not (eq return-value undefined))
         (setf (getprop obj key) return-value)
       (delete (getprop obj key)))
+
+    ;; Always resetting this guarantees that we won't keep references to
+    ;; observables which should be garbage collected.
+    (chain *target-observables-map* (set obj observables))
+
     (loop
      for i from (- (length *read-stack*) 1) downto 0 do
      (when (eq (typeof (getprop *read-stack* i)) 'symbol) break)
      (let* ((tuple (getprop *read-stack* i))
             (observable (@ tuple 0))
             (observable-key (@ tuple 1))
-            (observable-context nil))
+            (context nil))
 
-       (when (not (chain *target-observables-map* (has obj)))
-         (chain *target-observables-map* (set obj (list))))
-       (let ((observables (chain *target-observables-map* (get obj))))
-         (when (not (chain observables (includes observable)))
-           (chain observables (push observable))))
+       (when (not (chain observables (includes observable)))
+         (chain observables (push observable)))
 
        (when (not (chain *observable-context-map* (has observable)))
          (chain *observable-context-map* (set observable (create))))
-       (setf observable-context
-             (chain *observable-context-map* (get observable)))
+       (setf context (chain *observable-context-map* (get observable)))
 
-       (when (not (getprop observable-context observable-key))
-         (setf (getprop observable-context observable-key) (list)))
+       (when (not (getprop context observable-key))
+         (setf (getprop context observable-key) (list)))
 
-       (let ((key-bindings (getprop observable-context observable-key)))
+       (let ((key-bindings (getprop context observable-key)))
          (when (not (chain key-bindings
-                           (find (lambda (entry)
+                           (some (lambda (entry)
                                    (and (eq (elt entry 0) obj)
                                         (eq (elt entry 1) key))))))
            (chain key-bindings (push (list obj key fn))))))))
