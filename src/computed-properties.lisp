@@ -123,6 +123,9 @@
        (when (@ value is-event-listener) (continue))
        (compute-dependencies obj key value)))))
 
+
+;; Each time a computed function is run, it tracks all observable keys it read.
+;; If a dependency re-appears it should not be duplicated.
 (defun compute-dependencies (obj key fn)
   (chain *read-stack* (push *stack-delimiter-symbol*))
   (let ((return-value (chain fn (call obj))))
