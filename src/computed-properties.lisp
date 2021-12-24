@@ -140,7 +140,7 @@
          (chain *observable-context-map* (set observable (create))))
        (setf context (chain *observable-context-map* (get observable)))
 
-       (when (not (getprop context observable-key))
+       (when (not (chain context (has-own-property observable-key)))
          (setf (getprop context observable-key) (list)))
 
        (let ((key-bindings (getprop context observable-key)))

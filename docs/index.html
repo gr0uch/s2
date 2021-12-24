@@ -717,7 +717,7 @@ function read(event) {
             </aside>
           </div>
           <div>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 108)">
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 116)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">const src = observable({
@@ -727,20 +727,22 @@ function read(event) {
     { price: 2.50, tax: 1.10 },
   ],
 }, true);
-return {
-  rows: src.data.map(d => computed({
-    total: () => `$${
-      (d.price * d.tax).toFixed(2)}`,
-    price: () => d.price,
-    tax: () => d.tax,
-    setPrice() {
-      d.price = this.price;
-    },
-    setTax() {
-      d.tax = this.tax;
-    },
-  })),
-};</textarea><textarea spellcheck="false">
+return computed({
+  rows() {
+    return src.data.map(d => computed({
+      total: () => `$${
+        (d.price * d.tax).toFixed(2)}`,
+      price: () => d.price,
+      tax: () => d.tax,
+      setPrice() {
+        d.price = this.price;
+      },
+      setTax() {
+        d.tax = this.tax;
+      },
+    }));
+  },
+});</textarea><textarea spellcheck="false">
 <div class="spreadsheet">
   <div>Price</div>
   <div>Tax rate</div>

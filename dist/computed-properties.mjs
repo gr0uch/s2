@@ -225,7 +225,10 @@ function createSource(obj, isDeep) {
                            (SETF CONTEXT
                                    (CHAIN *OBSERVABLE-CONTEXT-MAP*
                                           (GET OBSERVABLE)))
-                           (WHEN (NOT (GETPROP CONTEXT OBSERVABLE-KEY))
+                           (WHEN
+                               (NOT
+                                (CHAIN CONTEXT
+                                       (HAS-OWN-PROPERTY OBSERVABLE-KEY)))
                              (SETF (GETPROP CONTEXT OBSERVABLE-KEY) (LIST)))
                            (LET ((KEY-BINDINGS
                                   (GETPROP CONTEXT OBSERVABLE-KEY)))
@@ -265,7 +268,7 @@ function computeDependencies(obj, key, fn) {
             OBSERVABLECONTEXTMAP.set(observable, {  });
         };
         context = OBSERVABLECONTEXTMAP.get(observable);
-        if (!context[observableKey]) {
+        if (!context.hasOwnProperty(observableKey)) {
             context[observableKey] = [];
         };
         var keyBindings = context[observableKey];
