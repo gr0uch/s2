@@ -85,6 +85,7 @@ test.initialThings = initialThings;
 
 const source = observable({
   showBox: true,
+  array: new Array(5).fill(),
   selectedIndex: 0,
   content: 'f',
 });
@@ -93,7 +94,7 @@ const computed = createComputed(mount, unmount);
 const template = document.querySelector("#root");
 
 const [reactiveObject, node] = s2({
-  title: "Hello, <em>world!</em>",
+  title: () => "Hello, <em>world!</em>",
   titleClass: "title",
   fooBar: "bar",
   titleStyle: "color: #ff8;",
@@ -123,17 +124,19 @@ const [reactiveObject, node] = s2({
   container: computed({
     box() {
       if (!source.showBox) return null;
-      return new Array(10).fill().map((_, i) => computed({
-        content() {
-          return `${source.content} ${i}`;
-        },
-        content2() {
-          return source.selectedIndex === i ? '%' : null;
-        },
-        select() {
-          source.selectedIndex = i;
-        }
-      }));
+      return source.array.map((_, i) => {
+        return computed({
+          content() {
+            return `${Math.random()} // ${source.content} ${i}`;
+          },
+          content2() {
+            return source.selectedIndex === i ? '%' : null;
+          },
+          select() {
+            source.selectedIndex = i;
+          }
+        });
+      });
     },
   }),
   reg: { a: 1 },

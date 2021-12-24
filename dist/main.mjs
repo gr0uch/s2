@@ -404,25 +404,41 @@ function enqueue(fn) {
             (IS-CHANGED (NOT (EQ (GETPROP TARGET KEY) VALUE)))
             (DESCRIPTORS (GETPROP CONTEXT KEY))
             (NODE NIL)
-            (TYPE NIL))
+            (TYPE NIL)
+            (RETURN-VALUE NIL)
+            (HAS-RETURN-VALUE FALSE))
        (WHEN DESCRIPTORS
          (LOOP FOR DESCRIPTOR IN DESCRIPTORS
                DO (SETF NODE (@ DESCRIPTOR NODE)
                         TYPE (@ DESCRIPTOR TYPE)) (WHEN
                                                       (OR IS-CHANGED
                                                           IS-INITIALIZING)
-                                                    (IF (AND
-                                                         (IN TYPE
-                                                          *PROPERTY-HANDLERS*)
+                                                    (WHEN
+                                                        (AND
+                                                         (EQ (TYPEOF VALUE)
+                                                             'FUNCTION)
                                                          (NOT
-                                                          (EQ (TYPEOF VALUE)
-                                                              'FUNCTION)))
+                                                          (EQ TYPE
+                                                              *CONTEXT-EVENT*))
+                                                         (NOT
+                                                          HAS-RETURN-VALUE))
+                                                      (SETF HAS-RETURN-VALUE T
+                                                            RETURN-VALUE
+                                                              (CHAIN VALUE
+                                                                     (CALL
+                                                                      RECEIVER))))
+                                                    (IF (CHAIN
+                                                         *PROPERTY-HANDLERS*
+                                                         (HAS-OWN-PROPERTY
+                                                          TYPE))
                                                         ((GETPROP
                                                           *PROPERTY-HANDLERS*
                                                           TYPE)
                                                          NODE
                                                          (@ DESCRIPTOR NAME)
-                                                         VALUE)
+                                                         (IF HAS-RETURN-VALUE
+                                                             RETURN-VALUE
+                                                             VALUE))
                                                         (PROGN
                                                          (WHEN
                                                              (EQ TYPE
@@ -436,7 +452,9 @@ function enqueue(fn) {
                                                            (LET ((PROXY
                                                                   (SET-SLOT
                                                                    TARGET KEY
-                                                                   VALUE
+                                                                   (IF HAS-RETURN-VALUE
+                                                                       RETURN-VALUE
+                                                                       VALUE)
                                                                    RECEIVER
                                                                    DESCRIPTOR
                                                                    IS-INITIALIZING)))
@@ -499,6 +517,8 @@ function setProperty(target, key, value, receiver, isInitializing) {
     var descriptors = context[key];
     var node = null;
     var type = null;
+    var returnValue = null;
+    var hasReturnValue = false;
     if (descriptors) {
         var _js20 = descriptors.length;
         for (var _js19 = 0; _js19 < _js20; _js19 += 1) {
@@ -506,14 +526,18 @@ function setProperty(target, key, value, receiver, isInitializing) {
             node = descriptor.node;
             type = descriptor.type;
             if (isChanged || isInitializing) {
-                if (type in PROPERTYHANDLERS && typeof value !== 'function') {
-                    PROPERTYHANDLERS[type](node, descriptor.name, value);
+                if (typeof value === 'function' && type !== CONTEXTEVENT && !hasReturnValue) {
+                    hasReturnValue = true;
+                    returnValue = value.call(receiver);
+                };
+                if (PROPERTYHANDLERS.hasOwnProperty(type)) {
+                    PROPERTYHANDLERS[type](node, descriptor.name, hasReturnValue ? returnValue : value);
                 } else {
                     if (type === CONTEXTEVENT) {
                         setEvent(target, value, descriptor, receiver);
                     };
                     if (type === CONTEXTSLOT) {
-                        var proxy = setSlot(target, key, value, receiver, descriptor, isInitializing);
+                        var proxy = setSlot(target, key, hasReturnValue ? returnValue : value, receiver, descriptor, isInitializing);
                         if (proxy) {
                             
                             return Reflect.set(target, key, proxy, receiver);

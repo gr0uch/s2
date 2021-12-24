@@ -229,14 +229,14 @@
     (chain
      main window
      (request-animation-frame
-     (lambda ()
-       (let ((q (length *deferred-queue*)))
-         (loop
-          while (length *deferred-queue*) do
-          (let ((func (chain *deferred-queue* (shift))))
-            (func)))
-         (when (@ main debug)
-           (console-log "queue flushed" q)))))))
+      (lambda ()
+        (let ((q (length *deferred-queue*)))
+          (loop
+           while (length *deferred-queue*) do
+           (let ((func (chain *deferred-queue* (shift))))
+             (func)))
+          (when (@ main debug)
+            (console-log "queue flushed" q)))))))
   (chain *deferred-queue* (push fn)))
 
 
@@ -251,7 +251,9 @@
          (is-changed (not (eq (getprop target key) value)))
          (descriptors (getprop context key))
          (node nil)
-         (type nil))
+         (type nil)
+         (return-value nil)
+         (has-return-value false))
 
     (when descriptors
       (loop
@@ -259,17 +261,24 @@
        (setf node (@ descriptor node)
              type (@ descriptor type))
        (when (or is-changed is-initializing)
-         (if (and (in type *property-handlers*) ; conflict not possible
-                  (not (eq (typeof value) 'function)))
+         (when (and (eq (typeof value) 'function)
+                    (not (eq type *context-event*))
+                    (not has-return-value))
+           (setf has-return-value t
+                 return-value (chain value (call receiver))))
+         (if (chain *property-handlers* (has-own-property type))
              ((getprop *property-handlers* type)
-              node (@ descriptor name) value)
+              node (@ descriptor name)
+              (if has-return-value return-value value))
            (progn
              (when (eq type *context-event*)
                (set-event target value descriptor receiver))
              (when (eq type *context-slot*)
                (let ((proxy
                       (set-slot
-                       target key value receiver descriptor is-initializing)))
+                       target key
+                       (if has-return-value return-value value) receiver
+                       descriptor is-initializing)))
                  (when proxy
                    (return-from
                     set-property
@@ -520,7 +529,7 @@
 
              (chain parent-node (insert-before anchor node))
              (if (not (chain context (has-own-property slot-name)))
-               (setf (getprop context slot-name) (list))
+                 (setf (getprop context slot-name) (list))
                (throw
                 (new (*error
                       (+ "The key \"" slot-name "\" was used in a template "

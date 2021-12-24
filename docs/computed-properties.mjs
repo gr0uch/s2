@@ -200,25 +200,6 @@ function createSource(obj, isDeep) {
     
     return proxy;
 };
-/* (DEFUN MOUNT-OBJECT (OBJ)
-     (LOOP FOR KEY OF OBJ
-           DO (LET* ((VALUE (GETPROP OBJ KEY))
-                     (IS-FUNCTION (EQ (TYPEOF VALUE) 'FUNCTION)))
-                (WHEN IS-FUNCTION
-                  (WHEN (@ VALUE IS-EVENT-LISTENER) (CONTINUE))
-                  (COMPUTE-DEPENDENCIES OBJ KEY VALUE))))) */
-function mountObject(obj) {
-    for (var key in obj) {
-        var value = obj[key];
-        var isFunction = typeof value === 'function';
-        if (isFunction) {
-            if (value.isEventListener) {
-                continue;
-            };
-            computeDependencies(obj, key, value);
-        };
-    };
-};
 /* (DEFUN COMPUTE-DEPENDENCIES (OBJ KEY FN)
      (CHAIN *READ-STACK* (PUSH *STACK-DELIMITER-SYMBOL*))
      (LET ((RETURN-VALUE (CHAIN FN (CALL OBJ))) (OBSERVABLES (LIST)))
@@ -256,8 +237,9 @@ function mountObject(obj) {
                                             (AND (EQ (ELT ENTRY 0) OBJ)
                                                  (EQ (ELT ENTRY 1) KEY))))))
                                (CHAIN KEY-BINDINGS
-                                      (PUSH (LIST OBJ KEY FN))))))))
-     (POP-STACK)) */
+                                      (PUSH (LIST OBJ KEY FN)))))))
+       (POP-STACK)
+       RETURN-VALUE)) */
 function computeDependencies(obj, key, fn) {
     READSTACK.push(STACKDELIMITERSYMBOL);
     var returnValue = fn.call(obj);
@@ -293,8 +275,9 @@ function computeDependencies(obj, key, fn) {
             keyBindings.push([obj, key, fn]);
         };
     };
+    popStack();
     
-    return popStack();
+    return returnValue;
 };
 /* (DEFUN UNMOUNT-OBJECT (OBJ)
      (LET ((OBSERVABLES (CHAIN *TARGET-OBSERVABLES-MAP* (GET OBJ))))
@@ -337,34 +320,68 @@ function unmountObject(obj) {
      (DEFUN COMPUTED (OBJ)
        (LET ((MOUNT (GETPROP OBJ MOUNT-SYMBOL))
              (UNMOUNT (GETPROP OBJ UNMOUNT-SYMBOL)))
-         (SETF (GETPROP OBJ MOUNT-SYMBOL)
-                 (LAMBDA ()
-                   (WHEN MOUNT (CHAIN MOUNT (CALL THIS)))
-                   (MOUNT-OBJECT THIS))
-               (GETPROP OBJ UNMOUNT-SYMBOL)
-                 (LAMBDA ()
-                   (WHEN UNMOUNT (CHAIN UNMOUNT (CALL THIS)))
-                   (UNMOUNT-OBJECT THIS))))
+         (DEFUN COMPUTED-MOUNT ()
+           (WHEN MOUNT (CHAIN MOUNT (CALL THIS)))
+           (WHEN (NOT (LENGTH ARGUMENTS))
+             (LOOP FOR KEY OF OBJ
+                   DO (LET ((FN (GETPROP OBJ KEY)))
+                        (WHEN (EQ (TYPEOF FN) 'FUNCTION)
+                          (CHAIN FN (CALL THIS)))))))
+         (DEFUN COMPUTED-UNMOUNT ()
+           (WHEN UNMOUNT (CHAIN UNMOUNT (CALL THIS)))
+           (UNMOUNT-OBJECT THIS))
+         (SETF (GETPROP OBJ MOUNT-SYMBOL) COMPUTED-MOUNT
+               (GETPROP OBJ UNMOUNT-SYMBOL) COMPUTED-UNMOUNT))
+       (CHAIN *OBJECT (KEYS OBJ)
+              (FOR-EACH
+               (LAMBDA (KEY)
+                 (LET ((FN (GETPROP OBJ KEY)))
+                   (WHEN (EQ (TYPEOF FN) 'FUNCTION)
+                     (DEFUN COMPUTED-PROPERTY ()
+                       (LET ((VALUE (GETPROP THIS KEY)))
+                         (IF (AND VALUE (@ VALUE IS-EVENT-LISTENER))
+                             (CHAIN FN (APPLY THIS ARGUMENTS))
+                             (COMPUTE-DEPENDENCIES THIS KEY FN))))
+                     (SETF (GETPROP OBJ KEY) COMPUTED-PROPERTY))))))
        OBJ)
      COMPUTED) */
 function createComputed(mountSymbol, unmountSymbol) {
     function computed(obj) {
         var mount = obj[mountSymbol];
         var unmount = obj[unmountSymbol];
-        obj[mountSymbol] = function () {
+        function computedMount() {
             if (mount) {
                 mount.call(this);
             };
-            
-            return mountObject(this);
+            if (!arguments.length) {
+                for (var key in obj) {
+                    var fn = obj[key];
+                    if (typeof fn === 'function') {
+                        fn.call(this);
+                    };
+                };
+            };
         };
-        obj[unmountSymbol] = function () {
+        function computedUnmount() {
             if (unmount) {
                 unmount.call(this);
             };
             
             return unmountObject(this);
         };
+        obj[mountSymbol] = computedMount;
+        obj[unmountSymbol] = computedUnmount;
+        Object.keys(obj).forEach(function (key) {
+            var fn = obj[key];
+            if (typeof fn === 'function') {
+                function computedProperty() {
+                    var value = this[key];
+                    
+                    return value && value.isEventListener ? fn.apply(this, arguments) : computeDependencies(this, key, fn);
+                };
+                return obj[key] = computedProperty;
+            };
+        });
         return obj;
     };
     return computed;

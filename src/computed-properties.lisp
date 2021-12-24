@@ -111,19 +111,6 @@
     proxy))
 
 
-;; What this function does is call the functions on the object, which will
-;; trigger the get traps on the proxy objects which in turn will give us
-;; all the necessary info to track dependencies automatically.
-(defun mount-object (obj)
-  (loop
-   for key of obj do
-   (let* ((value (getprop obj key))
-          (is-function (eq (typeof value) 'function)))
-     (when is-function
-       (when (@ value is-event-listener) (continue))
-       (compute-dependencies obj key value)))))
-
-
 ;; Each time a computed function is run, it tracks all observable keys it read.
 ;; If a dependency re-appears it should not be duplicated.
 (defun compute-dependencies (obj key fn)
@@ -161,8 +148,10 @@
                            (some (lambda (entry)
                                    (and (eq (elt entry 0) obj)
                                         (eq (elt entry 1) key))))))
-           (chain key-bindings (push (list obj key fn))))))))
-  (pop-stack))
+           (chain key-bindings (push (list obj key fn)))))))
+
+    (pop-stack)
+    return-value))
 
 
 ;; Careful: this will only remove dependencies if unmount is called! This can
@@ -193,15 +182,37 @@
   (defun computed (obj)
     (let ((mount (getprop obj mount-symbol))
           (unmount (getprop obj unmount-symbol)))
+      (defun computed-mount ()
+        (when mount (chain mount (call this)))
+        (when (not (length arguments))
+          (loop for key of obj do
+                (let ((fn (getprop obj key)))
+                  (when (eq (typeof fn) 'function)
+                    (chain fn (call this)))))))
+      (defun computed-unmount ()
+        (when unmount (chain unmount (call this)))
+        (unmount-object this))
       (setf
-       (getprop obj mount-symbol)
-       (lambda ()
-         (when mount (chain mount (call this)))
-         (mount-object this))
-       (getprop obj unmount-symbol)
-       (lambda ()
-         (when unmount (chain unmount (call this)))
-         (unmount-object this))))
+       ;; The mount symbol is not really used for the main functionality,
+       ;; it is only here to be manually called in case emulating a mount
+       ;; is needed.
+       (getprop obj mount-symbol) computed-mount
+       (getprop obj unmount-symbol) computed-unmount))
+
+    ;; Replace functions with tracked functions.
+    (chain
+     *object (keys obj)
+     (for-each
+      (lambda (key)
+        (let ((fn (getprop obj key)))
+          (when (eq (typeof fn) 'function)
+            (defun computed-property ()
+              (let ((value (getprop this key)))
+                (if (and value (@ value is-event-listener))
+                    (chain fn (apply this arguments))
+                  (compute-dependencies this key fn))))
+            (setf
+             (getprop obj key) computed-property))))))
     obj)
   computed)
 
