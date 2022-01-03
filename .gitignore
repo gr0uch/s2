@@ -1,2 +1,4 @@
 psbuild
+cov_profile
+*.lcov
 *.br

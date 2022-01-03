@@ -9,8 +9,9 @@ Deno.test("mustache parser", () => {
   node = document.body.querySelector("div[data-container]");
   assertEquals(
     node.toString(),
-    `<div data-container="123">unescaped<b><i>text</i></b><input value="foo">` +
-      `<ul></ul>raw text<span>str</span><div id="cmp">2</div></div>`,
+    `<div data-container="123"><span><i>text</i></span><b><i>text</i></b>` +
+      `<input value="foo"><ul></ul>raw text<span>str</span>` +
+      `<div id="cmp">2</div></div>`,
   );
   proxy.nested = { text: "hi" };
   node = document.body.querySelector("#nested");
@@ -103,6 +104,12 @@ Deno.test("computed property", () => {
   // simple assignment
   source.x.y.z = 2;
   assertEquals(node.textContent, "3");
+
+  // deep assignment should not replace objects
+  const oldY = source.x.y;
+  source.x = { y: { z: 5 } };
+  assertEquals(oldY, source.x.y);
+  assertEquals(node.textContent, "6");
 
   // deletion should cause update
   delete source.x;

@@ -51,7 +51,8 @@ export function createWindow() {
     data-container="{{id}}"
   >
     {{!comment-should-be-stripped}}
-    unescaped <b onclick="{{click}}">{{{unescaped}}}</b>
+    {{{unescaped}}}
+    <b onclick="{{click}}">{{{unescaped}}}</b>
     <input value="{{input}}">
     <ul>
       {{#list}}

@@ -286,12 +286,16 @@ function remove() {
           <div>
             <h2 id="import-the-module">Import the module</h2>
             <p>A runtime environment that supports ES Modules is required without build tooling. The recommended way is to either vendor the library, or import from a CDN using the commit hash in the URL. For convenience, the following example uses the latest version.</p>
-            <pre>import s2, {
+            <pre>import bindObjectToTemplate, {
   // The following are symbols, import when needed.
   root, target, mount, unmount, move,
   // The following function is for referring to templates by name.
   registerTemplate,
 } from "https://cdn.jsdelivr.net/gh/gr0uch/s2@latest/dist/main.min.mjs";</pre>
+            <p>Using the default export:</p>
+            <pre>const obj = { ... };
+const template = /* see Mustache addon or use querySelector */;
+const [proxy, fragment] = bindObjectToTemplate(obj, template);</pre>
             <p>Optional addons are as follows:</p>
             <pre>// Parse a subset of Mustache for templating.
 import parseMustache, { createMustacheTag } from "https://cdn.jsdelivr.net/gh/gr0uch/s2@latest/dist/mustache.min.mjs";
