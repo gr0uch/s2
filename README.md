@@ -1,5 +1,7 @@
 # s²
 
+![test status](https://github.com/gr0uch/s2/actions/workflows/test.yml/badge.svg)
+
 **s2 is a function for reactive web UI.**
 
 See the <a href="https://gr0uch.github.io/s2/">documentation page</a> for usage details.

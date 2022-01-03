@@ -1,4 +1,4 @@
-name: s2 test
+name: test
 on: [push]
 jobs:
   test:
@@ -10,5 +10,5 @@ jobs:
         uses: denoland/setup-deno@v1
         with:
           deno-version: vx.x.x
-      - name: test s2
+      - name: test
         run: deno test
