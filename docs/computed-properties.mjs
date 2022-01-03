@@ -9,6 +9,8 @@ var READSTACK = [];
 var CLEARSTACKTIMEOUT = null;
 /* (DEFPARAMETER *STACK-DELIMITER-SYMBOL* (*SYMBOL 'STACK-DELIMITER)) */
 var STACKDELIMITERSYMBOL = Symbol('stackDelimiter');
+/* (DEFPARAMETER *REF-SYMBOL* (*SYMBOL 'REF)) */
+var REFSYMBOL = Symbol('ref');
 /* (DEFPARAMETER *PROXY-OBSERVABLE*
      (LET ((SET-PROPERTY (MAKE-SET-PROPERTY)))
        (CREATE GET GET-PROPERTY SET SET-PROPERTY DELETE-PROPERTY SET-PROPERTY))) */
@@ -83,8 +85,10 @@ function isObject(obj) {
      (DEFUN SET-PROPERTY (TARGET KEY VALUE RECEIVER)
        (LET ((OLD-VALUE (GETPROP TARGET KEY)))
          (WHEN (EQ OLD-VALUE VALUE) (RETURN-FROM SET-PROPERTY T))
-         (WHEN (AND IS-DEEP (IS-OBJECT VALUE))
-           (IF (IS-OBJECT OLD-VALUE)
+         (WHEN
+             (AND IS-DEEP (IS-OBJECT VALUE) (NOT (GETPROP VALUE *REF-SYMBOL*)))
+           (IF (AND (IS-OBJECT OLD-VALUE)
+                    (NOT (GETPROP OLD-VALUE *REF-SYMBOL*)))
                (PROGN
                 (DEEP-REPLACE (GETPROP RECEIVER KEY) VALUE)
                 (RETURN-FROM SET-PROPERTY T))
@@ -109,8 +113,8 @@ function makeSetProperty(isDeep) {
         if (oldValue === value) {
             return true;
         };
-        if (isDeep && isObject(value)) {
-            if (isObject(oldValue)) {
+        if (isDeep && isObject(value) && !value[REFSYMBOL]) {
+            if (isObject(oldValue) && !oldValue[REFSYMBOL]) {
                 deepReplace(receiver[key], value);
                 
                 return true;
@@ -181,7 +185,9 @@ function deepReplace(proxy, obj) {
        (WHEN IS-DEEP
          (LOOP FOR KEY OF OBJ
                DO (LET ((VALUE (GETPROP OBJ KEY)))
-                    (WHEN (IS-OBJECT VALUE)
+                    (WHEN
+                        (AND (IS-OBJECT VALUE)
+                             (NOT (GETPROP VALUE *REF-SYMBOL*)))
                       (SETF (GETPROP OBJ KEY) (CREATE-SOURCE VALUE T))))))
        PROXY)) */
 function createSource(obj, isDeep) {
@@ -192,7 +198,7 @@ function createSource(obj, isDeep) {
     if (isDeep) {
         for (var key in obj) {
             var value = obj[key];
-            if (isObject(value)) {
+            if (isObject(value) && !value[REFSYMBOL]) {
                 obj[key] = createSource(value, true);
             };
         };
@@ -389,6 +395,11 @@ function createComputed(mountSymbol, unmountSymbol) {
     };
     return computed;
 };
-/* (EXPORT NAMES ((CREATE-SOURCE OBSERVABLE) CREATE-SOURCE CREATE-COMPUTED)) */
-export { createSource as observable, createSource, createComputed, };
+/* (DEFUN REF (OBJ) (SETF (GETPROP OBJ *REF-SYMBOL*) T) OBJ) */
+function ref(obj) {
+    obj[REFSYMBOL] = true;
+    return obj;
+};
+/* (EXPORT NAMES ((CREATE-SOURCE OBSERVABLE) CREATE-SOURCE CREATE-COMPUTED REF)) */
+export { createSource as observable, createSource, createComputed, ref, };
 

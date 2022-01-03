@@ -65,13 +65,13 @@
       /* layout */
       .container { position: relative; min-height: 100%; max-width: var(--w); display: flex; margin: auto; hyphens: auto; }
       body::before { display: block; content: " "; position: fixed; top: 0; right: 0; height: 100%; width: calc((100% - var(--w)) / 2 + 1px); background: var(--c-a2); }
-      #main-nav { position: sticky; top: calc(1rem * var(--u) * -10); flex: 1; padding: 0 calc(1rem * var(--u) * 4) 0 calc(1rem * var(--u) * 1); align-self: flex-start; color: var(--c-fg2); }
+      #main-nav { position: sticky; top: 0; flex: 1; padding: calc(1rem * 28 * var(--u)) 0 0 calc(1rem * var(--u) * 1); margin: 0 calc(1rem * var(--u) * 4) 0 0; align-self: flex-start; color: var(--c-fg2); max-height: 100vh; overflow: auto; }
       #main-nav h5 { font-size: var(--h3); font-weight: 700; }
       #main-nav code { font-size: var(--h4); }
       #main-nav h5 + h5 { margin-top: var(--l); }
       #main-nav ul { padding: 0; list-style-type: none; font-style: italic; font-size: var(--h3); font-weight: 300; }
       #main-nav li::before { content: "-"; margin-right: calc(1rem * var(--u) * 1); color: var(--c-fg3); }
-      #main-nav .logo { position: sticky; top: 0; width: calc(1rem * var(--u) * 8); padding-top: calc(1rem * var(--u) * 2); background: var(--c-l); margin-bottom: calc(1rem * 20 * var(--u)); border-bottom: var(--c-l) calc(1rem * var(--u) * 1) solid; border-radius: 0 0 calc(1rem * var(--u)) calc(1rem * var(--u)); }
+      #main-nav .logo { position: fixed; top: 0; width: calc(1rem * var(--u) * 8); padding-top: calc(1rem * var(--u) * 2); background: var(--c-l); border-bottom: var(--c-l) calc(1rem * var(--u) * 1) solid; border-radius: 0 0 calc(1rem * var(--u)) calc(1rem * var(--u)); }
       #main-nav svg { display: block; height: calc(1rem * var(--u) * 8); width: calc(1rem * var(--u) * 8); }
       #content { flex: 5; }
       #content a, #main-nav h5 a { text-decoration: underline var(--c-l) 2px; }
@@ -87,7 +87,7 @@
       #content > section code { background: var(--c-a2); border-radius: calc(1rem * var(--u)); padding: 0 calc(1rem * var(--u)); }
       #content > section pre code { background: inherit; border-radius: inherit; }
       .tagline { color: var(--c-fg3); font-size: var(--h3); padding-top: calc(1rem * var(--u) * 2); }
-      .params { position: relative; z-index: 0; margin: calc(1rem * var(--u) * 20) 0 0 0; font-size: calc(1rem * var(--u) * 5); line-height: calc(1rem * var(--u) * 10); border-radius: calc(1rem * var(--u)); color: var(--c-l); }
+      .params { position: relative; z-index: 0; margin: calc(1rem * var(--u) * 18) 0 0 0; font-size: calc(1rem * var(--u) * 5); line-height: calc(1rem * var(--u) * 10); border-radius: calc(1rem * var(--u)); color: var(--c-l); }
       .params b { display: inline-block; width: calc(1rem * var(--u) * 20); }
       .params i { display: inline-block; margin: 0 calc(1rem * var(--u) * 2); }
       .params code { background: none !important; text-decoration: underline; font-size: inherit; }
@@ -149,7 +149,7 @@
         .container { flex-direction: column; }
         .params { margin: calc(1rem * var(--u) * 8) 0; padding: calc(var(--l) * 1 / 2); }
         h2 { margin-top: calc(1rem * var(--u) * 6); }
-        #main-nav { position: static; }
+        #main-nav { position: static; padding-top: 0; }
         #main-nav .logo { margin-bottom: 0; position: static; }
         #main-nav .logo ~ * { display: none; }
         .live-example.primary.code { position: inherit; left: 0; margin-right: 0; }
@@ -298,7 +298,7 @@ import parseMustache, { createMustacheTag } from "https://cdn.jsdelivr.net/gh/gr
 &nbsp;
 // Computed properties implementation.
 import {
-  observable, createComputed,
+  observable, createComputed, ref,
 } from "https://cdn.jsdelivr.net/gh/gr0uch/s2@latest/dist/computed-properties.min.mjs";</pre>
           </div>
           <div>
@@ -777,6 +777,8 @@ return computed({
             <p>Note that in the above example, the observable object has a second argument passed in as <code>true</code>. This tells the observable to be <em>deeply observable</em>, including nested objects. When using deep observables, it is possible to delete observables and replace them with new observables. This is because dependencies are tracked on every run of the computed function.</p>
             <h3>Deep observability</h3>
             <p>When an observable is deeply observable, any arbitrary path may be used in computed properties. This means that paths can be deleted, replaced with different objects, mutated, and the dependent computed properties would still react to changes.</p>
+            <h3>Using <code>ref(obj)</code> to opt-out of deep observability</h3>
+            <p>In case one knows in advance that an object will not have its properties changed, the <code>ref()</code> function will assign an internal symbol on the object to mark it as a reference only.</p>
             <hr>
           </div>
           <div>

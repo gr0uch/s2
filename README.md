@@ -17,16 +17,6 @@ See [js-framework-benchmark results table](https://krausest.github.io/js-framewo
 - `s2.window`: set a different global object for server-side rendering.
 
 
-## Name
-
-s2 can mean:
-- simulacra 2: electric bugaloo
-- super solenoid
-- sneaky submarine
-- season 2
-- 2 kilobytes compressed
-
-
 ## Development
 
 s2 is written in the Parenscript subset of Common Lisp.
@@ -39,7 +29,20 @@ Need to build the `psbuild` binary from `parenscript-builder` and put it here to
 
 ## Testing
 
+Run automated tests with Deno:
+
+```sh
+deno test
+```
+
+### Manual testing pages
+
 Run a web server like `http-server .` and then navigate to the `/test/` directory. HTTP is required for loading modules.
+
+
+## Name
+
+s2 is short for simulacra 2. Prior art: I wrote [a similar library that is limited to ES5](https://github.com/gr0uch/simulacra), so no proxies.
 
 
 ## License

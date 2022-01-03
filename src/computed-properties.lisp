@@ -6,6 +6,7 @@
 (defparameter *read-stack* (list))
 (defparameter *clear-stack-timeout* nil)
 (defparameter *stack-delimiter-symbol* (*symbol 'stack-delimiter))
+(defparameter *ref-symbol* (*symbol 'ref))
 
 (defparameter *proxy-observable*
   (let ((set-property (make-set-property)))
@@ -25,6 +26,7 @@
   (loop
    while (length *read-stack*) do
    (chain *read-stack* (pop))))
+
 
 (defun pop-stack ()
   (loop
@@ -47,8 +49,10 @@
       (setf *clear-stack-timeout* (set-timeout clear-stack 0))))
   (chain *reflect (get target key receiver)))
 
+
 (defun is-object (obj)
   (and obj (eq (typeof obj) 'object)))
+
 
 (defun make-set-property (is-deep)
   (defun set-property (target key value receiver)
@@ -57,8 +61,8 @@
       (when (eq old-value value) (return-from set-property t))
 
       ;; Just overwrite keys on deep observables.
-      (when (and is-deep (is-object value))
-        (if (is-object old-value)
+      (when (and is-deep (is-object value) (not (getprop value *ref-symbol*)))
+        (if (and (is-object old-value) (not (getprop old-value *ref-symbol*)))
             (progn
               (deep-replace (getprop receiver key) value)
               (return-from set-property t))
@@ -106,7 +110,7 @@
     (when is-deep
       (loop for key of obj do
             (let ((value (getprop obj key)))
-              (when (is-object value)
+              (when (and (is-object value) (not (getprop value *ref-symbol*)))
                 (setf (getprop obj key) (create-source value t))))))
     proxy))
 
@@ -156,8 +160,8 @@
 
 ;; Careful: this will only remove dependencies if unmount is called! This can
 ;; cause memory leaks if unmount is not called. Unmount should be called
-;; recursively, so it should not be necessary to directly call it in any
-;; circumstance.
+;; recursively, so it should not be necessary to directly call it in most
+;; circumstances.
 (defun unmount-object (obj)
   (let ((observables (chain *target-observables-map* (get obj))))
     (when (not observables) (return-from unmount-object))
@@ -217,8 +221,16 @@
   computed)
 
 
+;; Assign the ref symbol on an object, to mark it as not deeply observable.
+(defun ref (obj)
+  (setf (getprop obj *ref-symbol*) t)
+  obj)
+
+
 (export :names
         ((create-source observable)
          ;; TODO: the `create-source` should probably be deprecated in favor
          ;; of `observable`.
-         create-source create-computed))
+         create-source
+         create-computed
+         ref))

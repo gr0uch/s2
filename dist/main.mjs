@@ -73,10 +73,13 @@ var PROPERTYHANDLERS = {  };
          (GETPROP *PROPERTY-HANDLERS* *CONTEXT-VALUE*)
            (LAMBDA (NODE KEY VALUE)
              (WHEN (NOT (EQ VALUE (@ NODE VALUE)))
-               (SETF (@ NODE VALUE)
-                       (IF (EQ VALUE UNDEFINED)
-
-                           VALUE))))
+               (IF (EQ VALUE UNDEFINED)
+                   (PROGN
+                    (CHAIN NODE (REMOVE-ATTRIBUTE 'VALUE))
+                    (SETF (@ NODE VALUE) ))
+                   (PROGN
+                    (CHAIN NODE (SET-ATTRIBUTE 'VALUE VALUE))
+                    (SETF (@ NODE VALUE) VALUE)))))
          (GETPROP *PROPERTY-HANDLERS* *CONTEXT-CLASS*) SET-CLASS
          (GETPROP *PROPERTY-HANDLERS* *CONTEXT-ATTRIBUTE*) SET-ATTRIBUTE
          (GETPROP *PROPERTY-HANDLERS* *CONTEXT-DATA*) SET-DATA) */
@@ -88,7 +91,13 @@ PROPERTYHANDLERS[CONTEXTHTML] = function (node, key, value) {
 };
 PROPERTYHANDLERS[CONTEXTVALUE] = function (node, key, value) {
     if (value !== node.value) {
-        return node.value = value === undefined ? '' : value;
+        if (value === undefined) {
+            node.removeAttribute('value');
+            return node.value = '';
+        } else {
+            node.setAttribute('value', value);
+            return node.value = value;
+        };
     };
 };
 PROPERTYHANDLERS[CONTEXTCLASS] = setClass;
@@ -478,7 +487,7 @@ function enqueue(fn) {
                                                                                            (CHAIN
                                                                                             NODE
                                                                                             (ADD-EVENT-LISTENER
-                                                                                             input
+                                                                                             'INPUT
                                                                                              (LAMBDA
                                                                                                  (
                                                                                                   EVENT)

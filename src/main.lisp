@@ -70,7 +70,11 @@
  (getprop *property-handlers* *context-value*)
  (lambda (node key value)
    (when (not (eq value (@ node value)))
-     (setf (@ node value) (if (eq value undefined) "" value))))
+     (if (eq value undefined)
+         (progn (chain node (remove-attribute 'value))
+                (setf (@ node value) ""))
+       (progn (chain node (set-attribute 'value value))
+              (setf (@ node value) value)))))
  (getprop *property-handlers* *context-class*) set-class
  (getprop *property-handlers* *context-attribute*) set-attribute
  (getprop *property-handlers* *context-data*) set-data)
@@ -288,7 +292,7 @@
        (when (and (eq type *context-value*)
                   (not (@ descriptor is-listening)))
          (chain node (add-event-listener
-                      "input"
+                      'input
                       (lambda (event)
                         (chain *reflect (set target key
                                              (@ event target value)
