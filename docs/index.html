@@ -65,20 +65,20 @@
       /* layout */
       .container { position: relative; min-height: 100%; max-width: var(--w); display: flex; margin: auto; hyphens: auto; }
       body::before { display: block; content: " "; position: fixed; top: 0; right: 0; height: 100%; width: calc((100% - var(--w)) / 2 + 1px); background: var(--c-a2); }
-      #main-nav { position: sticky; top: 0; flex: 1; padding: calc(1rem * 28 * var(--u)) 0 0 calc(1rem * var(--u) * 1); margin: 0 calc(1rem * var(--u) * 4) 0 0; align-self: flex-start; color: var(--c-fg2); max-height: 100vh; overflow: auto; }
+      #main-nav { position: sticky; top: 0; flex: 1; padding: calc(1rem * 28 * var(--u)) 0 0 calc(1rem * var(--u) * 1); margin: 0 var(--l) 0 0; align-self: flex-start; color: var(--c-fg2); height: 100vh; overflow: auto; }
       #main-nav h5 { font-size: var(--h3); font-weight: 700; }
       #main-nav code { font-size: var(--h4); }
       #main-nav h5 + h5 { margin-top: var(--l); }
       #main-nav ul { padding: 0; list-style-type: none; font-style: italic; font-size: var(--h3); font-weight: 300; }
       #main-nav li::before { content: "-"; margin-right: calc(1rem * var(--u) * 1); color: var(--c-fg3); }
-      #main-nav .logo { position: fixed; top: 0; width: calc(1rem * var(--u) * 8); padding-top: calc(1rem * var(--u) * 2); background: var(--c-l); border-bottom: var(--c-l) calc(1rem * var(--u) * 1) solid; border-radius: 0 0 calc(1rem * var(--u)) calc(1rem * var(--u)); }
+      #main-nav .logo { position: absolute; top: 0; width: calc(1rem * var(--u) * 8); padding-top: calc(1rem * var(--u) * 2); background: var(--c-l); border-bottom: var(--c-l) calc(1rem * var(--u) * 1) solid; border-radius: 0 0 calc(1rem * var(--u)) calc(1rem * var(--u)); }
       #main-nav svg { display: block; height: calc(1rem * var(--u) * 8); width: calc(1rem * var(--u) * 8); }
       #content { flex: 5; }
       #content a, #main-nav h5 a { text-decoration: underline var(--c-l) 2px; }
       #content > section { display: grid; grid-template-columns: 5fr 2fr; grid-template-rows: min-content; border-bottom: 2px var(--c-a2) solid; }
       #content > section > div { padding: 0 calc(1rem * var(--u) * 16) 0 0; position: relative; }
       #content > section > div:nth-of-type(2n) { padding: 0 var(--l); }
-      #content > section > div:nth-of-type(2n)::before { display: block; content: " "; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--c-a2); z-index: -1; }
+      #content > section > div:nth-of-type(2n)::before { display: block; content: " "; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--c-a2); z-index: -1; box-sizing: border-box; }
       #content > section > div:last-of-type { padding-bottom: calc(1rem * var(--u) * 16); }
       #content > section > div:nth-last-of-type(2) > :last-child { margin-bottom: calc(1rem * var(--u) * 16) !important; }
       #content > section > div > :last-child:not(.live-example.code) { margin-bottom: 0; }
@@ -149,7 +149,7 @@
         .container { flex-direction: column; }
         .params { margin: calc(1rem * var(--u) * 8) 0; padding: calc(var(--l) * 1 / 2); }
         h2 { margin-top: calc(1rem * var(--u) * 6); }
-        #main-nav { position: static; padding-top: 0; }
+        #main-nav { position: static; padding-top: 0; height: auto; }
         #main-nav .logo { margin-bottom: 0; position: static; }
         #main-nav .logo ~ * { display: none; }
         .live-example.primary.code { position: inherit; left: 0; margin-right: 0; }
@@ -214,10 +214,10 @@
         <section>
           <div>
             <h2 id="rationale">Rationale</h2>
-            <p><em>s²</em> is a single function capable of expressing the most complex web applications. It enables the user to think of the front-end entirely in terms of state, rather than mixing logic in with the presentation layer (templates, components). <em>s²</em> has a few design goals:</p>
+            <p><em>s²</em> is a single function that <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy">proxies</a> mutable data to <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Reflect">reflect</a> in the DOM. Its paradigm models user interface entirely in terms of state, and avoids mixing logic with the presentation layer (inlining JavaScript, such as JSX). <em>s²</em> has a few design goals:</p>
             <ul>
               <li>Enable separation of application logic from the presentation layer. For example, unlike React which combines hooks, templates (JSX), and arbitrary code in a render function, <em>s²</em> has data, functions that operate on the data, and declarative templates.</li>
-              <li>The only required API is its main function. Advanced features such as computed properties are implemented as addons.</li>
+              <li>The only required API is its main function, which handles rendering and event listening. Advanced features such as computed properties are implemented as addons.</li>
               <li>Templates are logic-less. This differs from prior art such as JSX where embedded JavaScript is allowed. Due to this constraint, logic-less templating maps well to <em>s²</em>, and there is an addon for <a href="#mustache-templates">Mustache templates</a> that is aware of HTML context.</li>
             </ul>
             <p>Here is a sample to-do app built with <em>s²</em>:</p>
@@ -286,7 +286,7 @@ function remove() {
           <div>
             <h2 id="import-the-module">Import the module</h2>
             <p>A runtime environment that supports ES Modules is required without build tooling. The recommended way is to either vendor the library, or import from a CDN using the commit hash in the URL. For convenience, the following example uses the latest version.</p>
-            <pre>import bindObjectToTemplate, {
+            <pre>import s2, {
   // The following are symbols, import when needed.
   root, target, mount, unmount, move,
   // The following function is for referring to templates by name.
@@ -295,7 +295,7 @@ function remove() {
             <p>Using the default export:</p>
             <pre>const obj = { ... };
 const template = /* see Mustache addon or use querySelector */;
-const [proxy, fragment] = bindObjectToTemplate(obj, template);</pre>
+const [proxy, fragment] = s2(obj, template);</pre>
             <p>Optional addons are as follows:</p>
             <pre>// Parse a subset of Mustache for templating.
 import parseMustache, { createMustacheTag } from "https://cdn.jsdelivr.net/gh/gr0uch/s2@latest/dist/mustache.min.mjs";
@@ -781,8 +781,11 @@ return computed({
             <p>Note that in the above example, the observable object has a second argument passed in as <code>true</code>. This tells the observable to be <em>deeply observable</em>, including nested objects. When using deep observables, it is possible to delete observables and replace them with new observables. This is because dependencies are tracked on every run of the computed function.</p>
             <h3>Deep observability</h3>
             <p>When an observable is deeply observable, any arbitrary path may be used in computed properties. This means that paths can be deleted, replaced with different objects, mutated, and the dependent computed properties would still react to changes.</p>
-            <h3>Using <code>ref(obj)</code> to opt-out of deep observability</h3>
+            <h3>Using <code>ref()</code> to opt-out of deep observability</h3>
             <p>In case one knows in advance that an object will not have its properties changed, the <code>ref()</code> function will assign an internal symbol on the object to mark it as a reference only.</p>
+            <pre>const source = observable({
+  notDeep: ref({ ... }), // this object will not be deeply observable
+}, true);</pre>
             <hr>
           </div>
           <div>
