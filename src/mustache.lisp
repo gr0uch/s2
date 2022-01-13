@@ -109,7 +109,9 @@
           (hash nil))
       (loop for hash in args
             for i from 1 to (length strs) do
-            (chain result (push (+ "{{>" hash "}}") (elt strs i))))
+            (chain result
+                   (push (if hash (+ "{{>" hash "}}") (elt arguments i))
+                         (elt strs i))))
       (setf result (chain result (join ""))
             element (parse-mustache result)
             hash (+ "template" (hash-str result)))
