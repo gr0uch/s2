@@ -398,8 +398,9 @@
         (when previous-value
           (let ((unmount (chain *proxy-unmount-map* (get previous-value)))
                 (nodes (chain *proxy-delimiter-map* (get previous-value))))
-            (remove-between-delimiters
-             (@ nodes 0) (@ nodes 1) unmount previous-value))))
+            (when nodes
+              (remove-between-delimiters
+               (@ nodes 0) (@ nodes 1) unmount previous-value)))))
       (if (and value (not previous-value))
           ;; This is specifically to remove slot placeholder.
           (remove-between-delimiters (@ nodes 0) (@ nodes 1))

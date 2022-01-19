@@ -698,8 +698,9 @@ function recursiveUnmount(self, shouldUnmount, cycleSet) {
              (WHEN PREVIOUS-VALUE
                (LET ((UNMOUNT (CHAIN *PROXY-UNMOUNT-MAP* (GET PREVIOUS-VALUE)))
                      (NODES (CHAIN *PROXY-DELIMITER-MAP* (GET PREVIOUS-VALUE))))
-                 (REMOVE-BETWEEN-DELIMITERS (@ NODES 0) (@ NODES 1) UNMOUNT
-                  PREVIOUS-VALUE))))
+                 (WHEN NODES
+                   (REMOVE-BETWEEN-DELIMITERS (@ NODES 0) (@ NODES 1) UNMOUNT
+                    PREVIOUS-VALUE)))))
          (IF (AND VALUE (NOT PREVIOUS-VALUE))
              (REMOVE-BETWEEN-DELIMITERS (@ NODES 0) (@ NODES 1))
              (PROGN (CHAIN NODES 0 (REMOVE)) (CHAIN NODES 1 (REMOVE)))))
@@ -795,7 +796,9 @@ function setSlot(target, key, value, receiver, descriptor, isInitializing) {
             if (previousValue) {
                 var unmount30 = PROXYUNMOUNTMAP.get(previousValue);
                 var nodes31 = PROXYDELIMITERMAP.get(previousValue);
-                removeBetweenDelimiters(nodes31[0], nodes31[1], unmount30, previousValue);
+                if (nodes31) {
+                    removeBetweenDelimiters(nodes31[0], nodes31[1], unmount30, previousValue);
+                };
             };
         };
         if (value && !previousValue) {
