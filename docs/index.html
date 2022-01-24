@@ -29,25 +29,24 @@
         --f-b: Space Grotesk, -apple-system, BlinkMacSystemFont, Microsoft Sans Serif, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji;
         --f-m: Space Mono, SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
 
-        --c-bg: #fff;
-        --c-fg: #000;
-        --c-fg2: #666;
-        --c-fg3: #bbb;
-        --c-a: rgb(240, 240, 240);
-        --c-a2: rgb(225, 225, 225);
-        --c-j: #f1e05a;
+        --c-bg: rgb(32, 30, 40);
+        --c-fg: rgb(215, 210, 220);
+        --c-fh: rgb(255, 255, 255);
+        --c-fg2: rgb(155, 150, 160);
+        --c-fg3: rgb(125, 120, 130);
+        --c-a: rgb(42, 40, 50);
+        --c-a2: rgb(52, 50, 60);
         --c-l: #3fb68b;
         --c-l2: rgba(63, 182, 139, 0.08);
         --c-h: #e34c26;
         --c-e: #6e40c9;
-        --c-e2: #5d33b0;
       }
-      ::selection { background: var(--c-j); color: var(--c-fg); }
+      ::selection { background: var(--c-e); color: var(--c-fg); }
       * { margin: 0; padding: 0; border: 0; box-sizing: border-box; }
       html { font-size: var(--h); }
       body { line-height: var(--l); background: var(--c-a); color: var(--c-fg); font-family: var(--f-b); }
       h1, h2, h3, h4, h5, h6 { font-size: inherit; font-weight: inherit; }
-      h2 { font-size: calc(1rem * var(--u) * 5); font-weight: 700; margin: calc(1rem * 12 * var(--u)) 0 var(--l); padding: calc(1rem * var(--u) * 2) 0; }
+      h2 { font-size: calc(1rem * var(--u) * 5); font-weight: 700; margin: calc(1rem * 12 * var(--u)) 0 var(--l); padding: calc(1rem * var(--u) * 2) 0; color: var(--c-fh); }
       h2 code { font-size: inherit; }
       h3 { font-size: 1rem; font-weight: 700; margin: 0 0 var(--l); }
       h6 { font-size: var(--h3); text-transform: uppercase; font-weight: 300; font-style: italic; letter-spacing: 0.1rem; color: var(--c-fg2); }
@@ -56,8 +55,8 @@
       blockquote { color: var(--c-fg2); border-left: calc(1rem * var(--u) * 1) var(--c-fg3) solid; padding-left: calc(1rem * var(--u) * 3); }
       a { color: inherit; text-decoration: inherit; }
       code, pre { font-family: var(--f-m); font-size: var(--h2); }
-      textarea, pre { background: none; padding: calc(1rem * var(--u) * 2) calc(1rem * var(--u) * 3); font-family: var(--f-m); font-size: var(--h3); resize: vertical; font-variant-ligatures: none; }
-      pre { box-shadow: 0 calc(1rem * var(--u) * 3) calc(1rem * var(--u) * 9) var(--c-a2); border-radius: calc(1rem * var(--u)); white-space: pre-wrap; counter-reset: line; }
+      textarea, pre { color: var(--c-fg2); background: none; padding: calc(1rem * var(--u) * 2) calc(1rem * var(--u) * 3); font-family: var(--f-m); font-size: var(--h3); resize: vertical; font-variant-ligatures: none; }
+      pre { box-shadow: 0 calc(1rem * var(--u) * 3) calc(1rem * var(--u) * 9) var(--c-bg); border-radius: calc(1rem * var(--u)); white-space: pre-wrap; counter-reset: line; }
       pre > code { display: block; counter-increment: line; position: relative; padding: 0 0 0 calc(1rem * var(--u) * 6) !important; font-size: inherit; }
       pre > code::before { content: counter(line); display: inline-block; position: absolute; top: 0; right: calc(100% - 1rem * var(--u) * 4); color: var(--c-fg3); }
       textarea:focus, input:focus { outline: 1px var(--c-l) solid; }
@@ -75,10 +74,10 @@
       #main-nav svg { display: block; height: calc(1rem * var(--u) * 8); width: calc(1rem * var(--u) * 8); }
       #content { flex: 5; }
       #content a, #main-nav h5 a { text-decoration: underline var(--c-l) 2px; }
-      #content > section { display: grid; grid-template-columns: 5fr 2fr; grid-template-rows: min-content; border-bottom: 2px var(--c-a2) solid; }
+      #content > section { display: grid; grid-template-columns: 5fr 2fr; grid-template-rows: min-content; border-bottom: 4px var(--c-a2) solid; }
       #content > section > div { padding: 0 calc(1rem * var(--u) * 16) 0 0; position: relative; }
       #content > section > div:nth-of-type(2n) { padding: 0 var(--l); }
-      #content > section > div:nth-of-type(2n)::before { display: block; content: " "; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--c-a2); z-index: -1; box-sizing: border-box; }
+      #content > section > div:nth-of-type(2n)::before { display: block; content: " "; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--c-a); z-index: -1; box-sizing: border-box; }
       #content > section > div:last-of-type { padding-bottom: calc(1rem * var(--u) * 16); }
       #content > section > div:nth-last-of-type(2) > :last-child { margin-bottom: calc(1rem * var(--u) * 16) !important; }
       #content > section > div > :last-child:not(.live-example.code) { margin-bottom: 0; }
@@ -93,7 +92,7 @@
       .params code { background: none !important; text-decoration: underline; font-size: inherit; }
 
       /* examples */
-      .live-example.code { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: min-content 1fr; box-shadow: 0 calc(1rem * var(--u) * 4) calc(1rem * var(--u) * 8) var(--c-a2); border-radius: calc(1rem * var(--u)); margin-bottom: calc(1rem * var(--u) * 10); }
+      .live-example.code { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: min-content 1fr; box-shadow: 0 calc(1rem * var(--u) * 4) calc(1rem * var(--u) * 8) var(--c-bg); border-radius: calc(1rem * var(--u)); margin-bottom: calc(1rem * var(--u) * 10); }
       .live-example.code h6 { background: var(--c-bg); padding: calc(1rem * var(--u) * 1) calc(1rem * var(--u) * 3); border-bottom: 1px var(--c-a2) solid; border-right: 1px var(--c-a2) solid; }
       .live-example.code h6:first-of-type { border-radius: calc(1rem * var(--u)) 0 0 0; }
       .live-example.code h6:last-of-type { border-radius: 0 calc(1rem * var(--u)) 0 0; border-right: none; }
@@ -101,7 +100,7 @@
       .live-example.code textarea:last-of-type { border-right: none; }
       aside { color: var(--c-fg2); font-size: var(--h3); }
       aside code { font-size: inherit; }
-      aside h6 { padding: calc(1rem * var(--u) * 1) 0; margin-bottom: calc(1rem * var(--u) * 2); border-bottom: 1px var(--c-fg3) solid; }
+      aside h6 { padding: calc(1rem * var(--u) * 1) 0; margin-bottom: calc(1rem * var(--u) * 2); border-bottom: 2px var(--c-a2) solid; }
       .live-example.output ul { list-style-type: circle; padding: 0 0 0 calc(1rem * var(--u) * 4); margin: 0; }
       .live-example.output li > div { float: right; color: var(--c-h); cursor: pointer; font-weight: 700; }
       aside:not(.output) { margin-top: calc(1rem * var(--u) * 16); }
@@ -126,7 +125,7 @@
       .live-example.primary.code h6 { background: var(--c-l2); }
       .live-example.primary.code textarea { background: var(--c-a); }
       .live-example.primary.output { background: var(--c-l2); backdrop-filter: blur(var(--h4)); margin: 0 calc(1rem * var(--u) * -4); padding: 0 calc(1rem * var(--u) * 4) calc(1rem * var(--u) * 4); border-radius: calc(1rem * var(--u)); }
-      .live-example.primary.output input { background: var(--c-bg); }
+      .live-example.primary.output input { background: var(--c-a); }
       .live-example.primary.output input:focus { outline: none; }
       .live-example.primary h6 { color: var(--c-l); border-bottom-width: 2px; border-bottom-color: var(--c-l); font-weight: 700; font-style: inherit; padding-top: calc(1rem * var(--u) * 2); }
 
@@ -137,7 +136,7 @@
       input, button { font-family: inherit; font-size: inherit; background: inherit; color: inherit; }
       form button { background: var(--c-bg); }
       form input { width: 0; }
-      input { background: var(--c-a); height: calc(1rem * var(--u) * 7); padding: 0 calc(1rem * var(--u) * 2); flex: 1; width: 100%; border-radius: calc(1rem * var(--u)); }
+      input { background: var(--c-a2); height: calc(1rem * var(--u) * 7); padding: 0 calc(1rem * var(--u) * 2); flex: 1; width: 100%; border-radius: calc(1rem * var(--u)); }
       button { cursor: pointer; padding: 0 calc(1rem * var(--u) * 3); color: var(--c-e); font-weight: 700; }
 
       /* rEspoNsiVe */
@@ -424,6 +423,13 @@ return state;</textarea><textarea spellcheck="false"><form onsubmit="{{ignore}}"
             </aside>
           </div>
           <div>
+            <p>Here is what the Mustache addon maps to HTML:</p>
+            <ul>
+              <li><code>{{text}}</code> and <code>{{{rawText}}}</code> inside of an element&apos;s body map to <code>textContent</code> and <code>innerHTML</code> respectively.</li>
+              <li>Attributes such as <code>&lt;p style="{{style}}"&gt;</code> will map to the element&apos;s attributes.</li>
+              <li>Event listeners such as <code>&lt;form onsubmit="{{action}}"&gt;</code> will add an event listener on the element.</li>
+              <li>Mustache sections <code>{{#section}}...{{/section}}</code> can contain inlined content, or exactly one partial: <code>{{>partial}}</code>.</li>
+            </ul>
             <p>There are some caveats due to the limitations of the HTML templating:</p>
             <ul>
               <li>Inverted sections are not supported. This won&apos;t work: <code>{{^section}}{{/section}}</code>.</li>
@@ -490,10 +496,14 @@ function increment(event) {
           <div>
             <p>This provides an abstraction for template re-use. However, what it does not provide is &ldquo;components&rdquo; in any sense. <em>s²</em> stays agnostic about <a href="https://developer.mozilla.org/en-US/docs/Web/Web_Components">Web Components</a>, or even implementing its own concept of components in general. It is entirely feasible to build Web Components using <em>s²</em> without any conceptual mismatch.</p>
             <p>For improved ergonomics, there is the <code>createMustacheTag</code> function, which will allow one to re-use templates without naming them, and also interpolate templates in tagged template literals.</p>
-            <pre>const mustache = createMustacheTag(registerTemplate);
-const name = mustache`{{firstName}} {{lastName}}`;
-const greeting = mustache`Hello {{#person}}${name}{{/person}}!`;</pre>
+            <pre>const html = createMustacheTag(registerTemplate);
+const name = html`{{firstName}} {{lastName}}`;
+const greeting = html`
+  Hello
+  {{#person}}${name}{{/person}}
+  !`;</pre>
             <p>In the above example, <em>name</em> will be a separate template which is referred to by <em>greeting</em>, they are connected by an internal hash.</p>
+            <p><strong>Warning:</strong> templates can only be interpolated inside of a section (refer to the <a href="#mustache-templates">limitations</a>). If you meant to re-use part of a template, interpolate a string instead of another template.</p>
           </div>
           <div>
           </div>
@@ -594,7 +604,7 @@ async function unmountChar(node) {
   shuffle(event) {
     event.preventDefault();
     this.nums.sort((a, b) =>
-      Math.random() < 0.5 ? -1 : 1);
+      Math.random() - 0.5);
   },
 };
 function animate(node) {
@@ -778,8 +788,10 @@ return computed({
             </aside>
           </div>
           <div>
-            <p>Note that in the above example, the observable object has a second argument passed in as <code>true</code>. This tells the observable to be <em>deeply observable</em>, including nested objects. When using deep observables, it is possible to delete observables and replace them with new observables. This is because dependencies are tracked on every run of the computed function.</p>
+            <p>Note that in the above example, the observable object has a second argument passed in as <code>true</code>. This tells the observable to be <em>deeply observable</em>, including nested objects. When using deep observables, it is possible to delete observables and replace them with new observables. This works because dependencies are tracked on every run of the computed function.</p>
             <h3>Deep observability</h3>
+            <p>Opt-in to deep observability by passing the second argument as <code>true</code>:</p>
+            <pre>const source = observable({ ... }, true);</pre>
             <p>When an observable is deeply observable, any arbitrary path may be used in computed properties. This means that paths can be deleted, replaced with different objects, mutated, and the dependent computed properties would still react to changes.</p>
             <h3>Using <code>ref()</code> to opt-out of deep observability</h3>
             <p>In case one knows in advance that an object will not have its properties changed, the <code>ref()</code> function will assign an internal symbol on the object to mark it as a reference only.</p>
