@@ -29,13 +29,13 @@
         --f-b: Space Grotesk, -apple-system, BlinkMacSystemFont, Microsoft Sans Serif, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji;
         --f-m: Space Mono, SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
 
-        --c-bg: rgb(32, 30, 40);
+        --c-bg: rgb(32, 30, 32);
         --c-fg: rgb(215, 210, 220);
         --c-fh: rgb(255, 255, 255);
         --c-fg2: rgb(155, 150, 160);
         --c-fg3: rgb(125, 120, 130);
-        --c-a: rgb(42, 40, 50);
-        --c-a2: rgb(52, 50, 60);
+        --c-a: rgb(42, 40, 42);
+        --c-a2: rgb(52, 50, 52);
         --c-l: #3fb68b;
         --c-l2: rgba(63, 182, 139, 0.08);
         --c-h: #e34c26;
@@ -74,6 +74,7 @@
       #main-nav svg { display: block; height: calc(1rem * var(--u) * 8); width: calc(1rem * var(--u) * 8); }
       #content { flex: 5; }
       #content a, #main-nav h5 a { text-decoration: underline var(--c-l) 2px; }
+      #content a { font-weight: 700; }
       #content > section { display: grid; grid-template-columns: 5fr 2fr; grid-template-rows: min-content; border-bottom: 4px var(--c-a2) solid; }
       #content > section > div { padding: 0 calc(1rem * var(--u) * 16) 0 0; position: relative; }
       #content > section > div:nth-of-type(2n) { padding: 0 var(--l); }
