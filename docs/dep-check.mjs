@@ -50,15 +50,15 @@ function depCheck() {
     if (PASSEDCHECK) {
         return;
     };
-    var _js6 = DEPMAP.length;
-    for (var _js5 = 0; _js5 < _js6; _js5 += 1) {
-        var tuple = DEPMAP[_js5];
+    var _js2 = DEPMAP.length;
+    for (var _js1 = 0; _js1 < _js2; _js1 += 1) {
+        var tuple = DEPMAP[_js1];
         var path = tuple[0];
         var typeStr = tuple[1];
         var target = window;
         if (typeStr === 'property') {
-            var _js7 = path.length - 2;
-            for (var i = 0; i <= _js7; i += 1) {
+            var _js3 = path.length - 2;
+            for (var i = 0; i <= _js3; i += 1) {
                 var key = path[i];
                 if (target[key]) {
                     target = target[key];
@@ -72,11 +72,11 @@ function depCheck() {
             };
             continue;
         };
-        var _js9 = path.length;
-        for (var _js8 = 0; _js8 < _js9; _js8 += 1) {
-            var key10 = path[_js8];
-            if (target[key10]) {
-                target = target[key10];
+        var _js5 = path.length;
+        for (var _js4 = 0; _js4 < _js5; _js4 += 1) {
+            var key6 = path[_js4];
+            if (target[key6]) {
+                target = target[key6];
             } else {
                 target = undefined;
                 break;

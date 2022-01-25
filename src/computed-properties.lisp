@@ -131,7 +131,7 @@
 
     (loop
      for i from (- (length *read-stack*) 1) downto 0 do
-     (when (eq (typeof (getprop *read-stack* i)) 'symbol) break)
+     (when (eq (getprop *read-stack* i) *stack-delimiter-symbol*) break)
      (let* ((tuple (getprop *read-stack* i))
             (observable (@ tuple 0))
             (observable-key (@ tuple 1))

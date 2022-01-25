@@ -134,9 +134,9 @@ function makeSetProperty(isDeep) {
             return true;
         };
         keyBindings = context[key] || [];
-        var _js6 = keyBindings.length;
-        for (var _js5 = 0; _js5 < _js6; _js5 += 1) {
-            var keyBinding = keyBindings[_js5];
+        var _js2 = keyBindings.length;
+        for (var _js1 = 0; _js1 < _js2; _js1 += 1) {
+            var keyBinding = keyBindings[_js1];
             var obj = keyBinding[0];
             var objKey = keyBinding[1];
             var fn = keyBinding[2];
@@ -168,7 +168,7 @@ function deepReplace(proxy, obj) {
         };
     };
     for (var key in proxy) {
-        var oldValue7 = proxy[key];
+        var oldValue3 = proxy[key];
         if (!obj.hasOwnProperty(key)) {
             delete proxy[key];
         };
@@ -214,7 +214,7 @@ function createSource(obj, isDeep) {
            (DELETE (GETPROP OBJ KEY)))
        (CHAIN *TARGET-OBSERVABLES-MAP* (SET OBJ OBSERVABLES))
        (LOOP FOR I FROM (- (LENGTH *READ-STACK*) 1) DOWNTO 0
-             DO (WHEN (EQ (TYPEOF (GETPROP *READ-STACK* I)) 'SYMBOL)
+             DO (WHEN (EQ (GETPROP *READ-STACK* I) *STACK-DELIMITER-SYMBOL*)
                   BREAK) (LET* ((TUPLE (GETPROP *READ-STACK* I))
                                 (OBSERVABLE (@ TUPLE 0))
                                 (OBSERVABLE-KEY (@ TUPLE 1))
@@ -260,7 +260,7 @@ function computeDependencies(obj, key, fn) {
     };
     TARGETOBSERVABLESMAP.set(obj, observables);
     for (var i = READSTACK.length - 1; i >= 0; i -= 1) {
-        if (typeof READSTACK[i] === 'symbol') {
+        if (READSTACK[i] === STACKDELIMITERSYMBOL) {
             break;
         };
         var tuple = READSTACK[i];
@@ -309,9 +309,9 @@ function unmountObject(obj) {
     if (!observables) {
         return;
     };
-    var _js8 = observables.length;
-    for (var _js7 = 0; _js7 < _js8; _js7 += 1) {
-        var observable = observables[_js7];
+    var _js4 = observables.length;
+    for (var _js3 = 0; _js3 < _js4; _js3 += 1) {
+        var observable = observables[_js3];
         var context = OBSERVABLECONTEXTMAP.get(observable);
         for (var key in context) {
             var keyBindings = context[key];
