@@ -3,6 +3,9 @@ import s2, { mount, registerTemplate, unmount } from "../dist/main.mjs";
 import parseMustache, { createMustacheTag } from "../dist/mustache.mjs";
 import { createComputed, observable } from "../dist/computed-properties.mjs";
 
+// Opt-in behavior.
+parseMustache.selfClosing = true;
+
 const computed = createComputed(mount, unmount);
 const mustache = createMustacheTag(registerTemplate);
 

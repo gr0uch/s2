@@ -75,24 +75,30 @@
     element))
 
 (defun process-mustache (template)
-  (chain
-   template
-   ;; First, strip comments.
-   (replace *comment-regexp* "")
-   ;; Process partials.
-   (replace-all *partial-regexp*
-                "<slot name=\"$1\" data-template=\"$2\"></slot>")
-   ;; Process sections.
-   (replace-all *section-open-regexp* "<slot name=\"$1\">")
-   (replace-all *section-close-regexp* "</slot>")
-   ;; Process attributes.
-   (replace-all *attr-regexp* replace-attr)
-   ;; Process text.
-   (replace-all *enclosed-text-regexp* replace-enclosed-text)
-   (replace-all *free-text-regexp* replace-free-text)
+  (let ((result
+         (chain
+          template
+          ;; First, strip comments.
+          (replace *comment-regexp* "")
+          ;; Process partials.
+          (replace-all *partial-regexp*
+                       "<slot name=\"$1\" data-template=\"$2\"></slot>")
+          ;; Process sections.
+          (replace-all *section-open-regexp* "<slot name=\"$1\">")
+          (replace-all *section-close-regexp* "</slot>")
+          ;; Process attributes.
+          (replace-all *attr-regexp* replace-attr)
+          ;; Process text.
+          (replace-all *enclosed-text-regexp* replace-enclosed-text)
+          (replace-all *free-text-regexp* replace-free-text))))
 
-   ;; Optional: fix JSX-style self-closing tags.
-   (replace-all *self-closing-regexp* "<$1 $2></$1>")))
+    ;; Optional: fix JSX-style self-closing tags.
+    (when (@ parse-mustache self-closing)
+      (setf result
+            (chain result
+                   (replace-all *self-closing-regexp* "<$1 $2></$1>"))))
+
+    result))
 
 (defun create-mustache-tag (register-template)
   (defun tagged-mustache (strs)
@@ -117,7 +123,8 @@
   tagged-mustache)
 
 (setf (@ parse-mustache window)
-      (if (not (eq (typeof window) 'undefined)) window nil))
+      (if (not (eq (typeof window) 'undefined)) window nil)
+      (@ parse-mustache self-closing) false)
 
 (export :default parse-mustache
         :names (process-mustache

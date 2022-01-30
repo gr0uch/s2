@@ -128,17 +128,26 @@ function parseMustache(template) {
     return element;
 };
 /* (DEFUN PROCESS-MUSTACHE (TEMPLATE)
-     (CHAIN TEMPLATE (REPLACE *COMMENT-REGEXP* )
-            (REPLACE-ALL *PARTIAL-REGEXP*
-             <slot name="$1" data-template="$2"></slot>)
-            (REPLACE-ALL *SECTION-OPEN-REGEXP* <slot name="$1">)
-            (REPLACE-ALL *SECTION-CLOSE-REGEXP* </slot>)
-            (REPLACE-ALL *ATTR-REGEXP* REPLACE-ATTR)
-            (REPLACE-ALL *ENCLOSED-TEXT-REGEXP* REPLACE-ENCLOSED-TEXT)
-            (REPLACE-ALL *FREE-TEXT-REGEXP* REPLACE-FREE-TEXT)
-            (REPLACE-ALL *SELF-CLOSING-REGEXP* <$1 $2></$1>))) */
+     (LET ((RESULT
+            (CHAIN TEMPLATE (REPLACE *COMMENT-REGEXP* )
+                   (REPLACE-ALL *PARTIAL-REGEXP*
+                    <slot name="$1" data-template="$2"></slot>)
+                   (REPLACE-ALL *SECTION-OPEN-REGEXP* <slot name="$1">)
+                   (REPLACE-ALL *SECTION-CLOSE-REGEXP* </slot>)
+                   (REPLACE-ALL *ATTR-REGEXP* REPLACE-ATTR)
+                   (REPLACE-ALL *ENCLOSED-TEXT-REGEXP* REPLACE-ENCLOSED-TEXT)
+                   (REPLACE-ALL *FREE-TEXT-REGEXP* REPLACE-FREE-TEXT))))
+       (WHEN (@ PARSE-MUSTACHE SELF-CLOSING)
+         (SETF RESULT
+                 (CHAIN RESULT
+                        (REPLACE-ALL *SELF-CLOSING-REGEXP* <$1 $2></$1>))))
+       RESULT)) */
 function processMustache(template) {
-    return template.replace(COMMENTREGEXP, '').replaceAll(PARTIALREGEXP, '<slot name=\"$1\" data-template=\"$2\"></slot>').replaceAll(SECTIONOPENREGEXP, '<slot name=\"$1\">').replaceAll(SECTIONCLOSEREGEXP, '</slot>').replaceAll(ATTRREGEXP, replaceAttr).replaceAll(ENCLOSEDTEXTREGEXP, replaceEnclosedText).replaceAll(FREETEXTREGEXP, replaceFreeText).replaceAll(SELFCLOSINGREGEXP, '<$1 $2></$1>');
+    var result = template.replace(COMMENTREGEXP, '').replaceAll(PARTIALREGEXP, '<slot name=\"$1\" data-template=\"$2\"></slot>').replaceAll(SECTIONOPENREGEXP, '<slot name=\"$1\">').replaceAll(SECTIONCLOSEREGEXP, '</slot>').replaceAll(ATTRREGEXP, replaceAttr).replaceAll(ENCLOSEDTEXTREGEXP, replaceEnclosedText).replaceAll(FREETEXTREGEXP, replaceFreeText);
+    if (parseMustache.selfClosing) {
+        result = result.replaceAll(SELFCLOSINGREGEXP, '<$1 $2></$1>');
+    };
+    return result;
 };
 /* (DEFUN CREATE-MUSTACHE-TAG (REGISTER-TEMPLATE)
      (DEFUN TAGGED-MUSTACHE (STRS)
@@ -198,8 +207,10 @@ function createMustacheTag(registerTemplate) {
 /* (SETF (@ PARSE-MUSTACHE WINDOW)
            (IF (NOT (EQ (TYPEOF WINDOW) 'UNDEFINED))
                WINDOW
-               NIL)) */
+               NIL)
+         (@ PARSE-MUSTACHE SELF-CLOSING) FALSE) */
 parseMustache.window = typeof window !== 'undefined' ? window : null;
+parseMustache.selfClosing = false;
 /* (EXPORT DEFAULT PARSE-MUSTACHE NAMES (PROCESS-MUSTACHE CREATE-MUSTACHE-TAG)) */
 export { processMustache, createMustacheTag, };
 export default parseMustache;

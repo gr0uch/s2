@@ -54,7 +54,7 @@
       p, ul, ol, pre, blockquote { margin-bottom: var(--l); }
       blockquote { color: var(--c-fg2); border-left: calc(1rem * var(--u) * 1) var(--c-fg3) solid; padding-left: calc(1rem * var(--u) * 3); }
       a { color: inherit; text-decoration: inherit; }
-      code, pre { font-family: var(--f-m); font-size: var(--h2); }
+      code, pre { font-family: var(--f-m); font-size: var(--h2); font-variant-ligatures: none; }
       textarea, pre { color: var(--c-fg2); background: none; padding: calc(1rem * var(--u) * 2) calc(1rem * var(--u) * 3); font-family: var(--f-m); font-size: var(--h3); resize: vertical; font-variant-ligatures: none; }
       pre { box-shadow: 0 calc(1rem * var(--u) * 3) calc(1rem * var(--u) * 9) var(--c-bg); border-radius: calc(1rem * var(--u)); white-space: pre-wrap; counter-reset: line; }
       pre > code { display: block; counter-increment: line; position: relative; padding: 0 0 0 calc(1rem * var(--u) * 6) !important; font-size: inherit; }
@@ -424,14 +424,15 @@ return state;</textarea><textarea spellcheck="false"><form onsubmit="{{ignore}}"
             </aside>
           </div>
           <div>
-            <p>Here is what the Mustache addon maps to HTML:</p>
+            <h3>Mustache features</h3>
             <ul>
               <li><code>{{text}}</code> and <code>{{{rawText}}}</code> inside of an element&apos;s body map to <code>textContent</code> and <code>innerHTML</code> respectively.</li>
               <li>Attributes such as <code>&lt;p style="{{style}}"&gt;</code> will map to the element&apos;s attributes.</li>
               <li>Event listeners such as <code>&lt;form onsubmit="{{action}}"&gt;</code> will add an event listener on the element.</li>
               <li>Mustache sections <code>{{#section}}...{{/section}}</code> can contain inlined content, or exactly one partial: <code>{{>partial}}</code>.</li>
+              <li>Fixing JSX-style self-closing tags (<code>&lt;div &sol;&gt;</code>) is opt-in functionality: <code>parseMustache.selfClosing = true;</code> because it changes the behavior, browsers do not parse this as self-closing.</li>
             </ul>
-            <p>There are some caveats due to the limitations of the HTML templating:</p>
+            <h3>Caveats</h3>
             <ul>
               <li>Inverted sections are not supported. This won&apos;t work: <code>{{^section}}{{/section}}</code>.</li>
               <li>Partials can only exist as the only child of a section. For example, <code>{{#section}}{{>partial}}{{/section}}</code>.</li>
