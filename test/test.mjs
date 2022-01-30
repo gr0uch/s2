@@ -10,7 +10,8 @@ Deno.test("mustache parser", () => {
   assertEquals(
     node.toString(),
     `<div data-container="123"><span><i>text</i></span><b><i>text</i></b>` +
-      `<input value="foo"><ul></ul>raw text<span>str</span>` +
+      `<input value="foo"><ul></ul><div></div><div zh="中文"></div>` +
+      `<div foo="bar"></div>raw text<span>str</span>` +
       `<div id="cmp">2</div></div>`,
   );
   proxy.nested = { text: "hi" };
@@ -23,14 +24,14 @@ Deno.test("lists", () => {
   const node = document.body.querySelector("ul");
   const moveStack = [];
   function mover() {
-    moveStack.push(this.text);
+    moveStack.push(this["☯"]);
   }
 
   // init
   proxy.list = [
-    { text: "a", [move]: mover },
-    { text: "b", [move]: mover },
-    { text: "c", [move]: mover },
+    { "☯": "a", [move]: mover },
+    { "☯": "b", [move]: mover },
+    { "☯": "c", [move]: mover },
   ];
   assertEquals(node.textContent, "abc");
   assertEquals(moveStack, []);
@@ -42,19 +43,19 @@ Deno.test("lists", () => {
   moveStack.length = 0;
 
   // array push
-  proxy.list.push({ text: "d", [move]: mover });
+  proxy.list.push({ "☯": "d", [move]: mover });
   assertEquals(node.textContent, "cbad");
   assertEquals(moveStack, []);
 
   // array unshift
-  proxy.list.unshift({ text: "z", [move]: mover });
+  proxy.list.unshift({ "☯": "z", [move]: mover });
   assertEquals(node.textContent, "zcbad");
   assertEquals(moveStack, ["d", "a", "b", "c"]);
   moveStack.length = 0;
 
   // array splice
-  proxy.list.splice(1, 1, { text: "x", [move]: mover }, {
-    text: "y",
+  proxy.list.splice(1, 1, { "☯": "x", [move]: mover }, {
+    "☯": "y",
     [move]: mover,
   });
   assertEquals(node.textContent, "zxybad");
@@ -62,7 +63,7 @@ Deno.test("lists", () => {
   moveStack.length = 0;
 
   // array sort
-  proxy.list.sort(({ text: a }, { text: b }) => b.localeCompare(a));
+  proxy.list.sort(({ "☯": a }, { "☯": b }) => b.localeCompare(a));
   assertEquals(node.textContent, "zyxdba");
   assertEquals(moveStack, ["y", "x", "d", "b", "b", "a"]);
   moveStack.length = 0;
@@ -78,7 +79,7 @@ Deno.test("lists", () => {
   assertEquals(moveStack, []);
 
   // restoring array
-  proxy.list = [{ text: "e", [move]: mover }, { text: "f", [move]: mover }];
+  proxy.list = [{ "☯": "e", [move]: mover }, { "☯": "f", [move]: mover }];
   assertEquals(node.textContent, "ef");
   assertEquals(moveStack, []);
 });

@@ -1,41 +1,48 @@
 
-/* (DEFPARAMETER *TAG-OPEN* {{) */
-var TAGOPEN = '{{';
-/* (DEFPARAMETER *TAG-CLOSE* }}) */
-var TAGCLOSE = '}}';
-/* (DEFPARAMETER *TAG-TEXT-OPEN* {{2,3}) */
-var TAGTEXTOPEN = '{{2,3}';
-/* (DEFPARAMETER *TAG-TEXT-CLOSE* }{2,3}) */
-var TAGTEXTCLOSE = '}{2,3}';
+/* (DEFPARAMETER *TAG-OPEN* \{\{) */
+var TAGOPEN = '\\{\\{';
+/* (DEFPARAMETER *TAG-CLOSE* \}\}) */
+var TAGCLOSE = '\\}\\}';
+/* (DEFPARAMETER *TAG-TEXT-OPEN* \{{2,3}) */
+var TAGTEXTOPEN = '\\{{2,3}';
+/* (DEFPARAMETER *TAG-TEXT-CLOSE* \}{2,3}) */
+var TAGTEXTCLOSE = '\\}{2,3}';
 /* (DEFPARAMETER *COMMENT-REGEXP*
-     (NEW (*REG-EXP (+ *TAG-OPEN* !(.*?) *TAG-CLOSE*) gs))) */
-var COMMENTREGEXP = new RegExp(TAGOPEN + '!(.*?)' + TAGCLOSE, 'gs');
+     (NEW (*REG-EXP (+ *TAG-OPEN* !(.*?) *TAG-CLOSE*) gsu))) */
+var COMMENTREGEXP = new RegExp(TAGOPEN + '!(.*?)' + TAGCLOSE, 'gsu');
 /* (DEFPARAMETER *ATTR-REGEXP*
-     (NEW (*REG-EXP (+ \s([^< ]+?)=['"] *TAG-OPEN* (.*?) *TAG-CLOSE* ['"]) gm))) */
-var ATTRREGEXP = new RegExp('\\s([^< ]+?)=[\'\"]' + TAGOPEN + '(.*?)' + TAGCLOSE + '[\'\"]', 'gm');
+     (NEW
+      (*REG-EXP (+ \s([^< ]+?)=['"] *TAG-OPEN* \s*(\S+?)\s* *TAG-CLOSE* ['"])
+       gmu))) */
+var ATTRREGEXP = new RegExp('\\s([^< ]+?)=[\'\"]' + TAGOPEN + '\\s*(\\S+?)\\s*' + TAGCLOSE + '[\'\"]', 'gmu');
 /* (DEFPARAMETER *FREE-TEXT-REGEXP*
-     (NEW (*REG-EXP (+ *TAG-TEXT-OPEN* (.*?) *TAG-TEXT-CLOSE*) gm))) */
-var FREETEXTREGEXP = new RegExp(TAGTEXTOPEN + '(.*?)' + TAGTEXTCLOSE, 'gm');
-/* (DEFPARAMETER *UNESCAPED-TEXT-REGEXP* (NEW (*REG-EXP {{{(.*?)}}}))) */
-var UNESCAPEDTEXTREGEXP = new RegExp('{{{(.*?)}}}');
+     (NEW (*REG-EXP (+ *TAG-TEXT-OPEN* ([^>]*?) *TAG-TEXT-CLOSE*) gmu))) */
+var FREETEXTREGEXP = new RegExp(TAGTEXTOPEN + '([^>]*?)' + TAGTEXTCLOSE, 'gmu');
+/* (DEFPARAMETER *UNESCAPED-TEXT-REGEXP*
+     (NEW (*REG-EXP \{\{\{([^>]*?)\}\}\} u))) */
+var UNESCAPEDTEXTREGEXP = new RegExp('\\{\\{\\{([^>]*?)\\}\\}\\}', 'u');
 /* (DEFPARAMETER *ENCLOSED-TEXT-REGEXP*
      (NEW
       (*REG-EXP
-       (+ <(.+?)>\s* *TAG-TEXT-OPEN* (.*?) *TAG-TEXT-CLOSE* \s*</(.+?)>) gm))) */
-var ENCLOSEDTEXTREGEXP = new RegExp('<(.+?)>\\s*' + TAGTEXTOPEN + '(.*?)' + TAGTEXTCLOSE + '\\s*</(.+?)>', 'gm');
+       (+ <(.+?)>\s* *TAG-TEXT-OPEN* ([^>]+?) *TAG-TEXT-CLOSE* \s*</(\S+?)>)
+       gmu))) */
+var ENCLOSEDTEXTREGEXP = new RegExp('<(.+?)>\\s*' + TAGTEXTOPEN + '([^>]+?)' + TAGTEXTCLOSE + '\\s*</(\\S+?)>', 'gmu');
 /* (DEFPARAMETER *PARTIAL-REGEXP*
      (NEW
       (*REG-EXP
-       (+ *TAG-OPEN* #(.*?) *TAG-CLOSE* \s* *TAG-OPEN* >(.*?) *TAG-CLOSE* \s*
-          *TAG-OPEN* /(.*?) *TAG-CLOSE*)
-       gm))) */
-var PARTIALREGEXP = new RegExp(TAGOPEN + '#(.*?)' + TAGCLOSE + '\\s*' + TAGOPEN + '>(.*?)' + TAGCLOSE + '\\s*' + TAGOPEN + '/(.*?)' + TAGCLOSE, 'gm');
+       (+ *TAG-OPEN* #\s*(\S+?)\s* *TAG-CLOSE* \s* *TAG-OPEN* >\s*(\S+?)\s*
+          *TAG-CLOSE* \s* *TAG-OPEN* /\s*(\S+?)\s* *TAG-CLOSE*)
+       gmu))) */
+var PARTIALREGEXP = new RegExp(TAGOPEN + '#\\s*(\\S+?)\\s*' + TAGCLOSE + '\\s*' + TAGOPEN + '>\\s*(\\S+?)\\s*' + TAGCLOSE + '\\s*' + TAGOPEN + '/\\s*(\\S+?)\\s*' + TAGCLOSE, 'gmu');
 /* (DEFPARAMETER *SECTION-OPEN-REGEXP*
-     (NEW (*REG-EXP (+ *TAG-OPEN* #(.*?) *TAG-CLOSE*) gm))) */
-var SECTIONOPENREGEXP = new RegExp(TAGOPEN + '#(.*?)' + TAGCLOSE, 'gm');
+     (NEW (*REG-EXP (+ *TAG-OPEN* #\s*(\S+?)\s* *TAG-CLOSE*) gmu))) */
+var SECTIONOPENREGEXP = new RegExp(TAGOPEN + '#\\s*(\\S+?)\\s*' + TAGCLOSE, 'gmu');
 /* (DEFPARAMETER *SECTION-CLOSE-REGEXP*
-     (NEW (*REG-EXP (+ *TAG-OPEN* /(.*?) *TAG-CLOSE*) gm))) */
-var SECTIONCLOSEREGEXP = new RegExp(TAGOPEN + '/(.*?)' + TAGCLOSE, 'gm');
+     (NEW (*REG-EXP (+ *TAG-OPEN* /\s*(\S+?)\s* *TAG-CLOSE*) gmu))) */
+var SECTIONCLOSEREGEXP = new RegExp(TAGOPEN + '/\\s*(\\S+?)\\s*' + TAGCLOSE, 'gmu');
+/* (DEFPARAMETER *SELF-CLOSING-REGEXP*
+     (NEW (*REG-EXP <(?!/)(\S+?)\s((?:[^>]|\s)*?)/> gmu))) */
+var SELFCLOSINGREGEXP = new RegExp('<(?!/)(\\S+?)\\s((?:[^>]|\\s)*?)/>', 'gmu');
 /* (DEFPARAMETER *TEMPLATE-HASH-MAP* (NEW (*WEAK-MAP))) */
 var TEMPLATEHASHMAP = new WeakMap();
 /* (DEFUN REPLACE-ATTR (MATCH ATTR KEY)
@@ -91,21 +98,6 @@ function replaceEnclosedText(match, openingTag, key, closingTag) {
     };
     return '<' + openingTag + ' data-' + attr + '=\"' + key.trim() + '\"></' + closingTag + '>';
 };
-/* (DEFUN REPLACE-PARTIAL (MATCH KEY PARTIAL)
-     (+ <slot name=" (CHAIN KEY (TRIM)) " data-template="
-        (CHAIN PARTIAL (TRIM)) "></slot>)) */
-function replacePartial(match, key, partial) {
-    return '<slot name=\"' + key.trim() + '\" data-template=\"' + partial.trim() + '\"></slot>';
-};
-/* (DEFUN REPLACE-SECTION-OPEN (MATCH KEY)
-     (+ <slot name=" (CHAIN KEY (TRIM)) ">)) */
-function replaceSectionOpen(match, key) {
-    return '<slot name=\"' + key.trim() + '\">';
-};
-/* (DEFUN REPLACE-SECTION-CLOSE (MATCH) (PROGN </slot>)) */
-function replaceSectionClose(match) {
-    return '</slot>';
-};
 /* (DEFUN HASH-STR (STR)
      (LET ((I -1) (H 2))
        (LOOP WHILE (< I (1- (LENGTH STR)))
@@ -137,14 +129,16 @@ function parseMustache(template) {
 };
 /* (DEFUN PROCESS-MUSTACHE (TEMPLATE)
      (CHAIN TEMPLATE (REPLACE *COMMENT-REGEXP* )
-            (REPLACE-ALL *PARTIAL-REGEXP* REPLACE-PARTIAL)
-            (REPLACE-ALL *SECTION-OPEN-REGEXP* REPLACE-SECTION-OPEN)
-            (REPLACE-ALL *SECTION-CLOSE-REGEXP* REPLACE-SECTION-CLOSE)
+            (REPLACE-ALL *PARTIAL-REGEXP*
+             <slot name="$1" data-template="$2"></slot>)
+            (REPLACE-ALL *SECTION-OPEN-REGEXP* <slot name="$1">)
+            (REPLACE-ALL *SECTION-CLOSE-REGEXP* </slot>)
             (REPLACE-ALL *ATTR-REGEXP* REPLACE-ATTR)
             (REPLACE-ALL *ENCLOSED-TEXT-REGEXP* REPLACE-ENCLOSED-TEXT)
-            (REPLACE-ALL *FREE-TEXT-REGEXP* REPLACE-FREE-TEXT))) */
+            (REPLACE-ALL *FREE-TEXT-REGEXP* REPLACE-FREE-TEXT)
+            (REPLACE-ALL *SELF-CLOSING-REGEXP* <$1 $2></$1>))) */
 function processMustache(template) {
-    return template.replace(COMMENTREGEXP, '').replaceAll(PARTIALREGEXP, replacePartial).replaceAll(SECTIONOPENREGEXP, replaceSectionOpen).replaceAll(SECTIONCLOSEREGEXP, replaceSectionClose).replaceAll(ATTRREGEXP, replaceAttr).replaceAll(ENCLOSEDTEXTREGEXP, replaceEnclosedText).replaceAll(FREETEXTREGEXP, replaceFreeText);
+    return template.replace(COMMENTREGEXP, '').replaceAll(PARTIALREGEXP, '<slot name=\"$1\" data-template=\"$2\"></slot>').replaceAll(SECTIONOPENREGEXP, '<slot name=\"$1\">').replaceAll(SECTIONCLOSEREGEXP, '</slot>').replaceAll(ATTRREGEXP, replaceAttr).replaceAll(ENCLOSEDTEXTREGEXP, replaceEnclosedText).replaceAll(FREETEXTREGEXP, replaceFreeText).replaceAll(SELFCLOSINGREGEXP, '<$1 $2></$1>');
 };
 /* (DEFUN CREATE-MUSTACHE-TAG (REGISTER-TEMPLATE)
      (DEFUN TAGGED-MUSTACHE (STRS)

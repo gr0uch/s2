@@ -2,31 +2,33 @@
 ;; This function converts a subset of Mustache into data attributes, as
 ;; expected by s2.
 
-(defparameter *tag-open* "{{")
-(defparameter *tag-close* "}}")
-(defparameter *tag-text-open* "{{2,3}")
-(defparameter *tag-text-close* "}{2,3}")
+(defparameter *tag-open* "\\{\\{")
+(defparameter *tag-close* "\\}\\}")
+(defparameter *tag-text-open* "\\{{2,3}")
+(defparameter *tag-text-close* "\\}{2,3}")
 (defparameter *comment-regexp*
-  (new (*reg-exp (+ *tag-open* "!(.*?)" *tag-close*) "gs")))
+  (new (*reg-exp (+ *tag-open* "!(.*?)" *tag-close*) "gsu")))
 (defparameter *attr-regexp*
   (new (*reg-exp (+ "\\s([^< ]+?)=['\"]"
-                    *tag-open* "(.*?)" *tag-close* "['\"]") "gm")))
+                    *tag-open* "\\s*(\\S+?)\\s*" *tag-close* "['\"]") "gmu")))
 (defparameter *free-text-regexp*
-  (new (*reg-exp (+ *tag-text-open* "(.*?)" *tag-text-close*) "gm")))
+  (new (*reg-exp (+ *tag-text-open* "([^>]*?)" *tag-text-close*) "gmu")))
 (defparameter *unescaped-text-regexp*
-  (new (*reg-exp "{{{(.*?)}}}")))
+  (new (*reg-exp "\\{\\{\\{([^>]*?)\\}\\}\\}" "u")))
 (defparameter *enclosed-text-regexp*
   (new (*reg-exp (+ "<(.+?)>\\s*"
-                    *tag-text-open* "(.*?)" *tag-text-close*
-                    "\\s*<\/(.+?)>") "gm")))
+                    *tag-text-open* "([^>]+?)" *tag-text-close*
+                    "\\s*<\/(\\S+?)>") "gmu")))
 (defparameter *partial-regexp*
-  (new (*reg-exp (+ *tag-open* "#(.*?)" *tag-close*
-                    "\\s*" *tag-open* ">(.*?)" *tag-close* "\\s*"
-                    *tag-open* "\/(.*?)" *tag-close*) "gm")))
+  (new (*reg-exp (+ *tag-open* "#\\s*(\\S+?)\\s*" *tag-close*
+                    "\\s*" *tag-open* ">\\s*(\\S+?)\\s*" *tag-close* "\\s*"
+                    *tag-open* "\/\\s*(\\S+?)\\s*" *tag-close*) "gmu")))
 (defparameter *section-open-regexp*
-  (new (*reg-exp (+ *tag-open* "#(.*?)" *tag-close*) "gm")))
+  (new (*reg-exp (+ *tag-open* "#\\s*(\\S+?)\\s*" *tag-close*) "gmu")))
 (defparameter *section-close-regexp*
-  (new (*reg-exp (+ *tag-open* "\/(.*?)" *tag-close*) "gm")))
+  (new (*reg-exp (+ *tag-open* "\/\\s*(\\S+?)\\s*" *tag-close*) "gmu")))
+(defparameter *self-closing-regexp*
+  (new (*reg-exp "<(?!\/)(\\S+?)\\s((?:[^>]|\\s)*?)\/>" "gmu")))
 
 (defparameter *template-hash-map* (new (*weak-map)))
 
@@ -58,16 +60,6 @@
     (+ "<" opening-tag " data-" attr "=\"" (chain key (trim))
        "\"></" closing-tag ">")))
 
-(defun replace-partial (match key partial)
-  (+ "<slot name=\"" (chain key (trim))
-     "\" data-template=\"" (chain partial (trim)) "\"></slot>"))
-
-(defun replace-section-open (match key)
-  (+ "<slot name=\"" (chain key (trim)) "\">"))
-
-(defun replace-section-close (match)
-  (progn "</slot>"))
-
 (defun hash-str (str)
   (let ((i -1)
         (h 2))
@@ -88,15 +80,19 @@
    ;; First, strip comments.
    (replace *comment-regexp* "")
    ;; Process partials.
-   (replace-all *partial-regexp* replace-partial)
+   (replace-all *partial-regexp*
+                "<slot name=\"$1\" data-template=\"$2\"></slot>")
    ;; Process sections.
-   (replace-all *section-open-regexp* replace-section-open)
-   (replace-all *section-close-regexp* replace-section-close)
+   (replace-all *section-open-regexp* "<slot name=\"$1\">")
+   (replace-all *section-close-regexp* "</slot>")
    ;; Process attributes.
    (replace-all *attr-regexp* replace-attr)
    ;; Process text.
    (replace-all *enclosed-text-regexp* replace-enclosed-text)
-   (replace-all *free-text-regexp* replace-free-text)))
+   (replace-all *free-text-regexp* replace-free-text)
+
+   ;; Optional: fix JSX-style self-closing tags.
+   (replace-all *self-closing-regexp* "<$1 $2></$1>")))
 
 (defun create-mustache-tag (register-template)
   (defun tagged-mustache (strs)

@@ -51,22 +51,39 @@ export function createWindow() {
     data-container="{{id}}"
   >
     {{!comment-should-be-stripped}}
-    {{{unescaped}}}
-    <b onclick="{{click}}">{{{unescaped}}}</b>
-    <input value="{{input}}">
+    {{{ unescaped }}}
+    <b onclick="{{ click }}">{{{ unescaped }}}</b>
+    <input value="{{ input }}">
     <ul>
       {{#list}}
-        <li>{{text}}</li>
+        <li>{{ ☯ }}</li>
       {{/list}}
     </ul>
-    {{#nested}}
+    <div />
+    <div zh="中文" />
+    <div
+      foo="bar"
+    />
+    {{#
+      nested
+    }}
       ${nested}
-    {{/nested}}
-    {{!another-comment}}
+    {{/
+      nested
+    }}
+    {{!
+      another-comment
+    }}
     {{#comp}}
       raw text
-      {{str}}
-      <div id="cmp">{{value}}</div>
+      {{
+        str
+      }}
+      <div id="cmp">
+        {{
+          value
+        }}
+      </div>
     {{/comp}}
   </div>
   `;
