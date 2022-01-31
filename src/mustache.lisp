@@ -28,7 +28,7 @@
 (defparameter *section-close-regexp*
   (new (*reg-exp (+ *tag-open* "\/\\s*(\\S+?)\\s*" *tag-close*) "gmu")))
 (defparameter *self-closing-regexp*
-  (new (*reg-exp "<(?!\/)(\\S+?)\\s((?:[^>]|\\s)*?)\/>" "gmu")))
+  (new (*reg-exp "<(?!\/)(\\S+?)\\s+([^>]*?)\\s*?\/>" "gmu")))
 
 (defparameter *template-hash-map* (new (*weak-map)))
 
