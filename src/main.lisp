@@ -5,6 +5,7 @@
 (defparameter *context-value* 'value)
 (defparameter *context-class* 'class)
 (defparameter *context-attribute* 'attribute)
+(defparameter *context-style-property* 'style-property)
 (defparameter *context-data* 'data)
 (defparameter *context-event* 'event)
 
@@ -75,6 +76,9 @@
                 (setf (@ node value) ""))
        (progn (chain node (set-attribute 'value value))
               (setf (@ node value) value)))))
+ (getprop *property-handlers* *context-style-property*)
+ (lambda (node key value)
+   (chain node style (set-property key value)))
  (getprop *property-handlers* *context-class*) set-class
  (getprop *property-handlers* *context-attribute*) set-attribute
  (getprop *property-handlers* *context-data*) set-data)
@@ -572,6 +576,18 @@
                      type *context-attribute*
                      ;; Slice off "attribute", all attributes are lowercase.
                      name (chain key (slice 9) (to-lower-case)))))
+            (when (chain key (starts-with 'style))
+              (setf result
+                    (create
+                     type *context-style-property*
+                     ;; Slice off "style", convert to dasherized.
+                     name
+                     (chain key (slice 5)
+                            (replace-all
+                             (regex "/[A-Z]/g")
+                             (lambda (v) (+ "-" (chain v (to-lower-case)))))
+                            ;; Slice prefixed "-".
+                            (slice 1)))))
             (when (chain key (starts-with 'event))
               (setf result
                     (create

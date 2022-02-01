@@ -99,6 +99,8 @@ const [reactiveObject, node] = s2({
   fooBar: "bar",
   titleStyle: "color: #ff8;",
   list: {
+    descriptionColor: "#08f",
+    descriptionBackground: "#000",
     things: initialThings.slice(),
     "try": [
       { run, code: `p.list.things.reverse()` },

@@ -12,6 +12,7 @@
   h1 { margin: calc(var(--unit) / -3) calc(var(--unit) / -3) calc(var(--unit) * 2 / 3); background: #111; color: #fff; padding: calc(var(--unit) * 1 / 2) calc(var(--unit) / 3); font-weight: inherit; font-size: 3em; }
   ul { margin: var(--unit); list-style-type: square; }
   ul li { font-size: 1.5em; line-height: var(--unit); }
+  p { color: var(--color); }
   .counter { margin: calc(var(--unit) * 2) 0; }
   .counter span { font-weight: bold; }
   .counter button { margin-left: calc(var(--unit) / 2); }
@@ -50,7 +51,7 @@
 </template>
 
 <template id="list">
-  Here is a list of things:
+  <p data-style---color="descriptionColor" data-style-background="descriptionBackground">Here is a list of things:</p>
   <ul>
     <slot name="things" data-template="#things"><li><em>(empty)</em></li></slot>
   </ul>

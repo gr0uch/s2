@@ -29,15 +29,15 @@
         --f-b: Space Grotesk, -apple-system, BlinkMacSystemFont, Microsoft Sans Serif, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji;
         --f-m: Space Mono, SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
 
-        --c-bg: rgb(32, 30, 32);
         --c-fg: rgb(215, 210, 220);
         --c-fh: rgb(255, 255, 255);
         --c-fg2: rgb(155, 150, 160);
         --c-fg3: rgb(125, 120, 130);
-        --c-a: rgb(42, 40, 42);
-        --c-a2: rgb(52, 50, 52);
+        --c-bg: rgb(30, 32, 38);
+        --c-a: rgb(40, 42, 48);
+        --c-a2: rgb(46, 48, 54);
         --c-l: #3fb68b;
-        --c-l2: rgba(63, 182, 139, 0.08);
+        --c-l2: rgba(63, 182, 139, 0.06);
         --c-h: #e34c26;
         --c-e: #6e40c9;
       }
@@ -78,7 +78,7 @@
       #content > section { display: grid; grid-template-columns: 5fr 2fr; grid-template-rows: min-content; border-bottom: 4px var(--c-a2) solid; }
       #content > section > div { padding: 0 calc(1rem * var(--u) * 16) 0 0; position: relative; }
       #content > section > div:nth-of-type(2n) { padding: 0 var(--l); }
-      #content > section > div:nth-of-type(2n)::before { display: block; content: " "; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--c-a); z-index: -1; box-sizing: border-box; }
+      #content > section > div:nth-of-type(2n)::before { display: block; content: " "; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--c-a2); z-index: -1; box-sizing: border-box; }
       #content > section > div:last-of-type { padding-bottom: calc(1rem * var(--u) * 16); }
       #content > section > div:nth-last-of-type(2) > :last-child { margin-bottom: calc(1rem * var(--u) * 16) !important; }
       #content > section > div > :last-child:not(.live-example.code) { margin-bottom: 0; }
@@ -101,8 +101,9 @@
       .live-example.code textarea:last-of-type { border-right: none; }
       aside { color: var(--c-fg2); font-size: var(--h3); }
       aside code { font-size: inherit; }
-      aside h6 { padding: calc(1rem * var(--u) * 1) 0; margin-bottom: calc(1rem * var(--u) * 2); border-bottom: 2px var(--c-a2) solid; }
-      .live-example.output ul { list-style-type: circle; padding: 0 0 0 calc(1rem * var(--u) * 4); margin: 0; }
+      aside h6 { padding: calc(1rem * var(--u) * 1) 0; margin-bottom: calc(1rem * var(--u) * 2); border-bottom: 2px var(--c-a) solid; }
+      .live-example.output b { color: var(--color); }
+      .live-example.output ul { list-style-type: none; padding: 0; margin: 0; }
       .live-example.output li > div { float: right; color: var(--c-h); cursor: pointer; font-weight: 700; }
       aside:not(.output) { margin-top: calc(1rem * var(--u) * 16); }
       .live-example.output .chars { display: inline-flex; }
@@ -126,7 +127,7 @@
       .live-example.primary.code h6 { background: var(--c-l2); }
       .live-example.primary.code textarea { background: var(--c-a); }
       .live-example.primary.output { background: var(--c-l2); backdrop-filter: blur(var(--h4)); margin: 0 calc(1rem * var(--u) * -4); padding: 0 calc(1rem * var(--u) * 4) calc(1rem * var(--u) * 4); border-radius: calc(1rem * var(--u)); }
-      .live-example.primary.output input { background: var(--c-a); }
+      .live-example.primary.output input { background: var(--c-a2); }
       .live-example.primary.output input:focus { outline: none; }
       .live-example.primary h6 { color: var(--c-l); border-bottom-width: 2px; border-bottom-color: var(--c-l); font-weight: 700; font-style: inherit; padding-top: calc(1rem * var(--u) * 2); }
 
@@ -137,7 +138,8 @@
       input, button { font-family: inherit; font-size: inherit; background: inherit; color: inherit; }
       form button { background: var(--c-bg); }
       form input { width: 0; }
-      input { background: var(--c-a2); height: calc(1rem * var(--u) * 7); padding: 0 calc(1rem * var(--u) * 2); flex: 1; width: 100%; border-radius: calc(1rem * var(--u)); }
+      input { background: var(--c-a); height: calc(1rem * var(--u) * 7); padding: 0 calc(1rem * var(--u) * 2); flex: 1; width: 100%; border-radius: calc(1rem * var(--u)); }
+      input[type="checkbox"] { height: auto; width: auto; margin: 0 calc(1rem * var(--u) * 1) 0 0; }
       button { cursor: pointer; padding: 0 calc(1rem * var(--u) * 3); color: var(--c-e); font-weight: 700; }
 
       /* rEspoNsiVe */
@@ -239,13 +241,20 @@
   add, todos: [
     'Sleep', 'Wake up',
     'Brush teeth', 'Get dressed',
-  ].map(todo => ({ todo, remove })),
+  ].map(todo => ({
+    todo, toggle, remove,
+  })),
 };
 function add(event) {
   event.preventDefault();
   this[root].todos.unshift({
-    todo: this.todo, remove });
+    todo: this.todo,
+    remove, toggle, });
   delete this.todo;
+}
+function toggle() {
+  this.t = !this.t ?
+    "line-through" : null;
 }
 function remove() {
   const i = this[root].todos
@@ -262,7 +271,16 @@ function remove() {
     <li>
       <div onclick="{{remove}}">
         &#x2715;</div>
-      <span>{{todo}}</span>
+      <label>
+        <input
+          type="checkbox"
+          oninput="{{toggle}}">
+        <span
+          style:text-decoration="{{t}}"
+        >
+          {{todo}}
+        </span>
+      </label>
     </li>
   {{/todos}}
 </ul></textarea>
@@ -373,6 +391,7 @@ return state;</textarea><textarea spellcheck="false"><form onsubmit="{{ignore}}"
               <li><code>data-value</code>: for setting input values, also handles binding to <code>input</code> event automatically.</li>
               <li><code>data-event-*</code>: for adding event listeners.</li>
               <li><code>data-attribute-*</code>: for setting arbitrary attributes.</li>
+              <li><code>data-style-*</code>: for setting CSS properties.</li>
               <li><code>data-*</code>: for setting data attributes (reflection).</li>
             </ul>
           </div>
@@ -392,12 +411,13 @@ return state;</textarea><textarea spellcheck="false"><form onsubmit="{{ignore}}"
           <div>
           </div>
           <div>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 54)">
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 62)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">return {
   counter: {
     count: 0,
+    color: "var(--c-l)",
     increment(event) {
       event.preventDefault();
       this.count++;
@@ -407,7 +427,9 @@ return state;</textarea><textarea spellcheck="false"><form onsubmit="{{ignore}}"
 <div>
   Hello, world!<br>
   {{#counter}}
-    <b>{{count}}</b>
+    <b style:--color="{{color}}">
+      {{count}}
+    </b>
     <button onclick="{{increment}}">
       Increment
     </button>
@@ -427,7 +449,7 @@ return state;</textarea><textarea spellcheck="false"><form onsubmit="{{ignore}}"
             <h3>Mustache features</h3>
             <ul>
               <li><code>{{text}}</code> and <code>{{{rawText}}}</code> inside of an element&apos;s body map to <code>textContent</code> and <code>innerHTML</code> respectively.</li>
-              <li>Attributes such as <code>&lt;p style="{{style}}"&gt;</code> will map to the element&apos;s attributes.</li>
+              <li>Attributes such as <code>&lt;p style="{{style}}"&gt;</code> will map to the element&apos;s attributes. The custom <code>style:</code> <em>attribute directive</em> sets individual CSS properties efficiently, <a href="https://svelte.dev/docs#template-syntax-element-directives-style-property">similar to Svelte</a>.</li>
               <li>Event listeners such as <code>&lt;form onsubmit="{{action}}"&gt;</code> will add an event listener on the element.</li>
               <li>Mustache sections <code>{{#section}}...{{/section}}</code> can contain inlined content, or exactly one partial: <code>{{>partial}}</code>.</li>
               <li>Fixing JSX-style self-closing tags (<code>&lt;div &sol;&gt;</code>) is opt-in functionality: <code>parseMustache.selfClosing = true;</code> because it changes the behavior, browsers do not parse this as self-closing.</li>

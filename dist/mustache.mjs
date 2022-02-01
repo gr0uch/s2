@@ -18,9 +18,8 @@ var ATTRREGEXP = new RegExp('\\s([^< ]+?)=[\'\"]' + TAGOPEN + '\\s*(\\S+?)\\s*' 
 /* (DEFPARAMETER *FREE-TEXT-REGEXP*
      (NEW (*REG-EXP (+ *TAG-TEXT-OPEN* ([^>]*?) *TAG-TEXT-CLOSE*) gmu))) */
 var FREETEXTREGEXP = new RegExp(TAGTEXTOPEN + '([^>]*?)' + TAGTEXTCLOSE, 'gmu');
-/* (DEFPARAMETER *UNESCAPED-TEXT-REGEXP*
-     (NEW (*REG-EXP \{\{\{([^>]*?)\}\}\} u))) */
-var UNESCAPEDTEXTREGEXP = new RegExp('\\{\\{\\{([^>]*?)\\}\\}\\}', 'u');
+/* (DEFPARAMETER *UNESCAPED-TEXT-REGEXP* (REGEX /\{\{\{([^>]*?)\}\}\}/u)) */
+var UNESCAPEDTEXTREGEXP = /\{\{\{([^>]*?)\}\}\}/u;
 /* (DEFPARAMETER *ENCLOSED-TEXT-REGEXP*
      (NEW
       (*REG-EXP
@@ -41,8 +40,8 @@ var SECTIONOPENREGEXP = new RegExp(TAGOPEN + '#\\s*(\\S+?)\\s*' + TAGCLOSE, 'gmu
      (NEW (*REG-EXP (+ *TAG-OPEN* /\s*(\S+?)\s* *TAG-CLOSE*) gmu))) */
 var SECTIONCLOSEREGEXP = new RegExp(TAGOPEN + '/\\s*(\\S+?)\\s*' + TAGCLOSE, 'gmu');
 /* (DEFPARAMETER *SELF-CLOSING-REGEXP*
-     (NEW (*REG-EXP <(?!/)(\S+?)\s+([^>]*?)\s*?/> gmu))) */
-var SELFCLOSINGREGEXP = new RegExp('<(?!/)(\\S+?)\\s+([^>]*?)\\s*?/>', 'gmu');
+     (REGEX /<(?!\/)(\S+?)\s+([^>]*?)\s*?\/>/gmu)) */
+var SELFCLOSINGREGEXP = /<(?!\/)(\S+?)\s+([^>]*?)\s*?\/>/gmu;
 /* (DEFPARAMETER *TEMPLATE-HASH-MAP* (NEW (*WEAK-MAP))) */
 var TEMPLATEHASHMAP = new WeakMap();
 /* (DEFUN REPLACE-ATTR (MATCH ATTR KEY)
@@ -52,6 +51,9 @@ var TEMPLATEHASHMAP = new WeakMap();
        (WHEN (CHAIN ATTR (STARTS-WITH on))
          (SETF PREFIX event-
                ATTR (CHAIN ATTR (SLICE 2))))
+       (WHEN (CHAIN ATTR (STARTS-WITH style:))
+         (SETF PREFIX style-
+               ATTR (CHAIN ATTR (SLICE 6))))
        (WHEN (CHAIN ATTR (STARTS-WITH data-))
          (SETF PREFIX
                ATTR (CHAIN ATTR (SLICE 5))))
@@ -64,6 +66,10 @@ function replaceAttr(match, attr, key) {
     if (attr.startsWith('on')) {
         prefix = 'event-';
         attr = attr.slice(2);
+    };
+    if (attr.startsWith('style:')) {
+        prefix = 'style-';
+        attr = attr.slice(6);
     };
     if (attr.startsWith('data-')) {
         prefix = '';
@@ -180,27 +186,27 @@ function createMustacheTag(registerTemplate) {
         var args = Array.prototype.slice.call(arguments, 1).map(function (element) {
             return TEMPLATEHASHMAP.get(element);
         });
-        var element5 = null;
+        var element1 = null;
         var hash = null;
-        var _js7 = args.length;
-        var _js8 = strs.length;
-        var FIRST9 = true;
-        for (var _js6 = 0; _js6 < _js7; _js6 += 1) {
-            var hash10 = args[_js6];
-            var i = FIRST9 ? 1 : i + 1;
-            if (i > _js8) {
+        var _js3 = args.length;
+        var _js4 = strs.length;
+        var FIRST5 = true;
+        for (var _js2 = 0; _js2 < _js3; _js2 += 1) {
+            var hash6 = args[_js2];
+            var i = FIRST5 ? 1 : i + 1;
+            if (i > _js4) {
                 break;
             };
-            result.push(hash10 ? '{{>' + hash10 + '}}' : arguments[i], strs[i]);
-            FIRST9 = null;
+            result.push(hash6 ? '{{>' + hash6 + '}}' : arguments[i], strs[i]);
+            FIRST5 = null;
         };
         result = result.join('');
-        element5 = parseMustache(result);
+        element1 = parseMustache(result);
         hash = 'template' + hashStr(result);
-        TEMPLATEHASHMAP.set(element5, hash);
-        registerTemplate(hash, element5);
+        TEMPLATEHASHMAP.set(element1, hash);
+        registerTemplate(hash, element1);
         
-        return element5;
+        return element1;
     };
     return taggedMustache;
 };

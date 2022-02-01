@@ -14,7 +14,7 @@
 (defparameter *free-text-regexp*
   (new (*reg-exp (+ *tag-text-open* "([^>]*?)" *tag-text-close*) "gmu")))
 (defparameter *unescaped-text-regexp*
-  (new (*reg-exp "\\{\\{\\{([^>]*?)\\}\\}\\}" "u")))
+  (regex "/\\{\\{\\{([^>]*?)\\}\\}\\}/u"))
 (defparameter *enclosed-text-regexp*
   (new (*reg-exp (+ "<(.+?)>\\s*"
                     *tag-text-open* "([^>]+?)" *tag-text-close*
@@ -28,7 +28,7 @@
 (defparameter *section-close-regexp*
   (new (*reg-exp (+ *tag-open* "\/\\s*(\\S+?)\\s*" *tag-close*) "gmu")))
 (defparameter *self-closing-regexp*
-  (new (*reg-exp "<(?!\/)(\\S+?)\\s+([^>]*?)\\s*?\/>" "gmu")))
+  (regex "/<(?!\\/)(\\S+?)\\s+([^>]*?)\\s*?\\/>/gmu"))
 
 (defparameter *template-hash-map* (new (*weak-map)))
 
@@ -39,6 +39,9 @@
     (when (chain attr (starts-with "on"))
       (setf prefix "event-"
             attr (chain attr (slice 2))))
+    (when (chain attr (starts-with "style:"))
+      (setf prefix "style-"
+            attr (chain attr (slice 6))))
     (when (chain attr (starts-with "data-"))
       (setf prefix ""
             attr (chain attr (slice 5))))
