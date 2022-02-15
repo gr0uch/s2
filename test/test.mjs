@@ -1,7 +1,7 @@
 import { move } from "../dist/main.mjs";
 import { assertEquals } from "https://deno.land/std@0.119.0/testing/asserts.ts";
 import { ref } from "../dist/computed-properties.mjs";
-import { createWindow } from "./util.mjs";
+import { createWindow, sleep } from "./util.mjs";
 
 Deno.test("mustache parser", () => {
   const { proxy, document } = createWindow();
@@ -12,7 +12,7 @@ Deno.test("mustache parser", () => {
     `<div data-container="123"><span><i>text</i></span><b><i>text</i></b>` +
       `<input value="foo"><ul></ul><div></div><div zh="中文"></div>` +
       `<div foo="bar"></div>raw text<span>str</span>` +
-      `<div id="cmp">2</div></div>`,
+      `<div id="cmp">2</div><div id="nest"></div></div>`,
   );
   proxy.nested = { text: "hi" };
   node = document.body.querySelector("#nested");
@@ -126,4 +126,24 @@ Deno.test("computed property", () => {
   assertEquals(node.textContent, "4");
   source.x.y.z = 2;
   assertEquals(node.textContent, "3");
+});
+
+Deno.test("nested computed", async () => {
+  const { source, document } = createWindow();
+  const node = document.body.querySelector("#nest");
+
+  // nested computeds
+  assertEquals(node.textContent, "");
+  source.foos = ["a", "b", "c"];
+  assertEquals(node.textContent, "abc");
+  source.foos[2] = "d";
+  assertEquals(node.textContent, "abd");
+  source.foos = [];
+  assertEquals(node.textContent, "");
+  source.foos = ["x", "y", "z"];
+  assertEquals(node.textContent, "xyz");
+  delete source.foos;
+  assertEquals(node.textContent, "");
+  source.foos = ["1", "2", "3"];
+  assertEquals(node.textContent, "123");
 });

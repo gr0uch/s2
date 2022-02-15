@@ -26,6 +26,7 @@ export function createWindow() {
   s2.window = parseMustache.window = window;
 
   const source = observable({
+    foos: null,
     x: {
       y: {
         z: 1,
@@ -45,10 +46,21 @@ export function createWindow() {
       value() {
         return (source.x?.y?.z + 1) || "invalid";
       },
+      nest() {
+        const { foos } = source;
+        return (foos || []).map(foo => {
+          return computed({
+            text() {
+              return foo;
+            }
+          });
+        });
+      }
     }),
   };
 
   const nested = mustache`<div id="nested">{{text}}</div>`;
+  const foo = mustache`<div class="foo">{{text}}</div>`;
   const template = mustache`
   <div
     data-container="{{id}}"
@@ -87,6 +99,11 @@ export function createWindow() {
           value
         }}
       </div>
+      <div id="nest">
+        {{#nest}}
+          ${foo}
+        {{/nest}}
+      </div>
     {{/comp}}
   </div>
   `;
@@ -96,4 +113,10 @@ export function createWindow() {
   document.body.appendChild(fragment);
 
   return { source, proxy, window, document };
+}
+
+export function sleep (time = 0) {
+  return new Promise(resolve => {
+    setTimeout(resolve, time);
+  });
 }

@@ -337,8 +337,12 @@
           (let ((old-node node))
             (setf node (@ node next-sibling))
             (if unmount
-                (chain *promise (resolve (chain unmount (call self old-node)))
-                       (then (lambda () (chain old-node (remove)))))
+                (let ((unmount-value (chain unmount (call self old-node))))
+                  (if (and unmount-value
+                           (eq (typeof (@ unmount-value then)) 'function))
+                      (chain unmount-value
+                             (then (lambda () (chain old-node (remove)))))
+                    (chain old-node (remove))))
               (chain old-node (remove)))))
     (chain end-node (remove)))
   (when self (recursive-unmount self false (new (*weak-set))))
@@ -451,7 +455,7 @@
              for i from 0 to (- (length values) 1) do
              (let ((prev (getprop previous-values i))
                    (obj (getprop values i)))
-               (if prev
+               (if (and prev obj)
                    (progn
                      ;; Assignment.
                      (loop
