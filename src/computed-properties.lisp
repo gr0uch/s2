@@ -78,6 +78,7 @@
       (setf key-bindings (or (getprop context key) (list)))
       (loop
        for key-binding in key-bindings do
+       (when (not key-binding) (continue))
        (let* ((obj (@ key-binding 0))
               (obj-key (@ key-binding 1))
               (fn (@ key-binding 2)))

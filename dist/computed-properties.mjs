@@ -101,10 +101,11 @@ function isObject(obj) {
          (WHEN (NOT CONTEXT) (RETURN-FROM SET-PROPERTY T))
          (SETF KEY-BINDINGS (OR (GETPROP CONTEXT KEY) (LIST)))
          (LOOP FOR KEY-BINDING IN KEY-BINDINGS
-               DO (LET* ((OBJ (@ KEY-BINDING 0))
-                         (OBJ-KEY (@ KEY-BINDING 1))
-                         (FN (@ KEY-BINDING 2)))
-                    (COMPUTE-DEPENDENCIES OBJ OBJ-KEY FN))))
+               DO (WHEN (NOT KEY-BINDING)
+                    (CONTINUE)) (LET* ((OBJ (@ KEY-BINDING 0))
+                                       (OBJ-KEY (@ KEY-BINDING 1))
+                                       (FN (@ KEY-BINDING 2)))
+                                  (COMPUTE-DEPENDENCIES OBJ OBJ-KEY FN))))
        T)
      SET-PROPERTY) */
 function makeSetProperty(isDeep) {
@@ -137,6 +138,9 @@ function makeSetProperty(isDeep) {
         var _js6 = keyBindings.length;
         for (var _js5 = 0; _js5 < _js6; _js5 += 1) {
             var keyBinding = keyBindings[_js5];
+            if (!keyBinding) {
+                continue;
+            };
             var obj = keyBinding[0];
             var objKey = keyBinding[1];
             var fn = keyBinding[2];
