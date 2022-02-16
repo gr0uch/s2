@@ -7,6 +7,7 @@
 (defparameter *clear-stack-timeout* nil)
 (defparameter *stack-delimiter-symbol* (*symbol 'stack-delimiter))
 (defparameter *ref-symbol* (*symbol 'ref))
+(defparameter *has-unmounted-symbol* (*symbol 'has-unmounted))
 
 (defparameter *proxy-observable*
   (let ((set-property (make-set-property)))
@@ -82,6 +83,7 @@
        (let* ((obj (@ key-binding 0))
               (obj-key (@ key-binding 1))
               (fn (@ key-binding 2)))
+         (when (getprop obj *has-unmounted-symbol*) (continue))
          (compute-dependencies obj obj-key fn))))
     t)
   set-property)
@@ -177,7 +179,8 @@
            (let* ((key-binding (getprop key-bindings i))
                   (target (@ key-binding 0)))
              (when (eq target obj)
-               (chain key-bindings (splice i 1)))))))))))
+               (chain key-bindings (splice i 1))))))))))
+  (setf (getprop obj *has-unmounted-symbol*) t))
 
 
 ;; This is a function that returns the actual function meant to be used.

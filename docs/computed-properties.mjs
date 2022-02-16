@@ -11,6 +11,8 @@ var CLEARSTACKTIMEOUT = null;
 var STACKDELIMITERSYMBOL = Symbol('stackDelimiter');
 /* (DEFPARAMETER *REF-SYMBOL* (*SYMBOL 'REF)) */
 var REFSYMBOL = Symbol('ref');
+/* (DEFPARAMETER *HAS-UNMOUNTED-SYMBOL* (*SYMBOL 'HAS-UNMOUNTED)) */
+var HASUNMOUNTEDSYMBOL = Symbol('hasUnmounted');
 /* (DEFPARAMETER *PROXY-OBSERVABLE*
      (LET ((SET-PROPERTY (MAKE-SET-PROPERTY)))
        (CREATE GET GET-PROPERTY SET SET-PROPERTY DELETE-PROPERTY SET-PROPERTY))) */
@@ -105,6 +107,8 @@ function isObject(obj) {
                     (CONTINUE)) (LET* ((OBJ (@ KEY-BINDING 0))
                                        (OBJ-KEY (@ KEY-BINDING 1))
                                        (FN (@ KEY-BINDING 2)))
+                                  (WHEN (GETPROP OBJ *HAS-UNMOUNTED-SYMBOL*)
+                                    (CONTINUE))
                                   (COMPUTE-DEPENDENCIES OBJ OBJ-KEY FN))))
        T)
      SET-PROPERTY) */
@@ -144,6 +148,9 @@ function makeSetProperty(isDeep) {
             var obj = keyBinding[0];
             var objKey = keyBinding[1];
             var fn = keyBinding[2];
+            if (obj[HASUNMOUNTEDSYMBOL]) {
+                continue;
+            };
             computeDependencies(obj, objKey, fn);
         };
         
@@ -307,7 +314,8 @@ function computeDependencies(obj, key, fn) {
                                              (TARGET (@ KEY-BINDING 0)))
                                         (WHEN (EQ TARGET OBJ)
                                           (CHAIN KEY-BINDINGS
-                                                 (SPLICE I 1))))))))))) */
+                                                 (SPLICE I 1))))))))))
+     (SETF (GETPROP OBJ *HAS-UNMOUNTED-SYMBOL*) T)) */
 function unmountObject(obj) {
     var observables = TARGETOBSERVABLESMAP.get(obj);
     if (!observables) {
@@ -328,6 +336,7 @@ function unmountObject(obj) {
             };
         };
     };
+    return obj[HASUNMOUNTEDSYMBOL] = true;
 };
 /* (DEFUN CREATE-COMPUTED (MOUNT-SYMBOL UNMOUNT-SYMBOL)
      (DEFUN COMPUTED (OBJ)

@@ -48,7 +48,8 @@ export function createWindow() {
       },
       nest() {
         const { foos } = source;
-        return (foos || []).map(foo => {
+        if (!foos) return null;
+        return foos.map(foo => {
           return computed({
             text() {
               return foo;
