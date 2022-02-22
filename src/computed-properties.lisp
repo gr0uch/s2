@@ -107,14 +107,19 @@
 ;; Observable objects are sources of data that control computed properties.
 (defun create-source (obj is-deep)
   (when (not obj) (setf obj (create)))
-  (let ((proxy (new (*proxy obj
-                            (if is-deep *proxy-deep-observable*
-                              *proxy-observable*)))))
+  (let* ((proxy (new (*proxy obj
+                             (if is-deep *proxy-deep-observable*
+                               *proxy-observable*))))
+         (symbols (chain *object (get-own-property-symbols obj)))
+         (mount-fn (getprop obj (elt symbols 0))))
     (when is-deep
       (loop for key of obj do
             (let ((value (getprop obj key)))
               (when (and (is-object value) (not (getprop value *ref-symbol*)))
                 (setf (getprop obj key) (create-source value t))))))
+
+    ;; If a computed object is passed in, automatically mount it.
+    (when (eq (typeof mount-fn) 'function) (chain mount-fn (call proxy)))
     proxy))
 
 

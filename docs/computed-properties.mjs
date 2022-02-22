@@ -187,12 +187,14 @@ function deepReplace(proxy, obj) {
 };
 /* (DEFUN CREATE-SOURCE (OBJ IS-DEEP)
      (WHEN (NOT OBJ) (SETF OBJ (CREATE)))
-     (LET ((PROXY
-            (NEW
-             (*PROXY OBJ
-              (IF IS-DEEP
-                  *PROXY-DEEP-OBSERVABLE*
-                  *PROXY-OBSERVABLE*)))))
+     (LET* ((PROXY
+             (NEW
+              (*PROXY OBJ
+               (IF IS-DEEP
+                   *PROXY-DEEP-OBSERVABLE*
+                   *PROXY-OBSERVABLE*))))
+            (SYMBOLS (CHAIN *OBJECT (GET-OWN-PROPERTY-SYMBOLS OBJ)))
+            (MOUNT-FN (GETPROP OBJ (ELT SYMBOLS 0))))
        (WHEN IS-DEEP
          (LOOP FOR KEY OF OBJ
                DO (LET ((VALUE (GETPROP OBJ KEY)))
@@ -200,12 +202,15 @@ function deepReplace(proxy, obj) {
                         (AND (IS-OBJECT VALUE)
                              (NOT (GETPROP VALUE *REF-SYMBOL*)))
                       (SETF (GETPROP OBJ KEY) (CREATE-SOURCE VALUE T))))))
+       (WHEN (EQ (TYPEOF MOUNT-FN) 'FUNCTION) (CHAIN MOUNT-FN (CALL PROXY)))
        PROXY)) */
 function createSource(obj, isDeep) {
     if (!obj) {
         obj = {  };
     };
     var proxy = new Proxy(obj, isDeep ? PROXYDEEPOBSERVABLE : PROXYOBSERVABLE);
+    var symbols = Object.getOwnPropertySymbols(obj);
+    var mountFn = obj[symbols[0]];
     if (isDeep) {
         for (var key in obj) {
             var value = obj[key];
@@ -213,6 +218,9 @@ function createSource(obj, isDeep) {
                 obj[key] = createSource(value, true);
             };
         };
+    };
+    if (typeof mountFn === 'function') {
+        mountFn.call(proxy);
     };
     
     return proxy;

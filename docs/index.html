@@ -1177,19 +1177,19 @@ return {
   number: 1,
 });
 
-computed({
-  calcDouble() {
-    data.x2 = data.number * 2;
+const derived = observable(computed([
+  function() {
+    this.double = data.number * 2;
   },
-  calcQuadruple() {
-    data.x4 = data.x2 * 2;
-  }
-})[mount]();
+  function() {
+    this.quadruple = this.double * 2;
+  },
+]));
 
 return computed({
   number: () => data.number,
-  double: () => data.x2,
-  quadruple: () => data.x4,
+  double: () => derived.double,
+  quadruple: () => derived.quadruple,
   increment(event) {
     event.preventDefault();
     data.number++;
@@ -1214,7 +1214,7 @@ return computed({
             </aside>
           </div>
           <div>
-            <p>Note that this pattern should be implemented in a way that is UI agnostic. If computed of computed is used in UI, then it depends on the UI being rendered to function. It should be done in a computed object that is <strong>not</strong> mounted, and its <code>mount</code> method should be called manually.</p>
+            <p>When a computed object is passed into observable, its <code>mount</code> function is called automatically. If needed, its <code>unmount</code> function needs to be called manually.</p>
             <hr>
           </div>
           <div>
