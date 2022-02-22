@@ -139,9 +139,9 @@ function makeSetProperty(isDeep) {
             return true;
         };
         keyBindings = context[key] || [];
-        var _js6 = keyBindings.length;
-        for (var _js5 = 0; _js5 < _js6; _js5 += 1) {
-            var keyBinding = keyBindings[_js5];
+        var _js2 = keyBindings.length;
+        for (var _js1 = 0; _js1 < _js2; _js1 += 1) {
+            var keyBinding = keyBindings[_js1];
             if (!keyBinding) {
                 continue;
             };
@@ -179,7 +179,7 @@ function deepReplace(proxy, obj) {
         };
     };
     for (var key in proxy) {
-        var oldValue7 = proxy[key];
+        var oldValue3 = proxy[key];
         if (!obj.hasOwnProperty(key)) {
             delete proxy[key];
         };
@@ -321,9 +321,9 @@ function unmountObject(obj) {
     if (!observables) {
         return;
     };
-    var _js8 = observables.length;
-    for (var _js7 = 0; _js7 < _js8; _js7 += 1) {
-        var observable = observables[_js7];
+    var _js4 = observables.length;
+    for (var _js3 = 0; _js3 < _js4; _js3 += 1) {
+        var observable = observables[_js3];
         var context = OBSERVABLECONTEXTMAP.get(observable);
         for (var key in context) {
             var keyBindings = context[key];

@@ -136,8 +136,12 @@ Deno.test("nested computed", async () => {
   assertEquals(node.textContent, "");
   source.foos = ["a", "b", "c"];
   assertEquals(node.textContent, "abc");
-  source.foos[2] = "d";
+  source.foos[2] = { foo: "d" };
   assertEquals(node.textContent, "abd");
+  source.foos[2].foo = "e";
+  assertEquals(node.textContent, "abe");
+  delete source.foos[2];
+  assertEquals(node.textContent, "ab");
   source.foos = [];
   assertEquals(node.textContent, "");
   source.foos = ["x", "y", "z"];

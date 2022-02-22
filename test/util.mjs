@@ -49,10 +49,13 @@ export function createWindow() {
       nest() {
         const { foos } = source;
         if (!foos) return null;
-        return foos.map(foo => {
+        return foos.map((_, i) => {
           return computed({
             text() {
-              return foo;
+              const { foos } = source;
+              const value = foos[i];
+              if (typeof value !== "object") return value;
+              return value.foo;
             }
           });
         });

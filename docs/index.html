@@ -17,7 +17,7 @@
     <script type="module" src="./docs.mjs"></script>
     <style>
       :root {
-        --w: 77rem;
+        --w: 76rem;
         --h: 19px;
         --h2: 17px;
         --h3: 14px;
@@ -73,9 +73,9 @@
       #main-nav .logo { position: absolute; top: 0; width: calc(1rem * var(--u) * 8); padding-top: calc(1rem * var(--u) * 2); background: var(--c-l); border-bottom: var(--c-l) calc(1rem * var(--u) * 1) solid; border-radius: 0 0 calc(1rem * var(--u)) calc(1rem * var(--u)); }
       #main-nav svg { display: block; height: calc(1rem * var(--u) * 8); width: calc(1rem * var(--u) * 8); }
       #content { flex: 5; }
-      #content a, #main-nav h5 a { text-decoration: underline var(--c-l) 2px; }
+      #content a, #main-nav h5:first-of-type a { text-decoration: underline var(--c-l) 2px; }
       #content a { font-weight: 700; }
-      #content > section { display: grid; grid-template-columns: 5fr 2fr; grid-template-rows: min-content; border-bottom: 4px var(--c-a2) solid; }
+      #content > section { display: grid; grid-template-columns: 7fr 3fr; grid-template-rows: min-content; border-bottom: 4px var(--c-a2) solid; }
       #content > section > div { padding: 0 calc(1rem * var(--u) * 16) 0 0; position: relative; }
       #content > section > div:nth-of-type(2n) { padding: 0 var(--l); }
       #content > section > div:nth-of-type(2n)::before { display: block; content: " "; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--c-a2); z-index: -1; box-sizing: border-box; }
@@ -86,11 +86,10 @@
       #content > section > div > footer > h4 { font-size: 2em; }
       #content > section code { background: var(--c-a2); border-radius: calc(1rem * var(--u)); padding: 0 calc(1rem * var(--u)); }
       #content > section pre code { background: inherit; border-radius: inherit; }
-      .tagline { color: var(--c-fg3); font-size: var(--h3); padding-top: calc(1rem * var(--u) * 2); }
-      .params { position: relative; z-index: 0; margin: calc(1rem * var(--u) * 18) 0 0 0; font-size: calc(1rem * var(--u) * 5); line-height: calc(1rem * var(--u) * 10); border-radius: calc(1rem * var(--u)); color: var(--c-l); }
-      .params b { display: inline-block; width: calc(1rem * var(--u) * 20); }
+      .params { position: relative; z-index: 0; margin: calc(1rem * var(--u) * 26) 0 0 0; font-size: calc(1rem * var(--u) * 5); line-height: calc(1rem * var(--u) * 10); border-radius: calc(1rem * var(--u)); color: var(--c-l); }
+      .params b { display: inline-block; width: calc(1rem * var(--u) * 18); font-weight: inherit; }
       .params i { display: inline-block; margin: 0 calc(1rem * var(--u) * 2); }
-      .params code { background: none !important; text-decoration: underline; font-size: inherit; }
+      .params code { font-size: inherit; background-color: var(--c-l2); }
 
       /* examples */
       .live-example.code { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: min-content 1fr; box-shadow: 0 calc(1rem * var(--u) * 4) calc(1rem * var(--u) * 8) var(--c-bg); border-radius: calc(1rem * var(--u)); margin-bottom: calc(1rem * var(--u) * 10); }
@@ -149,18 +148,24 @@
           --h3: 12px;
         }
         .container { flex-direction: column; }
-        .params { margin: calc(1rem * var(--u) * 8) 0; padding: calc(var(--l) * 1 / 2); }
+        .params { margin: calc(1rem * var(--u) * 8) 0; padding: calc(var(--l) * 1 / 2) 0; }
         h2 { margin-top: calc(1rem * var(--u) * 6); }
         #main-nav { position: static; padding-top: 0; height: auto; }
         #main-nav .logo { margin-bottom: 0; position: static; }
         #main-nav .logo ~ * { display: none; }
+        .live-example.primary.output { margin: 0 calc(1rem * var(--u) * -2); }
         .live-example.primary.code { position: inherit; left: 0; margin-right: 0; }
+        .live-example.output { padding-bottom: calc(var(--l) / 4); }
         #content { padding: 0 calc(1rem * var(--u) * 1); }
         #content > section { display: block; }
         #content > section > div { padding: 0; }
+        #content > section > div > :last-child:not(.live-example.code):not(hr) { margin-bottom: var(--l); }
         #content > section > div:nth-child(2) { padding-top: 0; }
         #content > section > div:last-of-type { padding-bottom: 0; }
+        #content > section > div:nth-of-type(2n) { padding: 0 calc(var(--l) * 1 / 4); }
         #content > section > div:nth-of-type(2n + 1) > :last-child { margin-bottom: calc(1rem * var(--u) * 8); }
+        #content > section > div:nth-last-of-type(2) > hr:last-child { margin-bottom: 0 !important; }
+        aside:not(.output) {  margin-top: 0; }
       }
     </style>
   </head>
@@ -171,19 +176,19 @@
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 4.2333333 4.2333333"><g><path fill="#3fb68b" fill-rule="evenodd" d="M0 0h4.233v4.233h-4.233z"/><path d="M1.416.831q-.403.3-.403.646 0 .444.32.444.114 0 .362-.196t.486-.196q.227 0 .367.119.14.114.14.305 0 .181-.181.382-.181.196-.641.45-.46.248-.584.331-.124.088-.212.212l-.026-.031.031-.062.036-.078-.088-.103q-.083-.078-.222-.078-.258 0-.408.269l-.026.031-.031-.031q0-.083.233-.32.238-.243.563-.243.243 0 .424.155l.041.026.072-.041q.346-.181.444-.331.098-.15.098-.315 0-.181-.109-.284-.103-.109-.274-.109-.124 0-.377.196-.248.196-.46.196-.165 0-.284-.129-.119-.134-.119-.315 0-.258.227-.517.227-.258.816-.568.289-.155.403-.326l.016-.021.021.041-.093.124-.088.124q.171.145.279.145.134 0 .284-.103l.021.031q0 .026-.243.243-.238.212-.372.212-.124 0-.444-.284z" stroke="#fff" stroke-width=".132" stroke-linecap="square" fill="none"/><path d="M1.883 3.956l.432-.397.34-.327q.302-.286.4-.495.098-.21.098-.448 0-.267-.111-.422-.108-.156-.318-.156-.152 0-.286.083-.13.079-.13.171 0 .152.165.152.121 0 .194.073.076.07.076.184 0 .143-.098.238t-.241.095q-.178 0-.295-.102-.117-.105-.117-.273 0-.197.133-.356.133-.162.298-.235.168-.073.295-.092l.276-.022q.384 0 .654.171t.27.495q0 .203-.127.362-.124.159-.279.241-.156.079-.479.206-.321.124-.356.181v.013l.181-.01.222-.003h.502q.156 0 .219-.038l.092-.108.051-.137.038-.111h.041l-.203 1.086h-1.937z" /></g></svg>
         </div>
         <h5><a href="https://github.com/gr0uch/s2">GitHub: gr0uch/s2</a></h5>
-        <h5>Intro</h5>
+        <h5><a href="#intro">Intro</a></h5>
         <ul>
           <li><a href="#rationale">Rationale</a></li>
           <li><a href="#import-the-module">Import the module</a></li>
           <li><a href="#reactive-templating">Reactive templating</a></li>
         </ul>
-        <h5>Templating</h5>
+        <h5><a href="#templating">Templating</a></h5>
         <ul>
           <li><a href="#html-templates">HTML templates</a></li>
           <li><a href="#mustache-templates">Mustache templates</a></li>
           <li><a href="#registering-templates">Registering templates</a></li>
         </ul>
-        <h5>Advanced usage</h5>
+        <h5><a href="#advanced-usage">Advanced usage</a></h5>
         <ul>
           <li><a href="#mount-unmount-symbols"><code>mount</code>, <code>unmount</code> symbols</a></li>
           <li><a href="#move-symbol"><code>move</code> symbol</a></li>
@@ -191,7 +196,7 @@
           <li><a href="#computed-properties">Computed properties</a></li>
           <li><a href="#computed-composition">Computed composition</a></li>
         </ul>
-        <h5>Addendum</h5>
+        <h5><a href="#addendum">Addendum</a></h5>
         <ul>
           <li><a href="#performance-pitfalls">Performance pitfalls</a></li>
           <li><a href="#object-re-use">Object re-use</a></li>
@@ -201,19 +206,17 @@
       </nav>
       <main id="content">
         <section>
-          <div>
-            <p class="tagline" id="top">A function for reactive web UI.</p>
+          <div id="top">
             <p class="params">
-              <em>s²</em> &mdash; Reactive templating function.<br><br>
-              <em><b>Input</b> <i>&larr;</i></em> <code>Object</code>, <code>&lt;template&gt;</code><br>
-              <em><b>Output</b> <i>&rarr;</i></em> <code>Proxy</code>, <code>DocumentFragment</code>
+              <code>s2(object, template);</code><br><br>
+              Returns <code>[proxy, documentFragment]</code>, a reactive view model and a fragment containing its elements.
             </p>
             <hr>
           </div>
           <div></div>
         </section>
 
-        <section>
+        <section id="intro">
           <div>
             <h2 id="rationale">Rationale</h2>
             <p><em>s²</em> is a single function that <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy">proxies</a> mutable data to <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Reflect">reflect</a> in the DOM. Its paradigm models user interface entirely in terms of state, and avoids mixing logic with the presentation layer (inlining JavaScript, such as JSX). <em>s²</em> has a few design goals:</p>
@@ -380,7 +383,7 @@ return state;</textarea><textarea spellcheck="false"><form onsubmit="{{ignore}}"
           </div>
         </section>
 
-        <section>
+        <section id="templating">
           <div>
             <h2 id="html-templates">HTML templates</h2>
             <p>By default, <code>data-</code> attributes are used for templating. This section exists for reference.</p>
@@ -533,7 +536,7 @@ const greeting = html`
           </div>
         </section>
 
-        <section>
+        <section id="advanced-usage">
           <div>
             <h2 id="mount-unmount-symbols"><code>mount</code>, <code>unmount</code> symbols</h2>
             <p>The symbols <code>mount</code> and <code>unmount</code> allow user-defined behavior to run as elements are appended and removed from the DOM. This allows for animations and arbitrary code such as integrating with third-party libraries on these events. The unmount function is particularly useful for implementing exiting animations, as it will wait for a promise to resolve before removing the node.</p>
@@ -755,10 +758,10 @@ function read(event) {
             </aside>
           </div>
           <div>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 116)">
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 120)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
-              <textarea spellcheck="false">const src = observable({
+              <textarea spellcheck="false">const s = observable({
   data: [
     { price: 19.99, tax: 1.08 },
     { price: 75.00, tax: 1.06 },
@@ -767,9 +770,10 @@ function read(event) {
 }, true);
 return computed({
   rows() {
-    return src.data.map(d => computed({
+    return s.data.map(d => computed({
       total: () => `$${
-        (d.price * d.tax).toFixed(2)}`,
+        (d.price * d.tax)
+          .toFixed(2)}`,
       price: () => d.price,
       tax: () => d.tax,
       setPrice() {
@@ -979,7 +983,7 @@ return {
           </div>
         </section>
 
-        <section>
+        <section id="addendum">
           <div>
             <h2 id="performance-pitfalls">Performance pitfalls</h2>
             <p>When using computed properties, be careful about where observable properties are read from. Try to compose computed properties to be as granular as possible.</p>
