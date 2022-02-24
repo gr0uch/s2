@@ -4,7 +4,7 @@
 (defparameter *observable-context-map* (new (*weak-map)))
 (defparameter *target-observables-map* (new (*weak-map)))
 (defparameter *read-stack* (list))
-(defparameter *clear-stack-timeout* nil)
+(defparameter *will-clear-stack* false)
 (defparameter *stack-delimiter-symbol* (*symbol 'stack-delimiter))
 (defparameter *ref-symbol* (*symbol 'ref))
 (defparameter *has-unmounted-symbol* (*symbol 'has-unmounted))
@@ -23,10 +23,10 @@
 
 
 (defun clear-stack ()
-  (setf *clear-stack-timeout* nil)
   (loop
    while (length *read-stack*) do
-   (chain *read-stack* (pop))))
+   (chain *read-stack* (pop)))
+  (setf *will-clear-stack* false))
 
 
 (defun pop-stack ()
@@ -40,14 +40,21 @@
 (defun get-property (target key receiver)
   ;; Qualifying if a key has already been read or not means we don't have to
   ;; re-compute when the same key is read multiple times.
-  (when (not (chain *read-stack*
-                    (find (lambda (tuple)
-                            (and (eq (elt tuple 0) target)
-                                 (eq (elt tuple 1) key))))))
-    (chain *read-stack* (push (list target key)))
-    ;; Prevent possible memory leaks from reading.
-    (when (not *clear-stack-timeout*)
-      (setf *clear-stack-timeout* (set-timeout clear-stack 0))))
+  (let ((has-read false))
+    (loop
+     for i from (- (length *read-stack*) 1) downto 0 do
+     (let ((tuple (elt *read-stack* i)))
+       (when (eq tuple *stack-delimiter-symbol*) (break))
+       (when (and (eq (elt tuple 0) target)
+                  (eq (elt tuple 1) key))
+         (setf has-read t))))
+    (when (not has-read)
+      (chain *read-stack* (push (list target key)))
+      ;; Prevent possible memory leaks from reading.
+      (when (not *will-clear-stack*)
+        (setf *will-clear-stack* t)
+        (queue-microtask clear-stack))))
+
   (chain *reflect (get target key receiver)))
 
 

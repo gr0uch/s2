@@ -15,7 +15,6 @@
     ((document create-text-node) function)
     ((document create-comment) function)
     ((document create-document-fragment) function)
-    ((window request-animation-frame) function)
     ((*node) function)
 
     ;; Sanity checking JS.
@@ -29,16 +28,17 @@
     ((*reflect) object)
     ((*weak-map) function)
     ((*weak-set) function)
+    ((queue-microtask) function)
     ((*proxy) function)))
 
-(defun dep-check ()
+(defun dep-check (root)
   (when *passed-check* (return-from dep-check))
 
   (loop
    for tuple in *dep-map* do
    (let ((path (@ tuple 0))
          (type-str (@ tuple 1))
-         (target window))
+         (target (or root window)))
 
      (when (eq type-str 'property)
        (loop

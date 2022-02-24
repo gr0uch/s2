@@ -1177,14 +1177,14 @@ return {
   number: 1,
 });
 
-const derived = observable(computed([
-  function() {
-    this.double = data.number * 2;
+const derived = observable(computed({
+  double() {
+    return data.number * 2;
   },
-  function() {
-    this.quadruple = this.double * 2;
+  quadruple() {
+    return this.double * 2;
   },
-]));
+}));
 
 return computed({
   number: () => data.number,

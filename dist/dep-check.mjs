@@ -11,18 +11,20 @@ var PASSEDCHECK = false;
        ((DOCUMENT QUERY-SELECTOR) FUNCTION)
        ((DOCUMENT CREATE-TEXT-NODE) FUNCTION)
        ((DOCUMENT CREATE-COMMENT) FUNCTION)
-       ((DOCUMENT CREATE-DOCUMENT-FRAGMENT) FUNCTION)
-       ((WINDOW REQUEST-ANIMATION-FRAME) FUNCTION) ((*NODE) FUNCTION)
+       ((DOCUMENT CREATE-DOCUMENT-FRAGMENT) FUNCTION) ((*NODE) FUNCTION)
        ((*OBJECT PROTOTYPE HAS-OWN-PROPERTY) FUNCTION)
        ((*NUMBER PARSE-INT) FUNCTION) ((*NUMBER IS-NA-N) FUNCTION)
        ((*ARRAY IS-ARRAY) FUNCTION) ((*OBJECT ASSIGN) FUNCTION)
        ((*PROMISE) FUNCTION) ((*SYMBOL) FUNCTION) ((*REFLECT) OBJECT)
-       ((*WEAK-MAP) FUNCTION) ((*WEAK-SET) FUNCTION) ((*PROXY) FUNCTION))) */
-var DEPMAP = [[['Node', 'prototype', 'cloneNode'], 'function'], [['Node', 'prototype', 'appendChild'], 'function'], [['Node', 'prototype', 'insertBefore'], 'function'], [['Node', 'prototype', 'nextSibling'], 'property'], [['Node', 'prototype', 'firstChild'], 'property'], [['Element', 'prototype', 'remove'], 'function'], [['document', 'querySelector'], 'function'], [['document', 'createTextNode'], 'function'], [['document', 'createComment'], 'function'], [['document', 'createDocumentFragment'], 'function'], [['window', 'requestAnimationFrame'], 'function'], [['Node'], 'function'], [['Object', 'prototype', 'hasOwnProperty'], 'function'], [['Number', 'parseInt'], 'function'], [['Number', 'isNaN'], 'function'], [['Array', 'isArray'], 'function'], [['Object', 'assign'], 'function'], [['Promise'], 'function'], [['Symbol'], 'function'], [['Reflect'], 'object'], [['WeakMap'], 'function'], [['WeakSet'], 'function'], [['Proxy'], 'function']];
-/* (DEFUN DEP-CHECK ()
+       ((*WEAK-MAP) FUNCTION) ((*WEAK-SET) FUNCTION)
+       ((QUEUE-MICROTASK) FUNCTION) ((*PROXY) FUNCTION))) */
+var DEPMAP = [[['Node', 'prototype', 'cloneNode'], 'function'], [['Node', 'prototype', 'appendChild'], 'function'], [['Node', 'prototype', 'insertBefore'], 'function'], [['Node', 'prototype', 'nextSibling'], 'property'], [['Node', 'prototype', 'firstChild'], 'property'], [['Element', 'prototype', 'remove'], 'function'], [['document', 'querySelector'], 'function'], [['document', 'createTextNode'], 'function'], [['document', 'createComment'], 'function'], [['document', 'createDocumentFragment'], 'function'], [['Node'], 'function'], [['Object', 'prototype', 'hasOwnProperty'], 'function'], [['Number', 'parseInt'], 'function'], [['Number', 'isNaN'], 'function'], [['Array', 'isArray'], 'function'], [['Object', 'assign'], 'function'], [['Promise'], 'function'], [['Symbol'], 'function'], [['Reflect'], 'object'], [['WeakMap'], 'function'], [['WeakSet'], 'function'], [['queueMicrotask'], 'function'], [['Proxy'], 'function']];
+/* (DEFUN DEP-CHECK (ROOT)
      (WHEN *PASSED-CHECK* (RETURN-FROM DEP-CHECK))
      (LOOP FOR TUPLE IN *DEP-MAP*
-           DO (LET ((PATH (@ TUPLE 0)) (TYPE-STR (@ TUPLE 1)) (TARGET WINDOW))
+           DO (LET ((PATH (@ TUPLE 0))
+                    (TYPE-STR (@ TUPLE 1))
+                    (TARGET (OR ROOT WINDOW)))
                 (WHEN (EQ TYPE-STR 'PROPERTY)
                   (LOOP FOR I FROM 0 TO (- (LENGTH PATH) 2)
                         DO (LET ((KEY (GETPROP PATH I)))
@@ -46,7 +48,7 @@ var DEPMAP = [[['Node', 'prototype', 'cloneNode'], 'function'], [['Node', 'proto
                         (+ Expected  (CHAIN PATH (JOIN .))  to have type "
                            TYPE-STR ")))))))
      (SETF *PASSED-CHECK* T)) */
-function depCheck() {
+function depCheck(root) {
     if (PASSEDCHECK) {
         return;
     };
@@ -55,7 +57,7 @@ function depCheck() {
         var tuple = DEPMAP[_js1];
         var path = tuple[0];
         var typeStr = tuple[1];
-        var target = window;
+        var target = root || window;
         if (typeStr === 'property') {
             var _js3 = path.length - 2;
             for (var i = 0; i <= _js3; i += 1) {

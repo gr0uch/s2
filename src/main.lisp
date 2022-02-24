@@ -54,8 +54,6 @@
 (defparameter *proxy-object* (create set set-property delete-property set-property))
 (defparameter *proxy-array* (create set set-index delete-property set-index))
 
-(defparameter *deferred-queue* (list))
-
 (defparameter *templates-hash* (create))
 
 (defparameter *property-handlers* (create))
@@ -95,7 +93,7 @@
 ;;     - The target location's proxy may or may not be the same proxy.
 (defun set-index (target key value receiver is-initializing)
   (when (and (@ main is-deferred) (not is-initializing))
-    (enqueue (lambda () (set-index target key value receiver t)))
+    (queue-microtask (lambda () (set-index target key value receiver t)))
     (return-from set-index t))
 
   (when (@ main debug) (console-log 'set-index arguments))
@@ -231,26 +229,9 @@
   t)
 
 
-;; When using deferred mode.
-(defun enqueue (fn)
-  (when (not (length *deferred-queue*))
-    (chain
-     main window
-     (request-animation-frame
-      (lambda ()
-        (let ((q (length *deferred-queue*)))
-          (loop
-           while (length *deferred-queue*) do
-           (let ((func (chain *deferred-queue* (shift))))
-             (func)))
-          (when (@ main debug)
-            (console-log "queue flushed" q)))))))
-  (chain *deferred-queue* (push fn)))
-
-
 (defun set-property (target key value receiver is-initializing)
   (when (and (@ main is-deferred) (not is-initializing))
-    (enqueue (lambda () (set-property target key value receiver t)))
+    (queue-microtask (lambda () (set-property target key value receiver t)))
     (return-from set-property t))
 
   (when (@ main debug) (console-log 'set-property arguments))

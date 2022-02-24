@@ -5,8 +5,8 @@ var OBSERVABLECONTEXTMAP = new WeakMap();
 var TARGETOBSERVABLESMAP = new WeakMap();
 /* (DEFPARAMETER *READ-STACK* (LIST)) */
 var READSTACK = [];
-/* (DEFPARAMETER *CLEAR-STACK-TIMEOUT* NIL) */
-var CLEARSTACKTIMEOUT = null;
+/* (DEFPARAMETER *WILL-CLEAR-STACK* FALSE) */
+var WILLCLEARSTACK = false;
 /* (DEFPARAMETER *STACK-DELIMITER-SYMBOL* (*SYMBOL 'STACK-DELIMITER)) */
 var STACKDELIMITERSYMBOL = Symbol('stackDelimiter');
 /* (DEFPARAMETER *REF-SYMBOL* (*SYMBOL 'REF)) */
@@ -36,14 +36,14 @@ var PROXYDEEPOBSERVABLE = (function () {
            };
 })();
 /* (DEFUN CLEAR-STACK ()
-     (SETF *CLEAR-STACK-TIMEOUT* NIL)
      (LOOP WHILE (LENGTH *READ-STACK*)
-           DO (CHAIN *READ-STACK* (POP)))) */
+           DO (CHAIN *READ-STACK* (POP)))
+     (SETF *WILL-CLEAR-STACK* FALSE)) */
 function clearStack() {
-    CLEARSTACKTIMEOUT = null;
     while (READSTACK.length) {
         READSTACK.pop();
     };
+    return WILLCLEARSTACK = false;
 };
 /* (DEFUN POP-STACK ()
      (LOOP FOR I FROM (- (LENGTH *READ-STACK*) 1) DOWNTO 0
@@ -57,23 +57,34 @@ function popStack() {
     };
 };
 /* (DEFUN GET-PROPERTY (TARGET KEY RECEIVER)
-     (WHEN
-         (NOT
-          (CHAIN *READ-STACK*
-                 (FIND
-                  (LAMBDA (TUPLE)
-                    (AND (EQ (ELT TUPLE 0) TARGET) (EQ (ELT TUPLE 1) KEY))))))
-       (CHAIN *READ-STACK* (PUSH (LIST TARGET KEY)))
-       (WHEN (NOT *CLEAR-STACK-TIMEOUT*)
-         (SETF *CLEAR-STACK-TIMEOUT* (SET-TIMEOUT CLEAR-STACK 0))))
+     (LET ((HAS-READ FALSE))
+       (LOOP FOR I FROM (- (LENGTH *READ-STACK*) 1) DOWNTO 0
+             DO (LET ((TUPLE (ELT *READ-STACK* I)))
+                  (WHEN (EQ TUPLE *STACK-DELIMITER-SYMBOL*) (BREAK))
+                  (WHEN (AND (EQ (ELT TUPLE 0) TARGET) (EQ (ELT TUPLE 1) KEY))
+                    (SETF HAS-READ T))))
+       (WHEN (NOT HAS-READ)
+         (CHAIN *READ-STACK* (PUSH (LIST TARGET KEY)))
+         (WHEN (NOT *WILL-CLEAR-STACK*)
+           (SETF *WILL-CLEAR-STACK* T)
+           (QUEUE-MICROTASK CLEAR-STACK))))
      (CHAIN *REFLECT (GET TARGET KEY RECEIVER))) */
 function getProperty(target, key, receiver) {
-    if (!READSTACK.find(function (tuple) {
-        return tuple[0] === target && tuple[1] === key;
-    })) {
+    var hasRead = false;
+    for (var i = READSTACK.length - 1; i >= 0; i -= 1) {
+        var tuple = READSTACK[i];
+        if (tuple === STACKDELIMITERSYMBOL) {
+            break;
+        };
+        if (tuple[0] === target && tuple[1] === key) {
+            hasRead = true;
+        };
+    };
+    if (!hasRead) {
         READSTACK.push([target, key]);
-        if (!CLEARSTACKTIMEOUT) {
-            CLEARSTACKTIMEOUT = setTimeout(clearStack, 0);
+        if (!WILLCLEARSTACK) {
+            WILLCLEARSTACK = true;
+            queueMicrotask(clearStack);
         };
     };
     

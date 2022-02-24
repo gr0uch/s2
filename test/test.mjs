@@ -1,7 +1,14 @@
 import { move } from "../dist/main.mjs";
-import { assertEquals } from "https://deno.land/std@0.119.0/testing/asserts.ts";
+import { assert, assertEquals } from "https://deno.land/std@0.119.0/testing/asserts.ts";
 import { ref } from "../dist/computed-properties.mjs";
+import depCheck from "../dist/dep-check.mjs";
 import { createWindow, sleep } from "./util.mjs";
+
+Deno.test("dependency check", () => {
+  const { window } = createWindow();
+  depCheck(window);
+  assert(true);
+});
 
 Deno.test("mustache parser", () => {
   const { proxy, document } = createWindow();

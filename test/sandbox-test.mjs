@@ -5,7 +5,7 @@ import { createComputed, observable } from "../dist/computed-properties.mjs";
 import test from "./runner.mjs";
 
 // s2.debug = true;
-// s2.isDeferred = true;
+s2.isDeferred = true;
 depCheck();
 cleanupTemplates();
 

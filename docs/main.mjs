@@ -58,8 +58,6 @@ var TEMPLATECONTEXTMAP = new WeakMap();
 var PROXYOBJECT = { set : setProperty, deleteProperty : setProperty };
 /* (DEFPARAMETER *PROXY-ARRAY* (CREATE SET SET-INDEX DELETE-PROPERTY SET-INDEX)) */
 var PROXYARRAY = { set : setIndex, deleteProperty : setIndex };
-/* (DEFPARAMETER *DEFERRED-QUEUE* (LIST)) */
-var DEFERREDQUEUE = [];
 /* (DEFPARAMETER *TEMPLATES-HASH* (CREATE)) */
 var TEMPLATESHASH = {  };
 /* (DEFPARAMETER *PROPERTY-HANDLERS* (CREATE)) */
@@ -113,7 +111,7 @@ PROPERTYHANDLERS[CONTEXTATTRIBUTE] = setAttribute;
 PROPERTYHANDLERS[CONTEXTDATA] = setData;
 /* (DEFUN SET-INDEX (TARGET KEY VALUE RECEIVER IS-INITIALIZING)
      (WHEN (AND (@ MAIN IS-DEFERRED) (NOT IS-INITIALIZING))
-       (ENQUEUE (LAMBDA () (SET-INDEX TARGET KEY VALUE RECEIVER T)))
+       (QUEUE-MICROTASK (LAMBDA () (SET-INDEX TARGET KEY VALUE RECEIVER T)))
        (RETURN-FROM SET-INDEX T))
      (WHEN (@ MAIN DEBUG) (CONSOLE-LOG 'SET-INDEX ARGUMENTS))
      (LET* ((NUMKEY
@@ -248,7 +246,7 @@ PROPERTYHANDLERS[CONTEXTDATA] = setData;
      T) */
 function setIndex(target, key, value, receiver, isInitializing) {
     if (main.isDeferred && !isInitializing) {
-        enqueue(function () {
+        queueMicrotask(function () {
             
             return setIndex(target, key, value, receiver, true);
         });
@@ -386,34 +384,9 @@ function setIndex(target, key, value, receiver, isInitializing) {
     
     return true;
 };
-/* (DEFUN ENQUEUE (FN)
-     (WHEN (NOT (LENGTH *DEFERRED-QUEUE*))
-       (CHAIN MAIN WINDOW
-              (REQUEST-ANIMATION-FRAME
-               (LAMBDA ()
-                 (LET ((Q (LENGTH *DEFERRED-QUEUE*)))
-                   (LOOP WHILE (LENGTH *DEFERRED-QUEUE*)
-                         DO (LET ((FUNC (CHAIN *DEFERRED-QUEUE* (SHIFT))))
-                              (FUNC)))
-                   (WHEN (@ MAIN DEBUG) (CONSOLE-LOG queue flushed Q)))))))
-     (CHAIN *DEFERRED-QUEUE* (PUSH FN))) */
-function enqueue(fn) {
-    if (!DEFERREDQUEUE.length) {
-        main.window.requestAnimationFrame(function () {
-            var q = DEFERREDQUEUE.length;
-            while (DEFERREDQUEUE.length) {
-                var func = DEFERREDQUEUE.shift();
-                func();
-            };
-            
-            return main.debug ? console.log('queue flushed', q) : null;
-        });
-    };
-    return DEFERREDQUEUE.push(fn);
-};
 /* (DEFUN SET-PROPERTY (TARGET KEY VALUE RECEIVER IS-INITIALIZING)
      (WHEN (AND (@ MAIN IS-DEFERRED) (NOT IS-INITIALIZING))
-       (ENQUEUE (LAMBDA () (SET-PROPERTY TARGET KEY VALUE RECEIVER T)))
+       (QUEUE-MICROTASK (LAMBDA () (SET-PROPERTY TARGET KEY VALUE RECEIVER T)))
        (RETURN-FROM SET-PROPERTY T))
      (WHEN (@ MAIN DEBUG) (CONSOLE-LOG 'SET-PROPERTY ARGUMENTS))
      (LET* ((CONTEXT (CHAIN *TARGET-CONTEXT-MAP* (GET TARGET)))
@@ -518,7 +491,7 @@ function enqueue(fn) {
            (CHAIN *REFLECT (DELETE-PROPERTY TARGET KEY))))) */
 function setProperty(target, key, value, receiver, isInitializing) {
     if (main.isDeferred && !isInitializing) {
-        enqueue(function () {
+        queueMicrotask(function () {
             
             return setProperty(target, key, value, receiver, true);
         });
