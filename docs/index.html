@@ -17,12 +17,12 @@
     <script type="module" src="./docs.mjs"></script>
     <style>
       :root {
-        --w: 76rem;
+        --w: 78rem;
         --h: 19px;
         --h2: 17px;
         --h3: 14px;
         --h4: 12px;
-        --l: calc(1rem * var(--u) * 7);
+        --l: calc(1rem * 9 / 5);
         --u: calc(1 / 4);
 
         /*--f-h: Garamond, Big Caslon Medium, Palatino Linotype, Palatino, serif;*/
@@ -75,8 +75,8 @@
       #content { flex: 5; }
       #content a, #main-nav h5:first-of-type a { text-decoration: underline var(--c-l) 2px; }
       #content a { font-weight: 700; }
-      #content > section { display: grid; grid-template-columns: 7fr 3fr; grid-template-rows: min-content; border-bottom: 4px var(--c-a2) solid; }
-      #content > section > div { padding: 0 calc(1rem * var(--u) * 16) 0 0; position: relative; }
+      #content > section { display: grid; grid-template-columns: 9fr 4fr; grid-template-rows: min-content; border-bottom: 4px var(--c-a2) solid; }
+      #content > section > div { padding: 0 calc(1rem * var(--u) * 22) 0 0; position: relative; }
       #content > section > div:nth-of-type(2n) { padding: 0 var(--l); }
       #content > section > div:nth-of-type(2n)::before { display: block; content: " "; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--c-a2); z-index: -1; box-sizing: border-box; }
       #content > section > div:last-of-type { padding-bottom: calc(1rem * var(--u) * 16); }
