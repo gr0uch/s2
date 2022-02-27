@@ -1,8 +1,10 @@
-import { move } from "../dist/main.mjs";
+import { move, mount, unmount } from "../dist/main.mjs";
 import { assert, assertEquals } from "https://deno.land/std@0.119.0/testing/asserts.ts";
-import { ref } from "../dist/computed-properties.mjs";
+import { createComputed, observable, ref } from "../dist/computed-properties.mjs";
 import depCheck from "../dist/dep-check.mjs";
-import { createWindow, sleep } from "./util.mjs";
+import { createWindow, customWindow } from "./util.mjs";
+
+const computed = createComputed(mount, unmount);
 
 Deno.test("dependency check", () => {
   const { window } = createWindow();
@@ -157,4 +159,49 @@ Deno.test("nested computed", async () => {
   assertEquals(node.textContent, "");
   source.foos = ["1", "2", "3"];
   assertEquals(node.textContent, "123");
+});
+
+Deno.test("computed of computed", async () => {
+  const data = observable({
+    number: 1,
+  });
+
+  const derived = observable(computed({
+    double() {
+      return data.number * 2;
+    },
+    quadruple() {
+      return this.double * 2;
+    },
+  }));
+
+  const obj = computed({
+    number: () => data.number,
+    double: () => derived.double,
+    quadruple: () => derived.quadruple,
+    increment(event) {
+      event.preventDefault();
+      data.number++;
+    },
+  });
+
+  const template = `<div>
+    Number: {{number}}<br>
+    Double: {{double}}<br>
+    Quadruple: {{quadruple}}<br>
+    Action:
+    <button onclick="{{increment}}">
+      Increment
+    </button>
+  </div>`;
+
+  const { proxy, document } = customWindow(obj, template);
+  const spans = document.querySelectorAll("span");
+  assertEquals(spans[0].textContent, "1");
+  assertEquals(spans[1].textContent, "2");
+  assertEquals(spans[2].textContent, "4");
+  document.querySelector("button").click();
+  assertEquals(spans[0].textContent, "2");
+  assertEquals(spans[1].textContent, "4");
+  assertEquals(spans[2].textContent, "8");
 });

@@ -119,8 +119,13 @@ export function createWindow() {
   return { source, proxy, window, document };
 }
 
-export function sleep (time = 0) {
-  return new Promise(resolve => {
-    setTimeout(resolve, time);
-  });
+export function customWindow(obj, template) {
+  const { window } = parseHTML(`<!DOCTYPE html><html></html>`);
+  const { document } = window;
+  s2.window = parseMustache.window = window;
+  template = mustache`${template}`;
+  cleanupTemplate(document, template);
+  const [proxy, fragment] = s2(obj, template);
+  document.body.appendChild(fragment);
+  return { proxy, window, document };
 }
