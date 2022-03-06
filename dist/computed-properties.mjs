@@ -51,10 +51,11 @@ function clearStack() {
 };
 /* (DEFUN POP-STACK ()
      (LOOP FOR I FROM (- (LENGTH *READ-STACK*) 1) DOWNTO 0
-           DO (WHEN (EQ (TYPEOF (CHAIN *READ-STACK* (POP))) 'SYMBOL) (BREAK)))) */
+           DO (WHEN (EQ (CHAIN *READ-STACK* (POP)) *STACK-DELIMITER-SYMBOL*)
+                (BREAK)))) */
 function popStack() {
     for (var i = READSTACK.length - 1; i >= 0; i -= 1) {
-        if (typeof READSTACK.pop() === 'symbol') {
+        if (READSTACK.pop() === STACKDELIMITERSYMBOL) {
             break;
         };
     };
@@ -63,7 +64,7 @@ function popStack() {
      (LET ((HAS-READ FALSE))
        (LOOP FOR I FROM (- (LENGTH *READ-STACK*) 1) DOWNTO 0
              DO (LET ((TUPLE (ELT *READ-STACK* I)))
-                  (WHEN (EQ (TYPEOF TUPLE) 'SYMBOL) (BREAK))
+                  (WHEN (EQ TUPLE *STACK-DELIMITER-SYMBOL*) (BREAK))
                   (WHEN (AND (EQ (ELT TUPLE 0) TARGET) (EQ (ELT TUPLE 1) KEY))
                     (SETF HAS-READ T))))
        (WHEN (NOT HAS-READ)
@@ -76,7 +77,7 @@ function getProperty(target, key, receiver) {
     var hasRead = false;
     for (var i = READSTACK.length - 1; i >= 0; i -= 1) {
         var tuple = READSTACK[i];
-        if (typeof tuple === 'symbol') {
+        if (tuple === STACKDELIMITERSYMBOL) {
             break;
         };
         if (tuple[0] === target && tuple[1] === key) {

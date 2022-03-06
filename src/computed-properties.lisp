@@ -36,7 +36,7 @@
 (defun pop-stack ()
   (loop
    for i from (- (length *read-stack*) 1) downto 0 do
-   (when (eq (typeof (chain *read-stack* (pop))) 'symbol) (break))))
+   (when (eq (chain *read-stack* (pop)) *stack-delimiter-symbol*) (break))))
 
 
 ;; By coordinating the function calls with the get trap, we can correlate
@@ -48,7 +48,7 @@
     (loop
      for i from (- (length *read-stack*) 1) downto 0 do
      (let ((tuple (elt *read-stack* i)))
-       (when (eq (typeof tuple) 'symbol) (break))
+       (when (eq tuple *stack-delimiter-symbol*) (break))
        (when (and (eq (elt tuple 0) target)
                   (eq (elt tuple 1) key))
          (setf has-read t))))
