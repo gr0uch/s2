@@ -205,3 +205,77 @@ Deno.test("computed of computed", async () => {
   assertEquals(spans[1].textContent, "4");
   assertEquals(spans[2].textContent, "8");
 });
+
+Deno.test(
+  "computed edge cases #1: initialize deep observable with data",
+  async () => {
+    const data = observable({
+      things: ["a", "b"],
+    }, true);
+
+    const obj = computed({
+      things() {
+        const { things } = data;
+        if (!things) return null;
+        return things.map((_, i) => {
+          return computed({
+            text() {
+              return data.things[i];
+            }
+          });
+        });
+      },
+    });
+
+    const template = `<div>
+    {{#things}}
+      <span>
+        {{text}}
+      </span>
+    {{/things}}
+  </div>`;
+
+    const { proxy, document } = customWindow(obj, template);
+    const div = document.querySelector("div");
+    assertEquals(div.textContent, "ab");
+    data.things = null;
+    assertEquals(div.textContent, "");
+  });
+
+Deno.test(
+  "computed edge cases #2: initialize deep observable without data",
+  async () => {
+    const data = observable({
+      things: null,
+    }, true);
+
+    const obj = computed({
+      things() {
+        const { things } = data;
+        if (!things) return null;
+        return things.map((_, i) => {
+          return computed({
+            text() {
+              return data.things[i];
+            }
+          });
+        });
+      },
+    });
+
+    const template = `<div>
+    {{#things}}
+      <span>
+        {{text}}
+      </span>
+    {{/things}}
+  </div>`;
+
+    const { proxy, document } = customWindow(obj, template);
+    const div = document.querySelector("div");
+    assertEquals(div.textContent, "");
+    data.things = ["a", "b"];
+    assertEquals(div.textContent, "ab");
+    delete data.things;
+    assertEquals(div.textContent, "");
+  });
