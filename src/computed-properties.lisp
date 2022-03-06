@@ -140,7 +140,9 @@
 ;; If a dependency re-appears it should not be duplicated.
 (defun compute-dependencies (obj key fn)
   (chain *read-stack* (push *stack-delimiter-symbol*))
-  (let ((return-value (chain fn (call obj)))
+  (let ((delimiter-index (- (length *read-stack*) 1))
+        (upper-index nil)
+        (return-value (chain fn (call obj)))
         (observables (list)))
     (if (not (eq return-value undefined))
         (setf (getprop obj key) return-value)
@@ -151,8 +153,12 @@
     (chain *target-observables-map* (set obj observables))
 
     (loop
-     for i from (- (length *read-stack*) 1) downto 0 do
+     for i from (+ delimiter-index 1) to (- (length *read-stack*) 1) do
      (when (eq (getprop *read-stack* i) *stack-delimiter-symbol*) break)
+     (setf upper-index i))
+
+    (loop
+     for i from upper-index downto (+ delimiter-index 1) do
      (let* ((tuple (getprop *read-stack* i))
             (observable (@ tuple 0))
             (observable-key (@ tuple 1))

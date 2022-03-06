@@ -36,8 +36,9 @@
   const [reactiveObject, node] = s2({
     delete(event) {
       event.preventDefault();
-      s.foos.length = s.foos.length - 1;
-      // delete s.foos;
+      // s.foos.length = s.foos.length - 1;
+      delete s.foos;
+      // s.foos = ["c"];
     },
     comp: computed({
       nest() {

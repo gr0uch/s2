@@ -241,49 +241,46 @@ function createSource(obj, isDeep) {
 };
 /* (DEFUN COMPUTE-DEPENDENCIES (OBJ KEY FN)
      (CHAIN *READ-STACK* (PUSH *STACK-DELIMITER-SYMBOL*))
-     (LET ((RETURN-VALUE (CHAIN FN (CALL OBJ))) (OBSERVABLES (LIST)))
+     (LET ((DELIMITER-INDEX (- (LENGTH *READ-STACK*) 1))
+           (UPPER-INDEX NIL)
+           (RETURN-VALUE (CHAIN FN (CALL OBJ)))
+           (OBSERVABLES (LIST)))
        (IF (NOT (EQ RETURN-VALUE UNDEFINED))
            (SETF (GETPROP OBJ KEY) RETURN-VALUE)
            (DELETE (GETPROP OBJ KEY)))
        (CHAIN *TARGET-OBSERVABLES-MAP* (SET OBJ OBSERVABLES))
-       (LOOP FOR I FROM (- (LENGTH *READ-STACK*) 1) DOWNTO 0
+       (LOOP FOR I FROM (+ DELIMITER-INDEX 1) TO (- (LENGTH *READ-STACK*) 1)
              DO (WHEN (EQ (GETPROP *READ-STACK* I) *STACK-DELIMITER-SYMBOL*)
-                  BREAK) (LET* ((TUPLE (GETPROP *READ-STACK* I))
-                                (OBSERVABLE (@ TUPLE 0))
-                                (OBSERVABLE-KEY (@ TUPLE 1))
-                                (CONTEXT NIL))
-                           (WHEN
-                               (NOT (CHAIN OBSERVABLES (INCLUDES OBSERVABLE)))
-                             (CHAIN OBSERVABLES (PUSH OBSERVABLE)))
-                           (WHEN
-                               (NOT
-                                (CHAIN *OBSERVABLE-CONTEXT-MAP*
-                                       (HAS OBSERVABLE)))
-                             (CHAIN *OBSERVABLE-CONTEXT-MAP*
-                                    (SET OBSERVABLE (CREATE))))
-                           (SETF CONTEXT
-                                   (CHAIN *OBSERVABLE-CONTEXT-MAP*
-                                          (GET OBSERVABLE)))
-                           (WHEN
-                               (NOT
-                                (CHAIN CONTEXT
-                                       (HAS-OWN-PROPERTY OBSERVABLE-KEY)))
-                             (SETF (GETPROP CONTEXT OBSERVABLE-KEY) (LIST)))
-                           (LET* ((KEY-BINDINGS
-                                   (GETPROP CONTEXT OBSERVABLE-KEY))
-                                  (MATCH-INDEX
-                                   (CHAIN KEY-BINDINGS
-                                          (FIND-INDEX
-                                           (LAMBDA (ENTRY)
-                                             (AND (EQ (ELT ENTRY 0) OBJ)
-                                                  (EQ (ELT ENTRY 1) KEY)))))))
-                             (WHEN (NOT (EQ MATCH-INDEX -1))
-                               (CHAIN KEY-BINDINGS (SPLICE MATCH-INDEX 1)))
-                             (CHAIN KEY-BINDINGS (PUSH (LIST OBJ KEY FN))))))
+                  BREAK) (SETF UPPER-INDEX I))
+       (LOOP FOR I FROM UPPER-INDEX DOWNTO (+ DELIMITER-INDEX 1)
+             DO (LET* ((TUPLE (GETPROP *READ-STACK* I))
+                       (OBSERVABLE (@ TUPLE 0))
+                       (OBSERVABLE-KEY (@ TUPLE 1))
+                       (CONTEXT NIL))
+                  (WHEN (NOT (CHAIN OBSERVABLES (INCLUDES OBSERVABLE)))
+                    (CHAIN OBSERVABLES (PUSH OBSERVABLE)))
+                  (WHEN (NOT (CHAIN *OBSERVABLE-CONTEXT-MAP* (HAS OBSERVABLE)))
+                    (CHAIN *OBSERVABLE-CONTEXT-MAP* (SET OBSERVABLE (CREATE))))
+                  (SETF CONTEXT
+                          (CHAIN *OBSERVABLE-CONTEXT-MAP* (GET OBSERVABLE)))
+                  (WHEN (NOT (CHAIN CONTEXT (HAS-OWN-PROPERTY OBSERVABLE-KEY)))
+                    (SETF (GETPROP CONTEXT OBSERVABLE-KEY) (LIST)))
+                  (LET* ((KEY-BINDINGS (GETPROP CONTEXT OBSERVABLE-KEY))
+                         (MATCH-INDEX
+                          (CHAIN KEY-BINDINGS
+                                 (FIND-INDEX
+                                  (LAMBDA (ENTRY)
+                                    (AND (EQ (ELT ENTRY 0) OBJ)
+                                         (EQ (ELT ENTRY 1) KEY)))))))
+                    (WHEN (NOT (EQ MATCH-INDEX -1))
+                      (CHAIN KEY-BINDINGS (SPLICE MATCH-INDEX 1)))
+                    (CHAIN KEY-BINDINGS (PUSH (LIST OBJ KEY FN))))))
        (POP-STACK)
        RETURN-VALUE)) */
 function computeDependencies(obj, key, fn) {
     READSTACK.push(STACKDELIMITERSYMBOL);
+    var delimiterIndex = READSTACK.length - 1;
+    var upperIndex = null;
     var returnValue = fn.call(obj);
     var observables = [];
     if (returnValue !== undefined) {
@@ -292,10 +289,15 @@ function computeDependencies(obj, key, fn) {
         delete obj[key];
     };
     TARGETOBSERVABLESMAP.set(obj, observables);
-    for (var i = READSTACK.length - 1; i >= 0; i -= 1) {
+    var _js1 = READSTACK.length - 1;
+    for (var i = delimiterIndex + 1; i <= _js1; i += 1) {
         if (READSTACK[i] === STACKDELIMITERSYMBOL) {
             break;
         };
+        upperIndex = i;
+    };
+    var _js2 = delimiterIndex + 1;
+    for (var i = upperIndex; i >= _js2; i -= 1) {
         var tuple = READSTACK[i];
         var observable = tuple[0];
         var observableKey = tuple[1];
@@ -345,9 +347,9 @@ function unmountObject(obj) {
     if (!observables) {
         return;
     };
-    var _js2 = observables.length;
-    for (var _js1 = 0; _js1 < _js2; _js1 += 1) {
-        var observable = observables[_js1];
+    var _js4 = observables.length;
+    for (var _js3 = 0; _js3 < _js4; _js3 += 1) {
+        var observable = observables[_js3];
         var context = OBSERVABLECONTEXTMAP.get(observable);
         for (var key in context) {
             var keyBindings = context[key];
