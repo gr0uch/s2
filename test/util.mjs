@@ -51,6 +51,7 @@ export function createWindow() {
         if (!foos) return null;
         return foos.map((_, i) => {
           return computed({
+            i,
             text() {
               const { foos } = source;
               const value = foos[i];

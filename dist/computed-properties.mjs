@@ -13,6 +13,10 @@ var STACKDELIMITERSYMBOL = Symbol('stackDelimiter');
 var REFSYMBOL = Symbol('ref');
 /* (DEFPARAMETER *HAS-UNMOUNTED-SYMBOL* (*SYMBOL 'HAS-UNMOUNTED)) */
 var HASUNMOUNTEDSYMBOL = Symbol('hasUnmounted');
+/* (SETF (@ GLOBAL-THIS OBSERVABLE-CONTEXT-MAP) *OBSERVABLE-CONTEXT-MAP*
+         (@ GLOBAL-THIS TARGET-OBSERVABLES-MAP) *TARGET-OBSERVABLES-MAP*) */
+globalThis.observableContextMap = OBSERVABLECONTEXTMAP;
+globalThis.targetObservablesMap = TARGETOBSERVABLESMAP;
 /* (DEFPARAMETER *PROXY-OBSERVABLE*
      (LET ((SET-PROPERTY (MAKE-SET-PROPERTY)))
        (CREATE GET GET-PROPERTY SET SET-PROPERTY DELETE-PROPERTY SET-PROPERTY))) */
@@ -47,11 +51,10 @@ function clearStack() {
 };
 /* (DEFUN POP-STACK ()
      (LOOP FOR I FROM (- (LENGTH *READ-STACK*) 1) DOWNTO 0
-           DO (WHEN (EQ (CHAIN *READ-STACK* (POP)) *STACK-DELIMITER-SYMBOL*)
-                (BREAK)))) */
+           DO (WHEN (EQ (TYPEOF (CHAIN *READ-STACK* (POP))) 'SYMBOL) (BREAK)))) */
 function popStack() {
     for (var i = READSTACK.length - 1; i >= 0; i -= 1) {
-        if (READSTACK.pop() === STACKDELIMITERSYMBOL) {
+        if (typeof READSTACK.pop() === 'symbol') {
             break;
         };
     };
@@ -60,7 +63,7 @@ function popStack() {
      (LET ((HAS-READ FALSE))
        (LOOP FOR I FROM (- (LENGTH *READ-STACK*) 1) DOWNTO 0
              DO (LET ((TUPLE (ELT *READ-STACK* I)))
-                  (WHEN (EQ TUPLE *STACK-DELIMITER-SYMBOL*) (BREAK))
+                  (WHEN (EQ (TYPEOF TUPLE) 'SYMBOL) (BREAK))
                   (WHEN (AND (EQ (ELT TUPLE 0) TARGET) (EQ (ELT TUPLE 1) KEY))
                     (SETF HAS-READ T))))
        (WHEN (NOT HAS-READ)
@@ -73,7 +76,7 @@ function getProperty(target, key, receiver) {
     var hasRead = false;
     for (var i = READSTACK.length - 1; i >= 0; i -= 1) {
         var tuple = READSTACK[i];
-        if (tuple === STACKDELIMITERSYMBOL) {
+        if (typeof tuple === 'symbol') {
             break;
         };
         if (tuple[0] === target && tuple[1] === key) {
@@ -266,17 +269,18 @@ function createSource(obj, isDeep) {
                                 (CHAIN CONTEXT
                                        (HAS-OWN-PROPERTY OBSERVABLE-KEY)))
                              (SETF (GETPROP CONTEXT OBSERVABLE-KEY) (LIST)))
-                           (LET ((KEY-BINDINGS
-                                  (GETPROP CONTEXT OBSERVABLE-KEY)))
-                             (WHEN
-                                 (NOT
-                                  (CHAIN KEY-BINDINGS
-                                         (SOME
-                                          (LAMBDA (ENTRY)
-                                            (AND (EQ (ELT ENTRY 0) OBJ)
-                                                 (EQ (ELT ENTRY 1) KEY))))))
-                               (CHAIN KEY-BINDINGS
-                                      (PUSH (LIST OBJ KEY FN)))))))
+                           (LET* ((KEY-BINDINGS
+                                   (GETPROP CONTEXT OBSERVABLE-KEY))
+                                  (MATCH-INDEX
+                                   (CHAIN KEY-BINDINGS
+                                          (FIND-INDEX
+                                           (LAMBDA (ENTRY)
+                                             (AND (EQ (ELT ENTRY 0) OBJ)
+                                                  (EQ (ELT ENTRY 1) KEY)))))))
+                             (WHEN (NOT (EQ MATCH-INDEX -1))
+                               (CHAIN KEY-BINDINGS (SPLICE MATCH-INDEX 1)))
+                             (CHAIN KEY-BINDINGS
+                                    (UNSHIFT (LIST OBJ KEY FN))))))
        (POP-STACK)
        RETURN-VALUE)) */
 function computeDependencies(obj, key, fn) {
@@ -308,11 +312,13 @@ function computeDependencies(obj, key, fn) {
             context[observableKey] = [];
         };
         var keyBindings = context[observableKey];
-        if (!keyBindings.some(function (entry) {
+        var matchIndex = keyBindings.findIndex(function (entry) {
             return entry[0] === obj && entry[1] === key;
-        })) {
-            keyBindings.push([obj, key, fn]);
+        });
+        if (matchIndex !== -1) {
+            keyBindings.splice(matchIndex, 1);
         };
+        keyBindings.unshift([obj, key, fn]);
     };
     popStack();
     

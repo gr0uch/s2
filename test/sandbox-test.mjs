@@ -88,7 +88,7 @@ const source = observable({
   array: new Array(3).fill(true),
   selectedIndex: 0,
   content: "f",
-});
+}, true);
 const computed = createComputed(mount, unmount);
 
 const template = document.querySelector("#root");
@@ -138,15 +138,15 @@ const [reactiveObject, node] = s2({
             return `${Math.random()} // ${source.content} ${i}`;
           },
           content2() {
+            console.log("fk", i, source.selectedIndex);
             return source.selectedIndex === i ? "%" : null;
           },
           select() {
             source.selectedIndex = i;
           },
           remove(event) {
-            const a = source.array.slice();
-            delete a[i];
-            source.array = a;
+            event.stopPropagation();
+            delete source.array[i];
             console.log("wtf", source.array, this);
           },
         });

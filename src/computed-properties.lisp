@@ -9,6 +9,10 @@
 (defparameter *ref-symbol* (*symbol 'ref))
 (defparameter *has-unmounted-symbol* (*symbol 'has-unmounted))
 
+(setf
+ (@ global-this observable-context-map) *observable-context-map*
+ (@ global-this target-observables-map) *target-observables-map*)
+
 (defparameter *proxy-observable*
   (let ((set-property (make-set-property)))
     (create get get-property
@@ -32,7 +36,7 @@
 (defun pop-stack ()
   (loop
    for i from (- (length *read-stack*) 1) downto 0 do
-   (when (eq (chain *read-stack* (pop)) *stack-delimiter-symbol*) (break))))
+   (when (eq (typeof (chain *read-stack* (pop))) 'symbol) (break))))
 
 
 ;; By coordinating the function calls with the get trap, we can correlate
@@ -44,7 +48,7 @@
     (loop
      for i from (- (length *read-stack*) 1) downto 0 do
      (let ((tuple (elt *read-stack* i)))
-       (when (eq tuple *stack-delimiter-symbol*) (break))
+       (when (eq (typeof tuple) 'symbol) (break))
        (when (and (eq (elt tuple 0) target)
                   (eq (elt tuple 1) key))
          (setf has-read t))))
@@ -79,6 +83,7 @@
     (if (not (eq value undefined))
         (chain *reflect (set target key value receiver))
       (chain *reflect (delete-property target key)))
+
     (let ((context (chain *observable-context-map* (get target)))
           (key-bindings nil))
       (when (not context)
@@ -162,12 +167,15 @@
        (when (not (chain context (has-own-property observable-key)))
          (setf (getprop context observable-key) (list)))
 
-       (let ((key-bindings (getprop context observable-key)))
-         (when (not (chain key-bindings
-                           (some (lambda (entry)
-                                   (and (eq (elt entry 0) obj)
-                                        (eq (elt entry 1) key))))))
-           (chain key-bindings (push (list obj key fn)))))))
+       (let* ((key-bindings (getprop context observable-key))
+              (match-index
+               (chain key-bindings
+                      (find-index (lambda (entry)
+                                    (and (eq (elt entry 0) obj)
+                                         (eq (elt entry 1) key)))))))
+         (when (not (eq match-index -1))
+           (chain key-bindings (splice match-index 1)))
+         (chain key-bindings (unshift (list obj key fn))))))
 
     (pop-stack)
     return-value))
