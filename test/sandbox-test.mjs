@@ -5,7 +5,7 @@ import { createComputed, observable } from "../dist/computed-properties.mjs";
 import test from "./runner.mjs";
 
 // s2.debug = true;
-s2.isDeferred = true;
+// s2.isDeferred = true;
 depCheck();
 cleanupTemplates();
 
@@ -85,7 +85,7 @@ test.initialThings = initialThings;
 
 const source = observable({
   showBox: true,
-  array: new Array(5).fill(),
+  array: new Array(3).fill(true),
   selectedIndex: 0,
   content: "f",
 });
@@ -131,7 +131,9 @@ const [reactiveObject, node] = s2({
     box() {
       if (!source.showBox) return null;
       return source.array.map((_, i) => {
+        if (!source.array[i]) return null;
         return computed({
+          i,
           content() {
             return `${Math.random()} // ${source.content} ${i}`;
           },
@@ -140,6 +142,12 @@ const [reactiveObject, node] = s2({
           },
           select() {
             source.selectedIndex = i;
+          },
+          remove(event) {
+            const a = source.array.slice();
+            delete a[i];
+            source.array = a;
+            console.log("wtf", source.array, this);
           },
         });
       });

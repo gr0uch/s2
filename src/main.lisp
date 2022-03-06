@@ -465,17 +465,23 @@
   (let* ((node (@ descriptor node))
          (event (@ descriptor event))
          (hash (chain *target-event-map* (get target)))
-         (listener (getprop hash event)))
-    (when listener
-      (chain node (remove-event-listener
-                   event listener (@ listener options))))
+         (listeners (getprop hash event)))
+
+    (when (not listeners)
+      (setf listeners (list)
+            (getprop hash event) listeners))
+
+    (loop for listener in listeners do
+          (chain node (remove-event-listener
+                       event listener (@ listener options))))
+
     (when value
       (setf (@ value is-event-listener) t)
       (let ((bound-listener (chain value (bind receiver))))
         (setf (@ bound-listener options) (@ value options))
         (chain node (add-event-listener
                      event bound-listener (@ bound-listener options)))
-        (setf (getprop hash event) bound-listener)))))
+        (chain listeners (push bound-listener))))))
 
 
 (defun process-template (template)

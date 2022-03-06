@@ -864,10 +864,14 @@ function setSlot(target, key, value, receiver, descriptor, isInitializing) {
      (LET* ((NODE (@ DESCRIPTOR NODE))
             (EVENT (@ DESCRIPTOR EVENT))
             (HASH (CHAIN *TARGET-EVENT-MAP* (GET TARGET)))
-            (LISTENER (GETPROP HASH EVENT)))
-       (WHEN LISTENER
-         (CHAIN NODE
-                (REMOVE-EVENT-LISTENER EVENT LISTENER (@ LISTENER OPTIONS))))
+            (LISTENERS (GETPROP HASH EVENT)))
+       (WHEN (NOT LISTENERS)
+         (SETF LISTENERS (LIST)
+               (GETPROP HASH EVENT) LISTENERS))
+       (LOOP FOR LISTENER IN LISTENERS
+             DO (CHAIN NODE
+                       (REMOVE-EVENT-LISTENER EVENT LISTENER
+                        (@ LISTENER OPTIONS))))
        (WHEN VALUE
          (SETF (@ VALUE IS-EVENT-LISTENER) T)
          (LET ((BOUND-LISTENER (CHAIN VALUE (BIND RECEIVER))))
@@ -875,13 +879,19 @@ function setSlot(target, key, value, receiver, descriptor, isInitializing) {
            (CHAIN NODE
                   (ADD-EVENT-LISTENER EVENT BOUND-LISTENER
                    (@ BOUND-LISTENER OPTIONS)))
-           (SETF (GETPROP HASH EVENT) BOUND-LISTENER))))) */
+           (CHAIN LISTENERS (PUSH BOUND-LISTENER)))))) */
 function setEvent(target, value, descriptor, receiver) {
     var node39 = descriptor.node;
     var event40 = descriptor.event;
     var hash = TARGETEVENTMAP.get(target);
-    var listener = hash[event40];
-    if (listener) {
+    var listeners = hash[event40];
+    if (!listeners) {
+        listeners = [];
+        hash[event40] = listeners;
+    };
+    var _js42 = listeners.length;
+    for (var _js41 = 0; _js41 < _js42; _js41 += 1) {
+        var listener = listeners[_js41];
         node39.removeEventListener(event40, listener, listener.options);
     };
     if (value) {
@@ -889,7 +899,7 @@ function setEvent(target, value, descriptor, receiver) {
         var boundListener = value.bind(receiver);
         boundListener.options = value.options;
         node39.addEventListener(event40, boundListener, boundListener.options);
-        return hash[event40] = boundListener;
+        return listeners.push(boundListener);
     };
 };
 /* (DEFUN PROCESS-TEMPLATE (TEMPLATE)
@@ -1011,8 +1021,8 @@ function processTemplate(template) {
     var clone = root.cloneNode(true);
     var context = {  };
     function walk(parentNode, path) {
-        var _js41 = parentNode.childNodes.length - 1;
-        for (var i = 0; i <= _js41; i += 1) {
+        var _js43 = parentNode.childNodes.length - 1;
+        for (var i = 0; i <= _js43; i += 1) {
             var node = parentNode.childNodes[i];
             if (node.nodeType !== main.window.Node['ELEMENT_NODE']) {
                 continue;
@@ -1120,12 +1130,12 @@ function createContext(clone, template) {
     var clonedContext = {  };
     for (var key in context) {
         clonedContext[key] = [];
-        var _js42 = context[key];
-        var _js44 = _js42.length;
-        for (var _js43 = 0; _js43 < _js44; _js43 += 1) {
-            var descriptor = _js42[_js43];
-            var path45 = descriptor.path;
-            var node = getPath(clone, path45);
+        var _js44 = context[key];
+        var _js46 = _js44.length;
+        for (var _js45 = 0; _js45 < _js46; _js45 += 1) {
+            var descriptor = _js44[_js45];
+            var path47 = descriptor.path;
+            var node = getPath(clone, path47);
             clonedContext[key].push(Object.assign({ node : node }, descriptor));
         };
     };
@@ -1140,8 +1150,8 @@ function createContext(clone, template) {
        RESULT)) */
 function getPath(node, path) {
     var result = node;
-    var _js42 = path.length - 1;
-    for (var i = 0; i <= _js42; i += 1) {
+    var _js44 = path.length - 1;
+    for (var i = 0; i <= _js44; i += 1) {
         var j = path[i];
         result = result.childNodes[j];
     };
@@ -1161,9 +1171,9 @@ function createArray(array, template, root) {
     var nodes = [];
     var proxies = [];
     var proxy = null;
-    var _js44 = array.length;
-    for (var _js43 = 0; _js43 < _js44; _js43 += 1) {
-        var item = array[_js43];
+    var _js46 = array.length;
+    for (var _js45 = 0; _js45 < _js46; _js45 += 1) {
+        var item = array[_js45];
         var result = createBinding(item, template, root);
         proxies.push(result[0]);
         nodes.push(result[1]);
