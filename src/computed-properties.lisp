@@ -90,13 +90,14 @@
         (return-from set-property t))
       (setf key-bindings (or (getprop context key) (list)))
       (loop
-       for key-binding in key-bindings do
-       (when (not key-binding) (continue))
-       (let* ((obj (@ key-binding 0))
-              (obj-key (@ key-binding 1))
-              (fn (@ key-binding 2)))
-         (when (getprop obj *has-unmounted-symbol*) (continue))
-         (compute-dependencies obj obj-key fn))))
+       for i from (- (length key-bindings) 1) downto 0 do
+       (let ((key-binding (getprop key-bindings i)))
+         (when (not key-binding) (continue))
+         (let* ((obj (@ key-binding 0))
+                (obj-key (@ key-binding 1))
+                (fn (@ key-binding 2)))
+           (when (getprop obj *has-unmounted-symbol*) (continue))
+           (compute-dependencies obj obj-key fn)))))
     t)
   set-property)
 
@@ -175,7 +176,7 @@
                                          (eq (elt entry 1) key)))))))
          (when (not (eq match-index -1))
            (chain key-bindings (splice match-index 1)))
-         (chain key-bindings (unshift (list obj key fn))))))
+         (chain key-bindings (push (list obj key fn))))))
 
     (pop-stack)
     return-value))

@@ -117,14 +117,14 @@ function isObject(obj) {
              (KEY-BINDINGS NIL))
          (WHEN (NOT CONTEXT) (RETURN-FROM SET-PROPERTY T))
          (SETF KEY-BINDINGS (OR (GETPROP CONTEXT KEY) (LIST)))
-         (LOOP FOR KEY-BINDING IN KEY-BINDINGS
-               DO (WHEN (NOT KEY-BINDING)
-                    (CONTINUE)) (LET* ((OBJ (@ KEY-BINDING 0))
-                                       (OBJ-KEY (@ KEY-BINDING 1))
-                                       (FN (@ KEY-BINDING 2)))
-                                  (WHEN (GETPROP OBJ *HAS-UNMOUNTED-SYMBOL*)
-                                    (CONTINUE))
-                                  (COMPUTE-DEPENDENCIES OBJ OBJ-KEY FN))))
+         (LOOP FOR I FROM (- (LENGTH KEY-BINDINGS) 1) DOWNTO 0
+               DO (LET ((KEY-BINDING (GETPROP KEY-BINDINGS I)))
+                    (WHEN (NOT KEY-BINDING) (CONTINUE))
+                    (LET* ((OBJ (@ KEY-BINDING 0))
+                           (OBJ-KEY (@ KEY-BINDING 1))
+                           (FN (@ KEY-BINDING 2)))
+                      (WHEN (GETPROP OBJ *HAS-UNMOUNTED-SYMBOL*) (CONTINUE))
+                      (COMPUTE-DEPENDENCIES OBJ OBJ-KEY FN)))))
        T)
      SET-PROPERTY) */
 function makeSetProperty(isDeep) {
@@ -154,9 +154,8 @@ function makeSetProperty(isDeep) {
             return true;
         };
         keyBindings = context[key] || [];
-        var _js2 = keyBindings.length;
-        for (var _js1 = 0; _js1 < _js2; _js1 += 1) {
-            var keyBinding = keyBindings[_js1];
+        for (var i = keyBindings.length - 1; i >= 0; i -= 1) {
+            var keyBinding = keyBindings[i];
             if (!keyBinding) {
                 continue;
             };
@@ -194,7 +193,7 @@ function deepReplace(proxy, obj) {
         };
     };
     for (var key in proxy) {
-        var oldValue3 = proxy[key];
+        var oldValue1 = proxy[key];
         if (!obj.hasOwnProperty(key)) {
             delete proxy[key];
         };
@@ -280,8 +279,7 @@ function createSource(obj, isDeep) {
                                                   (EQ (ELT ENTRY 1) KEY)))))))
                              (WHEN (NOT (EQ MATCH-INDEX -1))
                                (CHAIN KEY-BINDINGS (SPLICE MATCH-INDEX 1)))
-                             (CHAIN KEY-BINDINGS
-                                    (UNSHIFT (LIST OBJ KEY FN))))))
+                             (CHAIN KEY-BINDINGS (PUSH (LIST OBJ KEY FN))))))
        (POP-STACK)
        RETURN-VALUE)) */
 function computeDependencies(obj, key, fn) {
@@ -319,7 +317,7 @@ function computeDependencies(obj, key, fn) {
         if (matchIndex !== -1) {
             keyBindings.splice(matchIndex, 1);
         };
-        keyBindings.unshift([obj, key, fn]);
+        keyBindings.push([obj, key, fn]);
     };
     popStack();
     
@@ -347,9 +345,9 @@ function unmountObject(obj) {
     if (!observables) {
         return;
     };
-    var _js4 = observables.length;
-    for (var _js3 = 0; _js3 < _js4; _js3 += 1) {
-        var observable = observables[_js3];
+    var _js2 = observables.length;
+    for (var _js1 = 0; _js1 < _js2; _js1 += 1) {
+        var observable = observables[_js1];
         var context = OBSERVABLECONTEXTMAP.get(observable);
         for (var key in context) {
             var keyBindings = context[key];
