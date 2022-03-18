@@ -7,6 +7,9 @@ import parseMustache from "./mustache.mjs";
 const computed = createComputed(mount, unmount);
 let i = 0;
 
+// https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/AsyncFunction
+const AsyncFunction = Object.getPrototypeOf(async function() {}).constructor;
+
 for (const entry of Array.prototype.reduce.call(
   document.querySelectorAll(".live-example.code"),
   (list, element) => {
@@ -41,11 +44,11 @@ function processExample(element) {
   };
 }
 
-function executeExample({ js, html, output }) {
-  const fn = new Function(
+async function executeExample({ js, html, output }) {
+  const fn = new AsyncFunction(
     "root", "target", "mount", "unmount", "move", "createSource", "observable", "computed",
     "registerTemplate", "parseMustache", js);
-  const state = fn(
+  const state = await fn(
     root, target, mount, unmount, move, observable, observable, computed,
     registerTemplate, parseMustache);
   const template = parseMustache(html);

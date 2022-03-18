@@ -36,12 +36,15 @@
         --c-bg: rgb(30, 32, 38);
         --c-a: rgb(40, 42, 48);
         --c-a2: rgb(46, 48, 54);
+        --c-a3: rgb(66, 68, 74);
         --c-l: #3fb68b;
         --c-l2: rgba(63, 182, 139, 0.06);
         --c-h: #e34c26;
         --c-e: #6e40c9;
       }
       ::selection { background: var(--c-e); color: var(--c-fg); }
+      *::-webkit-scrollbar { background-color: var(--c-a2); width: 8px; }
+      *::-webkit-scrollbar-thumb { background-color: var(--c-a3); }
       * { margin: 0; padding: 0; border: 0; box-sizing: border-box; }
       html { font-size: var(--h); }
       body { line-height: var(--l); background: var(--c-a); color: var(--c-fg); font-family: var(--f-b); }
@@ -55,7 +58,7 @@
       blockquote { color: var(--c-fg2); border-left: calc(1rem * var(--u) * 1) var(--c-fg3) solid; padding-left: calc(1rem * var(--u) * 3); }
       a { color: inherit; text-decoration: inherit; }
       code, pre { font-family: var(--f-m); font-size: var(--h2); font-variant-ligatures: none; }
-      textarea, pre { color: var(--c-fg2); background: none; padding: calc(1rem * var(--u) * 2) calc(1rem * var(--u) * 3); font-family: var(--f-m); font-size: var(--h3); resize: vertical; font-variant-ligatures: none; }
+      textarea, pre { color: var(--c-fg2); background: none; padding: calc(1rem * var(--u) * 2) calc(1rem * var(--u) * 3); font-family: var(--f-m); font-size: var(--h3); resize: vertical; font-variant-ligatures: none; white-space: nowrap; }
       pre { box-shadow: 0 calc(1rem * var(--u) * 3) calc(1rem * var(--u) * 9) var(--c-bg); border-radius: calc(1rem * var(--u)); white-space: pre-wrap; counter-reset: line; }
       pre > code { display: block; counter-increment: line; position: relative; padding: 0 0 0 calc(1rem * var(--u) * 6) !important; font-size: inherit; }
       pre > code::before { content: counter(line); display: inline-block; position: absolute; top: 0; right: calc(100% - 1rem * var(--u) * 4); color: var(--c-fg3); }
@@ -188,20 +191,25 @@
           <li><a href="#mustache-templates">Mustache templates</a></li>
           <li><a href="#registering-templates">Registering templates</a></li>
         </ul>
-        <h5><a href="#advanced-usage">Advanced usage</a></h5>
+        <h5><a href="#symbols">Symbols</a></h5>
         <ul>
           <li><a href="#mount-unmount-symbols"><code>mount</code>, <code>unmount</code> symbols</a></li>
           <li><a href="#move-symbol"><code>move</code> symbol</a></li>
           <li><a href="#root-target-symbol"><code>root</code>, <code>target</code> symbol</a></li>
+        </ul>
+
+        <h5><a href="#computeds">Computeds</a></h5>
+        <ul>
           <li><a href="#computed-properties">Computed properties</a></li>
           <li><a href="#computed-composition">Computed composition</a></li>
+          <li><a href="#computed-of-computed">Computed of computed</a></li>
         </ul>
         <h5><a href="#addendum">Addendum</a></h5>
         <ul>
+          <li><a href="#server-side-rendering">Server-side rendering</a></li>
+          <li><a href="#styling">Styling</a></li>
           <li><a href="#performance-pitfalls">Performance pitfalls</a></li>
           <li><a href="#object-re-use">Object re-use</a></li>
-          <li><a href="#computed-of-computed">Computed of computed</a></li>
-          <li><a href="#server-side-rendering">Server-side rendering</a></li>
         </ul>
       </nav>
       <main id="content">
@@ -237,7 +245,7 @@
             </aside>
           </div>
           <div>
-            <div class="live-example primary code" style="min-height: calc(1rem * var(--u) * 72)">
+            <div class="live-example primary code" style="min-height: calc(1rem * var(--u) * 126)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">return {
@@ -536,7 +544,7 @@ const greeting = html`
           </div>
         </section>
 
-        <section id="advanced-usage">
+        <section id="symbols">
           <div>
             <h2 id="mount-unmount-symbols"><code>mount</code>, <code>unmount</code> symbols</h2>
             <p>The symbols <code>mount</code> and <code>unmount</code> allow user-defined behavior to run as elements are appended and removed from the DOM. This allows for animations and arbitrary code such as integrating with third-party libraries on these events. The unmount function is particularly useful for implementing exiting animations, as it will wait for a promise to resolve before removing the node.</p>
@@ -741,7 +749,9 @@ function read(event) {
           </div>
           <div>
           </div>
+        </section>
 
+        <section id="computeds">
           <div>
             <h2 id="computed-properties">Computed properties</h2>
             <p>The computed properties addon derives outputs from inputs, without the need for manually tracking dependencies. It implements reactivity by proxying the objects used as inputs via <code>observable</code>. To start, the computed function must be created by passing in the mount and unmount symbols:</p>
@@ -981,9 +991,151 @@ return {
               </div>
             </aside>
           </div>
+
+          <div>
+            <h2 id="computed-of-computed">Computed of computed</h2>
+            <p>Computed objects are <strong>not</strong> observable, but they can set properties on observables. By doing so, it is possible to create computed properties of computed properties.</p>
+            <hr>
+          </div>
+          <div>
+          </div>
+          <div>
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 112)">
+              <h6>JavaScript</h6>
+              <h6>HTML + Mustache</h6>
+              <textarea spellcheck="false">const data = observable({
+  number: 1,
+});
+
+const derived = observable(computed({
+  double() {
+    return data.number * 2;
+  },
+  quadruple() {
+    return this.double * 2;
+  },
+}));
+
+return computed({
+  number: () => data.number,
+  double: () => derived.double,
+  quadruple: () => derived.quadruple,
+  increment(event) {
+    event.preventDefault();
+    data.number++;
+  },
+});</textarea><textarea spellcheck="false"><div>
+  Number: {{number}}<br>
+  Double: {{double}}<br>
+  Quadruple: {{quadruple}}<br>
+  Action:
+  <button onclick="{{increment}}">
+    Increment
+  </button>
+</div></textarea>
+            </div>
+          </div>
+          <div>
+            <aside class="live-example output">
+              <h6>Output</h6>
+              <div>
+                <noscript>JavaScript must be enabled!</noscript>
+              </div>
+            </aside>
+          </div>
+          <div>
+            <p>When a computed object is passed into observable, its <code>mount</code> function is called automatically. If needed, its <code>unmount</code> function needs to be called manually.</p>
+            <hr>
+          </div>
+          <div>
+          </div>
         </section>
 
         <section id="addendum">
+          <div>
+            <h2 id="server-side-rendering">Server-side rendering</h2>
+            <p>A DOM implementation is required for server-side rendering. <strong>The recommended implementation is <a href="https://github.com/WebReflection/linkedom">linkedom</a>.</strong> Since s² is designed with DOM in mind, it is safer to emulate the DOM than to pretend it does not exist.</p>
+            <p>By setting the <code>window</code> property on the default import, the entire context can be changed in runtime. This allows client-side apps to be rendered with one line of code.</p>
+            <pre>import { parseHTML } from "https://cdn.jsdelivr.net/gh/WebReflection/linkedom@latest/worker.js";
+&nbsp;
+const { window } = parseHTML(...);
+s2.window = window;</pre>
+            <p>If you are using the Mustache addon, it requires something similar.</p>
+            <pre>// For Mustache, either set window or import processMustache.
+import parseMustache, { processMustache } from "https://cdn.jsdelivr.net/gh/gr0uch/s2@latest/dist/mustache.min.mjs";
+&nbsp;
+// Option 1 (recommended approach)
+parseMustache.window = window;
+&nbsp;
+// Option 2
+const template = window.document.createElement("template");
+template.innerHTML = processMustache(...);</pre>
+            <p>To get the output of the rendered HTML page:</p>
+            <pre>window.document.toString()</pre>
+            <hr>
+          </div>
+          <div>
+            <aside>
+              <h6>Aside</h6>
+              <p>Server-side rendering with s² is simply rendering the client-side application.</p>
+              <p>One way to think about it, is to export the client-side app so that the server-side can import it and change its window.</p>
+              <p>This also means that you will have to implement APIs to set the current URL and wait for data to load before rendering.</p>
+            </aside>
+          </div>
+
+          <div>
+            <h2 id="styling">Styling</h2>
+            <p>s² is agnostic about styling, and works well with framework-agnostic tooling. If you are already familiar with <a href="https://styled-components.com/">Styled Components</a>, then <a href="https://goober.js.org/">Goober</a> is a familiar alternative that implements the same API.</p>
+            <hr>
+          </div>
+          <div>
+          </div>
+          <div>
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 108)">
+              <h6>JavaScript</h6>
+              <h6>HTML + Mustache</h6>
+              <textarea spellcheck="false">const { css } = await import(
+  "https://esm.run/goober"
+);
+
+const containerStyle = () => css`
+> :nth-child(1) {
+  color: var(--c-l);
+}
+> :nth-child(2) {
+  color: var(--c-e);
+}
+> :nth-child(3) {
+  color: var(--c-h);
+}
+`;
+
+return computed({
+  containerClass() {
+    return containerStyle();
+  },
+});</textarea><textarea spellcheck="false"><div class="{{containerClass}}">
+  <div>
+    First
+  </div>
+  <div>
+    Second
+  </div>
+  <div>
+    Third
+  </div>
+</div></textarea>
+            </div>
+          </div>
+          <div>
+            <aside class="live-example output">
+              <h6>Output</h6>
+              <div>
+                <noscript>JavaScript must be enabled!</noscript>
+              </div>
+            </aside>
+          </div>
+
           <div>
             <h2 id="performance-pitfalls">Performance pitfalls</h2>
             <p>When using computed properties, be careful about where observable properties are read from. Try to compose computed properties to be as granular as possible.</p>
@@ -1160,95 +1312,6 @@ return {
             <hr>
           </div>
           <div>
-          </div>
-
-          <div>
-            <h2 id="computed-of-computed">Computed of computed</h2>
-            <p>Computed objects are <strong>not</strong> observable, but they can set properties on observables. By doing so, it is possible to create computed properties of computed properties.</p>
-            <hr>
-          </div>
-          <div>
-          </div>
-          <div>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 112)">
-              <h6>JavaScript</h6>
-              <h6>HTML + Mustache</h6>
-              <textarea spellcheck="false">const data = observable({
-  number: 1,
-});
-
-const derived = observable(computed({
-  double() {
-    return data.number * 2;
-  },
-  quadruple() {
-    return this.double * 2;
-  },
-}));
-
-return computed({
-  number: () => data.number,
-  double: () => derived.double,
-  quadruple: () => derived.quadruple,
-  increment(event) {
-    event.preventDefault();
-    data.number++;
-  },
-});</textarea><textarea spellcheck="false"><div>
-  Number: {{number}}<br>
-  Double: {{double}}<br>
-  Quadruple: {{quadruple}}<br>
-  Action:
-  <button onclick="{{increment}}">
-    Increment
-  </button>
-</div></textarea>
-            </div>
-          </div>
-          <div>
-            <aside class="live-example output">
-              <h6>Output</h6>
-              <div>
-                <noscript>JavaScript must be enabled!</noscript>
-              </div>
-            </aside>
-          </div>
-          <div>
-            <p>When a computed object is passed into observable, its <code>mount</code> function is called automatically. If needed, its <code>unmount</code> function needs to be called manually.</p>
-            <hr>
-          </div>
-          <div>
-          </div>
-
-          <div>
-            <h2 id="server-side-rendering">Server-side rendering</h2>
-            <p>A DOM implementation is required for server-side rendering. <strong>The recommended implementation is <a href="https://github.com/WebReflection/linkedom">linkedom</a>.</strong> Since s² is designed with DOM in mind, it is safer to emulate the DOM than to pretend it does not exist.</p>
-            <p>By setting the <code>window</code> property on the default import, the entire context can be changed in runtime. This allows client-side apps to be rendered with one line of code.</p>
-            <pre>import { parseHTML } from "https://cdn.jsdelivr.net/gh/WebReflection/linkedom@latest/worker.js";
-&nbsp;
-const { window } = parseHTML(...);
-s2.window = window;</pre>
-            <p>If you are using the Mustache addon, it requires something similar.</p>
-            <pre>// For Mustache, either set window or import processMustache.
-import parseMustache, { processMustache } from "https://cdn.jsdelivr.net/gh/gr0uch/s2@latest/dist/mustache.min.mjs";
-&nbsp;
-// Option 1 (recommended approach)
-parseMustache.window = window;
-&nbsp;
-// Option 2
-const template = window.document.createElement("template");
-template.innerHTML = processMustache(...);</pre>
-            <p>To get the output of the rendered HTML page:</p>
-            <pre>window.document.toString()</pre>
-            <hr>
-          </div>
-          <div>
-            <aside>
-              <h6>Aside</h6>
-              <p>Server-side rendering with s² is simply rendering the client-side application.</p>
-              <p>One way to think about it, is to export the client-side app so that the server-side can import it and change its window.</p>
-              <p>This also means that you will have to implement APIs to set the current URL and wait for data to load before rendering.</p>
-            </aside>
           </div>
         </section>
 
