@@ -52,12 +52,15 @@ export function createWindow() {
         return foos.map((_, i) => {
           return computed({
             i,
+            bar() {
+              return typeof source.foos[i] === "object";
+            },
             text() {
               const { foos } = source;
               const value = foos[i];
               if (typeof value !== "object") return value;
               return value.foo;
-            }
+            },
           });
         });
       }
@@ -65,7 +68,7 @@ export function createWindow() {
   };
 
   const nested = mustache`<div id="nested">{{text}}</div>`;
-  const foo = mustache`<div class="foo">{{text}}</div>`;
+  const foo = mustache`<div class="foo" class:bar-baz="{{bar}}">{{text}}</div>`;
   const template = mustache`
   <div
     data-container="{{id}}"
@@ -112,7 +115,6 @@ export function createWindow() {
     {{/comp}}
   </div>
   `;
-
   cleanupTemplate(document, template);
   const [proxy, fragment] = s2(obj, template);
   document.body.appendChild(fragment);

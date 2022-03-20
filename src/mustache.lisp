@@ -42,6 +42,9 @@
     (when (chain attr (starts-with "style:"))
       (setf prefix "style-"
             attr (chain attr (slice 6))))
+    (when (chain attr (starts-with "class:"))
+      (setf prefix "classlist-"
+            attr (chain attr (slice 6))))
     (when (chain attr (starts-with "data-"))
       (setf prefix ""
             attr (chain attr (slice 5))))

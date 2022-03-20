@@ -184,6 +184,7 @@
         <h5><a href="#intro">Intro</a></h5>
         <ul>
           <li><a href="#rationale">Rationale</a></li>
+          <li><a href="#install-from-npm">Install from <code>npm</code></a></li>
           <li><a href="#import-the-module">Import the module</a></li>
           <li><a href="#reactive-templating">Reactive templating</a></li>
         </ul>
@@ -315,11 +316,34 @@ function remove() {
           <div></div>
 
           <div>
-            <h2 id="import-the-module">Import the module</h2>
+            <h2 id="install-from-npm">Install from <code>npm</code> (Node.js build system)</h2>
+            <pre>npm install s2-engine</pre>
+            <p><strong>Important:</strong> this is an ES module, most modern build systems will support this out of the box. The exports are as follows:</p>
+            <pre>import s2, {
+  // Symbols
+  root, target, mount, unmount, move,
+
+  // Templating (prefer `html` tagged template literal)
+  html, parseMustache, registerTemplate,
+
+  // Computed properties
+  observable, computed, ref,
+} from "s2-engine";</pre>
+          </div>
+          <div>
+            <aside>
+              <h6>Aside</h6>
+              <p><em>s²</em> can be considered a template engine, or template processor.</p>
+            </aside>
+          </div>
+
+          <div>
+            <h2 id="import-the-module">Import the module (browser, Deno)</h2>
             <p>A runtime environment that supports ES Modules is required without build tooling. The recommended way is to either vendor the library, or import from a CDN using the commit hash in the URL. For convenience, the following example uses the latest version.</p>
             <pre>import s2, {
   // The following are symbols, import when needed.
   root, target, mount, unmount, move,
+
   // The following function is for referring to templates by name.
   registerTemplate,
 } from "https://cdn.jsdelivr.net/gh/gr0uch/s2@latest/dist/main.min.mjs";</pre>
@@ -401,6 +425,7 @@ return state;</textarea><textarea spellcheck="false"><form onsubmit="{{ignore}}"
               <li><code>data-key</code>, <code>data-template</code>: for binding keys valued by objects to templates.</li>
               <li><code>data-text</code>, <code>data-unsafe-html</code>: for setting text and HTML.</li>
               <li><code>data-class</code>: shorthand for setting class attribute.</li>
+              <li><code>data-classlist-*</code>: shorthand for toggling classes.</li>
               <li><code>data-value</code>: for setting input values, also handles binding to <code>input</code> event automatically.</li>
               <li><code>data-event-*</code>: for adding event listeners.</li>
               <li><code>data-attribute-*</code>: for setting arbitrary attributes.</li>
@@ -462,11 +487,18 @@ return state;</textarea><textarea spellcheck="false"><form onsubmit="{{ignore}}"
             <h3>Mustache features</h3>
             <ul>
               <li><code>{{text}}</code> and <code>{{{rawText}}}</code> inside of an element&apos;s body map to <code>textContent</code> and <code>innerHTML</code> respectively.</li>
-              <li>Attributes such as <code>&lt;p style="{{style}}"&gt;</code> will map to the element&apos;s attributes. The custom <code>style:</code> <em>attribute directive</em> sets individual CSS properties efficiently, <a href="https://svelte.dev/docs#template-syntax-element-directives-style-property">similar to Svelte</a>.</li>
-              <li>Event listeners such as <code>&lt;form onsubmit="{{action}}"&gt;</code> will add an event listener on the element.</li>
+              <li>Attributes such as <code>&lt;p style="{{style}}"&gt;</code> will map to the element&apos;s attributes.</li>
               <li>Mustache sections <code>{{#section}}...{{/section}}</code> can contain inlined content, or exactly one partial: <code>{{>partial}}</code>.</li>
+            </ul>
+
+            <h3>Mustache extensions (not in spec)</h3>
+            <ul>
+              <li>The custom <code>class:</code> <em>attribute directive</em> sets individual classes, <a href="https://svelte.dev/tutorial/classes">similar to Svelte</a>.</li>
+              <li>The custom <code>style:</code> <em>attribute directive</em> sets individual CSS properties efficiently, <a href="https://svelte.dev/docs#template-syntax-element-directives-style-property">similar to Svelte</a>.</li>
+              <li>Event listeners such as <code>&lt;form onsubmit="{{action}}"&gt;</code> will add an event listener on the element.</li>
               <li>Fixing JSX-style self-closing tags (<code>&lt;div &sol;&gt;</code>) is opt-in functionality: <code>parseMustache.selfClosing = true;</code> because it changes the behavior, browsers do not parse this as self-closing.</li>
             </ul>
+
             <h3>Caveats</h3>
             <ul>
               <li>Inverted sections are not supported. This won&apos;t work: <code>{{^section}}{{/section}}</code>.</li>
@@ -476,6 +508,15 @@ return state;</textarea><textarea spellcheck="false"><form onsubmit="{{ignore}}"
             </ul>
           </div>
           <div>
+            <aside class="output">
+              <h6>Aside</h6>
+              <p>The Mustache addon is a small, regular-expression based function that parses a subset of Mustache that maps to the built-in HTML-based templating.</p>
+              <p>If you are using VSCode, these plugins might be of interest:</p>
+              <ul>
+                <li><a href="https://marketplace.visualstudio.com/items?itemName=Tobermory.es6-string-html">es6-string-html</a></li>
+                <li><a href="https://marketplace.visualstudio.com/items?itemName=bierner.lit-html">lit-html</a></li>
+              </ul>
+            </aside>
           </div>
 
           <div>

@@ -54,6 +54,9 @@ var TEMPLATEHASHMAP = new WeakMap();
        (WHEN (CHAIN ATTR (STARTS-WITH style:))
          (SETF PREFIX style-
                ATTR (CHAIN ATTR (SLICE 6))))
+       (WHEN (CHAIN ATTR (STARTS-WITH class:))
+         (SETF PREFIX classlist-
+               ATTR (CHAIN ATTR (SLICE 6))))
        (WHEN (CHAIN ATTR (STARTS-WITH data-))
          (SETF PREFIX
                ATTR (CHAIN ATTR (SLICE 5))))
@@ -69,6 +72,10 @@ function replaceAttr(match, attr, key) {
     };
     if (attr.startsWith('style:')) {
         prefix = 'style-';
+        attr = attr.slice(6);
+    };
+    if (attr.startsWith('class:')) {
+        prefix = 'classlist-';
         attr = attr.slice(6);
     };
     if (attr.startsWith('data-')) {
@@ -117,7 +124,7 @@ function hashStr(str) {
     while (i < str.length - 1) {
         h = 3 * h + str.charCodeAt(++i) >> 0;
     };
-    
+
     return Math.abs(h);
 };
 /* (DEFUN PARSE-MUSTACHE (TEMPLATE)
@@ -130,7 +137,7 @@ function parseMustache(template) {
     var element = parseMustache.window.document.createElement('template');
     template = processMustache(template);
     element.innerHTML = template;
-    
+
     return element;
 };
 /* (DEFUN PROCESS-MUSTACHE (TEMPLATE)
@@ -205,7 +212,7 @@ function createMustacheTag(registerTemplate) {
         hash = 'template' + hashStr(result);
         TEMPLATEHASHMAP.set(element1, hash);
         registerTemplate(hash, element1);
-        
+
         return element1;
     };
     return taggedMustache;
@@ -220,4 +227,3 @@ parseMustache.selfClosing = false;
 /* (EXPORT DEFAULT PARSE-MUSTACHE NAMES (PROCESS-MUSTACHE CREATE-MUSTACHE-TAG)) */
 export { processMustache, createMustacheTag, };
 export default parseMustache;
-

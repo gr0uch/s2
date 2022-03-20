@@ -4,6 +4,7 @@
 (defparameter *context-html* 'html)
 (defparameter *context-value* 'value)
 (defparameter *context-class* 'class)
+(defparameter *context-classlist* 'classlist)
 (defparameter *context-attribute* 'attribute)
 (defparameter *context-style-property* 'style-property)
 (defparameter *context-data* 'data)
@@ -78,6 +79,7 @@
  (lambda (node key value)
    (chain node style (set-property key value)))
  (getprop *property-handlers* *context-class*) set-class
+ (getprop *property-handlers* *context-classlist*) set-classlist
  (getprop *property-handlers* *context-attribute*) set-attribute
  (getprop *property-handlers* *context-data*) set-data)
 
@@ -307,6 +309,12 @@
             (if (chain *array (is-array value))
                 (chain value (split " ")) value))
     (chain node (remove-attribute 'class))))
+
+
+(defun set-classlist (node name value)
+  (if value
+      (chain node class-list (add name))
+    (chain node class-list (remove name))))
 
 
 (defun remove-between-delimiters (start-node end-node unmount self)
@@ -579,6 +587,13 @@
                              (lambda (v) (+ "-" (chain v (to-lower-case)))))
                             ;; Slice prefixed "-".
                             (slice 1)))))
+            (when (chain key (starts-with 'classlist))
+              (setf result
+                    (create
+                     type *context-classlist*
+                     ;; Slice off "classlist", use camelCase.
+                     name
+                     (+ (chain key 9 (to-lower-case)) (chain key (slice 10))))))
             (when (chain key (starts-with 'event))
               (setf result
                     (create

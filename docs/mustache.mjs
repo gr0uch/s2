@@ -54,6 +54,9 @@ var TEMPLATEHASHMAP = new WeakMap();
        (WHEN (CHAIN ATTR (STARTS-WITH style:))
          (SETF PREFIX style-
                ATTR (CHAIN ATTR (SLICE 6))))
+       (WHEN (CHAIN ATTR (STARTS-WITH class:))
+         (SETF PREFIX classlist-
+               ATTR (CHAIN ATTR (SLICE 6))))
        (WHEN (CHAIN ATTR (STARTS-WITH data-))
          (SETF PREFIX
                ATTR (CHAIN ATTR (SLICE 5))))
@@ -69,6 +72,10 @@ function replaceAttr(match, attr, key) {
     };
     if (attr.startsWith('style:')) {
         prefix = 'style-';
+        attr = attr.slice(6);
+    };
+    if (attr.startsWith('class:')) {
+        prefix = 'classlist-';
         attr = attr.slice(6);
     };
     if (attr.startsWith('data-')) {

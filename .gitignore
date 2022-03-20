@@ -1,4 +1,5 @@
 psbuild
+node_modules
 cov_profile
 *.lcov
 *.br

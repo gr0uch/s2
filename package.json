@@ -1,0 +1,29 @@
+{
+  "name": "s2-engine",
+  "version": "1.0.1",
+  "description": "A function for reactive web UI.",
+  "main": "api.mjs",
+  "types": "api.d.ts",
+  "module": true,
+  "files": [
+    "dist/!(*.min.mjs)",
+    "api.mjs"
+  ],
+  "scripts": {
+    "test": "deno test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gr0uch/s2.git"
+  },
+  "keywords": [
+    "dom",
+    "reactive"
+  ],
+  "author": "Dali Zheng",
+  "license": "BSD-3-Clause",
+  "bugs": {
+    "url": "https://github.com/gr0uch/s2/issues"
+  },
+  "homepage": "https://github.com/gr0uch/s2#readme"
+}

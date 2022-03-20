@@ -9,6 +9,8 @@ var CONTEXTHTML = 'html';
 var CONTEXTVALUE = 'value';
 /* (DEFPARAMETER *CONTEXT-CLASS* 'CLASS) */
 var CONTEXTCLASS = 'class';
+/* (DEFPARAMETER *CONTEXT-CLASSLIST* 'CLASSLIST) */
+var CONTEXTCLASSLIST = 'classlist';
 /* (DEFPARAMETER *CONTEXT-ATTRIBUTE* 'ATTRIBUTE) */
 var CONTEXTATTRIBUTE = 'attribute';
 /* (DEFPARAMETER *CONTEXT-STYLE-PROPERTY* 'STYLE-PROPERTY) */
@@ -84,6 +86,7 @@ var PROPERTYHANDLERS = {  };
            (LAMBDA (NODE KEY VALUE)
              (CHAIN NODE STYLE (SET-PROPERTY KEY VALUE)))
          (GETPROP *PROPERTY-HANDLERS* *CONTEXT-CLASS*) SET-CLASS
+         (GETPROP *PROPERTY-HANDLERS* *CONTEXT-CLASSLIST*) SET-CLASSLIST
          (GETPROP *PROPERTY-HANDLERS* *CONTEXT-ATTRIBUTE*) SET-ATTRIBUTE
          (GETPROP *PROPERTY-HANDLERS* *CONTEXT-DATA*) SET-DATA) */
 PROPERTYHANDLERS[CONTEXTTEXT] = function (node, key, value) {
@@ -107,6 +110,7 @@ PROPERTYHANDLERS[CONTEXTSTYLEPROPERTY] = function (node, key, value) {
     return node.style.setProperty(key, value);
 };
 PROPERTYHANDLERS[CONTEXTCLASS] = setClass;
+PROPERTYHANDLERS[CONTEXTCLASSLIST] = setClasslist;
 PROPERTYHANDLERS[CONTEXTATTRIBUTE] = setAttribute;
 PROPERTYHANDLERS[CONTEXTDATA] = setData;
 /* (DEFUN SET-INDEX (TARGET KEY VALUE RECEIVER IS-INITIALIZING)
@@ -582,6 +586,13 @@ function setClass(node, name, value) {
         return node.removeAttribute('class');
     };
 };
+/* (DEFUN SET-CLASSLIST (NODE NAME VALUE)
+     (IF VALUE
+         (CHAIN NODE CLASS-LIST (ADD NAME))
+         (CHAIN NODE CLASS-LIST (REMOVE NAME)))) */
+function setClasslist(node, name, value) {
+    return value ? node.classList.add(name) : node.classList.remove(name);
+};
 /* (DEFUN REMOVE-BETWEEN-DELIMITERS (START-NODE END-NODE UNMOUNT SELF)
      (LET* ((NODE START-NODE) (FIRST-NODE NODE))
        (SETF NODE (@ NODE NEXT-SIBLING))
@@ -994,6 +1005,11 @@ function setEvent(target, value, descriptor, receiver) {
                                                        (CHAIN V
                                                               (TO-LOWER-CASE)))))
                                                  (SLICE 1)))))
+                               (WHEN (CHAIN KEY (STARTS-WITH 'CLASSLIST))
+                                 (SETF RESULT
+                                         (CREATE TYPE *CONTEXT-CLASSLIST* NAME
+                                          (+ (CHAIN KEY 9 (TO-LOWER-CASE))
+                                             (CHAIN KEY (SLICE 10))))))
                                (WHEN (CHAIN KEY (STARTS-WITH 'EVENT))
                                  (SETF RESULT
                                          (CREATE TYPE *CONTEXT-EVENT* EVENT
@@ -1083,6 +1099,9 @@ function processTemplate(template) {
                     result = { type : CONTEXTSTYLEPROPERTY, name : key.slice(5).replaceAll(/[A-Z]/g, function (v) {
                         return '-' + v.toLowerCase();
                     }).slice(1) };
+                };
+                if (key.startsWith('classlist')) {
+                    result = { type : CONTEXTCLASSLIST, name : key[9].toLowerCase() + key.slice(10) };
                 };
                 if (key.startsWith('event')) {
                     result = { type : CONTEXTEVENT, event : key.slice(5).toLowerCase() };

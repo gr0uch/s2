@@ -60,5 +60,5 @@ async function executeExample({ js, html, output }) {
 // Process line numbers
 for (const pre of document.querySelectorAll("pre")) {
   pre.innerHTML = pre.textContent
-    .split("\n").map(line => `<code>${line}</code>`).join("");
+    .split("\n").map(line => `<code>${line || "<br>"}</code>`).join("");
 }
