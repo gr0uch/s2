@@ -213,6 +213,7 @@
           <li><a href="#styling">Styling</a></li>
           <li><a href="#performance-pitfalls">Performance pitfalls</a></li>
           <li><a href="#object-re-use">Object re-use</a></li>
+          <li><a href="#time-travel">Time travel</a></li>
         </ul>
       </nav>
       <main id="content">
@@ -1354,6 +1355,111 @@ return {
             <hr>
           </div>
           <div>
+          </div>
+
+          <div>
+            <h2 id="time-travel">Time travel</h2>
+            <p>Implement your own time travel, this is just an example. It takes a little creativity, but it's not too difficult.</p>
+            <hr>
+          </div>
+          <div>
+          </div>
+          <div>
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 112)">
+              <h6>JavaScript</h6>
+              <h6>HTML + Mustache</h6>
+              <textarea spellcheck="false">
+const reversal = Symbol("reversal");
+const reversals = [];
+let group = [];
+const timeHandler = {
+  get() {
+    const value = Reflect
+      .get(...arguments);
+    if (value &&
+      typeof value === "object") {
+      const p = new Proxy(
+        value, timeHandler);
+      return p;
+    }
+    return value;
+  },
+  set(t, k, v, r) {
+    if (typeof v === "object" &&
+      Object.hasOwn(v, reversal)) {
+      t[k] = v[reversal];
+      return true;
+    } else {
+      group.push([r, k, t[k]]);
+      queueMicrotask(() => {
+        if (!group.length) return;
+        reversals.push(group);
+        group = [];
+      });
+    }
+    return Reflect.set(...arguments);
+  },
+};
+const data = new Proxy(observable({
+  actions: [],
+}, true), timeHandler);
+return computed({
+  updatedAt: () => data.updatedAt,
+  actions() {
+    void data.updatedAt;
+    return data.actions
+      .map(d => ({ d }));
+  },
+  goLeft(event) {
+    event.preventDefault();
+    data.actions.push("left");
+    data.updatedAt = Date.now();
+  },
+  goRight(event) {
+    event.preventDefault();
+    data.actions.push("right");
+    data.updatedAt = Date.now();
+  },
+  undo(event) {
+    event.preventDefault();
+    if (!reversals.length) return;
+    const groups = reversals.pop();
+    for (const [
+      obj, key, value
+] of groups) {
+      obj[key] = {
+        [reversal]: value,
+      };
+    }
+  },
+});</textarea><textarea spellcheck="false"><div>
+  Go:
+  <button onclick="{{goLeft}}">
+    Left
+  </button>
+  <button onclick="{{goRight}}">
+    Right
+  </button>
+  <button onclick="{{undo}}">
+    Undo
+  </button>
+  <br>
+  Updated at: {{updatedAt}}
+  {{#actions}}
+    <div>
+      Move: {{d}}
+    </div>
+  {{/actions}}
+</div></textarea>
+            </div>
+          </div>
+          <div>
+            <aside class="live-example output">
+              <h6>Output</h6>
+              <div>
+                <noscript>JavaScript must be enabled!</noscript>
+              </div>
+            </aside>
           </div>
         </section>
 
