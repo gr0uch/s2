@@ -12,7 +12,7 @@ const AsyncFunction = Object.getPrototypeOf(async function() {}).constructor;
 
 for (const entry of Array.prototype.reduce.call(
   document.querySelectorAll(".live-example.code"),
-  (list, element) => {
+  (list, element, i) => {
     list.push(processExample(element));
     element.addEventListener("input", () => {
       executeExample(processExample(element));

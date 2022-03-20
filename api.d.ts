@@ -26,7 +26,7 @@ export function html(
   ...props: Array<string | Element>
 ): Element;
 
-export function observable(obj: DataObject | void, isDeep: boolean): Proxy;
+export function observable(obj?: DataObject, isDeep?: boolean): Proxy;
 export function computed(definition: DataObject): DataObject;
 export function ref(obj: DataObject): DataObject;
 

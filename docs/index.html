@@ -893,16 +893,17 @@ return computed({
           <div>
           </div>
           <div>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 182)">
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 174)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
-              <textarea spellcheck="false">const src = observable({
-  todos: [
-    'Sleep', 'Wake up',
-    'Get out of bed', 'Brush teeth',
-    'Get dressed',
-  ],
-});
+              <textarea spellcheck="false">
+const todos = [
+  'Sleep', 'Wake up', 'Get out of bed',
+  'Brush teeth', 'Get dressed',
+];
+const src = observable({
+  todos,
+}, true);
 return computed({
   todos() {
     return src.todos
@@ -918,9 +919,8 @@ return computed({
   add,
 });
 function remove() {
-  src.todos = src.todos
-    .filter((_, i) =>
-      i !== src.indexToDelete);
+  src.todos
+    .splice(src.indexToDelete, 1);
   delete src.indexToDelete;
 }
 function confirmDelete() {
@@ -930,8 +930,7 @@ function confirmDelete() {
 function add(event) {
   event.preventDefault();
   if (!this.todo) return;
-  src.todos =
-    [this.todo, ...src.todos];
+  src.todos.unshift(this.todo);
   delete this.todo;
 }</textarea><textarea spellcheck="false"><form onsubmit="{{add}}">
   <input

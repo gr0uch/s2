@@ -8,10 +8,7 @@
 (defparameter *stack-delimiter-symbol* (*symbol 'stack-delimiter))
 (defparameter *ref-symbol* (*symbol 'ref))
 (defparameter *has-unmounted-symbol* (*symbol 'has-unmounted))
-
-(setf
- (@ global-this observable-context-map) *observable-context-map*
- (@ global-this target-observables-map) *target-observables-map*)
+(defparameter *proxy-target-symbol* (*symbol 'proxy-target))
 
 (defparameter *proxy-observable*
   (let ((set-property (make-set-property)))
@@ -42,6 +39,8 @@
 ;; By coordinating the function calls with the get trap, we can correlate
 ;; computed properties to their observables.
 (defun get-property (target key receiver)
+  (when (eq key *proxy-target-symbol*) (return-from get-property target))
+
   ;; Qualifying if a key has already been read or not means we don't have to
   ;; re-compute when the same key is read multiple times.
   (let ((has-read false))
@@ -76,7 +75,8 @@
       (when (and is-deep (is-object value) (not (getprop value *ref-symbol*)))
         (if (and (is-object old-value) (not (getprop old-value *ref-symbol*)))
             (progn
-              (deep-replace (getprop receiver key) value)
+              (deep-replace
+               (getprop (getprop receiver *proxy-target-symbol*) key) value)
               (return-from set-property t))
           (setf value (create-source value t)))))
 
@@ -103,18 +103,19 @@
 
 
 (defun deep-replace (proxy obj)
-  (loop
-   for key of obj do
-   (let ((value (getprop obj key))
-         (old-value (getprop proxy key)))
-     (if (and (is-object value) (is-object old-value))
-         (deep-replace old-value value)
-       (setf (getprop proxy key) value))))
-  (loop
-   for key of proxy do
-   (let ((old-value (getprop proxy key)))
-     (when (not (chain obj (has-own-property key)))
-       (delete (getprop proxy key))))))
+  (let ((old-target (getprop proxy *proxy-target-symbol*)))
+    (loop
+     for key of obj do
+     (let ((value (getprop obj key))
+           (old-value (getprop old-target key)))
+       (if (and (is-object value) (is-object old-value))
+           (deep-replace old-value value)
+         (setf (getprop proxy key) value))))
+    (loop
+     for key of old-target do
+     (let ((old-value (getprop old-target key)))
+       (when (not (chain obj (has-own-property key)))
+         (delete (getprop proxy key)))))))
 
 
 ;; Observable objects are sources of data that control computed properties.

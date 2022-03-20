@@ -13,10 +13,8 @@ var STACKDELIMITERSYMBOL = Symbol('stackDelimiter');
 var REFSYMBOL = Symbol('ref');
 /* (DEFPARAMETER *HAS-UNMOUNTED-SYMBOL* (*SYMBOL 'HAS-UNMOUNTED)) */
 var HASUNMOUNTEDSYMBOL = Symbol('hasUnmounted');
-/* (SETF (@ GLOBAL-THIS OBSERVABLE-CONTEXT-MAP) *OBSERVABLE-CONTEXT-MAP*
-         (@ GLOBAL-THIS TARGET-OBSERVABLES-MAP) *TARGET-OBSERVABLES-MAP*) */
-globalThis.observableContextMap = OBSERVABLECONTEXTMAP;
-globalThis.targetObservablesMap = TARGETOBSERVABLESMAP;
+/* (DEFPARAMETER *PROXY-TARGET-SYMBOL* (*SYMBOL 'PROXY-TARGET)) */
+var PROXYTARGETSYMBOL = Symbol('proxyTarget');
 /* (DEFPARAMETER *PROXY-OBSERVABLE*
      (LET ((SET-PROPERTY (MAKE-SET-PROPERTY)))
        (CREATE GET GET-PROPERTY SET SET-PROPERTY DELETE-PROPERTY SET-PROPERTY))) */
@@ -61,6 +59,7 @@ function popStack() {
     };
 };
 /* (DEFUN GET-PROPERTY (TARGET KEY RECEIVER)
+     (WHEN (EQ KEY *PROXY-TARGET-SYMBOL*) (RETURN-FROM GET-PROPERTY TARGET))
      (LET ((HAS-READ FALSE))
        (LOOP FOR I FROM (- (LENGTH *READ-STACK*) 1) DOWNTO 0
              DO (LET ((TUPLE (ELT *READ-STACK* I)))
@@ -74,6 +73,9 @@ function popStack() {
            (QUEUE-MICROTASK CLEAR-STACK))))
      (CHAIN *REFLECT (GET TARGET KEY RECEIVER))) */
 function getProperty(target, key, receiver) {
+    if (key === PROXYTARGETSYMBOL) {
+        return target;
+    };
     var hasRead = false;
     for (var i = READSTACK.length - 1; i >= 0; i -= 1) {
         var tuple = READSTACK[i];
@@ -107,7 +109,8 @@ function isObject(obj) {
            (IF (AND (IS-OBJECT OLD-VALUE)
                     (NOT (GETPROP OLD-VALUE *REF-SYMBOL*)))
                (PROGN
-                (DEEP-REPLACE (GETPROP RECEIVER KEY) VALUE)
+                (DEEP-REPLACE
+                 (GETPROP (GETPROP RECEIVER *PROXY-TARGET-SYMBOL*) KEY) VALUE)
                 (RETURN-FROM SET-PROPERTY T))
                (SETF VALUE (CREATE-SOURCE VALUE T)))))
        (IF (NOT (EQ VALUE UNDEFINED))
@@ -135,7 +138,7 @@ function makeSetProperty(isDeep) {
         };
         if (isDeep && isObject(value) && !value[REFSYMBOL]) {
             if (isObject(oldValue) && !oldValue[REFSYMBOL]) {
-                deepReplace(receiver[key], value);
+                deepReplace(receiver[PROXYTARGETSYMBOL][key], value);
                 
                 return true;
             } else {
@@ -173,27 +176,30 @@ function makeSetProperty(isDeep) {
     return setProperty;
 };
 /* (DEFUN DEEP-REPLACE (PROXY OBJ)
-     (LOOP FOR KEY OF OBJ
-           DO (LET ((VALUE (GETPROP OBJ KEY)) (OLD-VALUE (GETPROP PROXY KEY)))
-                (IF (AND (IS-OBJECT VALUE) (IS-OBJECT OLD-VALUE))
-                    (DEEP-REPLACE OLD-VALUE VALUE)
-                    (SETF (GETPROP PROXY KEY) VALUE))))
-     (LOOP FOR KEY OF PROXY
-           DO (LET ((OLD-VALUE (GETPROP PROXY KEY)))
-                (WHEN (NOT (CHAIN OBJ (HAS-OWN-PROPERTY KEY)))
-                  (DELETE (GETPROP PROXY KEY)))))) */
+     (LET ((OLD-TARGET (GETPROP PROXY *PROXY-TARGET-SYMBOL*)))
+       (LOOP FOR KEY OF OBJ
+             DO (LET ((VALUE (GETPROP OBJ KEY))
+                      (OLD-VALUE (GETPROP OLD-TARGET KEY)))
+                  (IF (AND (IS-OBJECT VALUE) (IS-OBJECT OLD-VALUE))
+                      (DEEP-REPLACE OLD-VALUE VALUE)
+                      (SETF (GETPROP PROXY KEY) VALUE))))
+       (LOOP FOR KEY OF OLD-TARGET
+             DO (LET ((OLD-VALUE (GETPROP OLD-TARGET KEY)))
+                  (WHEN (NOT (CHAIN OBJ (HAS-OWN-PROPERTY KEY)))
+                    (DELETE (GETPROP PROXY KEY))))))) */
 function deepReplace(proxy, obj) {
+    var oldTarget = proxy[PROXYTARGETSYMBOL];
     for (var key in obj) {
         var value = obj[key];
-        var oldValue = proxy[key];
+        var oldValue = oldTarget[key];
         if (isObject(value) && isObject(oldValue)) {
             deepReplace(oldValue, value);
         } else {
             proxy[key] = value;
         };
     };
-    for (var key in proxy) {
-        var oldValue1 = proxy[key];
+    for (var key in oldTarget) {
+        var oldValue1 = oldTarget[key];
         if (!obj.hasOwnProperty(key)) {
             delete proxy[key];
         };
