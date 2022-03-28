@@ -741,26 +741,31 @@
     (setf template (getprop *templates-hash* template)))
   (let ((bindings (create-binding root-state template)))
     ;; Special case when the root level object has an unmount symbol,
-    ;; call unmount when any of its nodes are removed.
+    ;; call unmount when all of its nodes are removed.
     (when (getprop root-state *symbol-unmount*) (observe-unmount bindings))
     bindings))
 
 (defun observe-unmount (bindings)
-  (let* ((proxy (elt bindings 0))
-         (fragment (elt bindings 1))
-         (fragment-nodes (chain *array (from (@ fragment children))))
-         (observe-fn
-          (lambda (mutations observer)
+  (let*
+      ((proxy (elt bindings 0))
+       (fragment (elt bindings 1))
+       (fragment-nodes (chain *array (from (@ fragment child-nodes))))
+       (observe-fn
+        (lambda (mutations observer)
+          (loop
+           for mutation in mutations do
+           (loop
+            for node in (@ mutation removed-nodes) do
             (loop
-             for mutation in mutations do
-             (loop
-              for node in (@ mutation removed-nodes) do
-              (when (chain fragment-nodes (includes node))
-                (recursive-unmount proxy t)
-                (chain observer (disconnect))
-                (break))))))
-         (observer (new (chain main window
-                               (*mutation-observer observe-fn)))))
+             for i from (- (length fragment-nodes) 1) downto 0 do
+             (let ((fragment-node (elt fragment-nodes i)))
+               (when (chain node (contains fragment-node))
+                 (chain fragment-nodes (splice i 1)))))))
+          (when (eq (length fragment-nodes) 0)
+            (recursive-unmount proxy t)
+            (chain observer (disconnect)))))
+       (observer (new (chain main window
+                             (*mutation-observer observe-fn)))))
     (chain observer (observe (@ main window document document-element)
                              (create child-list t subtree t)))))
 

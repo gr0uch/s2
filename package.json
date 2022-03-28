@@ -1,6 +1,6 @@
 {
   "name": "s2-engine",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "A function for reactive web UI.",
   "main": "api.mjs",
   "types": "api.d.ts",
@@ -11,7 +11,7 @@
     "api.d.ts"
   ],
   "scripts": {
-    "test": "deno test"
+    "test": "deno test test/"
   },
   "repository": {
     "type": "git",

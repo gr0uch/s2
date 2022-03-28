@@ -1340,15 +1340,24 @@ function main(rootState, template) {
 /* (DEFUN OBSERVE-UNMOUNT (BINDINGS)
      (LET* ((PROXY (ELT BINDINGS 0))
             (FRAGMENT (ELT BINDINGS 1))
-            (FRAGMENT-NODES (CHAIN *ARRAY (FROM (@ FRAGMENT CHILDREN))))
+            (FRAGMENT-NODES (CHAIN *ARRAY (FROM (@ FRAGMENT CHILD-NODES))))
             (OBSERVE-FN
              (LAMBDA (MUTATIONS OBSERVER)
                (LOOP FOR MUTATION IN MUTATIONS
                      DO (LOOP FOR NODE IN (@ MUTATION REMOVED-NODES)
-                              DO (WHEN (CHAIN FRAGMENT-NODES (INCLUDES NODE))
-                                   (RECURSIVE-UNMOUNT PROXY T)
-                                   (CHAIN OBSERVER (DISCONNECT))
-                                   (BREAK))))))
+                              DO (LOOP FOR I FROM (- (LENGTH FRAGMENT-NODES)
+                                                     1) DOWNTO 0
+                                       DO (LET ((FRAGMENT-NODE
+                                                 (ELT FRAGMENT-NODES I)))
+                                            (WHEN
+                                                (CHAIN NODE
+                                                       (CONTAINS
+                                                        FRAGMENT-NODE))
+                                              (CHAIN FRAGMENT-NODES
+                                                     (SPLICE I 1)))))))
+               (WHEN (EQ (LENGTH FRAGMENT-NODES) 0)
+                 (RECURSIVE-UNMOUNT PROXY T)
+                 (CHAIN OBSERVER (DISCONNECT)))))
             (OBSERVER
              (NEW (CHAIN MAIN WINDOW (*MUTATION-OBSERVER OBSERVE-FN)))))
        (CHAIN OBSERVER
@@ -1357,7 +1366,7 @@ function main(rootState, template) {
 function observeUnmount(bindings) {
     var proxy = bindings[0];
     var fragment = bindings[1];
-    var fragmentNodes = Array.from(fragment.children);
+    var fragmentNodes = Array.from(fragment.childNodes);
     var observeFn = function (mutations, observer) {
         var _js48 = mutations.length;
         for (var _js47 = 0; _js47 < _js48; _js47 += 1) {
@@ -1366,12 +1375,18 @@ function observeUnmount(bindings) {
             var _js51 = _js49.length;
             for (var _js50 = 0; _js50 < _js51; _js50 += 1) {
                 var node = _js49[_js50];
-                if (fragmentNodes.includes(node)) {
-                    recursiveUnmount(proxy, true);
-                    observer.disconnect();
-                    break;
+                for (var i = fragmentNodes.length - 1; i >= 0; i -= 1) {
+                    var fragmentNode = fragmentNodes[i];
+                    if (node.contains(fragmentNode)) {
+                        fragmentNodes.splice(i, 1);
+                    };
                 };
             };
+        };
+        if (fragmentNodes.length === 0) {
+            recursiveUnmount(proxy, true);
+            
+            return observer.disconnect();
         };
     };
     var observer = new main.window.MutationObserver(observeFn);

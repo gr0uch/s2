@@ -594,7 +594,7 @@ const greeting = html`
             <h2 id="mount-unmount-symbols"><code>mount</code>, <code>unmount</code> symbols</h2>
             <p>The symbols <code>mount</code> and <code>unmount</code> allow user-defined behavior to run as elements are appended and removed from the DOM. This allows for animations and arbitrary code such as integrating with third-party libraries on these events. The unmount function is particularly useful for implementing exiting animations, as it will wait for a promise to resolve before removing the node.</p>
             <p>Both <code>mount</code> and <code>unmount</code> functions have <code>node</code> as an argument, <em>but it is not the same node</em>. On mount, the node is a <code>DocumentFragment</code> before the fragment is inserted into the DOM. On unmount, the node is any top-level <code>Node</code> before the node is removed from the DOM.</p>
-            <p>On unmount, the unmount function is called recursively on each child that is removed, to ensure that unmount will always be called. If the root object has an unmount function, it will be called when its corresponding DOM nodes get removed, which uses <code>MutationObserver</code> internally.</p>
+            <p>On unmount, the unmount function is called recursively on each child that is removed, to ensure that unmount will always be called. If the root object has an unmount function, it will be called when all of its corresponding DOM nodes get removed, which uses <code>MutationObserver</code> internally.</p>
             <hr>
           </div>
           <div>

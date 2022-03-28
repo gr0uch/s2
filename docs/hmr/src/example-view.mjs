@@ -11,7 +11,7 @@ export const viewModel = computed({
   },
   containerClass() {
     return css`
-      color: purple;
+      color: blue;
     `;
   },
   displayName() {
@@ -26,6 +26,7 @@ export const viewModel = computed({
 });
 
 export const template = html`
+  your name:
   <div class="{{containerClass}}">
     <input type="text" value="{{inputName}}" oninput="{{updateName}}">
     <p>
