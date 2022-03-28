@@ -235,7 +235,7 @@
             <p><em>s²</em> is a single function that <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy">proxies</a> mutable data to <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Reflect">reflect</a> in the DOM. Its paradigm models user interface entirely in terms of state, and avoids mixing logic with the presentation layer (inlining JavaScript, such as JSX). <em>s²</em> has a few design goals:</p>
             <ul>
               <li>Enable separation of application logic from the presentation layer. For example, unlike React which combines hooks, templates (JSX), and arbitrary code in a render function, <em>s²</em> has data, functions that operate on the data, and declarative templates.</li>
-              <li>The only required API is its main function, which handles rendering and event listening. Advanced features such as <a href="#computeds">computed properties</a> are implemented as addons.</li>
+              <li>The entire API is built on top of its main function, which handles rendering and event listening. Advanced features such as <a href="#computeds">computed properties</a> are implemented as addons.</li>
               <li>Templates are logic-less. This differs from prior art such as JSX where embedded JavaScript is allowed. Due to this constraint, logic-less templating maps well to <em>s²</em>, and there is an addon for <a href="#mustache-templates">Mustache templates</a> that is aware of HTML context.</li>
             </ul>
             <p>Here is a sample to-do app built with <em>s²</em>:</p>
@@ -1186,6 +1186,10 @@ return computed({
             <hr>
           </div>
           <div>
+            <aside>
+              <h6>Aside</h6>
+              <p>This is just a boilerplate example, rather than something that one can import as a dependency.</p>
+            </aside>
           </div>
 
           <div>
