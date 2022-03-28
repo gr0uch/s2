@@ -1,0 +1,15 @@
+{
+  "name": "s2-hmr",
+  "version": "1.0.0",
+  "scripts": {
+    "start": "node dev-server.mjs"
+  },
+  "private": true,
+  "module": true,
+  "license": "UNLICENSED",
+  "devDependencies": {
+    "@parcel/watcher": "^2.0.5",
+    "esbuild": "^0.14.28",
+    "goober": "^2.1.8"
+  }
+}

@@ -334,11 +334,12 @@
                     (chain old-node (remove))))
               (chain old-node (remove)))))
     (chain end-node (remove)))
-  (when self (recursive-unmount self false (new (*weak-set))))
+  (when self (recursive-unmount self false))
   nil)
 
 
 (defun recursive-unmount (self should-unmount cycle-set)
+  (when (not cycle-set) (setf cycle-set (new (*weak-set))))
   (chain cycle-set (add self))
   (loop
    for key of self do
@@ -735,11 +736,33 @@
   (setf (getprop *templates-hash* name) template))
 
 
-(defun main (origin template)
+(defun main (root-state template)
   (when (chain *templates-hash* (has-own-property template))
     (setf template (getprop *templates-hash* template)))
-  (create-binding origin template))
+  (let ((bindings (create-binding root-state template)))
+    ;; Special case when the root level object has an unmount symbol,
+    ;; call unmount when any of its nodes are removed.
+    (when (getprop root-state *symbol-unmount*) (observe-unmount bindings))
+    bindings))
 
+(defun observe-unmount (bindings)
+  (let* ((proxy (elt bindings 0))
+         (fragment (elt bindings 1))
+         (fragment-nodes (chain *array (from (@ fragment children))))
+         (observe-fn
+          (lambda (mutations observer)
+            (loop
+             for mutation in mutations do
+             (loop
+              for node in (@ mutation removed-nodes) do
+              (when (chain fragment-nodes (includes node))
+                (recursive-unmount proxy t)
+                (chain observer (disconnect))
+                (break))))))
+         (observer (new (chain main window
+                               (*mutation-observer observe-fn)))))
+    (chain observer (observe (@ main window document document-element)
+                             (create child-list t subtree t)))))
 
 (setf (@ main debug) (not t)
       (@ main is-deferred) (not t)

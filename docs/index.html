@@ -211,6 +211,7 @@
         <ul>
           <li><a href="#server-side-rendering">Server-side rendering</a></li>
           <li><a href="#styling">Styling</a></li>
+          <li><a href="#hot-module-replacement">Hot module replacement (HMR)</a></li>
           <li><a href="#performance-pitfalls">Performance pitfalls</a></li>
           <li><a href="#object-re-use">Object re-use</a></li>
           <li><a href="#time-travel">Time travel</a></li>
@@ -593,7 +594,7 @@ const greeting = html`
             <h2 id="mount-unmount-symbols"><code>mount</code>, <code>unmount</code> symbols</h2>
             <p>The symbols <code>mount</code> and <code>unmount</code> allow user-defined behavior to run as elements are appended and removed from the DOM. This allows for animations and arbitrary code such as integrating with third-party libraries on these events. The unmount function is particularly useful for implementing exiting animations, as it will wait for a promise to resolve before removing the node.</p>
             <p>Both <code>mount</code> and <code>unmount</code> functions have <code>node</code> as an argument, <em>but it is not the same node</em>. On mount, the node is a <code>DocumentFragment</code> before the fragment is inserted into the DOM. On unmount, the node is any top-level <code>Node</code> before the node is removed from the DOM.</p>
-            <p>On unmount, the unmount function is called recursively on each child that is removed, to ensure that unmount will always be called.</p>
+            <p>On unmount, the unmount function is called recursively on each child that is removed, to ensure that unmount will always be called. If the root object has an unmount function, it will be called when its corresponding DOM nodes get removed, which uses <code>MutationObserver</code> internally.</p>
             <hr>
           </div>
           <div>
@@ -1177,6 +1178,14 @@ return computed({
                 <noscript>JavaScript must be enabled!</noscript>
               </div>
             </aside>
+          </div>
+
+          <div>
+            <h2 id="hot-module-replacement">Hot module replacement (HMR)</h2>
+            <p>There is a <a href="https://github.com/gr0uch/s2/tree/master/docs/hmr">build-tool agnostic example of HMR in the source tree</a>. Although the example uses esbuild, that is contained in one file, <code>dev-server.mjs</code>, while the rest is agnostic. This is achieved by making the source code somewhat aware of HMR, allowing the developer to opt-in to persistence across module replacements.</p>
+            <hr>
+          </div>
+          <div>
           </div>
 
           <div>

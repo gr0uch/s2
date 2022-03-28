@@ -612,7 +612,7 @@ function setClasslist(node, name, value) {
                             (CHAIN OLD-NODE (REMOVE))))
                       (CHAIN OLD-NODE (REMOVE)))))
        (CHAIN END-NODE (REMOVE)))
-     (WHEN SELF (RECURSIVE-UNMOUNT SELF FALSE (NEW (*WEAK-SET))))
+     (WHEN SELF (RECURSIVE-UNMOUNT SELF FALSE))
      NIL) */
 function removeBetweenDelimiters(startNode, endNode, unmount, self) {
     var node = startNode;
@@ -635,12 +635,13 @@ function removeBetweenDelimiters(startNode, endNode, unmount, self) {
     };
     endNode.remove();
     if (self) {
-        recursiveUnmount(self, false, new WeakSet());
+        recursiveUnmount(self, false);
     };
     
     return null;
 };
 /* (DEFUN RECURSIVE-UNMOUNT (SELF SHOULD-UNMOUNT CYCLE-SET)
+     (WHEN (NOT CYCLE-SET) (SETF CYCLE-SET (NEW (*WEAK-SET))))
      (CHAIN CYCLE-SET (ADD SELF))
      (LOOP FOR KEY OF SELF
            DO (LET ((VALUE (GETPROP SELF KEY)))
@@ -652,6 +653,9 @@ function removeBetweenDelimiters(startNode, endNode, unmount, self) {
        (LET ((UNMOUNT (CHAIN *PROXY-UNMOUNT-MAP* (GET SELF))))
          (WHEN UNMOUNT (CHAIN UNMOUNT (CALL SELF)))))) */
 function recursiveUnmount(self, shouldUnmount, cycleSet) {
+    if (!cycleSet) {
+        cycleSet = new WeakSet();
+    };
     cycleSet.add(self);
     for (var key in self) {
         var value = self[key];
@@ -1316,16 +1320,62 @@ function registerTemplate(name, template) {
     };
     return TEMPLATESHASH[name] = template;
 };
-/* (DEFUN MAIN (ORIGIN TEMPLATE)
+/* (DEFUN MAIN (ROOT-STATE TEMPLATE)
      (WHEN (CHAIN *TEMPLATES-HASH* (HAS-OWN-PROPERTY TEMPLATE))
        (SETF TEMPLATE (GETPROP *TEMPLATES-HASH* TEMPLATE)))
-     (CREATE-BINDING ORIGIN TEMPLATE)) */
-function main(origin, template) {
+     (LET ((BINDINGS (CREATE-BINDING ROOT-STATE TEMPLATE)))
+       (WHEN (GETPROP ROOT-STATE *SYMBOL-UNMOUNT*) (OBSERVE-UNMOUNT BINDINGS))
+       BINDINGS)) */
+function main(rootState, template) {
     if (TEMPLATESHASH.hasOwnProperty(template)) {
         template = TEMPLATESHASH[template];
     };
+    var bindings = createBinding(rootState, template);
+    if (rootState[SYMBOLUNMOUNT]) {
+        observeUnmount(bindings);
+    };
     
-    return createBinding(origin, template);
+    return bindings;
+};
+/* (DEFUN OBSERVE-UNMOUNT (BINDINGS)
+     (LET* ((PROXY (ELT BINDINGS 0))
+            (FRAGMENT (ELT BINDINGS 1))
+            (FRAGMENT-NODES (CHAIN *ARRAY (FROM (@ FRAGMENT CHILDREN))))
+            (OBSERVE-FN
+             (LAMBDA (MUTATIONS OBSERVER)
+               (LOOP FOR MUTATION IN MUTATIONS
+                     DO (LOOP FOR NODE IN (@ MUTATION REMOVED-NODES)
+                              DO (WHEN (CHAIN FRAGMENT-NODES (INCLUDES NODE))
+                                   (RECURSIVE-UNMOUNT PROXY T)
+                                   (CHAIN OBSERVER (DISCONNECT))
+                                   (BREAK))))))
+            (OBSERVER
+             (NEW (CHAIN MAIN WINDOW (*MUTATION-OBSERVER OBSERVE-FN)))))
+       (CHAIN OBSERVER
+              (OBSERVE (@ MAIN WINDOW DOCUMENT DOCUMENT-ELEMENT)
+               (CREATE CHILD-LIST T SUBTREE T))))) */
+function observeUnmount(bindings) {
+    var proxy = bindings[0];
+    var fragment = bindings[1];
+    var fragmentNodes = Array.from(fragment.children);
+    var observeFn = function (mutations, observer) {
+        var _js48 = mutations.length;
+        for (var _js47 = 0; _js47 < _js48; _js47 += 1) {
+            var mutation = mutations[_js47];
+            var _js49 = mutation.removedNodes;
+            var _js51 = _js49.length;
+            for (var _js50 = 0; _js50 < _js51; _js50 += 1) {
+                var node = _js49[_js50];
+                if (fragmentNodes.includes(node)) {
+                    recursiveUnmount(proxy, true);
+                    observer.disconnect();
+                    break;
+                };
+            };
+        };
+    };
+    var observer = new main.window.MutationObserver(observeFn);
+    return observer.observe(main.window.document.documentElement, { childList : true, subtree : true });
 };
 /* (SETF (@ MAIN DEBUG) (NOT T)
          (@ MAIN IS-DEFERRED) (NOT T)
