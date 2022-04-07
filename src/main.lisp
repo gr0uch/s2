@@ -742,7 +742,9 @@
   (let ((bindings (create-binding root-state template)))
     ;; Special case when the root level object has an unmount symbol,
     ;; call unmount when all of its nodes are removed.
-    (when (getprop root-state *symbol-unmount*) (observe-unmount bindings))
+    (when (and (getprop root-state *symbol-unmount*)
+               (@ main should-unmount-root))
+      (observe-unmount bindings))
     bindings))
 
 (defun observe-unmount (bindings)
@@ -769,8 +771,9 @@
     (chain observer (observe (@ main window document document-element)
                              (create child-list t subtree t)))))
 
-(setf (@ main debug) (not t)
-      (@ main is-deferred) (not t)
+(setf (@ main debug) false
+      (@ main is-deferred) false
+      (@ main should-unmount-root) t
       (@ main window) (if (not (eq (typeof window) 'undefined)) window nil))
 
 

@@ -1324,14 +1324,17 @@ function registerTemplate(name, template) {
      (WHEN (CHAIN *TEMPLATES-HASH* (HAS-OWN-PROPERTY TEMPLATE))
        (SETF TEMPLATE (GETPROP *TEMPLATES-HASH* TEMPLATE)))
      (LET ((BINDINGS (CREATE-BINDING ROOT-STATE TEMPLATE)))
-       (WHEN (GETPROP ROOT-STATE *SYMBOL-UNMOUNT*) (OBSERVE-UNMOUNT BINDINGS))
+       (WHEN
+           (AND (GETPROP ROOT-STATE *SYMBOL-UNMOUNT*)
+                (@ MAIN SHOULD-UNMOUNT-ROOT))
+         (OBSERVE-UNMOUNT BINDINGS))
        BINDINGS)) */
 function main(rootState, template) {
     if (TEMPLATESHASH.hasOwnProperty(template)) {
         template = TEMPLATESHASH[template];
     };
     var bindings = createBinding(rootState, template);
-    if (rootState[SYMBOLUNMOUNT]) {
+    if (rootState[SYMBOLUNMOUNT] && main.shouldUnmountRoot) {
         observeUnmount(bindings);
     };
     
@@ -1392,14 +1395,16 @@ function observeUnmount(bindings) {
     var observer = new main.window.MutationObserver(observeFn);
     return observer.observe(main.window.document.documentElement, { childList : true, subtree : true });
 };
-/* (SETF (@ MAIN DEBUG) (NOT T)
-         (@ MAIN IS-DEFERRED) (NOT T)
+/* (SETF (@ MAIN DEBUG) FALSE
+         (@ MAIN IS-DEFERRED) FALSE
+         (@ MAIN SHOULD-UNMOUNT-ROOT) T
          (@ MAIN WINDOW)
            (IF (NOT (EQ (TYPEOF WINDOW) 'UNDEFINED))
                WINDOW
                NIL)) */
-main.debug = !true;
-main.isDeferred = !true;
+main.debug = false;
+main.isDeferred = false;
+main.shouldUnmountRoot = true;
 main.window = typeof window !== 'undefined' ? window : null;
 /* (EXPORT DEFAULT MAIN NAMES
            ((*SYMBOL-MOUNT* MOUNT) (*SYMBOL-UNMOUNT* UNMOUNT)

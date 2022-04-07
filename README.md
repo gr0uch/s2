@@ -14,9 +14,10 @@ See [js-framework-benchmark results table](https://krausest.github.io/js-framewo
 
 ## Flags
 
-- `s2.debug`: turn on messages in the console. Warning: has a performance impact.
+- `s2.shouldUnmountRoot`: enabled by default, but can be disabled. This will automatically call `unmount` when the DOM nodes mapped to an object are removed. This should only be disabled if you need to keep updating nodes that may be removed and appended later.
 - `s2.isDeferred` (experimental): this will defer setting proxy values as a microtask. This might be preferable if there is significant blocking in between updates. However, it can break functionality in case there are updates that depend on a previous update in the same tick.
 - `s2.window`: set a different global object for server-side rendering.
+- `s2.debug`: turn on messages in the console. Warning: has a performance impact.
 
 
 ## Development

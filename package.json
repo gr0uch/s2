@@ -1,6 +1,6 @@
 {
   "name": "s2-engine",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "A function for reactive web UI.",
   "main": "api.mjs",
   "types": "api.d.ts",
