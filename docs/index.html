@@ -17,7 +17,7 @@
     <script type="module" src="./docs.mjs"></script>
     <style>
       :root {
-        --w: 78rem;
+        --w: 80rem;
         --h: 19px;
         --h2: 17px;
         --h3: 14px;
@@ -119,8 +119,8 @@
       @keyframes char-out { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(5); opacity: 0; } }
       .live-example.output .in { animation: char-in 0.5s; }
       .live-example.output .out { animation: char-out 0.5s; }
-      .live-example.output .nums { display: inline-flex; }
-      .live-example.output .nums > * { margin: 0 calc(1rem * var(--u) * 1); }
+      .live-example.output .nums { display: inline-flex; flex-wrap: wrap; }
+      .live-example.output .nums > * { padding: 0 calc(1rem * var(--u) / 2); flex: 0 1 calc(100% / 3); text-align: center; }
       .live-example.output .spreadsheet { display: grid; grid-template-columns: 1fr 1fr 1fr; column-gap: calc(1rem * var(--u) * 3); row-gap: calc(1rem * var(--u) * 1); }
       .live-example.output .todo > :nth-child(2) { display: none; }
       .live-example.output .todo[data-confirm] > :nth-child(2) { display: block; }
@@ -679,7 +679,7 @@ async function unmountChar(node) {
           <div>
           </div>
           <div>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 174)">
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 186)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">return {
@@ -707,8 +707,11 @@ function animate(node) {
     const b2 =
       node.getBoundingClientRect();
     const i = b1.left - b2.left;
-    const t1 = `translateX(${i}px)`;
-    const t2 = 'translateX(0)';
+    const j = b1.top - b2.top;
+    const t1 = `translateX(${i}px)
+                translateY(${j}px)`;
+    const t2 = `translateX(0)
+                translateY(0)`;
     node.animate([
       { transform: t1 },
       { transform: t2 },
