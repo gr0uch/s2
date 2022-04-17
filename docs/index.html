@@ -41,6 +41,7 @@
         --c-l2: rgba(63, 182, 139, 0.06);
         --c-h: #e34c26;
         --c-e: #6e40c9;
+        --c-e2: #af86ff;
       }
       ::selection { background: var(--c-e); color: var(--c-fg); }
       *::-webkit-scrollbar { background-color: var(--c-a2); width: 8px; }
@@ -67,7 +68,7 @@
       /* layout */
       .container { position: relative; min-height: 100%; max-width: var(--w); display: flex; margin: auto; hyphens: auto; }
       body::before { display: block; content: " "; position: fixed; top: 0; right: 0; height: 100%; width: calc((100% - var(--w)) / 2 + 1px); background: var(--c-a2); }
-      #main-nav { position: sticky; top: 0; flex: 1; padding: calc(1rem * 28 * var(--u)) 0 0 calc(1rem * var(--u) * 1); margin: 0 var(--l) 0 0; align-self: flex-start; color: var(--c-fg2); height: 100vh; overflow: auto; }
+      #main-nav { position: sticky; top: 0; flex: 1; padding: calc(1rem * 26 * var(--u)) 0 0 calc(1rem * var(--u) * 1); margin: 0 var(--l) 0 0; align-self: flex-start; color: var(--c-fg2); height: 100vh; overflow: auto; }
       #main-nav h5 { font-size: var(--h3); font-weight: 700; }
       #main-nav code { font-size: var(--h4); }
       #main-nav h5 + h5 { margin-top: var(--l); }
@@ -91,10 +92,12 @@
       #content > section > div > footer > h4 { font-size: 2em; }
       #content > section code { background: var(--c-a2); border-radius: calc(1rem * var(--u)); padding: 0 calc(1rem * var(--u)); }
       #content > section pre code { background: inherit; border-radius: inherit; }
-      .params { position: relative; z-index: 0; margin: calc(1rem * var(--u) * 26) 0 0 0; font-size: calc(1rem * var(--u) * 5); line-height: calc(1rem * var(--u) * 10); border-radius: calc(1rem * var(--u)); color: var(--c-l); }
+      .params { position: relative; z-index: 0; margin: calc(1rem * var(--u) * 26) 0 calc(var(--l) * 2) 0; border-radius: calc(1rem * var(--u)); color: var(--c-e2); font-size: calc(1rem * var(--u) * 5); line-height: calc(var(--l) * var(--u) * 5); }
       .params b { display: inline-block; width: calc(1rem * var(--u) * 18); font-weight: inherit; }
       .params i { display: inline-block; margin: 0 calc(1rem * var(--u) * 2); }
       .params code { font-size: inherit; background-color: var(--c-l2); }
+      .quick-points { color: var(--c-e2); font-style: italic; /*font-size: calc(1rem * var(--u) * 5); line-height: calc(var(--l) * var(--u) * 5);*/ display: flex; flex-wrap: wrap; }
+      .quick-points > li { flex: 0 1 calc(100% / 2); }
 
       /* examples */
       .live-example.code { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: min-content 1fr; box-shadow: 0 calc(1rem * var(--u) * 4) calc(1rem * var(--u) * 8) var(--c-bg); border-radius: calc(1rem * var(--u)); margin-bottom: calc(1rem * var(--u) * 10); }
@@ -224,6 +227,12 @@
               <code>s2(object, template);</code><br><br>
               Returns <code>[proxy, documentFragment]</code>, a reactive view model and a fragment containing its elements.
             </p>
+            <ul class="quick-points">
+              <li>Reactive templating</li>
+              <li>Computed properties</li>
+              <li>No <abbr title="JavaScript XML">JSX</abbr></li>
+              <li>No tooling required</li>
+            </ul>
             <hr>
           </div>
           <div></div>

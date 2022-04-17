@@ -11,4 +11,4 @@ jobs:
         with:
           deno-version: vx.x.x
       - name: test
-        run: deno test
+        run: deno test test/

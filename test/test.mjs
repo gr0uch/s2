@@ -280,3 +280,48 @@ Deno.test(
     delete data.things;
     assertEquals(div.textContent, "");
   });
+
+Deno.test(
+  "computed properties ordering",
+  async () => {
+    const data = observable({
+      allies: null,
+    }, true);
+
+    const obj = computed({
+      allies() {
+        const { allies } = data;
+        if (!allies) return null;
+        return Object.values(allies).map((ally) => {
+          return computed({
+            name() {
+              return ally.name;
+            },
+            rank() {
+              return ally.rank;
+            },
+          });
+        });
+      },
+    });
+
+    const template = `<ul>
+    {{#allies}}
+      <li>
+        <span>{{name}}</span>
+        <span>{{rank}}</span>
+      </li>
+    {{/allies}}
+  </ul>`;
+
+    const { proxy, document } = customWindow(obj, template);
+    const ul = document.querySelector("ul");
+    assertEquals(ul.textContent, "");
+    data.allies = {
+      0: { name: "a", rank: 1 },
+      1: { name: "b", rank: 2 },
+    };
+    assertEquals(ul.textContent, "a1b2");
+    delete data.allies;
+    assertEquals(ul.textContent, "");
+  });

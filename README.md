@@ -35,7 +35,7 @@ Need to build the `psbuild` binary from `parenscript-builder` and put it here to
 Run automated tests with Deno:
 
 ```sh
-make && deno test
+make && deno test test/
 ```
 
 ### Manual testing pages
