@@ -288,16 +288,24 @@ Deno.test(
       allies: null,
     }, true);
 
+    const stack = [];
+    const clearStack = () => {
+      stack.splice(0, stack.length);
+    };
+
     const obj = computed({
       allies() {
+        stack.push("allies");
         const { allies } = data;
         if (!allies) return null;
-        return Object.values(allies).map((ally) => {
+        return allies.map((ally) => {
           return computed({
             name() {
+              stack.push("name");
               return ally.name;
             },
             rank() {
+              stack.push("rank");
               return ally.rank;
             },
           });
@@ -316,12 +324,18 @@ Deno.test(
 
     const { proxy, document } = customWindow(obj, template);
     const ul = document.querySelector("ul");
+    assertEquals(stack, ["allies"]);
     assertEquals(ul.textContent, "");
-    data.allies = {
-      0: { name: "a", rank: 1 },
-      1: { name: "b", rank: 2 },
-    };
+    clearStack();
+    data.allies = [
+      { name: "a", rank: 1 },
+      { name: "b", rank: 2 },
+    ];
+    assertEquals(stack, ["allies", "name", "rank", "name", "rank"]);
     assertEquals(ul.textContent, "a1b2");
+    clearStack();
     delete data.allies;
+    assertEquals(stack, ["allies"]);
     assertEquals(ul.textContent, "");
+    clearStack();
   });
