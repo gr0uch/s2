@@ -17,8 +17,8 @@
     <script type="module" src="./docs.mjs"></script>
     <style>
       :root {
-        --w: 80rem;
-        --h: 19px;
+        --w: 78rem;
+        --h: 20px;
         --h2: 17px;
         --h3: 14px;
         --h4: 12px;
@@ -96,6 +96,12 @@
       .params i { display: inline-block; margin: 0 calc(1rem * var(--u) * 2); }
       .params code { font-size: inherit; background-color: var(--c-l2); }
 
+      /* main demo */
+      .demo-container { background: var(--c-l2); border-radius: calc(1rem * var(--u)); color: var(--c-l); margin-right: calc((100% + (1rem * var(--u) * 22)) * (-4 / 9) - (1rem * var(--u) * 22)); font-weight: 700; display: flex; justify-content: space-between; align-items: center; }
+      .demo-container > :first-child { margin-inline: calc(1rem * var(--u) * 6); }
+      .demo-container .boxes { display: grid; grid: 1fr 1fr 1fr / 1fr 1fr 1fr; gap: calc(1rem * var(--u) * 1); margin: calc(1rem * var(--u) * 2); }
+      .demo-container .boxes > * { background-color: var(--c-l); color: var(--c-a2); line-height: 1; text-align: center; width: 1rem; border-radius: calc(1rem * var(--u) * 1); transition: background-color 0.4s ease; }
+
       /* examples */
       .live-example.code { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: min-content 1fr; box-shadow: 0 calc(1rem * var(--u) * 4) calc(1rem * var(--u) * 8) var(--c-bg); border-radius: calc(1rem * var(--u)); margin-bottom: calc(1rem * var(--u) * 10); }
       .live-example.code h6 { background: var(--c-bg); padding: calc(1rem * var(--u) * 1) calc(1rem * var(--u) * 3); border-bottom: 1px var(--c-a2) solid; border-right: 1px var(--c-a2) solid; }
@@ -161,6 +167,8 @@
         .live-example.primary.output { margin: 0 calc(1rem * var(--u) * -2); }
         .live-example.primary.code { position: inherit; left: 0; margin-right: 0; }
         .live-example.output { padding-bottom: calc(var(--l) / 4); }
+        .demo-container { margin-right: 0; }
+        .demo-container > :first-child { margin-inline: calc(1rem * var(--u) * 2); }
         #content { padding: 0 calc(1rem * var(--u) * 1); }
         #content > section { display: block; }
         #content > section > div { padding: 0; }
@@ -225,6 +233,20 @@
               Returns <code>[proxy, documentFragment]</code>, a reactive view model and a fragment containing its elements.
             </p>
             <hr>
+            <div class="demo-container">
+              <div>Optimized for granular re-rendering of complex, real-time user interfaces.</div>
+              <div class="boxes">
+                <div>A</div>
+                <div>B</div>
+                <div>C</div>
+                <div>D</div>
+                <div>E</div>
+                <div>F</div>
+                <div>G</div>
+                <div>H</div>
+                <div>I</div>
+              </div>
+            </div>
           </div>
           <div></div>
         </section>

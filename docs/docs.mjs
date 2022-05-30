@@ -1,6 +1,7 @@
 import s2, { root, target, mount, unmount, move, registerTemplate } from "./main.mjs";
 import { observable, createComputed } from "./computed-properties.mjs";
 import parseMustache from "./mustache.mjs";
+import "./demo.mjs";
 
 // s2.debug = true;
 
