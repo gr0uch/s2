@@ -39,6 +39,7 @@
         --c-a3: rgb(66, 68, 74);
         --c-l: #3fb68b;
         --c-l2: rgba(63, 182, 139, 0.06);
+        --c-l3: rgba(63, 182, 139, 0.12);
         --c-h: #e34c26;
         --c-e: #6e40c9;
       }
@@ -49,9 +50,9 @@
       html { font-size: var(--h); }
       body { line-height: var(--l); background: var(--c-a); color: var(--c-fg); font-family: var(--f-b); }
       h1, h2, h3, h4, h5, h6 { font-size: inherit; font-weight: inherit; }
-      h2 { font-size: calc(1rem * var(--u) * 5); font-weight: 700; margin: calc(1rem * 12 * var(--u)) 0 var(--l); padding: calc(1rem * var(--u) * 2) 0; color: var(--c-fh); }
-      h2 code { font-size: inherit; }
-      h3 { font-size: 1rem; font-weight: 700; margin: 0 0 var(--l); }
+      h2 { font-size: calc(1rem * var(--u) * 5); font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; margin: calc(1rem * 12 * var(--u)) 0 var(--l); padding: calc(1rem * var(--u) * 2) 0; color: var(--c-fh); }
+      h2 code, h3 code { font-size: inherit; text-transform: none; letter-spacing: 0; }
+      h3 { font-size: 1rem; font-weight: 700; margin: 0 0 var(--l); text-transform: uppercase; letter-spacing: 0.02em; }
       h6 { font-size: var(--h3); text-transform: uppercase; font-weight: 300; font-style: italic; letter-spacing: 0.1rem; color: var(--c-fg2); }
       ul, ol { padding-left: 2rem; }
       p, ul, ol, pre, blockquote { margin-bottom: var(--l); }
@@ -97,7 +98,7 @@
       .params code { font-size: inherit; background-color: var(--c-l2); }
 
       /* main demo */
-      .demo-container { background: var(--c-l2); border-radius: calc(1rem * var(--u)); color: var(--c-l); margin-right: calc((100% + (1rem * var(--u) * 22)) * (-4 / 9) - (1rem * var(--u) * 22)); font-weight: 700; display: flex; justify-content: space-between; align-items: center; }
+      .demo-container { background: var(--c-l2); border-radius: calc(1rem * var(--u)); color: var(--c-l); margin-right: calc((100% + (1rem * var(--u) * 22)) * (-4 / 9) - (1rem * var(--u) * 22)); font-weight: 700; display: flex; justify-content: space-between; align-items: center; border-top: 2px var(--c-l3) solid; }
       .demo-container > :first-child { margin-inline: calc(1rem * var(--u) * 6); }
       .demo-container .boxes { display: grid; grid: 1fr 1fr 1fr / 1fr 1fr 1fr; gap: calc(1rem * var(--u) * 1); margin: calc(1rem * var(--u) * 2); }
       .demo-container .boxes > * { background-color: var(--c-l); color: var(--c-a2); line-height: 1; text-align: center; width: 1rem; border-radius: calc(1rem * var(--u) * 1); transition: background-color 0.4s ease; }
@@ -254,7 +255,7 @@
         <section id="intro">
           <div>
             <h2 id="rationale">Rationale</h2>
-            <p><em>s²</em> is a single function that <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy">proxies</a> mutable data to <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Reflect">reflect</a> in the DOM. Its paradigm models user interface entirely in terms of state, and avoids mixing logic with the presentation layer (inlining JavaScript, such as JSX). <em>s²</em> has a few design goals:</p>
+            <p><em>s²</em> enables developers to implement complex UI as data models, like a retained mode for the web. In more technical terms, <em>s²</em> is a single function that <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy">proxies</a> mutable data to <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Reflect">reflect</a> in the DOM. <em>s²</em> has a few design goals:</p>
             <ul>
               <li>Enable separation of application logic from the presentation layer. For example, unlike React which combines hooks, templates (JSX), and arbitrary code in a render function, <em>s²</em> has data, functions that operate on the data, and declarative templates.</li>
               <li>The entire API is built on top of its main function, which handles rendering and event listening. Advanced features such as <a href="#computeds">computed properties</a> are implemented as addons.</li>
