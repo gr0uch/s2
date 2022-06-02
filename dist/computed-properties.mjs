@@ -109,8 +109,7 @@ function isObject(obj) {
            (IF (AND (IS-OBJECT OLD-VALUE)
                     (NOT (GETPROP OLD-VALUE *REF-SYMBOL*)))
                (PROGN
-                (DEEP-REPLACE
-                 (GETPROP (GETPROP RECEIVER *PROXY-TARGET-SYMBOL*) KEY) VALUE)
+                (DEEP-REPLACE OLD-VALUE VALUE)
                 (RETURN-FROM SET-PROPERTY T))
                (SETF VALUE (CREATE-SOURCE VALUE T)))))
        (IF (NOT (EQ VALUE UNDEFINED))
@@ -138,7 +137,7 @@ function makeSetProperty(isDeep) {
         };
         if (isDeep && isObject(value) && !value[REFSYMBOL]) {
             if (isObject(oldValue) && !oldValue[REFSYMBOL]) {
-                deepReplace(receiver[PROXYTARGETSYMBOL][key], value);
+                deepReplace(oldValue, value);
                 
                 return true;
             } else {
@@ -180,27 +179,28 @@ function makeSetProperty(isDeep) {
        (LOOP FOR KEY OF OBJ
              DO (LET ((VALUE (GETPROP OBJ KEY))
                       (OLD-VALUE (GETPROP OLD-TARGET KEY)))
-                  (IF (AND (IS-OBJECT VALUE) (IS-OBJECT OLD-VALUE))
+                  (IF (AND (IS-OBJECT VALUE) (IS-OBJECT OLD-VALUE)
+                           (NOT (GETPROP OLD-VALUE *REF-SYMBOL*)))
                       (DEEP-REPLACE OLD-VALUE VALUE)
                       (SETF (GETPROP PROXY KEY) VALUE))))
        (LOOP FOR KEY OF OLD-TARGET
              DO (LET ((OLD-VALUE (GETPROP OLD-TARGET KEY)))
-                  (WHEN (NOT (CHAIN OBJ (HAS-OWN-PROPERTY KEY)))
+                  (WHEN (NOT (CHAIN *OBJECT (HAS-OWN OBJ KEY)))
                     (DELETE (GETPROP PROXY KEY))))))) */
 function deepReplace(proxy, obj) {
     var oldTarget = proxy[PROXYTARGETSYMBOL];
     for (var key in obj) {
         var value = obj[key];
         var oldValue = oldTarget[key];
-        if (isObject(value) && isObject(oldValue)) {
+        if (isObject(value) && isObject(oldValue) && !oldValue[REFSYMBOL]) {
             deepReplace(oldValue, value);
         } else {
             proxy[key] = value;
         };
     };
     for (var key in oldTarget) {
-        var oldValue1 = oldTarget[key];
-        if (!obj.hasOwnProperty(key)) {
+        var oldValue5 = oldTarget[key];
+        if (!Object.hasOwn(obj, key)) {
             delete proxy[key];
         };
     };
@@ -269,7 +269,7 @@ function createSource(obj, isDeep) {
                     (CHAIN *OBSERVABLE-CONTEXT-MAP* (SET OBSERVABLE (CREATE))))
                   (SETF CONTEXT
                           (CHAIN *OBSERVABLE-CONTEXT-MAP* (GET OBSERVABLE)))
-                  (WHEN (NOT (CHAIN CONTEXT (HAS-OWN-PROPERTY OBSERVABLE-KEY)))
+                  (WHEN (NOT (CHAIN *OBJECT (HAS-OWN CONTEXT OBSERVABLE-KEY)))
                     (SETF (GETPROP CONTEXT OBSERVABLE-KEY) (LIST)))
                   (LET* ((KEY-BINDINGS (GETPROP CONTEXT OBSERVABLE-KEY))
                          (MATCH-INDEX
@@ -295,15 +295,15 @@ function computeDependencies(obj, key, fn) {
         delete obj[key];
     };
     TARGETOBSERVABLESMAP.set(obj, observables);
-    var _js1 = READSTACK.length - 1;
-    for (var i = delimiterIndex + 1; i <= _js1; i += 1) {
+    var _js5 = READSTACK.length - 1;
+    for (var i = delimiterIndex + 1; i <= _js5; i += 1) {
         if (READSTACK[i] === STACKDELIMITERSYMBOL) {
             break;
         };
         upperIndex = i;
     };
-    var _js2 = delimiterIndex + 1;
-    for (var i = upperIndex; i >= _js2; i -= 1) {
+    var _js6 = delimiterIndex + 1;
+    for (var i = upperIndex; i >= _js6; i -= 1) {
         var tuple = READSTACK[i];
         var observable = tuple[0];
         var observableKey = tuple[1];
@@ -315,7 +315,7 @@ function computeDependencies(obj, key, fn) {
             OBSERVABLECONTEXTMAP.set(observable, {  });
         };
         context = OBSERVABLECONTEXTMAP.get(observable);
-        if (!context.hasOwnProperty(observableKey)) {
+        if (!Object.hasOwn(context, observableKey)) {
             context[observableKey] = [];
         };
         var keyBindings = context[observableKey];
@@ -353,9 +353,9 @@ function unmountObject(obj) {
     if (!observables) {
         return;
     };
-    var _js4 = observables.length;
-    for (var _js3 = 0; _js3 < _js4; _js3 += 1) {
-        var observable = observables[_js3];
+    var _js8 = observables.length;
+    for (var _js7 = 0; _js7 < _js8; _js7 += 1) {
+        var observable = observables[_js7];
         var context = OBSERVABLECONTEXTMAP.get(observable);
         for (var key in context) {
             var keyBindings = context[key];

@@ -75,8 +75,7 @@
       (when (and is-deep (is-object value) (not (getprop value *ref-symbol*)))
         (if (and (is-object old-value) (not (getprop old-value *ref-symbol*)))
             (progn
-              (deep-replace
-               (getprop (getprop receiver *proxy-target-symbol*) key) value)
+              (deep-replace old-value value)
               (return-from set-property t))
           (setf value (create-source value t)))))
 
@@ -108,13 +107,14 @@
      for key of obj do
      (let ((value (getprop obj key))
            (old-value (getprop old-target key)))
-       (if (and (is-object value) (is-object old-value))
+       (if (and (is-object value) (is-object old-value)
+                (not (getprop old-value *ref-symbol*)))
            (deep-replace old-value value)
          (setf (getprop proxy key) value))))
     (loop
      for key of old-target do
      (let ((old-value (getprop old-target key)))
-       (when (not (chain obj (has-own-property key)))
+       (when (not (chain *object (has-own obj key)))
          (delete (getprop proxy key)))))))
 
 
@@ -172,7 +172,7 @@
          (chain *observable-context-map* (set observable (create))))
        (setf context (chain *observable-context-map* (get observable)))
 
-       (when (not (chain context (has-own-property observable-key)))
+       (when (not (chain *object (has-own context observable-key)))
          (setf (getprop context observable-key) (list)))
 
        (let* ((key-bindings (getprop context observable-key))
