@@ -114,7 +114,7 @@
     (loop
      for key of old-target do
      (let ((old-value (getprop old-target key)))
-       (when (not (chain *object (has-own obj key)))
+       (when (not (chain *object prototype has-own-property (call obj key)))
          (delete (getprop proxy key)))))))
 
 
@@ -172,7 +172,7 @@
          (chain *observable-context-map* (set observable (create))))
        (setf context (chain *observable-context-map* (get observable)))
 
-       (when (not (chain *object (has-own context observable-key)))
+       (when (not (chain *object prototype has-own-property (call context observable-key)))
          (setf (getprop context observable-key) (list)))
 
        (let* ((key-bindings (getprop context observable-key))

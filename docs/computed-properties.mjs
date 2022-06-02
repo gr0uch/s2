@@ -185,7 +185,10 @@ function makeSetProperty(isDeep) {
                       (SETF (GETPROP PROXY KEY) VALUE))))
        (LOOP FOR KEY OF OLD-TARGET
              DO (LET ((OLD-VALUE (GETPROP OLD-TARGET KEY)))
-                  (WHEN (NOT (CHAIN *OBJECT (HAS-OWN OBJ KEY)))
+                  (WHEN
+                      (NOT
+                       (CHAIN *OBJECT PROTOTYPE HAS-OWN-PROPERTY
+                              (CALL OBJ KEY)))
                     (DELETE (GETPROP PROXY KEY))))))) */
 function deepReplace(proxy, obj) {
     var oldTarget = proxy[PROXYTARGETSYMBOL];
@@ -200,7 +203,7 @@ function deepReplace(proxy, obj) {
     };
     for (var key in oldTarget) {
         var oldValue5 = oldTarget[key];
-        if (!Object.hasOwn(obj, key)) {
+        if (!Object.prototype.hasOwnProperty.call(obj, key)) {
             delete proxy[key];
         };
     };
@@ -269,7 +272,10 @@ function createSource(obj, isDeep) {
                     (CHAIN *OBSERVABLE-CONTEXT-MAP* (SET OBSERVABLE (CREATE))))
                   (SETF CONTEXT
                           (CHAIN *OBSERVABLE-CONTEXT-MAP* (GET OBSERVABLE)))
-                  (WHEN (NOT (CHAIN *OBJECT (HAS-OWN CONTEXT OBSERVABLE-KEY)))
+                  (WHEN
+                      (NOT
+                       (CHAIN *OBJECT PROTOTYPE HAS-OWN-PROPERTY
+                              (CALL CONTEXT OBSERVABLE-KEY)))
                     (SETF (GETPROP CONTEXT OBSERVABLE-KEY) (LIST)))
                   (LET* ((KEY-BINDINGS (GETPROP CONTEXT OBSERVABLE-KEY))
                          (MATCH-INDEX
@@ -315,7 +321,7 @@ function computeDependencies(obj, key, fn) {
             OBSERVABLECONTEXTMAP.set(observable, {  });
         };
         context = OBSERVABLECONTEXTMAP.get(observable);
-        if (!Object.hasOwn(context, observableKey)) {
+        if (!Object.prototype.hasOwnProperty.call(context, observableKey)) {
             context[observableKey] = [];
         };
         var keyBindings = context[observableKey];
