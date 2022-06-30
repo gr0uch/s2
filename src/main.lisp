@@ -61,12 +61,14 @@
 (setf
  (getprop *property-handlers* *context-text*)
  (lambda (node key value)
-   (when (not (eq value (@ node text-content)))
-     (setf (@ node text-content) value)))
+   (or (set-node value node)
+       (when (not (eq value (@ node text-content)))
+         (setf (@ node text-content) value))))
  (getprop *property-handlers* *context-html*)
  (lambda (node key value)
-   (when (not (eq value (@ node inner-h-t-m-l)))
-     (setf (@ node inner-h-t-m-l) (or value ""))))
+   (or (set-node value node)
+       (when (not (eq value (@ node inner-h-t-m-l)))
+         (setf (@ node inner-h-t-m-l) (or value "")))))
  (getprop *property-handlers* *context-value*)
  (lambda (node key value)
    (when (not (eq value (@ node value)))
@@ -82,6 +84,16 @@
  (getprop *property-handlers* *context-classlist*) set-classlist
  (getprop *property-handlers* *context-attribute*) set-attribute
  (getprop *property-handlers* *context-data*) set-data)
+
+
+;; Used for setting DOM Nodes as value instead of text/html.
+(defun set-node (value node)
+  (when (not (instanceof value (@ main window *node)))
+    (return-from set-node))
+  (when (length (@ node child-nodes))
+    (setf (@ node inner-h-t-m-l) ""))
+  (chain node (append-child value))
+  t)
 
 
 ;; The logic contained here is the most difficult. The flow is like:
@@ -770,6 +782,7 @@
                              (*mutation-observer observe-fn)))))
     (chain observer (observe (@ main window document document-element)
                              (create child-list t subtree t)))))
+
 
 (setf (@ main debug) false
       (@ main is-deferred) false

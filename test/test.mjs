@@ -107,6 +107,19 @@ Deno.test("event binding", () => {
   );
 });
 
+Deno.test("raw DOM elements", () => {
+  const { document, proxy } = createWindow();
+  const node = document.createElement("div");
+  const TEST_TEXT = "hullo";
+  const TEST_CLASS = "world";
+  node.textContent = TEST_TEXT;
+  node.className = TEST_CLASS;
+  proxy.unescaped = node;
+  const html = document.body.toString();
+  assert(html.includes(TEST_TEXT));
+  assert(html.includes(TEST_CLASS));
+});
+
 Deno.test("computed property", () => {
   const { source, document } = createWindow();
   const node = document.body.querySelector("#cmp");

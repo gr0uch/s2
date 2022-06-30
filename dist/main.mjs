@@ -66,12 +66,14 @@ var TEMPLATESHASH = {  };
 var PROPERTYHANDLERS = {  };
 /* (SETF (GETPROP *PROPERTY-HANDLERS* *CONTEXT-TEXT*)
            (LAMBDA (NODE KEY VALUE)
-             (WHEN (NOT (EQ VALUE (@ NODE TEXT-CONTENT)))
-               (SETF (@ NODE TEXT-CONTENT) VALUE)))
+             (OR (SET-NODE VALUE NODE)
+                 (WHEN (NOT (EQ VALUE (@ NODE TEXT-CONTENT)))
+                   (SETF (@ NODE TEXT-CONTENT) VALUE))))
          (GETPROP *PROPERTY-HANDLERS* *CONTEXT-HTML*)
            (LAMBDA (NODE KEY VALUE)
-             (WHEN (NOT (EQ VALUE (@ NODE INNER-H-T-M-L)))
-               (SETF (@ NODE INNER-H-T-M-L) (OR VALUE ))))
+             (OR (SET-NODE VALUE NODE)
+                 (WHEN (NOT (EQ VALUE (@ NODE INNER-H-T-M-L)))
+                   (SETF (@ NODE INNER-H-T-M-L) (OR VALUE )))))
          (GETPROP *PROPERTY-HANDLERS* *CONTEXT-VALUE*)
            (LAMBDA (NODE KEY VALUE)
              (WHEN (NOT (EQ VALUE (@ NODE VALUE)))
@@ -90,10 +92,12 @@ var PROPERTYHANDLERS = {  };
          (GETPROP *PROPERTY-HANDLERS* *CONTEXT-ATTRIBUTE*) SET-ATTRIBUTE
          (GETPROP *PROPERTY-HANDLERS* *CONTEXT-DATA*) SET-DATA) */
 PROPERTYHANDLERS[CONTEXTTEXT] = function (node, key, value) {
-    return value !== node.textContent ? (node.textContent = value) : null;
+    
+    return setNode(value, node) || (value !== node.textContent ? (node.textContent = value) : null);
 };
 PROPERTYHANDLERS[CONTEXTHTML] = function (node, key, value) {
-    return value !== node.innerHTML ? (node.innerHTML = value || '') : null;
+    
+    return setNode(value, node) || (value !== node.innerHTML ? (node.innerHTML = value || '') : null);
 };
 PROPERTYHANDLERS[CONTEXTVALUE] = function (node, key, value) {
     if (value !== node.value) {
@@ -113,6 +117,22 @@ PROPERTYHANDLERS[CONTEXTCLASS] = setClass;
 PROPERTYHANDLERS[CONTEXTCLASSLIST] = setClasslist;
 PROPERTYHANDLERS[CONTEXTATTRIBUTE] = setAttribute;
 PROPERTYHANDLERS[CONTEXTDATA] = setData;
+/* (DEFUN SET-NODE (VALUE NODE)
+     (WHEN (NOT (INSTANCEOF VALUE (@ MAIN WINDOW *NODE)))
+       (RETURN-FROM SET-NODE))
+     (WHEN (LENGTH (@ NODE CHILD-NODES)) (SETF (@ NODE INNER-H-T-M-L) ))
+     (CHAIN NODE (APPEND-CHILD VALUE))
+     T) */
+function setNode(value, node) {
+    if (!((value instanceof main.window.Node))) {
+        return;
+    };
+    if (node.childNodes.length) {
+        node.innerHTML = '';
+    };
+    node.appendChild(value);
+    return true;
+};
 /* (DEFUN SET-INDEX (TARGET KEY VALUE RECEIVER IS-INITIALIZING)
      (WHEN (AND (@ MAIN IS-DEFERRED) (NOT IS-INITIALIZING))
        (QUEUE-MICROTASK (LAMBDA () (SET-INDEX TARGET KEY VALUE RECEIVER T)))
