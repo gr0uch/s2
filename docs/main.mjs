@@ -146,7 +146,7 @@ function setNode(value, node) {
                          NIL)
                      10)))
             (IS-INDEX (NOT (CHAIN *NUMBER (IS-NA-N NUMKEY))))
-            (IS-SETTER (NOT (EQ VALUE UNDEFINED))))
+            (IS-SETTER (NOT (OR (EQ VALUE UNDEFINED) (EQ VALUE NIL)))))
        (WHEN (EQ KEY 'LENGTH)
          (LOOP FOR I FROM VALUE TO (- (LENGTH TARGET) 1)
                DO (LET* ((PROXY (GETPROP TARGET I))
@@ -282,7 +282,7 @@ function setIndex(target, key, value, receiver, isInitializing) {
     };
     var numkey = Number.parseInt(typeof key === 'string' ? key : null, 10);
     var isIndex = !Number.isNaN(numkey);
-    var isSetter = value !== undefined;
+    var isSetter = !(value === undefined || value === null);
     if (key === 'length') {
         var _js5 = target.length - 1;
         for (var i = value; i <= _js5; i += 1) {
@@ -414,7 +414,7 @@ function setIndex(target, key, value, receiver, isInitializing) {
        (RETURN-FROM SET-PROPERTY T))
      (WHEN (@ MAIN DEBUG) (CONSOLE-LOG 'SET-PROPERTY ARGUMENTS))
      (LET* ((CONTEXT (CHAIN *TARGET-CONTEXT-MAP* (GET TARGET)))
-            (IS-SETTER (NOT (EQ VALUE UNDEFINED)))
+            (IS-SETTER (NOT (OR (EQ VALUE UNDEFINED) (EQ VALUE NIL))))
             (IS-CHANGED (NOT (EQ (GETPROP TARGET KEY) VALUE)))
             (DESCRIPTORS (GETPROP CONTEXT KEY))
             (NODE NIL)
@@ -512,7 +512,7 @@ function setIndex(target, key, value, receiver, isInitializing) {
                                                                                                    T))))
        (IF IS-SETTER
            (CHAIN *REFLECT (SET TARGET KEY VALUE RECEIVER))
-           (CHAIN *REFLECT (DELETE-PROPERTY TARGET KEY))))) */
+           (DELETE (GETPROP TARGET KEY))))) */
 function setProperty(target, key, value, receiver, isInitializing) {
     if (main.isDeferred && !isInitializing) {
         queueMicrotask(function () {
@@ -526,7 +526,7 @@ function setProperty(target, key, value, receiver, isInitializing) {
         console.log('setProperty', arguments);
     };
     var context = TARGETCONTEXTMAP.get(target);
-    var isSetter = value !== undefined;
+    var isSetter = !(value === undefined || value === null);
     var isChanged = target[key] !== value;
     var descriptors = context[key];
     var node = null;
@@ -568,7 +568,7 @@ function setProperty(target, key, value, receiver, isInitializing) {
         };
     };
     
-    return isSetter ? Reflect.set(target, key, value, receiver) : Reflect.deleteProperty(target, key);
+    return isSetter ? Reflect.set(target, key, value, receiver) : delete target[key];
 };
 /* (DEFUN SET-ATTRIBUTE (NODE NAME VALUE)
      (IF (NOT (OR (EQ VALUE NIL) (EQ VALUE UNDEFINED) (EQ VALUE FALSE)))

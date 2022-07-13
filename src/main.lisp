@@ -114,7 +114,7 @@
   (let* ((numkey (chain *number (parse-int
                                  (if (eq (typeof key) 'string) key nil) 10)))
          (is-index (not (chain *number (is-na-n numkey))))
-         (is-setter (not (eq value undefined))))
+         (is-setter (not (or (eq value undefined) (eq value nil)))))
 
     (when (eq key 'length)
       ;; Setting array length should remove extra values.
@@ -250,7 +250,7 @@
 
   (when (@ main debug) (console-log 'set-property arguments))
   (let* ((context (chain *target-context-map* (get target)))
-         (is-setter (not (eq value undefined)))
+         (is-setter (not (or (eq value undefined) (eq value nil))))
          (is-changed (not (eq (getprop target key) value)))
          (descriptors (getprop context key))
          (node nil)
@@ -300,7 +300,7 @@
 
     (if is-setter
         (chain *reflect (set target key value receiver))
-      (chain *reflect (delete-property target key)))))
+        (chain *reflect (delete-property target key)))))
 
 
 (defun set-attribute (node name value)
