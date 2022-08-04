@@ -512,7 +512,7 @@ function setIndex(target, key, value, receiver, isInitializing) {
                                                                                                    T))))
        (IF IS-SETTER
            (CHAIN *REFLECT (SET TARGET KEY VALUE RECEIVER))
-           (DELETE (GETPROP TARGET KEY))))) */
+           (CHAIN *REFLECT (DELETE-PROPERTY TARGET KEY))))) */
 function setProperty(target, key, value, receiver, isInitializing) {
     if (main.isDeferred && !isInitializing) {
         queueMicrotask(function () {
@@ -568,7 +568,7 @@ function setProperty(target, key, value, receiver, isInitializing) {
         };
     };
     
-    return isSetter ? Reflect.set(target, key, value, receiver) : delete target[key];
+    return isSetter ? Reflect.set(target, key, value, receiver) : Reflect.deleteProperty(target, key);
 };
 /* (DEFUN SET-ATTRIBUTE (NODE NAME VALUE)
      (IF (NOT (OR (EQ VALUE NIL) (EQ VALUE UNDEFINED) (EQ VALUE FALSE)))
