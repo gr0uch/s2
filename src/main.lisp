@@ -334,7 +334,7 @@
          (first-node node))
     (setf node (@ node next-sibling))
     (chain first-node (remove))
-    (loop while (not (chain node (is-same-node end-node))) do
+    (loop while (and node (not (chain node (is-same-node end-node)))) do
           (let ((old-node node))
             (setf node (@ node next-sibling))
             (if unmount
