@@ -96,6 +96,13 @@ Deno.test("lists", () => {
   delete proxy.list[0];
   assertEquals(node.textContent, "f");
   assertEquals(moveStack, []);
+
+  // initialize sparse array
+  const a = [{ "☯": "e", [move]: mover }, undefined];
+  delete proxy.list;
+  proxy.list = a;
+  assertEquals(node.textContent, "e");
+  assertEquals(moveStack, []);
 });
 
 Deno.test("event binding", () => {

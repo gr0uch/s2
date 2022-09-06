@@ -202,7 +202,7 @@ function deepReplace(proxy, obj) {
         };
     };
     for (var key in oldTarget) {
-        var oldValue1 = oldTarget[key];
+        var oldValue5 = oldTarget[key];
         if (!Object.prototype.hasOwnProperty.call(obj, key)) {
             delete proxy[key];
         };
@@ -301,15 +301,15 @@ function computeDependencies(obj, key, fn) {
         delete obj[key];
     };
     TARGETOBSERVABLESMAP.set(obj, observables);
-    var _js1 = READSTACK.length - 1;
-    for (var i = delimiterIndex + 1; i <= _js1; i += 1) {
+    var _js5 = READSTACK.length - 1;
+    for (var i = delimiterIndex + 1; i <= _js5; i += 1) {
         if (READSTACK[i] === STACKDELIMITERSYMBOL) {
             break;
         };
         upperIndex = i;
     };
-    var _js2 = delimiterIndex + 1;
-    for (var i = upperIndex; i >= _js2; i -= 1) {
+    var _js6 = delimiterIndex + 1;
+    for (var i = upperIndex; i >= _js6; i -= 1) {
         var tuple = READSTACK[i];
         var observable = tuple[0];
         var observableKey = tuple[1];
@@ -359,9 +359,9 @@ function unmountObject(obj) {
     if (!observables) {
         return;
     };
-    var _js4 = observables.length;
-    for (var _js3 = 0; _js3 < _js4; _js3 += 1) {
-        var observable = observables[_js3];
+    var _js8 = observables.length;
+    for (var _js7 = 0; _js7 < _js8; _js7 += 1) {
+        var observable = observables[_js7];
         var context = OBSERVABLECONTEXTMAP.get(observable);
         for (var key in context) {
             var keyBindings = context[key];

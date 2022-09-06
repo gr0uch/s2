@@ -284,8 +284,8 @@ function setIndex(target, key, value, receiver, isInitializing) {
     var isIndex = !Number.isNaN(numkey);
     var isSetter = !(value === undefined || value === null);
     if (key === 'length') {
-        var _js1 = target.length - 1;
-        for (var i = value; i <= _js1; i += 1) {
+        var _js5 = target.length - 1;
+        for (var i = value; i <= _js5; i += 1) {
             var proxy = target[i];
             var nodes = PROXYDELIMITERMAP.get(proxy);
             var unmount = PROXYUNMOUNTMAP.get(proxy);
@@ -296,10 +296,10 @@ function setIndex(target, key, value, receiver, isInitializing) {
         };
     };
     if (!isSetter && target[key]) {
-        var proxy2 = target[key];
-        var nodes3 = PROXYDELIMITERMAP.get(proxy2);
-        var unmount4 = PROXYUNMOUNTMAP.get(proxy2);
-        removeBetweenDelimiters(nodes3[0], nodes3[1], unmount4, proxy2);
+        var proxy6 = target[key];
+        var nodes7 = PROXYDELIMITERMAP.get(proxy6);
+        var unmount8 = PROXYUNMOUNTMAP.get(proxy6);
+        removeBetweenDelimiters(nodes7[0], nodes7[1], unmount8, proxy6);
         delete target[key];
     };
     if (isSetter) {
@@ -309,15 +309,15 @@ function setIndex(target, key, value, receiver, isInitializing) {
         };
         if (!target.includes(value)) {
             var anchor = PROXYANCHORMAP.get(receiver);
-            var parentNode5 = anchor.parentNode;
+            var parentNode9 = anchor.parentNode;
             var template = PROXYTEMPLATEMAP.get(receiver);
             var result = createBinding(value, template, receiver[SYMBOLROOT]);
-            var proxy6 = result[0];
+            var proxy10 = result[0];
             var node = result[1];
             var previousProxy = target[key];
             var nextProxy = null;
-            var _js7 = target.length - 1;
-            for (var i = numkey + 1; i <= _js7; i += 1) {
+            var _js11 = target.length - 1;
+            for (var i = numkey + 1; i <= _js11; i += 1) {
                 nextProxy = target[i];
                 if (nextProxy) {
                     break;
@@ -327,75 +327,75 @@ function setIndex(target, key, value, receiver, isInitializing) {
                 if (!target.find(function (p, i) {
                     return p === previousProxy && i !== numkey;
                 })) {
-                    var nodes8 = PROXYDELIMITERMAP.get(previousProxy);
-                    var unmount9 = PROXYUNMOUNTMAP.get(previousProxy);
-                    removeBetweenDelimiters(nodes8[0], nodes8[1], unmount9, proxy6);
+                    var nodes12 = PROXYDELIMITERMAP.get(previousProxy);
+                    var unmount13 = PROXYUNMOUNTMAP.get(previousProxy);
+                    removeBetweenDelimiters(nodes12[0], nodes12[1], unmount13, proxy10);
                 };
             };
             if (nextProxy) {
                 var nextAnchor = PROXYDELIMITERMAP.get(nextProxy)[0];
-                parentNode5.insertBefore(node, nextAnchor);
+                parentNode9.insertBefore(node, nextAnchor);
             } else {
                 var endNode = PROXYDELIMITERMAP.get(receiver)[1];
-                parentNode5.insertBefore(node, endNode);
+                parentNode9.insertBefore(node, endNode);
             };
             
-            return Reflect.set(target, key, proxy6, receiver);
+            return Reflect.set(target, key, proxy10, receiver);
         } else {
             var otherIndex = target.findIndex(function (p, i) {
                 return p === value && i !== numkey;
             });
             var otherProxy = target[key];
             var move = PROXYMOVEMAP.get(value);
-            var nodes10 = PROXYDELIMITERMAP.get(value);
-            var startNode = nodes10[0];
-            var endNode11 = nodes10[1];
+            var nodes14 = PROXYDELIMITERMAP.get(value);
+            var startNode = nodes14[0];
+            var endNode15 = nodes14[1];
             if (otherProxy) {
                 var otherNodes = PROXYDELIMITERMAP.get(otherProxy);
                 var otherStartNode = otherNodes[0];
                 var otherEndNode = otherNodes[1];
                 var otherMove = PROXYMOVEMAP.get(otherProxy);
-                var anchor12 = nodes10[1].nextSibling;
-                var parentNode13 = anchor12.parentNode;
+                var anchor16 = nodes14[1].nextSibling;
+                var parentNode17 = anchor16.parentNode;
                 if (value !== otherProxy) {
                     if (move) {
-                        var node14 = startNode.nextSibling;
-                        while (!node14.isSameNode(endNode11)) {
-                            var oldNode = node14;
-                            node14 = node14.nextSibling;
+                        var node18 = startNode.nextSibling;
+                        while (!node18.isSameNode(endNode15)) {
+                            var oldNode = node18;
+                            node18 = node18.nextSibling;
                             move.call(value, oldNode);
                         };
                     };
                     if (otherMove) {
-                        var node15 = otherStartNode.nextSibling;
-                        while (!node15.isSameNode(otherEndNode)) {
-                            var oldNode16 = node15;
-                            node15 = node15.nextSibling;
-                            otherMove.call(otherProxy, oldNode16);
+                        var node19 = otherStartNode.nextSibling;
+                        while (!node19.isSameNode(otherEndNode)) {
+                            var oldNode20 = node19;
+                            node19 = node19.nextSibling;
+                            otherMove.call(otherProxy, oldNode20);
                         };
                     };
-                    var node16 = startNode;
-                    while (!node16.isSameNode(endNode11)) {
-                        var oldNode17 = node16;
-                        node16 = node16.nextSibling;
-                        parentNode13.insertBefore(oldNode17, otherStartNode);
+                    var node20 = startNode;
+                    while (!node20.isSameNode(endNode15)) {
+                        var oldNode21 = node20;
+                        node20 = node20.nextSibling;
+                        parentNode17.insertBefore(oldNode21, otherStartNode);
                     };
-                    parentNode13.insertBefore(endNode11, otherStartNode);
-                    var node17 = otherStartNode;
-                    while (!node17.isSameNode(otherEndNode)) {
-                        var oldNode18 = node17;
-                        node17 = node17.nextSibling;
-                        parentNode13.insertBefore(oldNode18, anchor12);
+                    parentNode17.insertBefore(endNode15, otherStartNode);
+                    var node21 = otherStartNode;
+                    while (!node21.isSameNode(otherEndNode)) {
+                        var oldNode22 = node21;
+                        node21 = node21.nextSibling;
+                        parentNode17.insertBefore(oldNode22, anchor16);
                     };
-                    parentNode13.insertBefore(otherEndNode, anchor12);
+                    parentNode17.insertBefore(otherEndNode, anchor16);
                 };
             } else {
                 if (move) {
-                    var node18 = startNode.nextSibling;
-                    while (!node18.isSameNode(endNode11)) {
-                        var oldNode19 = node18;
-                        node18 = node18.nextSibling;
-                        move.call(value, oldNode19);
+                    var node22 = startNode.nextSibling;
+                    while (!node22.isSameNode(endNode15)) {
+                        var oldNode23 = node22;
+                        node22 = node22.nextSibling;
+                        move.call(value, oldNode23);
                     };
                 };
             };
@@ -534,9 +534,9 @@ function setProperty(target, key, value, receiver, isInitializing) {
     var returnValue = null;
     var hasReturnValue = false;
     if (descriptors) {
-        var _js20 = descriptors.length;
-        for (var _js19 = 0; _js19 < _js20; _js19 += 1) {
-            var descriptor = descriptors[_js19];
+        var _js24 = descriptors.length;
+        for (var _js23 = 0; _js23 < _js24; _js23 += 1) {
+            var descriptor = descriptors[_js23];
             node = descriptor.node;
             type = descriptor.type;
             if (isChanged || isInitializing) {
@@ -795,11 +795,11 @@ function setSlot(target, key, value, receiver, descriptor, isInitializing) {
         return;
     };
     var anchor = descriptor.node;
-    var slot21 = descriptor.slot;
-    var template22 = descriptor.template;
+    var slot25 = descriptor.slot;
+    var template26 = descriptor.template;
     var hash = TARGETDELIMITERMAP.get(target);
     var nodes = hash[key];
-    var parentNode23 = anchor.parentNode;
+    var parentNode27 = anchor.parentNode;
     var startNode = createAnchor(0, key);
     var endNode = createAnchor(1, key);
     var previousValue = target[key];
@@ -810,21 +810,21 @@ function setSlot(target, key, value, receiver, descriptor, isInitializing) {
     var returnValue = null;
     if (nodes && (!value || value && !previousValue || isTypeMismatch)) {
         if (Array.isArray(previousValue)) {
-            var _js25 = previousValue.length;
-            for (var _js24 = 0; _js24 < _js25; _js24 += 1) {
-                var proxy = previousValue[_js24];
+            var _js29 = previousValue.length;
+            for (var _js28 = 0; _js28 < _js29; _js28 += 1) {
+                var proxy = previousValue[_js28];
                 var unmount = PROXYUNMOUNTMAP.get(proxy);
-                var nodes26 = PROXYDELIMITERMAP.get(proxy);
-                if (nodes26) {
-                    removeBetweenDelimiters(nodes26[0], nodes26[1], unmount, proxy);
+                var nodes30 = PROXYDELIMITERMAP.get(proxy);
+                if (nodes30) {
+                    removeBetweenDelimiters(nodes30[0], nodes30[1], unmount, proxy);
                 };
             };
         } else {
             if (previousValue) {
-                var unmount26 = PROXYUNMOUNTMAP.get(previousValue);
-                var nodes27 = PROXYDELIMITERMAP.get(previousValue);
-                if (nodes27) {
-                    removeBetweenDelimiters(nodes27[0], nodes27[1], unmount26, previousValue);
+                var unmount30 = PROXYUNMOUNTMAP.get(previousValue);
+                var nodes31 = PROXYDELIMITERMAP.get(previousValue);
+                if (nodes31) {
+                    removeBetweenDelimiters(nodes31[0], nodes31[1], unmount30, previousValue);
                 };
             };
         };
@@ -836,33 +836,33 @@ function setSlot(target, key, value, receiver, descriptor, isInitializing) {
         };
     };
     hash[key] = [startNode, endNode];
-    parentNode23.insertBefore(startNode, anchor);
+    parentNode27.insertBefore(startNode, anchor);
     if (value) {
         if (!previousValue || !isPreviousObject || isTypeMismatch) {
             if (Array.isArray(value)) {
-                var result = createArray(value, template22, receiver[SYMBOLROOT]);
-                var nodes28 = result[0];
-                var proxy29 = result[1];
-                var _js31 = nodes28.length;
-                for (var _js30 = 0; _js30 < _js31; _js30 += 1) {
-                    var node = nodes28[_js30];
-                    parentNode23.insertBefore(node, anchor);
+                var result = createArray(value, template26, receiver[SYMBOLROOT]);
+                var nodes32 = result[0];
+                var proxy33 = result[1];
+                var _js35 = nodes32.length;
+                for (var _js34 = 0; _js34 < _js35; _js34 += 1) {
+                    var node = nodes32[_js34];
+                    parentNode27.insertBefore(node, anchor);
                 };
-                PROXYANCHORMAP.set(proxy29, anchor);
-                PROXYDELIMITERMAP.set(proxy29, hash[key]);
-                returnValue = proxy29;
-            } else {
-                var result32 = createBinding(value, template22, receiver[SYMBOLROOT]);
-                var proxy33 = result32[0];
-                var node34 = result32[1];
-                parentNode23.insertBefore(node34, anchor);
+                PROXYANCHORMAP.set(proxy33, anchor);
+                PROXYDELIMITERMAP.set(proxy33, hash[key]);
                 returnValue = proxy33;
+            } else {
+                var result36 = createBinding(value, template26, receiver[SYMBOLROOT]);
+                var proxy37 = result36[0];
+                var node38 = result36[1];
+                parentNode27.insertBefore(node38, anchor);
+                returnValue = proxy37;
             };
         } else {
             var previousValues = isPreviousArray ? previousValue : [previousValue];
             var values = isValueArray ? value : [value];
-            var _js35 = values.length - 1;
-            for (var i = 0; i <= _js35; i += 1) {
+            var _js39 = values.length - 1;
+            for (var i = 0; i <= _js39; i += 1) {
                 var prev = previousValues[i];
                 var obj = values[i];
                 if (prev && obj) {
@@ -884,14 +884,14 @@ function setSlot(target, key, value, receiver, descriptor, isInitializing) {
             returnValue = previousValue;
         };
     } else {
-        var _js36 = slot21.childNodes;
-        var _js38 = _js36.length;
-        for (var _js37 = 0; _js37 < _js38; _js37 += 1) {
-            var node39 = _js36[_js37];
-            parentNode23.insertBefore(node39.cloneNode(true), anchor);
+        var _js40 = slot25.childNodes;
+        var _js42 = _js40.length;
+        for (var _js41 = 0; _js41 < _js42; _js41 += 1) {
+            var node43 = _js40[_js41];
+            parentNode27.insertBefore(node43.cloneNode(true), anchor);
         };
     };
-    parentNode23.insertBefore(endNode, anchor);
+    parentNode27.insertBefore(endNode, anchor);
     
     return returnValue;
 };
@@ -916,24 +916,24 @@ function setSlot(target, key, value, receiver, descriptor, isInitializing) {
                    (@ BOUND-LISTENER OPTIONS)))
            (CHAIN LISTENERS (PUSH BOUND-LISTENER)))))) */
 function setEvent(target, value, descriptor, receiver) {
-    var node39 = descriptor.node;
-    var event40 = descriptor.event;
+    var node43 = descriptor.node;
+    var event44 = descriptor.event;
     var hash = TARGETEVENTMAP.get(target);
-    var listeners = hash[event40];
+    var listeners = hash[event44];
     if (!listeners) {
         listeners = [];
-        hash[event40] = listeners;
+        hash[event44] = listeners;
     };
-    var _js42 = listeners.length;
-    for (var _js41 = 0; _js41 < _js42; _js41 += 1) {
-        var listener = listeners[_js41];
-        node39.removeEventListener(event40, listener, listener.options);
+    var _js46 = listeners.length;
+    for (var _js45 = 0; _js45 < _js46; _js45 += 1) {
+        var listener = listeners[_js45];
+        node43.removeEventListener(event44, listener, listener.options);
     };
     if (value) {
         value.isEventListener = true;
         var boundListener = value.bind(receiver);
         boundListener.options = value.options;
-        node39.addEventListener(event40, boundListener, boundListener.options);
+        node43.addEventListener(event44, boundListener, boundListener.options);
         return listeners.push(boundListener);
     };
 };
@@ -1061,8 +1061,8 @@ function processTemplate(template) {
     var clone = root.cloneNode(true);
     var context = {  };
     function walk(parentNode, path) {
-        var _js43 = parentNode.childNodes.length - 1;
-        for (var i = 0; i <= _js43; i += 1) {
+        var _js47 = parentNode.childNodes.length - 1;
+        for (var i = 0; i <= _js47; i += 1) {
             var node = parentNode.childNodes[i];
             if (node.nodeType !== main.window.Node['ELEMENT_NODE']) {
                 continue;
@@ -1173,12 +1173,12 @@ function createContext(clone, template) {
     var clonedContext = {  };
     for (var key in context) {
         clonedContext[key] = [];
-        var _js44 = context[key];
-        var _js46 = _js44.length;
-        for (var _js45 = 0; _js45 < _js46; _js45 += 1) {
-            var descriptor = _js44[_js45];
-            var path47 = descriptor.path;
-            var node = getPath(clone, path47);
+        var _js48 = context[key];
+        var _js50 = _js48.length;
+        for (var _js49 = 0; _js49 < _js50; _js49 += 1) {
+            var descriptor = _js48[_js49];
+            var path51 = descriptor.path;
+            var node = getPath(clone, path51);
             clonedContext[key].push(Object.assign({ node : node }, descriptor));
         };
     };
@@ -1193,8 +1193,8 @@ function createContext(clone, template) {
        RESULT)) */
 function getPath(node, path) {
     var result = node;
-    var _js44 = path.length - 1;
-    for (var i = 0; i <= _js44; i += 1) {
+    var _js48 = path.length - 1;
+    for (var i = 0; i <= _js48; i += 1) {
         var j = path[i];
         result = result.childNodes[j];
     };
@@ -1203,9 +1203,11 @@ function getPath(node, path) {
 /* (DEFUN CREATE-ARRAY (ARRAY TEMPLATE ROOT)
      (LET* ((NODES (LIST)) (PROXIES (LIST)) (PROXY NIL))
        (LOOP FOR ITEM IN ARRAY
-             DO (LET ((RESULT (CREATE-BINDING ITEM TEMPLATE ROOT)))
-                  (CHAIN PROXIES (PUSH (@ RESULT 0)))
-                  (CHAIN NODES (PUSH (@ RESULT 1)))))
+             DO (WHEN (NOT ITEM)
+                  (CONTINUE)) (LET ((RESULT
+                                     (CREATE-BINDING ITEM TEMPLATE ROOT)))
+                                (CHAIN PROXIES (PUSH (@ RESULT 0)))
+                                (CHAIN NODES (PUSH (@ RESULT 1)))))
        (SETF PROXY (NEW (*PROXY PROXIES *PROXY-ARRAY*)))
        (SETF (GETPROP PROXY *SYMBOL-ROOT*) ROOT)
        (CHAIN *PROXY-TEMPLATE-MAP* (SET PROXY TEMPLATE))
@@ -1214,9 +1216,12 @@ function createArray(array, template, root) {
     var nodes = [];
     var proxies = [];
     var proxy = null;
-    var _js46 = array.length;
-    for (var _js45 = 0; _js45 < _js46; _js45 += 1) {
-        var item = array[_js45];
+    var _js50 = array.length;
+    for (var _js49 = 0; _js49 < _js50; _js49 += 1) {
+        var item = array[_js49];
+        if (!item) {
+            continue;
+        };
         var result = createBinding(item, template, root);
         proxies.push(result[0]);
         nodes.push(result[1]);
@@ -1391,13 +1396,13 @@ function observeUnmount(bindings) {
     var fragment = bindings[1];
     var fragmentNodes = Array.from(fragment.childNodes);
     var observeFn = function (mutations, observer) {
-        var _js48 = mutations.length;
-        for (var _js47 = 0; _js47 < _js48; _js47 += 1) {
-            var mutation = mutations[_js47];
-            var _js49 = mutation.removedNodes;
-            var _js51 = _js49.length;
-            for (var _js50 = 0; _js50 < _js51; _js50 += 1) {
-                var node = _js49[_js50];
+        var _js52 = mutations.length;
+        for (var _js51 = 0; _js51 < _js52; _js51 += 1) {
+            var mutation = mutations[_js51];
+            var _js53 = mutation.removedNodes;
+            var _js55 = _js53.length;
+            for (var _js54 = 0; _js54 < _js55; _js54 += 1) {
+                var node = _js53[_js54];
                 for (var i = fragmentNodes.length - 1; i >= 0; i -= 1) {
                     var fragmentNode = fragmentNodes[i];
                     if (node.contains(fragmentNode)) {

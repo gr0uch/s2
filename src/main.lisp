@@ -667,6 +667,7 @@
          (proxy nil))
     (loop
      for item in array do
+     (when (not item) (continue))
      (let ((result (create-binding item template root)))
        (chain proxies (push (@ result 0)))
        (chain nodes (push (@ result 1)))))
