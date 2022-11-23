@@ -1,4 +1,5 @@
 import s2, { mount, move } from "./main.mjs";
+import "./scroll-handler.mjs";
 
 const demoContainer = document.querySelector(".demo-container");
 const boxes = demoContainer.querySelector(".boxes");
