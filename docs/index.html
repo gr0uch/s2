@@ -22,8 +22,8 @@
         --h2: 17px;
         --h3: 14px;
         --h4: 12px;
-        --l: calc(1rem * 29 / 16);
-        --l2: calc(1rem * 23 / 16);
+        --l: calc(1rem * 28 / 16);
+        --l2: calc(1rem * 21 / 16);
         --u: calc(1 / 4);
 
         /*--f-h: Garamond, Big Caslon Medium, Palatino Linotype, Palatino, serif;*/
@@ -366,6 +366,9 @@ function remove() {
           <div>
             <h2 id="import-the-module">Import the module (browser, Deno)</h2>
             <p>A runtime environment that supports ES Modules is required without build tooling. The recommended way is to either vendor the library, or import from a CDN using the commit hash in the URL. For convenience, the following example uses the latest version.</p>
+            <p><strong>The recommended way is to use the <code>api.mjs</code> entry point, which is the entry point for the <code>npm</code> package.</strong></p>
+            <pre>import * as s2 from "https://cdn.jsdelivr.net/gh/gr0uch/s2@latest/api.mjs";</pre>
+            <p>Alternatively, importing from the individual modules:</p>
             <pre>import s2, {
   // The following are symbols, import when needed.
   root, target, mount, unmount, move,
