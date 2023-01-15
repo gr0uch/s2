@@ -1,6 +1,6 @@
 const elementPositionMap = new Map();
-const THROTTLE_TIMEOUT = 100;
-let throttleTimer = null;
+const DEBOUNCE_TIMEOUT = 100;
+let debounceTimer = null;
 
 window.addEventListener("click", (event) => {
   const { target: { hash } } = event;
@@ -12,10 +12,11 @@ window.addEventListener("click", (event) => {
   event.preventDefault();
 });
 
-window.addEventListener("scroll", handleScroll, { passive: true });
+window.addEventListener("scroll", debounceScroll, { passive: true });
+handleScroll();
+
 const resizeObserver = new ResizeObserver(handleResize);
 resizeObserver.observe(document.body);
-handleScroll();
 
 function handleResize() {
   for (const element of document.querySelectorAll("main h2[id]")) {
@@ -25,16 +26,17 @@ function handleResize() {
   }
 }
 
-function handleScroll() {
-  if (throttleTimer) return;
-  throttleTimer = setTimeout(() => {
-    clearTimeout(throttleTimer);
-    throttleTimer = null;
-  }, THROTTLE_TIMEOUT);
+function debounceScroll() {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {
+    handleScroll();
+  }, DEBOUNCE_TIMEOUT);
+}
 
+function handleScroll() {
   const targetY = window.scrollY;
 
-  if (targetY === 0) {
+  if (targetY < 200) {
     window.history.replaceState(null, "", window.location.pathname);
     return;
   }

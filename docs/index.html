@@ -17,13 +17,13 @@
     <script type="module" src="./docs.mjs"></script>
     <style>
       :root {
-        --w: 78rem;
+        --w: 80rem;
         --h: 20px;
         --h2: 17px;
         --h3: 14px;
         --h4: 12px;
-        --l: calc(1rem * 28 / 16);
-        --l2: calc(1rem * 21 / 16);
+        --l: calc(1em * 27 / 16);
+        --l2: calc(1em * 21 / 16);
         --u: calc(1 / 4);
 
         /*--f-h: Garamond, Big Caslon Medium, Palatino Linotype, Palatino, serif;*/
@@ -45,13 +45,11 @@
         --c-e: #6e40c9;
       }
       ::selection { background: var(--c-e); color: var(--c-fg); }
-      *::-webkit-scrollbar { background-color: var(--c-a2); width: 8px; }
-      *::-webkit-scrollbar-thumb { background-color: var(--c-a3); }
       * { margin: 0; padding: 0; border: 0; box-sizing: border-box; }
       html { font-size: var(--h); }
       body { line-height: var(--l); background: var(--c-a); color: var(--c-fg); font-family: var(--f-b); }
       h1, h2, h3, h4, h5, h6 { font-size: inherit; font-weight: inherit; }
-      h2 { font-size: calc(1rem * var(--u) * 5); font-weight: 700; margin: calc(1rem * 12 * var(--u)) 0 var(--l); padding: calc(1rem * var(--u) * 2) 0; color: var(--c-fh); }
+      h2 { font-size: calc(1rem * var(--u) * 5); font-weight: 700; margin: 0 0 calc(1rem * var(--u) * 4); padding: calc(1rem * var(--u) * 14) 0 calc(1rem * var(--u) * 2); color: var(--c-fh); }
       h2 code, h3 code { font-size: inherit; text-transform: none; letter-spacing: 0; }
       h3 { font-size: 1rem; font-weight: 700; margin: 0 0 var(--l); text-transform: uppercase; letter-spacing: 0.02em; }
       h6 { font-size: var(--h3); text-transform: uppercase; font-weight: 300; font-style: italic; letter-spacing: 0.1rem; color: var(--c-fg2); }
@@ -63,13 +61,23 @@
       textarea, pre { color: var(--c-fg2); background: none; padding: calc(1rem * var(--u) * 2) calc(1rem * var(--u) * 3); font-family: var(--f-m); font-size: var(--h3); resize: vertical; font-variant-ligatures: none; white-space: nowrap; }
       pre { box-shadow: 0 calc(1rem * var(--u) * 3) calc(1rem * var(--u) * 9) var(--c-bg); border-radius: calc(1rem * var(--u)); white-space: pre-wrap; counter-reset: line; }
       pre > code { display: block; counter-increment: line; position: relative; padding: 0 0 0 calc(1rem * var(--u) * 6) !important; font-size: inherit; }
-      pre > code::before { content: counter(line); display: inline-block; position: absolute; top: 0; right: calc(100% - 1rem * var(--u) * 4); color: var(--c-fg3); }
+      pre > code::before { content: counter(line); display: inline-block; position: absolute; top: 0; right: calc(100% - 1rem * var(--u) * 4); color: var(--c-a3); }
       textarea:focus, input:focus { outline: 1px var(--c-l) solid; }
+
+      /* intro*/
+      .intro { background: var(--c-l); color: var(--c-bg); }
+      .intro > .container::before { background: linear-gradient(to left, rgba(0, 0, 0, calc(1 / 12)), var(--c-l)); content: " "; display: block; position: absolute; top: 0; right: calc(100% - 1rem * var(--u) * 1); width: 100vw; height: 100%; }
+      .intro > .container > * { flex: 5; }
+      .intro > .container > .spacer { flex: 1; margin-right: var(--l); padding-left: calc(1rem * var(--u) * 1); }
+      .intro > .container > .headline { font-size: calc(1rem * var(--u) * 5); line-height: var(--l); margin: calc(1rem * var(--u) * 12) calc((1 / var(--u) / 5) * var(--l)) calc(1rem * var(--u) * 7) 0; }
+      .intro > .container > .headline > span { float: right; font-size: 2em; line-height: var(--l); color: transparent; text-shadow: 0 0 var(--c-a3); letter-spacing: calc(1rem * var(--u) * -1); }
 
       /* layout */
       .container { position: relative; min-height: 100%; max-width: var(--w); display: flex; margin: auto; hyphens: auto; }
+      .container *::-webkit-scrollbar { background-color: var(--c-a2); width: 8px; }
+      .container *::-webkit-scrollbar-thumb { background-color: var(--c-a3); }
       body::before { display: block; content: " "; position: fixed; top: 0; right: 0; height: 100%; width: calc((100% - var(--w)) / 2 + 1px); background: var(--c-a2); }
-      #main-nav { position: sticky; top: 0; flex: 1; padding: calc(1rem * 26 * var(--u)) 0 0 calc(1rem * var(--u) * 1); margin: 0 var(--l) 0 0; align-self: flex-start; color: var(--c-fg2); height: 100vh; overflow: auto; line-height: var(--l2); }
+      #main-nav { position: sticky; top: 0; flex: 1; padding: calc(1rem * 21 * var(--u)) 0 0 calc(1rem * var(--u) * 1); margin: 0 var(--l) 0 0; align-self: flex-start; color: var(--c-fg2); height: 100vh; overflow: auto; line-height: var(--l2); }
       #main-nav h5 { font-size: var(--h3); text-transform: uppercase; letter-spacing: 0.04em; }
       #main-nav code { font-size: var(--h4); }
       #main-nav h5 + h5 { margin-top: var(--l); }
@@ -82,6 +90,7 @@
       #content a { font-weight: 700; }
       #content > section { display: grid; grid-template-columns: 9fr 4fr; grid-template-rows: min-content; border-bottom: 6px var(--c-a2) solid; }
       #content > section:last-of-type { border-bottom: none; }
+      #content > section:first-of-type > div:nth-of-type(2n)::before { display: none; }
       #content > section > div { padding: 0 calc(1rem * var(--u) * 22) 0 0; position: relative; }
       #content > section > div:nth-of-type(2n) { padding: 0 var(--l); line-height: var(--l2); }
       #content > section > div:nth-of-type(2n) p { margin-bottom: calc(var(--l2) / 2); }
@@ -93,16 +102,17 @@
       #content > section > div > footer > h4 { font-size: 2em; }
       #content > section code { background: var(--c-a2); border-radius: calc(1rem * var(--u)); padding: 0 calc(1rem * var(--u)); }
       #content > section pre code { background: inherit; border-radius: inherit; }
-      .params { position: relative; z-index: 0; margin: calc(1rem * var(--u) * 25) 0 calc(1rem * var(--u) * 10) 0; border-radius: calc(1rem * var(--u)); color: var(--c-l); font-size: calc(1rem * var(--u) * 5); line-height: calc(var(--l) * var(--u) * 5); }
+      .params { position: relative; z-index: 0; margin: calc(1rem * var(--u) * 18) 0 calc(1rem * var(--u) * 8) 0; border-radius: calc(1rem * var(--u)); color: var(--c-l); font-size: calc(1rem * var(--u) * 5); line-height: calc(var(--l) * var(--u) * 5); }
       .params b { display: inline-block; width: calc(1rem * var(--u) * 18); font-weight: inherit; }
       .params i { display: inline-block; margin: 0 calc(1rem * var(--u) * 2); }
-      .params code { font-size: inherit; background-color: var(--c-l2) !important; padding: 0 !important; }
+      .params code { font-size: inherit; background: none !important; padding: 0 !important; }
 
       /* main demo */
       .demo-container { background: linear-gradient(to right, var(--c-l3), var(--c-l2)); border-radius: calc(1rem * var(--u)); color: var(--c-l); margin-right: calc((100% + (1rem * var(--u) * 22)) * (-4 / 9) - (1rem * var(--u) * 22) + var(--l)); font-weight: 700; display: flex; justify-content: space-between; align-items: center; border-top: 2px var(--c-l3) solid; position: relative; z-index: 10; }
       .demo-container > :first-child { margin-inline: calc(1rem * var(--u) * 6); }
-      .demo-container .boxes { display: grid; grid: 1fr 1fr 1fr / 1fr 1fr 1fr; gap: calc(1rem * var(--u) * 1); margin: calc(1rem * var(--u) * 3) calc(1rem * var(--u) * 4); }
-      .demo-container .boxes > * { background-color: var(--c-l); color: var(--c-a2); line-height: 1; text-align: center; width: 1.25rem; border-radius: calc(1rem * var(--u) * 1); transition: background-color 0.4s ease; }
+      .demo-container .boxes { display: grid; grid: 1fr 1fr / 1fr 1fr 1fr; gap: calc(1rem * var(--u) * 1); margin: calc(1rem * var(--u) * 2) calc(1rem * var(--u) * 3); }
+      .demo-container .boxes > * { background-color: var(--c-l3); color: var(--c-l); line-height: var(--l2); text-align: center; width: 1.5rem; border-radius: calc(1rem * var(--u) * 1); transition: background-color 0.4s ease, color 0.2s ease; }
+      .demo-container code { background: var(--c-l3) !important; color: var(--c-l); }
 
       /* examples */
       .live-example.code { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: min-content 1fr; box-shadow: 0 calc(1rem * var(--u) * 4) calc(1rem * var(--u) * 8) var(--c-bg); border-radius: calc(1rem * var(--u)); margin-bottom: calc(1rem * var(--u) * 10); }
@@ -117,7 +127,7 @@
       .live-example.output b { color: var(--color); }
       .live-example.output ul { list-style-type: none; padding: 0; margin: 0; }
       .live-example.output li > div { float: right; color: var(--c-h); cursor: pointer; font-weight: 700; }
-      aside:not(.output) { margin-top: calc(1rem * var(--u) * 20); }
+      aside:not(.output) { margin-top: calc(1rem * var(--u) * 14); }
       .live-example.output .chars { display: inline-flex; }
       .live-example.output .chars > * { pointer-events: none; }
       @keyframes char-in { 0% { transform: scale(5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
@@ -142,6 +152,7 @@
       .live-example.primary.output input { background: var(--c-a); }
       .live-example.primary.output input:focus { outline: none; }
       .live-example.primary h6 { color: var(--c-l); border-bottom-width: 2px; border-bottom-color: var(--c-l); font-weight: 700; font-style: inherit; padding-top: calc(1rem * var(--u) * 2); }
+      .live-example.primary.output h6 { border-bottom-width: 1px; border-bottom-color: var(--c-l3); }
 
       /* forms */
       form { display: flex; margin: calc(1rem * var(--u) * 4) 0; }
@@ -161,8 +172,10 @@
           --h3: 12px;
         }
         .container { flex-direction: column; }
-        .params { margin: calc(1rem * var(--u) * 8) 0; padding: calc(var(--l) * 1 / 2) 0; }
-        h2 { margin-top: calc(1rem * var(--u) * 6); }
+        .params { margin: calc(1rem * var(--u) * 6) 0 calc(1rem * var(--u) * 2); padding: calc(var(--l) * 1 / 2) 0; }
+        h2 { padding-top: calc(1rem * var(--u) * 8); }
+        .intro > .container::before { display: none; }
+        .intro > .container > .headline { margin: calc(var(--l) * 2 / 3) calc((1 / var(--u) / 5) * var(--l)) calc(var(--l) * 1 / 2) calc(1rem * var(--u) * 1); }
         #main-nav { position: static; padding-top: 0; height: auto; }
         #main-nav .logo { margin-bottom: 0; position: static; }
         #main-nav .logo ~ * { display: none; }
@@ -185,10 +198,21 @@
     </style>
   </head>
   <body>
+    <div id="top" class="intro">
+      <div class="container">
+        <div class="spacer"></div>
+        <h1 class="headline">
+          <span>&#9889;&#xFE0E;²</span>
+          <em>Simplicity</em> of logic-less templating, <br><em>Speed</em> of a modern, optimized DOM library.
+        </h1>
+      </div>
+    </div>
     <div class="container">
       <nav id="main-nav">
         <div class="logo">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 4.233 4.233"><path style="stroke-width:3.77953;fill:#3fb68b;fill-opacity:1" d="M0 0v15.998h15.998V0H0zm8 8h7v4.69h-2.506l.633-1.231c.133-.255.2-.531.2-.828 0-.518-.182-.958-.544-1.32a1.78 1.78 0 0 0-1.312-.543c-.513 0-.95.183-1.313.55a1.801 1.801 0 0 0-.543 1.317c0 .33.077.633.23.906.154.273.374.499.66.676l.684-1.219a.4.4 0 0 1-.14-.297c0-.096.035-.18.105-.25a.348.348 0 0 1 .254-.11c.248 0 .371.106.371.317a.528.528 0 0 1-.07.254l-.059.11-1.71 3.21H15V15H8V8z" transform="scale(.26458)"/><path d="M1.385.905q-.394.294-.394.632 0 .434.313.434.111 0 .354-.192.242-.191.475-.191.222 0 .359.116.137.111.137.298 0 .177-.177.374-.177.191-.627.44-.45.242-.571.323-.121.086-.207.207l-.026-.03.03-.06.036-.077L1 3.08Q.92 3.002.784 3.002q-.253 0-.4.263l-.025.03-.03-.03q0-.08.228-.313.233-.237.55-.237.238 0 .415.151l.04.026.07-.04q.339-.177.434-.324.096-.147.096-.308 0-.177-.106-.277-.101-.107-.268-.107-.121 0-.369.192-.242.191-.45.191-.16 0-.277-.126-.117-.13-.117-.308 0-.252.222-.505t.798-.556q.283-.151.394-.318l.016-.02.02.04-.09.12-.087.122q.168.141.273.141.131 0 .278-.1l.02.03q0 .025-.237.238-.233.207-.364.207-.121 0-.434-.278z" style="line-height:1.25;-inkscape-font-specification:Parchment;paint-order:normal;fill:none;fill-opacity:1" font-size="10.583" font-family="Parchment" stroke="#fff" stroke-width=".129" stroke-linecap="square" fill="none"/></svg>
+          <a href="#top">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 4.233 4.233"><path style="stroke-width:3.77953;fill:#3fb68b;fill-opacity:1" d="M0 0v15.998h15.998V0H0zm8 8h7v4.69h-2.506l.633-1.231c.133-.255.2-.531.2-.828 0-.518-.182-.958-.544-1.32a1.78 1.78 0 0 0-1.312-.543c-.513 0-.95.183-1.313.55a1.801 1.801 0 0 0-.543 1.317c0 .33.077.633.23.906.154.273.374.499.66.676l.684-1.219a.4.4 0 0 1-.14-.297c0-.096.035-.18.105-.25a.348.348 0 0 1 .254-.11c.248 0 .371.106.371.317a.528.528 0 0 1-.07.254l-.059.11-1.71 3.21H15V15H8V8z" transform="scale(.26458)"/><path d="M1.385.905q-.394.294-.394.632 0 .434.313.434.111 0 .354-.192.242-.191.475-.191.222 0 .359.116.137.111.137.298 0 .177-.177.374-.177.191-.627.44-.45.242-.571.323-.121.086-.207.207l-.026-.03.03-.06.036-.077L1 3.08Q.92 3.002.784 3.002q-.253 0-.4.263l-.025.03-.03-.03q0-.08.228-.313.233-.237.55-.237.238 0 .415.151l.04.026.07-.04q.339-.177.434-.324.096-.147.096-.308 0-.177-.106-.277-.101-.107-.268-.107-.121 0-.369.192-.242.191-.45.191-.16 0-.277-.126-.117-.13-.117-.308 0-.252.222-.505t.798-.556q.283-.151.394-.318l.016-.02.02.04-.09.12-.087.122q.168.141.273.141.131 0 .278-.1l.02.03q0 .025-.237.238-.233.207-.364.207-.121 0-.434-.278z" style="line-height:1.25;-inkscape-font-specification:Parchment;paint-order:normal;fill:none;fill-opacity:1" font-size="10.583" font-family="Parchment" stroke="#fff" stroke-width=".129" stroke-linecap="square" fill="none"/></svg>
+            </a>
         </div>
         <h5><a href="https://github.com/gr0uch/s2">GitHub: gr0uch/s2</a></h5>
         <h5><a href="#intro">Intro</a></h5>
@@ -229,24 +253,22 @@
       </nav>
       <main id="content">
         <section>
-          <div id="top">
+          <div>
             <p class="params">
-              <code>s2(object, template);</code><br><br>
-              Returns <code>[proxy, documentFragment]</code>, a reactive view model and a fragment containing its elements.
+              <code>function s2&lt;T&gt;(d: T, t: Element): [T, Node];</code>
             </p>
             <hr>
             <div class="demo-container">
-              <div>Optimized for granular re-rendering of complex, real-time user interfaces.</div>
+              <div>
+                Optimized for granular re-rendering of complex, real-time user interfaces.
+              </div>
               <div class="boxes">
-                <div>A</div>
-                <div>B</div>
-                <div>C</div>
-                <div>D</div>
-                <div>E</div>
-                <div>F</div>
-                <div>G</div>
-                <div>H</div>
-                <div>I</div>
+                <div>一</div>
+                <div>二</div>
+                <div>三</div>
+                <div>四</div>
+                <div>五</div>
+                <div>六</div>
               </div>
             </div>
           </div>
@@ -256,11 +278,11 @@
         <section id="intro">
           <div>
             <h2 id="rationale">Rationale</h2>
-            <p><em>s²</em> enables developers to implement complex UI as data models, like a retained mode for the web. In more technical terms, <em>s²</em> is a single function that <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Proxy">proxies</a> mutable data to <a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Reflect">reflect</a> in the DOM. <em>s²</em> has a few design goals:</p>
+            <p><strong><em>s²</em> is a bit like Mustache, but reactive.</strong> I built it because I wanted to bind mutable data to the DOM efficiently without Turing-completeness at the template level. Complex UIs are mostly about managing state, and <em>s²</em> has a very data-centric approach, versus component-centric. A few design goals:</p>
             <ul>
-              <li>Enable separation of application logic from the presentation layer. For example, unlike React which combines hooks, templates (JSX), and arbitrary code in a render function, <em>s²</em> has data, functions that operate on the data, and declarative templates.</li>
-              <li>The entire API is built on top of its main function, which handles rendering and event listening. Advanced features such as <a href="#computeds">computed properties</a> are implemented as addons.</li>
-              <li>Templates are logic-less. This differs from prior art such as JSX where embedded JavaScript is allowed. Due to this constraint, logic-less templating maps well to <em>s²</em>, and there is an addon for <a href="#mustache-templates">Mustache templates</a> that is aware of HTML context.</li>
+              <li>Separation of application logic from the presentation layer. Unlike React which combines hooks, templates (JSX), and arbitrary code in a render function, <em>s²</em> has data, functions that operate on the data, and declarative templates.</li>
+              <li>The entire API is built on top of its main function, which handles rendering and event listening. Advanced features such as <a href="#computeds">computed properties</a> are implemented as modular addons.</li>
+              <li>Templates are logic-less, embedded JavaScript is <strong>not</strong> allowed. Due to this constraint, logic-less templating maps well to <em>s²</em>, and there is an addon for <a href="#mustache-templates">Mustache templates</a> that is aware of HTML context.</li>
             </ul>
             <p>Here is a sample to-do app built with <em>s²</em>:</p>
             <hr>
@@ -268,13 +290,13 @@
           <div>
             <aside>
               <h6>Aside</h6>
-              <p><em>s²</em> is tiny in size (~3kb), and implements comparatively little compared to JS frameworks.</p>
-              <p>The intended use case is for highly interactive UI that needs to re-render often.</p>
+              <p><em>s²</em> is tiny in size, and does not require any compile-time tooling. Since it is so light and portable, it would be well-suited to use in conjunction with other front-end frameworks, or even embedded in a Web Component.</p>
+              <p>The intended use case is to drop in highly interactive UI that needs to re-render often.</p>
               <p>It <a href="https://krausest.github.io/js-framework-benchmark/current.html">performs well</a> in benchmarks.</p>
             </aside>
           </div>
           <div>
-            <div class="live-example primary code" style="min-height: calc(1rem * var(--u) * 126)">
+            <div class="live-example primary code" style="min-height: calc(1rem * var(--u) * 116)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">return {
@@ -327,7 +349,7 @@ function remove() {
             </div>
           </div>
           <div>
-            <aside class="live-example primary output" style="min-height: calc(1rem * var(--u) * 72)">
+            <aside class="live-example primary output" style="min-height: calc(1rem * var(--u) * 54)">
               <h6>Output</h6>
               <div>
                 <noscript>JavaScript must be enabled!</noscript>
@@ -366,7 +388,7 @@ function remove() {
           <div>
             <h2 id="import-the-module">Import the module (browser, Deno)</h2>
             <p>A runtime environment that supports ES Modules is required without build tooling. The recommended way is to either vendor the library, or import from a CDN using the commit hash in the URL. For convenience, the following example uses the latest version.</p>
-            <p><strong>The recommended way is to use the <code>api.mjs</code> entry point, which is the entry point for the <code>npm</code> package.</strong></p>
+            <p><strong>The recommended way is to use the <code>api.mjs</code> entry point, which is also the entry point for the <code>npm</code> package.</strong></p>
             <pre>import * as s2 from "https://cdn.jsdelivr.net/gh/gr0uch/s2@latest/api.mjs";</pre>
             <p>Alternatively, importing from the individual modules:</p>
             <pre>import s2, {
@@ -404,7 +426,7 @@ import {
           <div>
           </div>
           <div>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 72)">
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 68)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">const state = {
@@ -478,7 +500,7 @@ return state;</textarea><textarea spellcheck="false"><form onsubmit="{{ignore}}"
           <div>
           </div>
           <div>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 62)">
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 60)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">return {
@@ -561,7 +583,7 @@ return state;</textarea><textarea spellcheck="false"><form onsubmit="{{ignore}}"
             </aside>
           </div>
           <div>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 80)">
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 76)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">registerTemplate(
@@ -603,7 +625,10 @@ function increment(event) {
           <div>
             <p>This provides an abstraction for template re-use. However, what it does not provide is &ldquo;components&rdquo; in any sense. <em>s²</em> stays agnostic about <a href="https://developer.mozilla.org/en-US/docs/Web/Web_Components">Web Components</a>, or even implementing its own concept of components in general. It is entirely feasible to build Web Components using <em>s²</em> without any conceptual mismatch.</p>
             <p>For improved ergonomics, there is the <code>createMustacheTag</code> function, which will allow one to re-use templates without naming them, and also interpolate templates in tagged template literals.</p>
-            <pre>const html = createMustacheTag(registerTemplate);
+            <pre>// Just import `html` if using the `api.mjs` entry point.
+// import { html } from "s2-engine";
+const html = createMustacheTag(registerTemplate);
+
 const name = html`{{firstName}} {{lastName}}`;
 const greeting = html`
   Hello
@@ -631,7 +656,7 @@ const greeting = html`
             </aside>
           </div>
           <div>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 138)">
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 132)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">const msg = "s2_is_great!";
@@ -697,7 +722,7 @@ async function unmountChar(node) {
           <div>
           </div>
           <div>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 186)">
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 178)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">return {
@@ -776,7 +801,7 @@ function animate(node) {
             </aside>
           </div>
           <div>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 86)">
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 82)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">return {
@@ -830,7 +855,11 @@ function read(event) {
           <div>
             <h2 id="computed-properties">Computed properties</h2>
             <p>The computed properties addon derives outputs from inputs, without the need for manually tracking dependencies. It implements reactivity by proxying the objects used as inputs via <code>observable</code>. To start, the computed function must be created by passing in the mount and unmount symbols:</p>
-            <pre>const computed = createComputed(mount, unmount);</pre>
+            <pre>// Just import `computed, observable` if using the `api.mjs` entry point.
+// import { computed, observable } from "s2-engine";
+
+// The following is only needed when using the computed module separately.
+const computed = createComputed(mount, unmount);</pre>
             <p>In the computed properties addon, an <code>observable</code> is an object whose keys are automatically tracked by computed properties when they are read. A <code>computed</code> object&apos;s <em>methods</em> are run automatically when its dependencies change.</p>
             <p>Here is a classic spreadsheet example where there are computed cell values:</p>
             <hr>
@@ -843,29 +872,29 @@ function read(event) {
             </aside>
           </div>
           <div>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 120)">
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 116)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">const s = observable({
   data: [
-    { price: 19.99, tax: 1.08 },
-    { price: 75.00, tax: 1.06 },
-    { price: 2.50, tax: 1.10 },
+    { price: 19.99, tax: 0.08 },
+    { price: 75.00, tax: 0.06 },
+    { price: 2.50, tax: 0.10 },
   ],
 }, true);
 return computed({
   rows() {
     return s.data.map(d => computed({
       total: () => `$${
-        (d.price * d.tax)
+        (d.price * (1 + d.tax))
           .toFixed(2)}`,
-      price: () => d.price,
-      tax: () => d.tax,
+      price: d.price,
+      tax: d.tax,
       setPrice() {
-        d.price = this.price;
+        d.price = Number(this.price);
       },
       setTax() {
-        d.tax = this.tax;
+        d.tax = Number(this.tax);
       },
     }));
   },
@@ -925,7 +954,7 @@ return computed({
           <div>
           </div>
           <div>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 174)">
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 166)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">
@@ -1007,7 +1036,7 @@ function add(event) {
             </aside>
           </div>
           <div>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 134)">
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 128)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">const data = [
@@ -1074,7 +1103,7 @@ return {
           <div>
           </div>
           <div>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 112)">
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 106)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">const data = observable({
@@ -1159,13 +1188,13 @@ template.innerHTML = processMustache(...);</pre>
 
           <div>
             <h2 id="styling">Styling</h2>
-            <p>s² is agnostic about styling, and works well with framework-agnostic tooling. If you are already familiar with <a href="https://styled-components.com/">Styled Components</a>, then <a href="https://goober.js.org/">Goober</a> is a familiar alternative that implements the same API.</p>
+            <p>s² is agnostic about styling, and works well with framework-agnostic tooling. If you are already familiar with CSS-in-JS solutions like <a href="https://styled-components.com/">Styled Components</a>, then <a href="https://goober.js.org/">Goober</a> is a familiar alternative that implements the same API without the React dependency.</p>
             <hr>
           </div>
           <div>
           </div>
           <div>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 108)">
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 102)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">const { css } = await import(
@@ -1231,7 +1260,7 @@ return computed({
           <div>
           </div>
           <div>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 86)">
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 82)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">const data = observable({
@@ -1278,7 +1307,7 @@ return computed({
           <div>
           </div>
           <div>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 102)">
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 98)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">const data = observable({
@@ -1339,7 +1368,7 @@ return computed({
           <div>
           </div>
           <div>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 112)">
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 106)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">const data = observable({
@@ -1402,13 +1431,13 @@ return {
 
           <div>
             <h2 id="time-travel">Time travel</h2>
-            <p>Implement your own time travel, this is just an example. It takes a little creativity, but it's not too difficult.</p>
+            <p>Since <em>s²</em> is data-driven by design, it is not much of a stretch to implement undo/redo functionality in an ad-hoc way.</p>
             <hr>
           </div>
           <div>
           </div>
           <div>
-            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 112)">
+            <div class="live-example code" style="min-height: calc(1rem * var(--u) * 94)">
               <h6>JavaScript</h6>
               <h6>HTML + Mustache</h6>
               <textarea spellcheck="false">

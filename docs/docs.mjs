@@ -3,7 +3,7 @@ import { observable, createComputed } from "./computed-properties.mjs";
 import parseMustache from "./mustache.mjs";
 import "./demo.mjs";
 
-// s2.debug = true;
+s2.debug = true;
 
 const computed = createComputed(mount, unmount);
 let i = 0;

@@ -62,7 +62,7 @@ function animate(node) {
     const t2 = `translateX(0)
                 translateY(0)`;
     const c1 = "var(--c-e)";
-    const c2 = "var(--c-a2)";
+    const c2 = "var(--c-l)";
     node.animate([
       { transform: t1, color: c1 },
       { transform: t2, color: c2 },
