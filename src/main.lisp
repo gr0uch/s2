@@ -353,13 +353,16 @@
 (defun recursive-unmount (self should-unmount cycle-set)
   (when (not cycle-set) (setf cycle-set (new (*weak-set))))
   (chain cycle-set (add self))
-  (loop
-   for key of self do
-   (let ((value (getprop self key)))
-     (when (and (eq (typeof value) 'object)
-                (not (eq value nil))
-                (not (chain cycle-set (has value))))
-       (recursive-unmount value t cycle-set))))
+  (chain
+   *object
+   (keys self)
+   (for-each
+    (lambda (key)
+      (let ((value (getprop self key)))
+        (when (and (eq (typeof value) 'object)
+                   (not (eq value nil))
+                   (not (chain cycle-set (has value))))
+          (recursive-unmount value t cycle-set))))))
   (when should-unmount
     (let ((unmount (chain *proxy-unmount-map* (get self))))
       (when unmount (chain unmount (call self))))))

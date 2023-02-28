@@ -663,12 +663,14 @@ function removeBetweenDelimiters(startNode, endNode, unmount, self) {
 /* (DEFUN RECURSIVE-UNMOUNT (SELF SHOULD-UNMOUNT CYCLE-SET)
      (WHEN (NOT CYCLE-SET) (SETF CYCLE-SET (NEW (*WEAK-SET))))
      (CHAIN CYCLE-SET (ADD SELF))
-     (LOOP FOR KEY OF SELF
-           DO (LET ((VALUE (GETPROP SELF KEY)))
-                (WHEN
-                    (AND (EQ (TYPEOF VALUE) 'OBJECT) (NOT (EQ VALUE NIL))
-                         (NOT (CHAIN CYCLE-SET (HAS VALUE))))
-                  (RECURSIVE-UNMOUNT VALUE T CYCLE-SET))))
+     (CHAIN *OBJECT (KEYS SELF)
+            (FOR-EACH
+             (LAMBDA (KEY)
+               (LET ((VALUE (GETPROP SELF KEY)))
+                 (WHEN
+                     (AND (EQ (TYPEOF VALUE) 'OBJECT) (NOT (EQ VALUE NIL))
+                          (NOT (CHAIN CYCLE-SET (HAS VALUE))))
+                   (RECURSIVE-UNMOUNT VALUE T CYCLE-SET))))))
      (WHEN SHOULD-UNMOUNT
        (LET ((UNMOUNT (CHAIN *PROXY-UNMOUNT-MAP* (GET SELF))))
          (WHEN UNMOUNT (CHAIN UNMOUNT (CALL SELF)))))) */
@@ -677,12 +679,11 @@ function recursiveUnmount(self, shouldUnmount, cycleSet) {
         cycleSet = new WeakSet();
     };
     cycleSet.add(self);
-    for (var key in self) {
+    Object.keys(self).forEach(function (key) {
         var value = self[key];
-        if (typeof value === 'object' && value !== null && !cycleSet.has(value)) {
-            recursiveUnmount(value, true, cycleSet);
-        };
-    };
+        
+        return typeof value === 'object' && value !== null && !cycleSet.has(value) ? recursiveUnmount(value, true, cycleSet) : null;
+    });
     if (shouldUnmount) {
         var unmount = PROXYUNMOUNTMAP.get(self);
         
