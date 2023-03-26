@@ -25,6 +25,7 @@
         --l: calc(1em * 27 / 16);
         --l2: calc(1em * 21 / 16);
         --u: calc(1 / 4);
+        --gutter: 16;
 
         /*--f-h: Garamond, Big Caslon Medium, Palatino Linotype, Palatino, serif;*/
         --f-b: Space Grotesk, -apple-system, BlinkMacSystemFont, Microsoft Sans Serif, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji;
@@ -91,7 +92,7 @@
       #content > section { display: grid; grid-template-columns: 9fr 4fr; grid-template-rows: min-content; border-bottom: 6px var(--c-a2) solid; }
       #content > section:last-of-type { border-bottom: none; }
       #content > section:first-of-type > div:nth-of-type(2n)::before { display: none; }
-      #content > section > div { padding: 0 calc(1rem * var(--u) * 22) 0 0; position: relative; }
+      #content > section > div { padding: 0 calc(1rem * var(--u) * var(--gutter)) 0 0; position: relative; }
       #content > section > div:nth-of-type(2n) { padding: 0 var(--l); line-height: var(--l2); }
       #content > section > div:nth-of-type(2n) p { margin-bottom: calc(var(--l2) / 2); }
       #content > section > div:nth-of-type(2n)::before { display: block; content: " "; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--c-a); border-left: 2px var(--c-a2) solid; z-index: -1; box-sizing: border-box; }
@@ -102,13 +103,13 @@
       #content > section > div > footer > h4 { font-size: 2em; }
       #content > section code { background: var(--c-a2); border-radius: calc(1rem * var(--u)); padding: 0 calc(1rem * var(--u)); }
       #content > section pre code { background: inherit; border-radius: inherit; }
-      .params { position: relative; z-index: 0; margin: calc(1rem * var(--u) * 18) 0 calc(1rem * var(--u) * 8) 0; border-radius: calc(1rem * var(--u)); color: var(--c-l); font-size: calc(1rem * var(--u) * 5); line-height: calc(var(--l) * var(--u) * 5); }
+      .params { position: relative; z-index: 0; margin: calc(1rem * var(--u) * 18) 0 0 0; border-radius: calc(1rem * var(--u)); color: var(--c-l); font-size: calc(1rem * var(--u) * 5); line-height: calc(var(--l) * var(--u) * 5); }
       .params b { display: inline-block; width: calc(1rem * var(--u) * 18); font-weight: inherit; }
       .params i { display: inline-block; margin: 0 calc(1rem * var(--u) * 2); }
       .params code { font-size: inherit; background: none !important; padding: 0 !important; }
 
       /* main demo */
-      .demo-container { background: linear-gradient(to right, var(--c-l3), var(--c-l2)); border-radius: calc(1rem * var(--u)); color: var(--c-l); margin-right: calc((100% + (1rem * var(--u) * 22)) * (-4 / 9) - (1rem * var(--u) * 22) + var(--l)); font-weight: 700; display: flex; justify-content: space-between; align-items: center; border-top: 2px var(--c-l3) solid; position: relative; z-index: 10; }
+      .demo-container { background: linear-gradient(to right, var(--c-l3), var(--c-l2)); border-radius: calc(1rem * var(--u)); color: var(--c-l); margin-right: calc((100% + (1rem * var(--u) * var(--gutter))) * (-4 / 9) - (1rem * var(--u) * var(--gutter)) + var(--l)); font-weight: 700; display: flex; justify-content: space-between; align-items: center; border-top: 2px var(--c-l3) solid; position: relative; z-index: 10; }
       .demo-container > :first-child { margin-inline: calc(1rem * var(--u) * 6); }
       .demo-container .boxes { display: grid; grid: 1fr 1fr / 1fr 1fr 1fr; gap: calc(1rem * var(--u) * 1); margin: calc(1rem * var(--u) * 2) calc(1rem * var(--u) * 3); }
       .demo-container .boxes > * { background-color: var(--c-l3); color: var(--c-l); line-height: var(--l2); text-align: center; width: 1.5rem; border-radius: calc(1rem * var(--u) * 1); transition: background-color 0.4s ease, color 0.2s ease; }
@@ -203,7 +204,7 @@
         <div class="spacer"></div>
         <h1 class="headline">
           <span>&#9889;&#xFE0E;²</span>
-          <em>Simplicity</em> of logic-less templating, <br><em>Speed</em> of a modern, optimized DOM library.
+          <em>Simplicity</em> of logic-less templating, <br><em>Speed</em> of fine-grained reactive updates.
         </h1>
       </div>
     </div>
@@ -258,7 +259,7 @@
               <code>function s2&lt;T&gt;(d: T, t: Element): [T, Node];</code>
             </p>
             <hr>
-            <div class="demo-container">
+            <!--<div class="demo-container">
               <div>
                 Optimized for granular re-rendering of complex, real-time user interfaces.
               </div>
@@ -270,7 +271,7 @@
                 <div>五</div>
                 <div>六</div>
               </div>
-            </div>
+            </div>-->
           </div>
           <div></div>
         </section>
@@ -278,7 +279,8 @@
         <section id="intro">
           <div>
             <h2 id="rationale">Rationale</h2>
-            <p><strong><em>s²</em> is a bit like Mustache, but reactive.</strong> I built it because I wanted to bind mutable data to the DOM efficiently without Turing-completeness at the template level. Complex UIs are mostly about managing state, and <em>s²</em> has a very data-centric approach, versus component-centric. A few design goals:</p>
+            <p><strong><em>s²</em> is logic-less templating like Mustache, but with fine-grained reactivity so it does not re-render entire templates.</strong> I built it because I wanted to bind mutable data to the DOM efficiently without Turing-completeness at the template level.</p>
+            <p>Complex UIs are mostly about managing state, and <em>s²</em> has a very data-centric approach, versus component-centric. A few design goals:</p>
             <ul>
               <li>Separation of application logic from the presentation layer. Unlike React which combines hooks, templates (JSX), and arbitrary code in a render function, <em>s²</em> has data, functions that operate on the data, and declarative templates.</li>
               <li>The entire API is built on top of its main function, which handles rendering and event listening. Advanced features such as <a href="#computeds">computed properties</a> are implemented as modular addons.</li>

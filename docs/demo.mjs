@@ -1,39 +1,46 @@
 import s2, { mount, move } from "./main.mjs";
 import "./scroll-handler.mjs";
 
-const demoContainer = document.querySelector(".demo-container");
-const boxes = demoContainer.querySelector(".boxes");
+try {
+  init();
+} catch(e) {
+}
 
-let isVisible;
+function init() {
+  const demoContainer = document.querySelector(".demo-container");
+  const boxes = demoContainer.querySelector(".boxes");
 
-const obj = {
-  boxes: boxes.textContent.split("").map(char => {
-    return char.trim() ? ({ char, [move]: animate }) : null;
-  }).filter(Boolean),
-  [mount](node) {
-    const obs = new IntersectionObserver((entries) => {
-      for (const { isIntersecting } of entries) {
-        isVisible = isIntersecting;
-        if (isIntersecting) mutate();
-      }
-    });
-    obs.observe(node);
-  }
-};
+  let isVisible;
 
-const box = boxes.firstElementChild;
-box.dataset.key = "boxes";
-box.innerHTML = "";
-const text = document.createElement("span");
-text.dataset.text = "char";
-box.appendChild(text);
-boxes.innerHTML = "";
-boxes.appendChild(box);
+  const obj = {
+    boxes: boxes.textContent.split("").map(char => {
+      return char.trim() ? ({ char, [move]: animate }) : null;
+    }).filter(Boolean),
+    [mount](node) {
+      const obs = new IntersectionObserver((entries) => {
+        for (const { isIntersecting } of entries) {
+          isVisible = isIntersecting;
+          if (isIntersecting) mutate();
+        }
+      });
+      obs.observe(node);
+    }
+  };
 
-const [proxy, fragment] = s2(obj, demoContainer);
+  const box = boxes.firstElementChild;
+  box.dataset.key = "boxes";
+  box.innerHTML = "";
+  const text = document.createElement("span");
+  text.dataset.text = "char";
+  box.appendChild(text);
+  boxes.innerHTML = "";
+  boxes.appendChild(box);
 
-demoContainer.parentNode.insertBefore(fragment, demoContainer);
-demoContainer.remove();
+  const [proxy, fragment] = s2(obj, demoContainer);
+
+  demoContainer.parentNode.insertBefore(fragment, demoContainer);
+  demoContainer.remove();
+}
 
 function mutate() {
   proxy.boxes.sort((a, b) => {
