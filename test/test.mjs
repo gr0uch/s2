@@ -364,3 +364,14 @@ Deno.test(
     assertEquals(ul.textContent, "");
     clearStack();
   });
+
+Deno.test(
+  "observable edge cases",
+  async () => {
+    const data = observable({
+      time: new Date(),
+    }, true);
+    // This should not crash.
+    assert(data.time.getTime());
+  }
+);

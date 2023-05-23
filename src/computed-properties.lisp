@@ -60,9 +60,16 @@
 
   (chain *reflect (get target key receiver)))
 
-
-(defun is-object (obj)
-  (and obj (eq (typeof obj) 'object)))
+;; It is not sufficient to check type for object, it must also be not built-in.
+;; This will intentionally restrict objects with a custom class from being
+;; proxied.
+;; https://2ality.com/2016/11/proxying-builtins.html#wrapping-instances-of-built-in-constructors
+(defun is-object-proxyable (obj)
+  (let ((ctor (and obj (@ obj constructor))))
+    (or (eq ctor *object) (eq ctor *array)))
+  ; The following is incomplete, it doesn't handle built-in constructors.
+  ; (and obj (eq (typeof obj) 'object))
+  )
 
 
 (defun make-set-property (is-deep)
@@ -72,8 +79,10 @@
       (when (eq old-value value) (return-from set-property t))
 
       ;; Just overwrite keys on deep observables.
-      (when (and is-deep (is-object value) (not (getprop value *ref-symbol*)))
-        (if (and (is-object old-value) (not (getprop old-value *ref-symbol*)))
+      (when (and is-deep (is-object-proxyable value)
+                 (not (getprop value *ref-symbol*)))
+        (if (and (is-object-proxyable old-value)
+                 (not (getprop old-value *ref-symbol*)))
             (progn
               (deep-replace old-value value)
               (return-from set-property t))
@@ -107,7 +116,7 @@
      for key of obj do
      (let ((value (getprop obj key))
            (old-value (getprop old-target key)))
-       (if (and (is-object value) (is-object old-value)
+       (if (and (is-object-proxyable value) (is-object-proxyable old-value)
                 (not (getprop old-value *ref-symbol*)))
            (deep-replace old-value value)
          (setf (getprop proxy key) value))))
@@ -129,7 +138,8 @@
     (when is-deep
       (loop for key of obj do
             (let ((value (getprop obj key)))
-              (when (and (is-object value) (not (getprop value *ref-symbol*)))
+              (when (and (is-object-proxyable value)
+                         (not (getprop value *ref-symbol*)))
                 (setf (getprop obj key) (create-source value t))))))
 
     ;; If a computed object is passed in, automatically mount it.
