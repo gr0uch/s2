@@ -40,16 +40,16 @@ function init() {
 
   demoContainer.parentNode.insertBefore(fragment, demoContainer);
   demoContainer.remove();
-}
 
-function mutate() {
-  proxy.boxes.sort((a, b) => {
-    return Math.random() - 0.2;
-  });
-  setTimeout(() => {
-    if (!isVisible) return;
-    mutate();
-  }, 750);
+  function mutate() {
+    proxy.boxes.sort((a, b) => {
+      return Math.random() - 0.2;
+    });
+    setTimeout(() => {
+      if (!isVisible) return;
+      mutate();
+    }, 750);
+  }
 }
 
 function animate(node) {
@@ -68,7 +68,7 @@ function animate(node) {
                 translateY(${j}px)`;
     const t2 = `translateX(0)
                 translateY(0)`;
-    const c1 = "var(--c-e)";
+    const c1 = "var(--c-h)";
     const c2 = "var(--c-l)";
     node.animate([
       { transform: t1, color: c1 },

@@ -22,10 +22,10 @@
         --h2: 17px;
         --h3: 14px;
         --h4: 12px;
-        --l: calc(1em * 27 / 16);
-        --l2: calc(1em * 21 / 16);
+        --l: calc(1em * 25 / 16);
+        --l2: calc(1em * 20 / 16);
         --u: calc(1 / 4);
-        --gutter: 16;
+        --gutter: 18;
 
         /*--f-h: Garamond, Big Caslon Medium, Palatino Linotype, Palatino, serif;*/
         --f-b: Space Grotesk, -apple-system, BlinkMacSystemFont, Microsoft Sans Serif, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji;
@@ -44,6 +44,8 @@
         --c-l3: rgba(63, 182, 139, 0.12);
         --c-h: #e34c26;
         --c-e: #6e40c9;
+        --c-e2: rgba(110, 64, 201, 0.06);
+        --c-e3: rgba(110, 64, 201, 0.12);
       }
       ::selection { background: var(--c-e); color: var(--c-fg); }
       * { margin: 0; padding: 0; border: 0; box-sizing: border-box; }
@@ -60,7 +62,7 @@
       a { color: inherit; text-decoration: inherit; }
       code, pre { font-family: var(--f-m); font-size: var(--h2); font-variant-ligatures: none; }
       textarea, pre { color: var(--c-fg2); background: none; padding: calc(1rem * var(--u) * 2) calc(1rem * var(--u) * 3); font-family: var(--f-m); font-size: var(--h3); resize: vertical; font-variant-ligatures: none; white-space: nowrap; }
-      pre { box-shadow: 0 calc(1rem * var(--u) * 3) calc(1rem * var(--u) * 9) var(--c-bg); border-radius: calc(1rem * var(--u)); white-space: pre-wrap; counter-reset: line; }
+      pre { box-shadow: 0 calc(1rem * var(--u) * 3) calc(1rem * var(--u) * 9) var(--c-bg); border-radius: calc(1rem * var(--u)); white-space: pre-wrap; counter-reset: line; margin-bottom: calc(var(--l) * 5 / 3); }
       pre > code { display: block; counter-increment: line; position: relative; padding: 0 0 0 calc(1rem * var(--u) * 6) !important; font-size: inherit; }
       pre > code::before { content: counter(line); display: inline-block; position: absolute; top: 0; right: calc(100% - 1rem * var(--u) * 4); color: var(--c-a3); }
       textarea:focus, input:focus { outline: 1px var(--c-l) solid; }
@@ -68,17 +70,17 @@
       /* intro*/
       .intro { background: var(--c-l); color: var(--c-bg); }
       .intro > .container::before { background: linear-gradient(to left, rgba(0, 0, 0, calc(1 / 12)), var(--c-l)); content: " "; display: block; position: absolute; top: 0; right: calc(100% - 1rem * var(--u) * 1); width: 100vw; height: 100%; }
-      .intro > .container > * { flex: 5; }
-      .intro > .container > .spacer { flex: 1; margin-right: var(--l); padding-left: calc(1rem * var(--u) * 1); }
-      .intro > .container > .headline { font-size: calc(1rem * var(--u) * 5); line-height: var(--l); margin: calc(1rem * var(--u) * 12) calc((1 / var(--u) / 5) * var(--l)) calc(1rem * var(--u) * 7) 0; }
+      .intro > .container > * { flex: 17; }
+      .intro > .container > .spacer { flex: 3; margin-right: var(--l); padding-left: calc(1rem * var(--u) * 1); }
+      .intro > .container > .headline { /*font-size: calc(1rem * var(--u) * 5);*/ line-height: var(--l); margin: calc(1rem * var(--u) * 12) calc((1 / var(--u) / 5) * var(--l)) calc(1rem * var(--u) * 7) 0; }
       .intro > .container > .headline > span { float: right; font-size: 2em; line-height: var(--l); color: transparent; text-shadow: 0 0 var(--c-a3); letter-spacing: calc(1rem * var(--u) * -1); }
 
       /* layout */
       .container { position: relative; min-height: 100%; max-width: var(--w); display: flex; margin: auto; hyphens: auto; }
       .container *::-webkit-scrollbar { background-color: var(--c-a2); width: 8px; }
       .container *::-webkit-scrollbar-thumb { background-color: var(--c-a3); }
-      body::before { display: block; content: " "; position: fixed; top: 0; right: 0; height: 100%; width: calc((100% - var(--w)) / 2 + 1px); background: var(--c-a2); }
-      #main-nav { position: sticky; top: 0; flex: 1; padding: calc(1rem * 21 * var(--u)) 0 0 calc(1rem * var(--u) * 1); margin: 0 var(--l) 0 0; align-self: flex-start; color: var(--c-fg2); height: 100vh; overflow: auto; line-height: var(--l2); }
+      body::before { display: block; content: " "; position: fixed; top: 0; right: 0; height: 100%; width: calc((100% - var(--w)) / 2 + 1px); background: var(--c-a2); z-index: -1; }
+      #main-nav { position: sticky; top: 0; flex: 3; padding: calc(1rem * 21 * var(--u)) 0 0 calc(1rem * var(--u) * 1); margin: 0 var(--l) 0 0; align-self: flex-start; color: var(--c-fg2); height: 100vh; overflow: auto; line-height: var(--l2); }
       #main-nav h5 { font-size: var(--h3); text-transform: uppercase; letter-spacing: 0.04em; }
       #main-nav code { font-size: var(--h4); }
       #main-nav h5 + h5 { margin-top: var(--l); }
@@ -86,34 +88,34 @@
       #main-nav li::before { content: "-"; margin-right: calc(1rem * var(--u) * 1); color: var(--c-fg3); }
       #main-nav .logo { position: absolute; top: 0; width: calc(1rem * var(--u) * 8); padding-top: calc(1rem * var(--u) * 2); background: var(--c-l); border-radius: 0 0 calc(1rem * var(--u)) calc(1rem * var(--u)); overflow: hidden; }
       #main-nav svg { display: block; height: calc(1rem * var(--u) * 8); width: calc(1rem * var(--u) * 8); background: var(--c-a); }
-      #content { flex: 5; }
+      #content { flex: 17; }
       #content a, #main-nav h5:first-of-type a { text-decoration: underline var(--c-l) 2px; }
       #content a { font-weight: 700; }
       #content > section { display: grid; grid-template-columns: 9fr 4fr; grid-template-rows: min-content; border-bottom: 6px var(--c-a2) solid; }
-      #content > section:last-of-type { border-bottom: none; }
+      #content > section:first-of-type, #content > section:last-of-type { border-bottom: none; }
       #content > section:first-of-type > div:nth-of-type(2n)::before { display: none; }
       #content > section > div { padding: 0 calc(1rem * var(--u) * var(--gutter)) 0 0; position: relative; }
-      #content > section > div:nth-of-type(2n) { padding: 0 var(--l); line-height: var(--l2); }
+      #content > section > div:nth-of-type(2n) { padding: 0 var(--l); line-height: var(--l2); background: var(--c-a2); }
       #content > section > div:nth-of-type(2n) p { margin-bottom: calc(var(--l2) / 2); }
       #content > section > div:nth-of-type(2n)::before { display: block; content: " "; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--c-a); border-left: 2px var(--c-a2) solid; z-index: -1; box-sizing: border-box; }
       #content > section > div:last-of-type { padding-bottom: calc(1rem * var(--u) * 16); }
-      #content > section > div:nth-last-of-type(2) > :last-child { margin-bottom: calc(1rem * var(--u) * 16) !important; }
+      #content > section:not(:first-of-type) > div:nth-last-of-type(2) > :last-child { margin-bottom: calc(1rem * var(--u) * 16) !important; }
       #content > section > div > :last-child:not(.live-example.code) { margin-bottom: 0; }
       #content > section > div > footer { padding: var(--l) 0 0; color: var(--c-fg3); text-align: center; }
       #content > section > div > footer > h4 { font-size: 2em; }
       #content > section code { background: var(--c-a2); border-radius: calc(1rem * var(--u)); padding: 0 calc(1rem * var(--u)); }
       #content > section pre code { background: inherit; border-radius: inherit; }
-      .params { position: relative; z-index: 0; margin: calc(1rem * var(--u) * 18) 0 0 0; border-radius: calc(1rem * var(--u)); color: var(--c-l); font-size: calc(1rem * var(--u) * 5); line-height: calc(var(--l) * var(--u) * 5); }
+      .params { position: relative; z-index: 0; margin: calc(1rem * var(--u) * 19) 0 calc(1rem * var(--u) * 4) 0; border-radius: calc(1rem * var(--u)); color: var(--c-l); line-height: calc(var(--l) * var(--u) * 5); }
       .params b { display: inline-block; width: calc(1rem * var(--u) * 18); font-weight: inherit; }
       .params i { display: inline-block; margin: 0 calc(1rem * var(--u) * 2); }
       .params code { font-size: inherit; background: none !important; padding: 0 !important; }
 
       /* main demo */
-      .demo-container { background: linear-gradient(to right, var(--c-l3), var(--c-l2)); border-radius: calc(1rem * var(--u)); color: var(--c-l); margin-right: calc((100% + (1rem * var(--u) * var(--gutter))) * (-4 / 9) - (1rem * var(--u) * var(--gutter)) + var(--l)); font-weight: 700; display: flex; justify-content: space-between; align-items: center; border-top: 2px var(--c-l3) solid; position: relative; z-index: 10; }
-      .demo-container > :first-child { margin-inline: calc(1rem * var(--u) * 6); }
-      .demo-container .boxes { display: grid; grid: 1fr 1fr / 1fr 1fr 1fr; gap: calc(1rem * var(--u) * 1); margin: calc(1rem * var(--u) * 2) calc(1rem * var(--u) * 3); }
+      .demo-container { background: linear-gradient(to right, var(--c-l3), var(--c-l2)); border-radius: calc(1rem * var(--u)); color: var(--c-l); margin-right: calc((100% + (1rem * var(--u) * var(--gutter))) * (-4 / 9) - (1rem * var(--u) * var(--gutter)) + var(--l)); margin-bottom: calc(1rem * var(--u) * 2); display: flex; justify-content: space-between; align-items: center; border-top: 2px var(--c-l3) solid; position: relative; z-index: 10; }
+      .demo-container > :first-child { margin-inline: calc(1rem * var(--u) * 6); font-weight: 700; }
+      .demo-container .boxes { display: grid; grid: 1fr 1fr / 1fr 1fr 1fr; gap: calc(1rem * var(--u) * 1); margin: calc(1rem * var(--u) * 6) calc(1rem * var(--u) * 3); }
       .demo-container .boxes > * { background-color: var(--c-l3); color: var(--c-l); line-height: var(--l2); text-align: center; width: 1.5rem; border-radius: calc(1rem * var(--u) * 1); transition: background-color 0.4s ease, color 0.2s ease; }
-      .demo-container code { background: var(--c-l3) !important; color: var(--c-l); }
+      .demo-container code { background: var(--c-e3) !important; color: var(--c-l); }
 
       /* examples */
       .live-example.code { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: min-content 1fr; box-shadow: 0 calc(1rem * var(--u) * 4) calc(1rem * var(--u) * 8) var(--c-bg); border-radius: calc(1rem * var(--u)); margin-bottom: calc(1rem * var(--u) * 10); }
@@ -124,7 +126,7 @@
       .live-example.code textarea:last-of-type { border-right: none; }
       aside { color: var(--c-fg2); font-size: var(--h3); }
       aside code { font-size: inherit; }
-      aside h6 { padding: calc(1rem * var(--u) * 1) 0; margin-bottom: calc(1rem * var(--u) * 2); border-bottom: 2px var(--c-a2) solid; }
+      aside h6 { padding: calc(1rem * var(--u) * 1) 0; margin-bottom: calc(1rem * var(--u) * 2); border-bottom: 2px var(--c-a3) solid; }
       .live-example.output b { color: var(--color); }
       .live-example.output ul { list-style-type: none; padding: 0; margin: 0; }
       .live-example.output li > div { float: right; color: var(--c-h); cursor: pointer; font-weight: 700; }
@@ -147,13 +149,13 @@
 
       /* primary */
       .live-example.primary.code { position: relative; left: calc(1rem * var(--u) * 0); margin-right: calc(1rem * var(--u) * 0); }
-      .live-example.primary.code h6 { background: var(--c-l2); }
+      .live-example.primary.code h6 { background: var(--c-e2); }
       .live-example.primary.code textarea { background: var(--c-a); }
-      .live-example.primary.output { background: var(--c-l2); backdrop-filter: blur(var(--h4)); margin: 0 calc(1rem * var(--u) * -4); padding: 0 calc(1rem * var(--u) * 4) calc(1rem * var(--u) * 4); border-radius: calc(1rem * var(--u)); }
-      .live-example.primary.output input { background: var(--c-a); }
+      .live-example.primary.output { background: var(--c-e2); backdrop-filter: blur(var(--h4)); margin: 0 calc(1rem * var(--u) * -4); padding: 0 calc(1rem * var(--u) * 4) calc(1rem * var(--u) * 4); border-radius: calc(1rem * var(--u)); }
+      .live-example.primary.output input { background: var(--c-e3); }
       .live-example.primary.output input:focus { outline: none; }
-      .live-example.primary h6 { color: var(--c-l); border-bottom-width: 2px; border-bottom-color: var(--c-l); font-weight: 700; font-style: inherit; padding-top: calc(1rem * var(--u) * 2); }
-      .live-example.primary.output h6 { border-bottom-width: 1px; border-bottom-color: var(--c-l3); }
+      .live-example.primary h6 { color: var(--c-e); border-bottom-width: 2px; border-bottom-color: var(--c-e); font-weight: 700; font-style: inherit; padding-top: calc(1rem * var(--u) * 2); }
+      .live-example.primary.output h6 { border-bottom-width: 1px; border-bottom-color: var(--c-e3); }
 
       /* forms */
       form { display: flex; margin: calc(1rem * var(--u) * 4) 0; }
@@ -162,7 +164,7 @@
       input, button { font-family: inherit; font-size: inherit; background: inherit; color: inherit; }
       form button { background: var(--c-bg); }
       form input { width: 0; }
-      input { background: var(--c-a2); height: calc(1rem * var(--u) * 7); padding: 0 calc(1rem * var(--u) * 2); flex: 1; width: 100%; border-radius: calc(1rem * var(--u)); }
+      input { background: var(--c-a3); height: calc(1rem * var(--u) * 7); padding: 0 calc(1rem * var(--u) * 2); flex: 1; width: 100%; border-radius: calc(1rem * var(--u)); }
       input[type="checkbox"] { height: auto; width: auto; margin: 0 calc(1rem * var(--u) * 1) 0 0; }
       button { cursor: pointer; padding: 0 calc(1rem * var(--u) * 3); color: var(--c-e); font-weight: 700; }
 
@@ -204,7 +206,8 @@
         <div class="spacer"></div>
         <h1 class="headline">
           <span>&#9889;&#xFE0E;²</span>
-          <em>Simplicity</em> of logic-less templating, <br><em>Speed</em> of fine-grained reactive updates.
+          A view layer for the web that's just reactive data under the hood.<br>
+          Optimized for granular re-rendering of complex, real-time user interfaces.
         </h1>
       </div>
     </div>
@@ -246,21 +249,22 @@
         <ul>
           <li><a href="#server-side-rendering">Server-side rendering</a></li>
           <li><a href="#styling">Styling</a></li>
-          <li><a href="#hot-module-replacement">Hot module replacement (HMR)</a></li>
+          <li><a href="#hot-module-replacement">Hot module replacement</a></li>
           <li><a href="#performance-pitfalls">Performance pitfalls</a></li>
           <li><a href="#object-re-use">Object re-use</a></li>
           <li><a href="#time-travel">Time travel</a></li>
+          <li><a href="#top-level-flags">Top-level flags</a></li>
         </ul>
       </nav>
       <main id="content">
         <section>
           <div>
             <p class="params">
-              <code>function s2&lt;T&gt;(d: T, t: Element): [T, Node];</code>
+              <code>function s2&lt;T&gt;(d: T, t: Element): [T, Node] {…}</code>
             </p>
-            <hr>
             <!--<div class="demo-container">
               <div>
+                A view layer for the web that's just reactive data under the hood.<br>
                 Optimized for granular re-rendering of complex, real-time user interfaces.
               </div>
               <div class="boxes">
@@ -272,6 +276,7 @@
                 <div>六</div>
               </div>
             </div>-->
+            <hr>
           </div>
           <div></div>
         </section>
@@ -279,10 +284,9 @@
         <section id="intro">
           <div>
             <h2 id="rationale">Rationale</h2>
-            <p><strong><em>s²</em> is logic-less templating like Mustache, but with fine-grained reactivity so it does not re-render entire templates.</strong> I built it because I wanted to bind mutable data to the DOM efficiently without Turing-completeness at the template level.</p>
+            <p><strong><em>s²</em> is logic-less templating, but with fine-grained reactivity so it does not re-render entire templates.</strong> I built it because I wanted to bind mutable data to the DOM efficiently without Turing-completeness at the template level.</p>
             <p>Complex UIs are mostly about managing state, and <em>s²</em> has a very data-centric approach, versus component-centric. A few design goals:</p>
             <ul>
-              <li>Separation of application logic from the presentation layer. Unlike React which combines hooks, templates (JSX), and arbitrary code in a render function, <em>s²</em> has data, functions that operate on the data, and declarative templates.</li>
               <li>The entire API is built on top of its main function, which handles rendering and event listening. Advanced features such as <a href="#computeds">computed properties</a> are implemented as modular addons.</li>
               <li>Templates are logic-less, embedded JavaScript is <strong>not</strong> allowed. Due to this constraint, logic-less templating maps well to <em>s²</em>, and there is an addon for <a href="#mustache-templates">Mustache templates</a> that is aware of HTML context.</li>
             </ul>
@@ -1535,6 +1539,20 @@ return computed({
               </div>
             </aside>
           </div>
+
+          <div>
+            <h2 id="top-level-flags">Top-level flags</h2>
+            <p>Mainly for development purposes, or advanced use cases.</p>
+            <ul>
+              <li><code>s2.shouldUnmountRoot</code>: enabled by default, but can be disabled. This will automatically call unmount when the DOM nodes mapped to an object are removed. This should only be disabled if you need to keep updating nodes that may be removed and appended later.</li>
+              <li><code>s2.isDeferred</code> (experimental): this will defer setting proxy values as a microtask. This might be preferable if there is significant blocking in between updates. However, it can break functionality in case there are updates that depend on a previous update in the same tick.</li>
+              <li><code>s2.window</code>: set a different global object for server-side rendering.</li>
+              <li><code>s2.debug</code>: turn on messages in the console. Warning: has a performance impact.</li>
+            </ul>
+            <hr>
+          </div>
+          <div></div>
+
         </section>
 
         <section>
