@@ -17,13 +17,13 @@
     <script type="module" src="./docs.mjs"></script>
     <style>
       :root {
-        --w: 80rem;
+        --w: 74rem;
         --h: 20px;
         --h2: 17px;
         --h3: 14px;
         --h4: 12px;
-        --l: calc(1em * 25 / 16);
-        --l2: calc(1em * 20 / 16);
+        --l: calc(1em * 24 / 16);
+        --l2: calc(1em * 19 / 16);
         --u: calc(1 / 4);
         --gutter: 18;
 
@@ -31,14 +31,14 @@
         --f-b: Space Grotesk, -apple-system, BlinkMacSystemFont, Microsoft Sans Serif, Helvetica, Arial, sans-serif, Apple Color Emoji, Segoe UI Emoji;
         --f-m: Space Mono, SFMono-Regular, Consolas, Liberation Mono, Menlo, monospace;
 
-        --c-fg: rgb(215, 210, 220);
-        --c-fh: rgb(255, 255, 255);
-        --c-fg2: rgb(155, 150, 160);
-        --c-fg3: rgb(125, 120, 130);
-        --c-bg: rgb(30, 32, 38);
-        --c-a: rgb(40, 42, 48);
-        --c-a2: rgb(46, 48, 54);
-        --c-a3: rgb(66, 68, 74);
+        --c-fg: rgb(40, 42, 48);
+        --c-fh: rgb(30, 32, 38);
+        --c-fg2: rgb(46, 48, 54);
+        --c-fg3: rgb(66, 68, 74);
+        --c-bg: rgb(255, 255, 255);
+        --c-a: rgb(225, 220, 230);
+        --c-a2: rgb(210, 205, 215);
+        --c-a3: rgb(185, 180, 190);
         --c-l: #3fb68b;
         --c-l2: rgba(63, 182, 139, 0.06);
         --c-l3: rgba(63, 182, 139, 0.12);
@@ -62,7 +62,7 @@
       a { color: inherit; text-decoration: inherit; }
       code, pre { font-family: var(--f-m); font-size: var(--h2); font-variant-ligatures: none; }
       textarea, pre { color: var(--c-fg2); background: none; padding: calc(1rem * var(--u) * 2) calc(1rem * var(--u) * 3); font-family: var(--f-m); font-size: var(--h3); resize: vertical; font-variant-ligatures: none; white-space: nowrap; }
-      pre { box-shadow: 0 calc(1rem * var(--u) * 3) calc(1rem * var(--u) * 9) var(--c-bg); border-radius: calc(1rem * var(--u)); white-space: pre-wrap; counter-reset: line; margin-bottom: calc(var(--l) * 5 / 3); }
+      pre { box-shadow: 0 calc(1rem * var(--u) * 3) calc(1rem * var(--u) * 9) var(--c-a2); border-radius: calc(1rem * var(--u)); white-space: pre-wrap; counter-reset: line; margin-bottom: calc(var(--l) * 5 / 3); }
       pre > code { display: block; counter-increment: line; position: relative; padding: 0 0 0 calc(1rem * var(--u) * 6) !important; font-size: inherit; }
       pre > code::before { content: counter(line); display: inline-block; position: absolute; top: 0; right: calc(100% - 1rem * var(--u) * 4); color: var(--c-a3); }
       textarea:focus, input:focus { outline: 1px var(--c-l) solid; }
@@ -73,7 +73,7 @@
       .intro > .container > * { flex: 17; }
       .intro > .container > .spacer { flex: 3; margin-right: var(--l); padding-left: calc(1rem * var(--u) * 1); }
       .intro > .container > .headline { /*font-size: calc(1rem * var(--u) * 5);*/ line-height: var(--l); margin: calc(1rem * var(--u) * 12) calc((1 / var(--u) / 5) * var(--l)) calc(1rem * var(--u) * 7) 0; }
-      .intro > .container > .headline > span { float: right; font-size: 2em; line-height: var(--l); color: transparent; text-shadow: 0 0 var(--c-a3); letter-spacing: calc(1rem * var(--u) * -1); }
+      .intro > .container > .headline > span { float: right; font-size: 2em; line-height: var(--l); color: transparent; text-shadow: 0 0 var(--c-fg3); letter-spacing: calc(1rem * var(--u) * -1); }
 
       /* layout */
       .container { position: relative; min-height: 100%; max-width: var(--w); display: flex; margin: auto; hyphens: auto; }
@@ -91,7 +91,7 @@
       #content { flex: 17; }
       #content a, #main-nav h5:first-of-type a { text-decoration: underline var(--c-l) 2px; }
       #content a { font-weight: 700; }
-      #content > section { display: grid; grid-template-columns: 9fr 4fr; grid-template-rows: min-content; border-bottom: 6px var(--c-a2) solid; }
+      #content > section { display: grid; grid-template-columns: 5fr 2fr; grid-template-rows: min-content; border-bottom: 6px var(--c-a2) solid; }
       #content > section:first-of-type, #content > section:last-of-type { border-bottom: none; }
       #content > section:first-of-type > div:nth-of-type(2n)::before { display: none; }
       #content > section > div { padding: 0 calc(1rem * var(--u) * var(--gutter)) 0 0; position: relative; }
@@ -118,7 +118,7 @@
       .demo-container code { background: var(--c-e3) !important; color: var(--c-l); }
 
       /* examples */
-      .live-example.code { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: min-content 1fr; box-shadow: 0 calc(1rem * var(--u) * 4) calc(1rem * var(--u) * 8) var(--c-bg); border-radius: calc(1rem * var(--u)); margin-bottom: calc(1rem * var(--u) * 10); }
+      .live-example.code { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: min-content 1fr; box-shadow: 0 calc(1rem * var(--u) * 4) calc(1rem * var(--u) * 8) var(--c-a2); border-radius: calc(1rem * var(--u)); margin-bottom: calc(1rem * var(--u) * 10); }
       .live-example.code h6 { background: var(--c-bg); padding: calc(1rem * var(--u) * 1) calc(1rem * var(--u) * 3); border-bottom: 1px var(--c-a2) solid; border-right: 1px var(--c-a2) solid; }
       .live-example.code h6:first-of-type { border-radius: calc(1rem * var(--u)) 0 0 0; }
       .live-example.code h6:last-of-type { border-radius: 0 calc(1rem * var(--u)) 0 0; border-right: none; }
@@ -164,7 +164,7 @@
       input, button { font-family: inherit; font-size: inherit; background: inherit; color: inherit; }
       form button { background: var(--c-bg); }
       form input { width: 0; }
-      input { background: var(--c-a3); height: calc(1rem * var(--u) * 7); padding: 0 calc(1rem * var(--u) * 2); flex: 1; width: 100%; border-radius: calc(1rem * var(--u)); }
+      input { background: var(--c-a2); height: calc(1rem * var(--u) * 7); padding: 0 calc(1rem * var(--u) * 2); flex: 1; width: 100%; border-radius: calc(1rem * var(--u)); }
       input[type="checkbox"] { height: auto; width: auto; margin: 0 calc(1rem * var(--u) * 1) 0 0; }
       button { cursor: pointer; padding: 0 calc(1rem * var(--u) * 3); color: var(--c-e); font-weight: 700; }
 

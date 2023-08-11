@@ -95,6 +95,7 @@
     (let ((context (chain *observable-context-map* (get target)))
           (key-bindings nil))
       (when (not context)
+        ;; Missing some special case handling for new indices on arrays!
         (return-from set-property t))
       (setf key-bindings (or (getprop context key) (list)))
       (loop
