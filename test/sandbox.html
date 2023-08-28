@@ -10,8 +10,10 @@
   const computed = createComputed(mount, unmount);
 
   const s = observable({
-    // foos: null,
-    foos: ["a", "b"],
+    // foo: null,
+    foo: {
+      a: "a",
+    },
   }, true);
 
   window.s = s;
@@ -27,6 +29,7 @@
 `;
 
   const template = mustache`
+<button onclick="{{add}}">add</button>
 <button onclick="{{delete}}">delete</button>
 {{#comp}}
   ${comp}
@@ -34,24 +37,26 @@
 `;
 
   const [reactiveObject, node] = s2({
+    add(event) {
+      event.preventDefault();
+      s.foo = { b: "b", c: "c" };
+    },
     delete(event) {
       event.preventDefault();
-      // s.foos.length = s.foos.length - 1;
-      delete s.foos;
-      // s.foos = ["c"];
+      delete s.foo;
     },
     comp: computed({
       nest() {
-        const { foos } = s;
-        if (!foos) return null;
-        return foos.map((_, i) => {
+        const { foo } = s;
+        console.log("nest", foo);
+        if (!foo) return null;
+        return Object.keys(foo).map((k) => {
           return computed({
-            i,
+            k,
             text() {
-              const { foos } = s;
-              const value = foos[i];
-              if (typeof value !== "object") return value;
-              return value.foo;
+              const value = s.foo?.[this.k];
+              console.log("txt", k, value);
+              return value;
             },
           });
         });
@@ -60,6 +65,4 @@
   }, template);
 
   document.body.appendChild(node);
-
-  // s.foos = ["a", "b"];
 </script>

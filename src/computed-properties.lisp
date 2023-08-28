@@ -66,7 +66,9 @@
 ;; https://2ality.com/2016/11/proxying-builtins.html#wrapping-instances-of-built-in-constructors
 (defun is-object-proxyable (obj)
   (let ((ctor (and obj (@ obj constructor))))
-    (or (eq ctor *object) (eq ctor *array)))
+    (or (eq ctor *object)
+        (eq ctor *array)
+        ))
   ; The following is incomplete, it doesn't handle built-in constructors.
   ; (and obj (eq (typeof obj) 'object))
   )
@@ -95,7 +97,6 @@
     (let ((context (chain *observable-context-map* (get target)))
           (key-bindings nil))
       (when (not context)
-        ;; Missing some special case handling for new indices on arrays!
         (return-from set-property t))
       (setf key-bindings (or (getprop context key) (list)))
       (loop
@@ -129,6 +130,7 @@
 
 
 ;; Observable objects are sources of data that control computed properties.
+;; TODO: rename is-deep to should-partially-replace, explain behavioral difference.
 (defun create-source (obj is-deep)
   (when (not obj) (setf obj (create)))
   (let* ((proxy (new (*proxy obj
