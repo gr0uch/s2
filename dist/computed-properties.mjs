@@ -26,10 +26,10 @@ var PROXYOBSERVABLE = (function () {
              deleteProperty : setProperty
            };
 })();
-/* (DEFPARAMETER *PROXY-DEEP-OBSERVABLE*
+/* (DEFPARAMETER *PROXY-PARTIAL-OBSERVABLE*
      (LET ((SET-PROPERTY (MAKE-SET-PROPERTY T)))
        (CREATE GET GET-PROPERTY SET SET-PROPERTY DELETE-PROPERTY SET-PROPERTY))) */
-var PROXYDEEPOBSERVABLE = (function () {
+var PROXYPARTIALOBSERVABLE = (function () {
     var setProperty = makeSetProperty(true);
     
     return { get : getProperty,
@@ -103,17 +103,17 @@ function isObjectProxyable(obj) {
     var ctor = obj && obj.constructor;
     return ctor === Object || ctor === Array;
 };
-/* (DEFUN MAKE-SET-PROPERTY (IS-DEEP)
+/* (DEFUN MAKE-SET-PROPERTY (SHOULD-PARTIALLY-REPLACE)
      (DEFUN SET-PROPERTY (TARGET KEY VALUE RECEIVER)
        (LET ((OLD-VALUE (GETPROP TARGET KEY)))
          (WHEN (EQ OLD-VALUE VALUE) (RETURN-FROM SET-PROPERTY T))
          (WHEN
-             (AND IS-DEEP (IS-OBJECT-PROXYABLE VALUE)
+             (AND SHOULD-PARTIALLY-REPLACE (IS-OBJECT-PROXYABLE VALUE)
                   (NOT (GETPROP VALUE *REF-SYMBOL*)))
            (IF (AND (IS-OBJECT-PROXYABLE OLD-VALUE)
                     (NOT (GETPROP OLD-VALUE *REF-SYMBOL*)))
                (PROGN
-                (DEEP-REPLACE OLD-VALUE VALUE)
+                (PARTIAL-REPLACE OLD-VALUE VALUE)
                 (RETURN-FROM SET-PROPERTY T))
                (SETF VALUE (CREATE-SOURCE VALUE T)))))
        (IF (NOT (EQ VALUE UNDEFINED))
@@ -133,15 +133,15 @@ function isObjectProxyable(obj) {
                       (COMPUTE-DEPENDENCIES OBJ OBJ-KEY FN)))))
        T)
      SET-PROPERTY) */
-function makeSetProperty(isDeep) {
+function makeSetProperty(shouldPartiallyReplace) {
     function setProperty(target, key, value, receiver) {
         var oldValue = target[key];
         if (oldValue === value) {
             return true;
         };
-        if (isDeep && isObjectProxyable(value) && !value[REFSYMBOL]) {
+        if (shouldPartiallyReplace && isObjectProxyable(value) && !value[REFSYMBOL]) {
             if (isObjectProxyable(oldValue) && !oldValue[REFSYMBOL]) {
-                deepReplace(oldValue, value);
+                partialReplace(oldValue, value);
                 
                 return true;
             } else {
@@ -178,7 +178,7 @@ function makeSetProperty(isDeep) {
     };
     return setProperty;
 };
-/* (DEFUN DEEP-REPLACE (PROXY OBJ)
+/* (DEFUN PARTIAL-REPLACE (PROXY OBJ)
      (LET ((OLD-TARGET (GETPROP PROXY *PROXY-TARGET-SYMBOL*)))
        (LOOP FOR KEY OF OBJ
              DO (LET ((VALUE (GETPROP OBJ KEY))
@@ -186,7 +186,7 @@ function makeSetProperty(isDeep) {
                   (IF (AND (IS-OBJECT-PROXYABLE VALUE)
                            (IS-OBJECT-PROXYABLE OLD-VALUE)
                            (NOT (GETPROP OLD-VALUE *REF-SYMBOL*)))
-                      (DEEP-REPLACE OLD-VALUE VALUE)
+                      (PARTIAL-REPLACE OLD-VALUE VALUE)
                       (SETF (GETPROP PROXY KEY) VALUE))))
        (LOOP FOR KEY OF OLD-TARGET
              DO (LET ((OLD-VALUE (GETPROP OLD-TARGET KEY)))
@@ -195,13 +195,13 @@ function makeSetProperty(isDeep) {
                        (CHAIN *OBJECT PROTOTYPE HAS-OWN-PROPERTY
                               (CALL OBJ KEY)))
                     (DELETE (GETPROP PROXY KEY))))))) */
-function deepReplace(proxy, obj) {
+function partialReplace(proxy, obj) {
     var oldTarget = proxy[PROXYTARGETSYMBOL];
     for (var key in obj) {
         var value = obj[key];
         var oldValue = oldTarget[key];
         if (isObjectProxyable(value) && isObjectProxyable(oldValue) && !oldValue[REFSYMBOL]) {
-            deepReplace(oldValue, value);
+            partialReplace(oldValue, value);
         } else {
             proxy[key] = value;
         };
@@ -213,17 +213,17 @@ function deepReplace(proxy, obj) {
         };
     };
 };
-/* (DEFUN CREATE-SOURCE (OBJ IS-DEEP)
+/* (DEFUN CREATE-SOURCE (OBJ SHOULD-PARTIALLY-REPLACE)
      (WHEN (NOT OBJ) (SETF OBJ (CREATE)))
      (LET* ((PROXY
              (NEW
               (*PROXY OBJ
-               (IF IS-DEEP
-                   *PROXY-DEEP-OBSERVABLE*
+               (IF SHOULD-PARTIALLY-REPLACE
+                   *PROXY-PARTIAL-OBSERVABLE*
                    *PROXY-OBSERVABLE*))))
             (SYMBOLS (CHAIN *OBJECT (GET-OWN-PROPERTY-SYMBOLS OBJ)))
             (MOUNT-FN (GETPROP OBJ (ELT SYMBOLS 0))))
-       (WHEN IS-DEEP
+       (WHEN SHOULD-PARTIALLY-REPLACE
          (LOOP FOR KEY OF OBJ
                DO (LET ((VALUE (GETPROP OBJ KEY)))
                     (WHEN
@@ -232,14 +232,14 @@ function deepReplace(proxy, obj) {
                       (SETF (GETPROP OBJ KEY) (CREATE-SOURCE VALUE T))))))
        (WHEN (EQ (TYPEOF MOUNT-FN) 'FUNCTION) (CHAIN MOUNT-FN (CALL PROXY)))
        PROXY)) */
-function createSource(obj, isDeep) {
+function createSource(obj, shouldPartiallyReplace) {
     if (!obj) {
         obj = {  };
     };
-    var proxy = new Proxy(obj, isDeep ? PROXYDEEPOBSERVABLE : PROXYOBSERVABLE);
+    var proxy = new Proxy(obj, shouldPartiallyReplace ? PROXYPARTIALOBSERVABLE : PROXYOBSERVABLE);
     var symbols = Object.getOwnPropertySymbols(obj);
     var mountFn = obj[symbols[0]];
-    if (isDeep) {
+    if (shouldPartiallyReplace) {
         for (var key in obj) {
             var value = obj[key];
             if (isObjectProxyable(value) && !value[REFSYMBOL]) {
