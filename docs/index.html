@@ -874,7 +874,7 @@ const computed = createComputed(mount, unmount);</pre>
             <aside>
               <h6>Aside</h6>
               <p>For any application with non-trivial complexity, computed properties are essential to writing maintainable code. However, it is not strictly necessary.</p>
-              <p>Observable objects are only tracked at the top level by default, it can be deeply nested by passing in the second argument as <code>true</code>.</p>
+              <p>Observable objects are only tracked at the top level by default, it can be nested by passing in the second argument as <code>true</code>.</p>
             </aside>
           </div>
           <div>
@@ -936,15 +936,15 @@ return computed({
             </aside>
           </div>
           <div>
-            <p>Note that in the above example, the observable object has a second argument passed in as <code>true</code>. This tells the observable to be <em>deeply observable</em>, including nested objects. When using deep observables, it is possible to delete observables and replace them with new observables. This works because dependencies are tracked on every run of the computed function.</p>
-            <h3>Deep observability</h3>
-            <p>Opt-in to deep observability by passing the second argument as <code>true</code>:</p>
+            <p>Note that in the above example, the observable object has a second argument passed in as <code>true</code>. This tells the observable to use <em>partial replacement</em>, including nested objects. When using partial replacement, it is possible to replace observables keeping the original object.</p>
+            <h3>Partial replacement</h3>
+            <p>Partial replacement overwrites key-values on objects recursively. The final state may look identical, but the difference is that the same objects are re-used. Opt-in to partial replacement by passing the second argument as <code>true</code>:</p>
             <pre>const source = observable({ ... }, true);</pre>
-            <p>When an observable is deeply observable, any arbitrary path may be used in computed properties. This means that paths can be deleted, replaced with different objects, mutated, and the dependent computed properties would still react to changes.</p>
-            <h3>Using <code>ref()</code> to opt-out of deep observability</h3>
+            <p>When an observable uses partial replacement, any arbitrary path may be used in computed properties. This means that paths can be deleted, replaced with different objects, mutated, and the dependent computed properties would still react to changes.</p>
+            <h3>Using <code>ref()</code> to opt-out of partial replacement</h3>
             <p>In case one knows in advance that an object will not have its properties changed, the <code>ref()</code> function will assign an internal symbol on the object to mark it as a reference only.</p>
             <pre>const source = observable({
-  notDeep: ref({ ... }), // this object will not be deeply observable
+  notPartial: ref({ ... }), // this object will not use partial replacement
 }, true);</pre>
             <hr>
           </div>

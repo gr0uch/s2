@@ -16,7 +16,7 @@
             set set-property
             delete-property set-property)))
 
-(defparameter *proxy-deep-observable*
+(defparameter *proxy-partial-observable*
   (let ((set-property (make-set-property t)))
     (create get get-property
             set set-property
@@ -74,19 +74,19 @@
   )
 
 
-(defun make-set-property (is-deep)
+(defun make-set-property (should-partially-replace)
   (defun set-property (target key value receiver)
     (let ((old-value (getprop target key)))
       ;; Skip if nothing changed.
       (when (eq old-value value) (return-from set-property t))
 
-      ;; Just overwrite keys on deep observables.
-      (when (and is-deep (is-object-proxyable value)
+      ;; Just overwrite keys on partial observables.
+      (when (and should-partially-replace (is-object-proxyable value)
                  (not (getprop value *ref-symbol*)))
         (if (and (is-object-proxyable old-value)
                  (not (getprop old-value *ref-symbol*)))
             (progn
-              (deep-replace old-value value)
+              (partial-replace old-value value)
               (return-from set-property t))
           (setf value (create-source value t)))))
 
@@ -112,7 +112,7 @@
   set-property)
 
 
-(defun deep-replace (proxy obj)
+(defun partial-replace (proxy obj)
   (let ((old-target (getprop proxy *proxy-target-symbol*)))
     (loop
      for key of obj do
@@ -120,7 +120,7 @@
            (old-value (getprop old-target key)))
        (if (and (is-object-proxyable value) (is-object-proxyable old-value)
                 (not (getprop old-value *ref-symbol*)))
-           (deep-replace old-value value)
+           (partial-replace old-value value)
          (setf (getprop proxy key) value))))
     (loop
      for key of old-target do
@@ -130,15 +130,15 @@
 
 
 ;; Observable objects are sources of data that control computed properties.
-;; TODO: rename is-deep to should-partially-replace, explain behavioral difference.
-(defun create-source (obj is-deep)
+(defun create-source (obj should-partially-replace)
   (when (not obj) (setf obj (create)))
   (let* ((proxy (new (*proxy obj
-                             (if is-deep *proxy-deep-observable*
+                             (if should-partially-replace
+                                 *proxy-partial-observable*
                                *proxy-observable*))))
          (symbols (chain *object (get-own-property-symbols obj)))
          (mount-fn (getprop obj (elt symbols 0))))
-    (when is-deep
+    (when should-partially-replace
       (loop for key of obj do
             (let ((value (getprop obj key)))
               (when (and (is-object-proxyable value)
@@ -266,7 +266,7 @@
   computed)
 
 
-;; Assign the ref symbol on an object, to mark it as not deeply observable.
+;; Assign the ref symbol on an object, to mark it as not observable.
 (defun ref (obj)
   (setf (getprop obj *ref-symbol*) t)
   obj)
