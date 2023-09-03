@@ -2,22 +2,22 @@
 
 ![test status](https://github.com/gr0uch/s2/actions/workflows/test.yml/badge.svg)
 
-**s2 is a function for reactive templating on the web.**
+s2 is a thin abstraction of the DOM that can be easily embedded on a page or within an existing framework, since it's toolless. It combines logic-less templates with reactive programming techniques.
 
 See the <a href="https://gr0uch.github.io/s2/">documentation page</a> for usage details.
 
 
-## Installing
+## Install
 
-```
+```sh
 npm install s2-engine
 ```
 
 
 ## Example
 
-```
-import bind, { html } from "s2-engine";
+```js
+import bind, { html } from "https://esm.run/s2-engine";
 
 const template = html`
   {{count}}
@@ -43,8 +43,8 @@ In its most basic form, it provides a reactive binding from data to a template. 
 
 With a modification of the above, a different object can be used as the data source:
 
-```
-import { observable, computed } from "s2-engine";
+```js
+import { observable, computed } from "https://esm.run/s2-engine";
 
 const source = observable({
   count: 0,

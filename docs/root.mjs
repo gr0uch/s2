@@ -10,6 +10,13 @@ for (const el of document.querySelectorAll("pre code")) {
   hljs.highlightElement(el);
 }
 
+for (const el of document.querySelectorAll("[id]")) {
+  const a = document.createElement("a");
+  a.href = `#${el.id}`;
+  a.textContent = "#";
+  el.appendChild(a);
+}
+
 const html = createMustacheTag(registerTemplate);
 const computed = createComputed(mount, unmount);
 
