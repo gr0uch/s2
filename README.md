@@ -1,10 +1,63 @@
-# s²
+# s2-engine
 
 ![test status](https://github.com/gr0uch/s2/actions/workflows/test.yml/badge.svg)
 
-**s2 is a function for reactive web UI.**
+**s2 is a function for reactive templating on the web.**
 
 See the <a href="https://gr0uch.github.io/s2/">documentation page</a> for usage details.
+
+
+## Installing
+
+```
+npm install s2-engine
+```
+
+
+## Example
+
+```
+import bind, { html } from "s2-engine";
+
+const template = html`
+  {{count}}
+  <button onclick="{{increment}}">+</button>
+`;
+
+const viewModel = {
+  count: 0,
+  increment(event) {
+    event.preventDefault();
+    this.count++;
+  }
+};
+
+const [proxy, fragment] = bind(viewModel, template);
+document.body.appendChild(fragment);
+
+// the viewModel can be interacted with using the proxy
+window.proxy = proxy;
+```
+
+In its most basic form, it provides a reactive binding from data to a template. Changing the data updates the template.
+
+With a modification of the above, a different object can be used as the data source:
+
+```
+import { observable, computed } from "s2-engine";
+
+const source = observable({
+  count: 0,
+});
+
+const viewModel = computed({
+  count: () => source.count,
+  increment: (event) => {
+    event.preventDefault();
+    source.count++;
+  },
+});
+```
 
 
 ## Benchmarks
@@ -19,7 +72,7 @@ s2 is written in the Parenscript subset of Common Lisp.
 - [`parenscript-builder`](https://github.com/gr0uch/parenscript-builder): see instructions
 - [`terser`](https://github.com/terser/terser): `npm i -g terser` to add this executable to `$PATH`
 
-Need to build the `psbuild` binary from `parenscript-builder` and put it here to compile with `make`. I couldn't figure out how to automate including this dependency yet.
+Need to build the `psbuild` binary from `parenscript-builder` and put it here to compile with `make`.
 
 
 ## Testing

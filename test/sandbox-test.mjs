@@ -4,7 +4,7 @@ import parseMustache, { createMustacheTag } from "../dist/mustache.mjs";
 import { createComputed, observable } from "../dist/computed-properties.mjs";
 import test from "./runner.mjs";
 
-// s2.debug = true;
+s2.debug = true;
 // s2.isDeferred = true;
 depCheck();
 cleanupTemplates();
