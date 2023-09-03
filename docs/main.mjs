@@ -149,16 +149,18 @@ function setNode(value, node) {
        (WHEN (EQ KEY 'LENGTH)
          (LOOP FOR I FROM VALUE TO (- (LENGTH TARGET) 1)
                DO (LET* ((PROXY (GETPROP TARGET I))
-                         (NODES (CHAIN *PROXY-DELIMITER-MAP* (GET PROXY)))
+                         (DELIMITERS (CHAIN *PROXY-DELIMITER-MAP* (GET PROXY)))
                          (UNMOUNT (CHAIN *PROXY-UNMOUNT-MAP* (GET PROXY))))
-                    (WHEN NODES
-                      (REMOVE-BETWEEN-DELIMITERS (@ NODES 0) (@ NODES 1)
-                       UNMOUNT PROXY))) (DELETE (GETPROP TARGET I))))
+                    (WHEN DELIMITERS
+                      (REMOVE-BETWEEN-DELIMITERS (@ DELIMITERS 0)
+                       (@ DELIMITERS 1) UNMOUNT PROXY))) (DELETE
+                                                          (GETPROP TARGET I))))
        (WHEN (AND (NOT IS-SETTER) (GETPROP TARGET KEY))
          (LET* ((PROXY (GETPROP TARGET KEY))
-                (NODES (CHAIN *PROXY-DELIMITER-MAP* (GET PROXY)))
+                (DELIMITERS (CHAIN *PROXY-DELIMITER-MAP* (GET PROXY)))
                 (UNMOUNT (CHAIN *PROXY-UNMOUNT-MAP* (GET PROXY))))
-           (REMOVE-BETWEEN-DELIMITERS (@ NODES 0) (@ NODES 1) UNMOUNT PROXY))
+           (REMOVE-BETWEEN-DELIMITERS (@ DELIMITERS 0) (@ DELIMITERS 1) UNMOUNT
+            PROXY))
          (DELETE (GETPROP TARGET KEY)))
        (WHEN IS-SETTER
          (WHEN (NOT IS-INDEX)
@@ -186,12 +188,12 @@ function setNode(value, node) {
                               (LAMBDA (P I)
                                 (AND (EQ P PREVIOUS-PROXY)
                                      (NOT (EQ I NUMKEY)))))))
-                   (LET ((NODES
+                   (LET ((DELIMITERS
                           (CHAIN *PROXY-DELIMITER-MAP* (GET PREVIOUS-PROXY)))
                          (UNMOUNT
                           (CHAIN *PROXY-UNMOUNT-MAP* (GET PREVIOUS-PROXY))))
-                     (REMOVE-BETWEEN-DELIMITERS (@ NODES 0) (@ NODES 1) UNMOUNT
-                      PROXY))))
+                     (REMOVE-BETWEEN-DELIMITERS (@ DELIMITERS 0)
+                      (@ DELIMITERS 1) UNMOUNT PROXY))))
                (IF NEXT-PROXY
                    (LET ((NEXT-ANCHOR
                           (@ (CHAIN *PROXY-DELIMITER-MAP* (GET NEXT-PROXY)) 0)))
@@ -208,17 +210,17 @@ function setNode(value, node) {
                                (AND (EQ P VALUE) (NOT (EQ I NUMKEY)))))))
                     (OTHER-PROXY (GETPROP TARGET KEY))
                     (MOVE (CHAIN *PROXY-MOVE-MAP* (GET VALUE)))
-                    (NODES (CHAIN *PROXY-DELIMITER-MAP* (GET VALUE)))
-                    (START-NODE (@ NODES 0))
-                    (END-NODE (@ NODES 1)))
+                    (DELIMITERS (CHAIN *PROXY-DELIMITER-MAP* (GET VALUE)))
+                    (START-NODE (@ DELIMITERS 0))
+                    (END-NODE (@ DELIMITERS 1)))
                (IF OTHER-PROXY
-                   (LET* ((OTHER-NODES
+                   (LET* ((OTHER-DELIMITERS
                            (CHAIN *PROXY-DELIMITER-MAP* (GET OTHER-PROXY)))
-                          (OTHER-START-NODE (@ OTHER-NODES 0))
-                          (OTHER-END-NODE (@ OTHER-NODES 1))
+                          (OTHER-START-NODE (@ OTHER-DELIMITERS 0))
+                          (OTHER-END-NODE (@ OTHER-DELIMITERS 1))
                           (OTHER-MOVE
                            (CHAIN *PROXY-MOVE-MAP* (GET OTHER-PROXY)))
-                          (ANCHOR (@ NODES 1 NEXT-SIBLING))
+                          (ANCHOR (@ DELIMITERS 1 NEXT-SIBLING))
                           (PARENT-NODE (@ ANCHOR PARENT-NODE)))
                      (WHEN (NOT (EQ VALUE OTHER-PROXY))
                        (WHEN MOVE
@@ -286,19 +288,19 @@ function setIndex(target, key, value, receiver, isInitializing) {
         var _js1 = target.length - 1;
         for (var i = value; i <= _js1; i += 1) {
             var proxy = target[i];
-            var nodes = PROXYDELIMITERMAP.get(proxy);
+            var delimiters = PROXYDELIMITERMAP.get(proxy);
             var unmount = PROXYUNMOUNTMAP.get(proxy);
-            if (nodes) {
-                removeBetweenDelimiters(nodes[0], nodes[1], unmount, proxy);
+            if (delimiters) {
+                removeBetweenDelimiters(delimiters[0], delimiters[1], unmount, proxy);
             };
             delete target[i];
         };
     };
     if (!isSetter && target[key]) {
         var proxy2 = target[key];
-        var nodes3 = PROXYDELIMITERMAP.get(proxy2);
+        var delimiters3 = PROXYDELIMITERMAP.get(proxy2);
         var unmount4 = PROXYUNMOUNTMAP.get(proxy2);
-        removeBetweenDelimiters(nodes3[0], nodes3[1], unmount4, proxy2);
+        removeBetweenDelimiters(delimiters3[0], delimiters3[1], unmount4, proxy2);
         delete target[key];
     };
     if (isSetter) {
@@ -326,9 +328,9 @@ function setIndex(target, key, value, receiver, isInitializing) {
                 if (!target.find(function (p, i) {
                     return p === previousProxy && i !== numkey;
                 })) {
-                    var nodes8 = PROXYDELIMITERMAP.get(previousProxy);
+                    var delimiters8 = PROXYDELIMITERMAP.get(previousProxy);
                     var unmount9 = PROXYUNMOUNTMAP.get(previousProxy);
-                    removeBetweenDelimiters(nodes8[0], nodes8[1], unmount9, proxy6);
+                    removeBetweenDelimiters(delimiters8[0], delimiters8[1], unmount9, proxy6);
                 };
             };
             if (nextProxy) {
@@ -346,15 +348,15 @@ function setIndex(target, key, value, receiver, isInitializing) {
             });
             var otherProxy = target[key];
             var move = PROXYMOVEMAP.get(value);
-            var nodes10 = PROXYDELIMITERMAP.get(value);
-            var startNode = nodes10[0];
-            var endNode11 = nodes10[1];
+            var delimiters10 = PROXYDELIMITERMAP.get(value);
+            var startNode = delimiters10[0];
+            var endNode11 = delimiters10[1];
             if (otherProxy) {
-                var otherNodes = PROXYDELIMITERMAP.get(otherProxy);
-                var otherStartNode = otherNodes[0];
-                var otherEndNode = otherNodes[1];
+                var otherDelimiters = PROXYDELIMITERMAP.get(otherProxy);
+                var otherStartNode = otherDelimiters[0];
+                var otherEndNode = otherDelimiters[1];
                 var otherMove = PROXYMOVEMAP.get(otherProxy);
-                var anchor12 = nodes10[1].nextSibling;
+                var anchor12 = delimiters10[1].nextSibling;
                 var parentNode13 = anchor12.parentNode;
                 if (value !== otherProxy) {
                     if (move) {
@@ -700,39 +702,49 @@ function recursiveUnmount(self, shouldUnmount, cycleSet) {
             (SLOT (@ DESCRIPTOR SLOT))
             (TEMPLATE (@ DESCRIPTOR TEMPLATE))
             (HASH (CHAIN *TARGET-DELIMITER-MAP* (GET TARGET)))
-            (NODES (GETPROP HASH KEY))
+            (DELIMITERS (GETPROP HASH KEY))
             (PARENT-NODE (@ ANCHOR PARENT-NODE))
-            (START-NODE (CREATE-ANCHOR 0 KEY))
-            (END-NODE (CREATE-ANCHOR 1 KEY))
+            (START-NODE NIL)
+            (END-NODE NIL)
             (PREVIOUS-VALUE (GETPROP TARGET KEY))
             (IS-PREVIOUS-ARRAY (CHAIN *ARRAY (IS-ARRAY PREVIOUS-VALUE)))
             (IS-PREVIOUS-OBJECT
              (AND PREVIOUS-VALUE (EQ (TYPEOF PREVIOUS-VALUE) 'OBJECT)))
             (IS-VALUE-ARRAY (CHAIN *ARRAY (IS-ARRAY VALUE)))
             (IS-TYPE-MISMATCH (NOT (EQ IS-PREVIOUS-ARRAY IS-VALUE-ARRAY)))
+            (SHOULD-CREATE-DELIMITERS
+             (OR (NOT DELIMITERS) (NOT PREVIOUS-VALUE)))
             (RETURN-VALUE NIL))
        (WHEN
-           (AND NODES
+           (AND DELIMITERS
                 (OR (NOT VALUE) (AND VALUE (NOT PREVIOUS-VALUE))
                     IS-TYPE-MISMATCH))
          (IF (CHAIN *ARRAY (IS-ARRAY PREVIOUS-VALUE))
              (LOOP FOR PROXY IN PREVIOUS-VALUE
                    DO (LET ((UNMOUNT (CHAIN *PROXY-UNMOUNT-MAP* (GET PROXY)))
-                            (NODES (CHAIN *PROXY-DELIMITER-MAP* (GET PROXY))))
-                        (WHEN NODES
-                          (REMOVE-BETWEEN-DELIMITERS (@ NODES 0) (@ NODES 1)
-                           UNMOUNT PROXY))))
+                            (DELIMITERS
+                             (CHAIN *PROXY-DELIMITER-MAP* (GET PROXY))))
+                        (WHEN DELIMITERS
+                          (REMOVE-BETWEEN-DELIMITERS (@ DELIMITERS 0)
+                           (@ DELIMITERS 1) UNMOUNT PROXY))))
              (WHEN PREVIOUS-VALUE
                (LET ((UNMOUNT (CHAIN *PROXY-UNMOUNT-MAP* (GET PREVIOUS-VALUE)))
-                     (NODES (CHAIN *PROXY-DELIMITER-MAP* (GET PREVIOUS-VALUE))))
-                 (WHEN NODES
-                   (REMOVE-BETWEEN-DELIMITERS (@ NODES 0) (@ NODES 1) UNMOUNT
-                    PREVIOUS-VALUE)))))
+                     (DELIMITERS
+                      (CHAIN *PROXY-DELIMITER-MAP* (GET PREVIOUS-VALUE))))
+                 (WHEN DELIMITERS
+                   (REMOVE-BETWEEN-DELIMITERS (@ DELIMITERS 0) (@ DELIMITERS 1)
+                    UNMOUNT PREVIOUS-VALUE)))))
          (IF (AND VALUE (NOT PREVIOUS-VALUE))
-             (REMOVE-BETWEEN-DELIMITERS (@ NODES 0) (@ NODES 1))
-             (PROGN (CHAIN NODES 0 (REMOVE)) (CHAIN NODES 1 (REMOVE)))))
-       (SETF (GETPROP HASH KEY) (LIST START-NODE END-NODE))
-       (CHAIN PARENT-NODE (INSERT-BEFORE START-NODE ANCHOR))
+             (REMOVE-BETWEEN-DELIMITERS (@ DELIMITERS 0) (@ DELIMITERS 1))
+             (PROGN
+              (SETF SHOULD-CREATE-DELIMITERS T)
+              (CHAIN DELIMITERS 0 (REMOVE))
+              (CHAIN DELIMITERS 1 (REMOVE)))))
+       (WHEN SHOULD-CREATE-DELIMITERS
+         (SETF START-NODE (CREATE-ANCHOR 0 KEY)
+               END-NODE (CREATE-ANCHOR 1 KEY)
+               (GETPROP HASH KEY) (LIST START-NODE END-NODE))
+         (CHAIN PARENT-NODE (INSERT-BEFORE START-NODE ANCHOR)))
        (IF VALUE
            (IF (OR (NOT PREVIOUS-VALUE) (NOT IS-PREVIOUS-OBJECT)
                    IS-TYPE-MISMATCH)
@@ -785,7 +797,8 @@ function recursiveUnmount(self, shouldUnmount, cycleSet) {
                  DO (CHAIN PARENT-NODE
                            (INSERT-BEFORE (CHAIN NODE (CLONE-NODE T))
                             ANCHOR))))
-       (CHAIN PARENT-NODE (INSERT-BEFORE END-NODE ANCHOR))
+       (WHEN SHOULD-CREATE-DELIMITERS
+         (CHAIN PARENT-NODE (INSERT-BEFORE END-NODE ANCHOR)))
        RETURN-VALUE)) */
 function setSlot(target, key, value, receiver, descriptor, isInitializing) {
     if (main.debug) {
@@ -798,71 +811,77 @@ function setSlot(target, key, value, receiver, descriptor, isInitializing) {
     var slot21 = descriptor.slot;
     var template22 = descriptor.template;
     var hash = TARGETDELIMITERMAP.get(target);
-    var nodes = hash[key];
+    var delimiters = hash[key];
     var parentNode23 = anchor.parentNode;
-    var startNode = createAnchor(0, key);
-    var endNode = createAnchor(1, key);
+    var startNode = null;
+    var endNode = null;
     var previousValue = target[key];
     var isPreviousArray = Array.isArray(previousValue);
     var isPreviousObject = previousValue && typeof previousValue === 'object';
     var isValueArray = Array.isArray(value);
     var isTypeMismatch = isPreviousArray !== isValueArray;
+    var shouldCreateDelimiters = !delimiters || !previousValue;
     var returnValue = null;
-    if (nodes && (!value || value && !previousValue || isTypeMismatch)) {
+    if (delimiters && (!value || value && !previousValue || isTypeMismatch)) {
         if (Array.isArray(previousValue)) {
             var _js25 = previousValue.length;
             for (var _js24 = 0; _js24 < _js25; _js24 += 1) {
                 var proxy = previousValue[_js24];
                 var unmount = PROXYUNMOUNTMAP.get(proxy);
-                var nodes26 = PROXYDELIMITERMAP.get(proxy);
-                if (nodes26) {
-                    removeBetweenDelimiters(nodes26[0], nodes26[1], unmount, proxy);
+                var delimiters26 = PROXYDELIMITERMAP.get(proxy);
+                if (delimiters26) {
+                    removeBetweenDelimiters(delimiters26[0], delimiters26[1], unmount, proxy);
                 };
             };
         } else {
             if (previousValue) {
                 var unmount26 = PROXYUNMOUNTMAP.get(previousValue);
-                var nodes27 = PROXYDELIMITERMAP.get(previousValue);
-                if (nodes27) {
-                    removeBetweenDelimiters(nodes27[0], nodes27[1], unmount26, previousValue);
+                var delimiters27 = PROXYDELIMITERMAP.get(previousValue);
+                if (delimiters27) {
+                    removeBetweenDelimiters(delimiters27[0], delimiters27[1], unmount26, previousValue);
                 };
             };
         };
         if (value && !previousValue) {
-            removeBetweenDelimiters(nodes[0], nodes[1]);
+            removeBetweenDelimiters(delimiters[0], delimiters[1]);
         } else {
-            nodes[0].remove();
-            nodes[1].remove();
+            shouldCreateDelimiters = true;
+            delimiters[0].remove();
+            delimiters[1].remove();
         };
     };
-    hash[key] = [startNode, endNode];
-    parentNode23.insertBefore(startNode, anchor);
+    if (shouldCreateDelimiters) {
+        startNode = createAnchor(0, key);
+        endNode = createAnchor(1, key);
+        hash[key] = [startNode, endNode];
+        parentNode23.insertBefore(startNode, anchor);
+    };
     if (value) {
         if (!previousValue || !isPreviousObject || isTypeMismatch) {
             if (Array.isArray(value)) {
                 var result = createArray(value, template22, receiver[SYMBOLROOT]);
-                var nodes28 = result[0];
-                var proxy29 = result[1];
-                var _js31 = nodes28.length;
-                for (var _js30 = 0; _js30 < _js31; _js30 += 1) {
-                    var node = nodes28[_js30];
+                var nodes = result[0];
+                var proxy28 = result[1];
+                var _js30 = nodes.length;
+                for (var _js29 = 0; _js29 < _js30; _js29 += 1) {
+                    var node = nodes[_js29];
                     parentNode23.insertBefore(node, anchor);
                 };
-                PROXYANCHORMAP.set(proxy29, anchor);
-                PROXYDELIMITERMAP.set(proxy29, hash[key]);
-                returnValue = proxy29;
+                PROXYANCHORMAP.set(proxy28, anchor);
+                PROXYDELIMITERMAP.set(proxy28, hash[key]);
+                returnValue = proxy28;
             } else {
-                var result32 = createBinding(value, template22, receiver[SYMBOLROOT]);
-                var proxy33 = result32[0];
-                var node34 = result32[1];
-                parentNode23.insertBefore(node34, anchor);
-                returnValue = proxy33;
+                var result31 = createBinding(value, template22, receiver[SYMBOLROOT]);
+                var proxy32 = result31[0];
+                var node33 = result31[1];
+                parentNode23.insertBefore(node33, anchor);
+                returnValue = proxy32;
             };
         } else {
             var previousValues = isPreviousArray ? previousValue : [previousValue];
             var values = isValueArray ? value : [value];
-            var _js35 = values.length - 1;
-            for (var i = 0; i <= _js35; i += 1) {
+            var _js34 = values.length - 1;
+            for (var i = 0; i <= _js34; i += 1) {
                 var prev = previousValues[i];
                 var obj = values[i];
                 if (prev && obj) {
@@ -884,14 +903,16 @@ function setSlot(target, key, value, receiver, descriptor, isInitializing) {
             returnValue = previousValue;
         };
     } else {
-        var _js36 = slot21.childNodes;
-        var _js38 = _js36.length;
-        for (var _js37 = 0; _js37 < _js38; _js37 += 1) {
-            var node39 = _js36[_js37];
-            parentNode23.insertBefore(node39.cloneNode(true), anchor);
+        var _js35 = slot21.childNodes;
+        var _js37 = _js35.length;
+        for (var _js36 = 0; _js36 < _js37; _js36 += 1) {
+            var node38 = _js35[_js36];
+            parentNode23.insertBefore(node38.cloneNode(true), anchor);
         };
     };
-    parentNode23.insertBefore(endNode, anchor);
+    if (shouldCreateDelimiters) {
+        parentNode23.insertBefore(endNode, anchor);
+    };
     
     return returnValue;
 };
@@ -916,24 +937,24 @@ function setSlot(target, key, value, receiver, descriptor, isInitializing) {
                    (@ BOUND-LISTENER OPTIONS)))
            (CHAIN LISTENERS (PUSH BOUND-LISTENER)))))) */
 function setEvent(target, value, descriptor, receiver) {
-    var node39 = descriptor.node;
-    var event40 = descriptor.event;
+    var node38 = descriptor.node;
+    var event39 = descriptor.event;
     var hash = TARGETEVENTMAP.get(target);
-    var listeners = hash[event40];
+    var listeners = hash[event39];
     if (!listeners) {
         listeners = [];
-        hash[event40] = listeners;
+        hash[event39] = listeners;
     };
-    var _js42 = listeners.length;
-    for (var _js41 = 0; _js41 < _js42; _js41 += 1) {
-        var listener = listeners[_js41];
-        node39.removeEventListener(event40, listener, listener.options);
+    var _js41 = listeners.length;
+    for (var _js40 = 0; _js40 < _js41; _js40 += 1) {
+        var listener = listeners[_js40];
+        node38.removeEventListener(event39, listener, listener.options);
     };
     if (value) {
         value.isEventListener = true;
         var boundListener = value.bind(receiver);
         boundListener.options = value.options;
-        node39.addEventListener(event40, boundListener, boundListener.options);
+        node38.addEventListener(event39, boundListener, boundListener.options);
         return listeners.push(boundListener);
     };
 };
@@ -1061,8 +1082,8 @@ function processTemplate(template) {
     var clone = root.cloneNode(true);
     var context = {  };
     function walk(parentNode, path) {
-        var _js43 = parentNode.childNodes.length - 1;
-        for (var i = 0; i <= _js43; i += 1) {
+        var _js42 = parentNode.childNodes.length - 1;
+        for (var i = 0; i <= _js42; i += 1) {
             var node = parentNode.childNodes[i];
             if (node.nodeType !== main.window.Node['ELEMENT_NODE']) {
                 continue;
@@ -1173,12 +1194,12 @@ function createContext(clone, template) {
     var clonedContext = {  };
     for (var key in context) {
         clonedContext[key] = [];
-        var _js44 = context[key];
-        var _js46 = _js44.length;
-        for (var _js45 = 0; _js45 < _js46; _js45 += 1) {
-            var descriptor = _js44[_js45];
-            var path47 = descriptor.path;
-            var node = getPath(clone, path47);
+        var _js43 = context[key];
+        var _js45 = _js43.length;
+        for (var _js44 = 0; _js44 < _js45; _js44 += 1) {
+            var descriptor = _js43[_js44];
+            var path46 = descriptor.path;
+            var node = getPath(clone, path46);
             clonedContext[key].push(Object.assign({ node : node }, descriptor));
         };
     };
@@ -1193,8 +1214,8 @@ function createContext(clone, template) {
        RESULT)) */
 function getPath(node, path) {
     var result = node;
-    var _js44 = path.length - 1;
-    for (var i = 0; i <= _js44; i += 1) {
+    var _js43 = path.length - 1;
+    for (var i = 0; i <= _js43; i += 1) {
         var j = path[i];
         result = result.childNodes[j];
     };
@@ -1216,9 +1237,9 @@ function createArray(array, template, root) {
     var nodes = [];
     var proxies = [];
     var proxy = null;
-    var _js46 = array.length;
-    for (var _js45 = 0; _js45 < _js46; _js45 += 1) {
-        var item = array[_js45];
+    var _js45 = array.length;
+    for (var _js44 = 0; _js44 < _js45; _js44 += 1) {
+        var item = array[_js44];
         if (!item) {
             continue;
         };
@@ -1243,7 +1264,7 @@ function createArray(array, template, root) {
             (CONTEXT (CREATE-CONTEXT CLONE TEMPLATE))
             (START-NODE (CREATE-ANCHOR 0 'PROXY))
             (END-NODE (CREATE-ANCHOR 1 'PROXY))
-            (NODES (LIST START-NODE END-NODE))
+            (DELIMITERS (LIST START-NODE END-NODE))
             (MOUNT (GETPROP OBJ *SYMBOL-MOUNT*))
             (UNMOUNT (GETPROP OBJ *SYMBOL-UNMOUNT*))
             (MOVE (GETPROP OBJ *SYMBOL-MOVE*))
@@ -1264,7 +1285,7 @@ function createArray(array, template, root) {
        (CHAIN FRAGMENT (APPEND-CHILD START-NODE))
        (CHAIN FRAGMENT (APPEND-CHILD CLONE))
        (CHAIN FRAGMENT (APPEND-CHILD END-NODE))
-       (CHAIN *PROXY-DELIMITER-MAP* (SET PROXY NODES))
+       (CHAIN *PROXY-DELIMITER-MAP* (SET PROXY DELIMITERS))
        (LIST PROXY FRAGMENT))) */
 function createBinding(obj, template, root) {
     if (!TEMPLATEPROCESSEDMAP.get(template)) {
@@ -1276,7 +1297,7 @@ function createBinding(obj, template, root) {
     var context = createContext(clone, template);
     var startNode = createAnchor(0, 'proxy');
     var endNode = createAnchor(1, 'proxy');
-    var nodes = [startNode, endNode];
+    var delimiters = [startNode, endNode];
     var mount = obj[SYMBOLMOUNT];
     var unmount = obj[SYMBOLUNMOUNT];
     var move = obj[SYMBOLMOVE];
@@ -1307,7 +1328,7 @@ function createBinding(obj, template, root) {
     fragment.appendChild(startNode);
     fragment.appendChild(clone);
     fragment.appendChild(endNode);
-    PROXYDELIMITERMAP.set(proxy, nodes);
+    PROXYDELIMITERMAP.set(proxy, delimiters);
     
     return [proxy, fragment];
 };
@@ -1396,13 +1417,13 @@ function observeUnmount(bindings) {
     var fragment = bindings[1];
     var fragmentNodes = Array.from(fragment.childNodes);
     var observeFn = function (mutations, observer) {
-        var _js48 = mutations.length;
-        for (var _js47 = 0; _js47 < _js48; _js47 += 1) {
-            var mutation = mutations[_js47];
-            var _js49 = mutation.removedNodes;
-            var _js51 = _js49.length;
-            for (var _js50 = 0; _js50 < _js51; _js50 += 1) {
-                var node = _js49[_js50];
+        var _js47 = mutations.length;
+        for (var _js46 = 0; _js46 < _js47; _js46 += 1) {
+            var mutation = mutations[_js46];
+            var _js48 = mutation.removedNodes;
+            var _js50 = _js48.length;
+            for (var _js49 = 0; _js49 < _js50; _js49 += 1) {
+                var node = _js48[_js49];
                 for (var i = fragmentNodes.length - 1; i >= 0; i -= 1) {
                     var fragmentNode = fragmentNodes[i];
                     if (node.contains(fragmentNode)) {

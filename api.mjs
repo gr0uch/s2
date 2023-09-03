@@ -1,12 +1,18 @@
-import s2, { root, target, mount, unmount, move, registerTemplate } from "./dist/main.mjs";
+import bind, { root, target, mount, unmount, move, registerTemplate } from "./dist/main.mjs";
 import parseMustache, { createMustacheTag } from "./dist/mustache.mjs";
 import { observable, createComputed, ref } from "./dist/computed-properties.mjs";
 
-export const html = createMustacheTag(registerTemplate);
-export const computed = createComputed(mount, unmount);
+const html = createMustacheTag(registerTemplate);
+const computed = createComputed(mount, unmount);
 
-export default s2;
+export default bind;
 export {
-  root, target, mount, unmount, move, registerTemplate,
-  parseMustache, observable, ref,
+  // main
+  bind, root, target, mount, unmount, move, registerTemplate,
+
+  // mustache
+  html, parseMustache,
+
+  // computed
+  observable, computed, ref,
 };
