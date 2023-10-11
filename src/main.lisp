@@ -80,7 +80,7 @@
               (setf (@ node value) value)))))
  (getprop *property-handlers* *context-style-property*)
  (lambda (node key value)
-   (setf (getprop (@ node style) key) value))
+   (chain node style (set-property key value)))
  (getprop *property-handlers* *context-class*) set-class
  (getprop *property-handlers* *context-classlist*) set-classlist
  (getprop *property-handlers* *context-attribute*) set-attribute

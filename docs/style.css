@@ -93,7 +93,7 @@ h1 {
   text-align: center;
   font-size: calc(var(--unit) * var(--s));
   padding-block-start: calc(1em * var(--line) * 2 / var(--s) * var(--v));
-  margin-block-end: calc(1em * var(--line) * 2 / var(--s) * (var(--v) - 1));
+  margin-block-end: calc(1em * var(--line) * 2 / var(--s) * 1);
 }
 
 h1 > svg {
