@@ -155,8 +155,11 @@ pre {
   background: var(--color-highlight2);
   color: var(--color-fg);
   box-shadow: 0 -1px 0 var(--color-bg3);
-  margin-block-end: calc(1em * var(--line) * 2);
   border-radius: var(--br);
+}
+
+.install:last-of-type {
+  margin-block-end: calc(1em * var(--line) * 2);
 }
 
 nav {
@@ -226,7 +229,7 @@ ul > li, ol > li {
   --s: calc(5 / 2);
   color: var(--color-fg2);
   font-size: calc(var(--unit) * var(--s));
-  margin-block-end: calc(1em * (2 / var(--s)) * var(--line) * 2);
+  margin-block-end: calc(1em * (2 / var(--s)) * var(--line) * 1);
 }
 
 .hljs span { color: var(--f); }
