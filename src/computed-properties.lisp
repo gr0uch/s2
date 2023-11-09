@@ -232,14 +232,14 @@
     (let ((mount (getprop obj mount-symbol))
           (unmount (getprop obj unmount-symbol)))
       (defun computed-mount ()
-        (when mount (chain mount (call this)))
+        (when mount (chain mount (apply this arguments)))
         (when (not (length arguments))
           (loop for key of obj do
                 (let ((fn (getprop obj key)))
                   (when (eq (typeof fn) 'function)
                     (chain fn (call this)))))))
       (defun computed-unmount ()
-        (when unmount (chain unmount (call this)))
+        (when unmount (chain unmount (apply this arguments)))
         (unmount-object this))
       (setf
        ;; The mount symbol is not really used for the main functionality,

@@ -386,14 +386,14 @@ function unmountObject(obj) {
        (LET ((MOUNT (GETPROP OBJ MOUNT-SYMBOL))
              (UNMOUNT (GETPROP OBJ UNMOUNT-SYMBOL)))
          (DEFUN COMPUTED-MOUNT ()
-           (WHEN MOUNT (CHAIN MOUNT (CALL THIS)))
+           (WHEN MOUNT (CHAIN MOUNT (APPLY THIS ARGUMENTS)))
            (WHEN (NOT (LENGTH ARGUMENTS))
              (LOOP FOR KEY OF OBJ
                    DO (LET ((FN (GETPROP OBJ KEY)))
                         (WHEN (EQ (TYPEOF FN) 'FUNCTION)
                           (CHAIN FN (CALL THIS)))))))
          (DEFUN COMPUTED-UNMOUNT ()
-           (WHEN UNMOUNT (CHAIN UNMOUNT (CALL THIS)))
+           (WHEN UNMOUNT (CHAIN UNMOUNT (APPLY THIS ARGUMENTS)))
            (UNMOUNT-OBJECT THIS))
          (SETF (GETPROP OBJ MOUNT-SYMBOL) COMPUTED-MOUNT
                (GETPROP OBJ UNMOUNT-SYMBOL) COMPUTED-UNMOUNT))
@@ -416,7 +416,7 @@ function createComputed(mountSymbol, unmountSymbol) {
         var unmount = obj[unmountSymbol];
         function computedMount() {
             if (mount) {
-                mount.call(this);
+                mount.apply(this, arguments);
             };
             if (!arguments.length) {
                 for (var key in obj) {
@@ -429,7 +429,7 @@ function createComputed(mountSymbol, unmountSymbol) {
         };
         function computedUnmount() {
             if (unmount) {
-                unmount.call(this);
+                unmount.apply(this, arguments);
             };
             
             return unmountObject(this);

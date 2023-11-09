@@ -333,6 +333,9 @@ Deno.test(
               stack.push("rank");
               return ally.rank;
             },
+            [mount](node) {
+              assert(node, "node exists");
+            }
           });
         });
       },
