@@ -811,7 +811,7 @@
 
 (setf (@ main debug) false
       (@ main is-deferred) false
-      (@ main should-unmount-root) t
+      (@ main should-unmount-root) false
       (@ main window) (if (not (eq (typeof window) 'undefined)) window nil))
 
 

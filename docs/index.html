@@ -134,7 +134,7 @@ const derived = observable(computed({
 <h4>Properties</h4>
 <p>These can be assigned as properties on the default function. They are mainly for development purposes, or enabling advanced use cases.</p>
 <ul>
-  <li><code>bind.shouldUnmountRoot</code>: enabled by default, but can be disabled. This will automatically call unmount when the DOM nodes mapped to an object are removed. This should only be disabled if you need to keep updating nodes that may be removed and appended later.</li>
+  <li><code>bind.shouldUnmountRoot</code>: disabled by default, but can be enabled. This will automatically call unmount when the DOM nodes mapped to an object are removed. This should be disabled if you need to keep updating nodes that may be removed and appended later.</li>
   <li><code>bind.isDeferred</code> (experimental): this will defer setting proxy values as a microtask. This might be preferable if there is significant blocking in between updates. However, it can break functionality in case there are updates that depend on a previous update in the same tick.</li>
   <li><code>bind.window</code>: set a different global object for server-side rendering.</li>
   <li><code>bind.debug</code>: use comment nodes and turn on messages in the console. Warning: has a performance impact.</li>

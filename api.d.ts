@@ -32,7 +32,7 @@ export function ref(obj: DataObject): DataObject;
 
 type S2Properties = {
   /**
-   * enabled by default, but can be disabled. This will automatically call
+   * disabled by default, but can be enabled. This will automatically call
    * unmount when the DOM nodes mapped to an object are removed. This should
    * only be disabled if you need to keep updating nodes that may be removed and
    * appended later.

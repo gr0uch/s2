@@ -1444,14 +1444,14 @@ function observeUnmount(bindings) {
 };
 /* (SETF (@ MAIN DEBUG) FALSE
          (@ MAIN IS-DEFERRED) FALSE
-         (@ MAIN SHOULD-UNMOUNT-ROOT) T
+         (@ MAIN SHOULD-UNMOUNT-ROOT) FALSE
          (@ MAIN WINDOW)
            (IF (NOT (EQ (TYPEOF WINDOW) 'UNDEFINED))
                WINDOW
                NIL)) */
 main.debug = false;
 main.isDeferred = false;
-main.shouldUnmountRoot = true;
+main.shouldUnmountRoot = false;
 main.window = typeof window !== 'undefined' ? window : null;
 /* (EXPORT DEFAULT MAIN NAMES
            ((*SYMBOL-MOUNT* MOUNT) (*SYMBOL-UNMOUNT* UNMOUNT)
