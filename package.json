@@ -1,6 +1,6 @@
 {
   "name": "s2-engine",
-  "version": "1.0.18",
+  "version": "1.0.19",
   "description": "A function for reactive templating on the web.",
   "main": "api.mjs",
   "types": "api.d.ts",
