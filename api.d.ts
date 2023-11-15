@@ -9,10 +9,7 @@ interface Proxy {
   [key: PrimitiveKey]: any;
 }
 
-type S2Result = [
-  proxy: Proxy,
-  fragment: DocumentFragment,
-];
+type S2Result = [proxy: Proxy, fragment: DocumentFragment];
 
 export function registerTemplate(
   name: string,
@@ -33,7 +30,7 @@ export function observable(
 export function computed(definition: DataObject): DataObject;
 export function ref(obj: DataObject): DataObject;
 
-type S2Fn = ((obj: DataObject, template: Element) => S2Result) & {
+type S2Properties = {
   /**
    * enabled by default, but can be disabled. This will automatically call
    * unmount when the DOM nodes mapped to an object are removed. This should
@@ -59,7 +56,10 @@ type S2Fn = ((obj: DataObject, template: Element) => S2Result) & {
   debug: boolean;
 };
 
-export default function s2(obj: DataObject, template: Element): S2Result;
+type S2Fn = ((obj: DataObject, template: Element) => S2Result) & S2Properties;
+
+declare const s2: S2Fn;
+export default s2;
 
 export const root: symbol;
 export const target: symbol;
