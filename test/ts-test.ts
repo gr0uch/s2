@@ -12,6 +12,8 @@ const s = observable(computed({
     },
 }), true);
 
+s2.debug = true;
+
 const t = html`<div>{{wat}}</div>`;
 
 const [proxy, fragment] = s2(s, t);

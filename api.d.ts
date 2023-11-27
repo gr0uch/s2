@@ -1,15 +1,4 @@
-type PrimitiveKey = string | number | symbol;
-
-interface DataObject {
-  [key: PrimitiveKey]: any;
-}
-
-// Mainly for annotation purposes.
-interface Proxy {
-  [key: PrimitiveKey]: any;
-}
-
-type S2Result = [proxy: Proxy, fragment: DocumentFragment];
+type S2Result<T> = [proxy: T, fragment: DocumentFragment];
 
 export function registerTemplate(
   name: string,
@@ -23,14 +12,16 @@ export function html(
   ...props: Array<string | Element>
 ): Element;
 
-export function observable(
-  obj?: DataObject,
+export function observable<T>(
+  obj?: T,
   shouldPartiallyReplace?: boolean
-): Proxy;
-export function computed(definition: DataObject): DataObject;
-export function ref(obj: DataObject): DataObject;
+): T;
+export function computed<T>(definition: T): T;
+export function ref<T>(obj: T): T;
 
-type S2Properties = {
+interface S2Fn {
+  <T>(obj: T, template: Element): S2Result<T>;
+
   /**
    * disabled by default, but can be enabled. This will automatically call
    * unmount when the DOM nodes mapped to an object are removed. This should
@@ -54,9 +45,7 @@ type S2Properties = {
    * performance impact.
    */
   debug: boolean;
-};
-
-type S2Fn = ((obj: DataObject, template: Element) => S2Result) & S2Properties;
+}
 
 declare const s2: S2Fn;
 export default s2;
