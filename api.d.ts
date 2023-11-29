@@ -1,4 +1,4 @@
-type S2Result<T> = [proxy: T, fragment: DocumentFragment];
+type S2Result<T extends object> = [proxy: T, fragment: DocumentFragment];
 
 export function registerTemplate(
   name: string,
@@ -12,15 +12,15 @@ export function html(
   ...props: Array<string | Element>
 ): Element;
 
-export function observable<T>(
+export function observable<T extends object>(
   obj?: T,
   shouldPartiallyReplace?: boolean
 ): T;
-export function computed<T>(definition: T): T;
-export function ref<T>(obj: T): T;
+export function computed<T extends object>(definition: T): T;
+export function ref<T extends object>(obj: T): T;
 
 interface S2Fn {
-  <T>(obj: T, template: Element): S2Result<T>;
+  <T extends object>(obj: T, template: Element): S2Result<T>;
 
   /**
    * disabled by default, but can be enabled. This will automatically call
