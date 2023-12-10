@@ -23,9 +23,9 @@ interface S2Fn {
   <T extends object>(obj: T, template: Element): S2Result<T>;
 
   /**
-   * disabled by default, but can be enabled. This will automatically call
+   * Disabled by default, but can be enabled. This will automatically call
    * unmount when the DOM nodes mapped to an object are removed. This should
-   * only be disabled if you need to keep updating nodes that may be removed and
+   * be disabled if you need to keep updating nodes that may be removed and
    * appended later.
    */
   shouldUnmountRoot: boolean;
@@ -33,15 +33,17 @@ interface S2Fn {
    * (experimental): this will defer setting proxy values as a microtask. This
    * might be preferable if there is significant blocking in between updates.
    * However, it can break functionality in case there are updates that depend
-   * on a previous update in the same tick.
+   * on a previous update in the same tick. As long as the view model is not
+   * read for updates (i.e. if only observable/computed is used) then this
+   * should be safe.
    */
   isDeferred: boolean;
   /**
-   * set a different global object for server-side rendering
+   * Set a different global object for server-side rendering.
    */
   window: Window | null;
   /**
-   * use comment nodes and turn on messages in the console. Warning: has a
+   * Use comment nodes and turn on messages in the console. Warning: has a
    * performance impact.
    */
   debug: boolean;

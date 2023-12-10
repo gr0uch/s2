@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<title>s2 sandbox</title>
+<script type="module">
+  import bind, { mount, unmount, registerTemplate } from "../dist/main.mjs";
+  import { createComputed, observable } from "../dist/computed-properties.mjs";
+  import { createMustacheTag } from "../dist/mustache.mjs";
+
+  const html = createMustacheTag(registerTemplate);
+  const computed = createComputed(mount, unmount);
+
+  const source = observable({
+    items: [
+      { id: 1, label: "A" },
+      { id: 2, label: "B" },
+    ],
+    name: "dog",
+    age: 1,
+  }, true);
+
+  const viewModel = computed({
+    items() {
+      return source.items.map((item) => {
+        return { text: `${item.id} ${item.label}` };
+        // return computed({
+        //   text() {
+        //     return `${item.id} ${item.label}`;
+        //   },
+        // });
+      });
+    },
+    user() {
+      return computed({
+        timestamp: new Date(),
+        age: source.age,
+        name() {
+          return source.name;
+        }
+      });
+    }
+  });
+  const template = html`
+  <ul>
+    {{#items}}
+      <li>{{text}}</li>
+    {{/items}}
+  </ul>
+  {{#user}}
+    <p>Name: {{name}}</p>
+    <p>Age: {{age}}</p>
+    <p>Timestamp: {{timestamp}}</p>
+  {{/user}}
+`;
+
+  const [proxy, fragment] = bind(viewModel, template);
+  document.body.appendChild(fragment);
+  window.s = source;
+</script>
