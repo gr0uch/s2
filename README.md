@@ -2,9 +2,9 @@
 
 ![test status](https://github.com/gr0uch/s2/actions/workflows/test.yml/badge.svg)
 
-s2 is a thin abstraction of the DOM that can be easily embedded on a page or within an existing framework, since it's toolless. It combines logic-less templates with reactive programming techniques.
+s2 is a thin abstraction of the DOM that can be easily embedded on a page or within an existing framework, since it's toolless. It combines logic-less templates with reactive programming, and is a modern successor to [Knockout](https://github.com/knockout/knockout) or [Ember](https://github.com/emberjs/ember.js) with superior ergonomics and [performance](https://krausest.github.io/js-framework-benchmark/current.html).
 
-See the <a href="https://gr0uch.github.io/s2/">documentation page</a> for usage details.
+At its core is a single function which provides the reactive data-binding. It also includes a Mustache-subset parser (`html`) and state management (`observable`, `computed`). See the <a href="https://gr0uch.github.io/s2/">documentation page</a> for usage details.
 
 
 ## Install
@@ -59,6 +59,7 @@ const viewModel = computed({
 });
 ```
 
+In the above example, the state has moved to `observable`, while `computed` provides the view. This provides an abstraction for arbitrary data to serve as the data model and propagating state to multiple views.
 
 ## Benchmarks
 

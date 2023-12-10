@@ -1,26 +1,26 @@
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 :root {
-  --line: calc(3 / 2);
+  --line: calc(8 / 5);
   --line-mono: calc(4 / 3);
-  --unit: 8px;
+  --unit: 8.5px;
   --br: calc(var(--unit) * 2 / 3);
 
   --font-primary: system-ui,-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif,Apple Color Emoji,Segoe UI Emoji,Segoe UI Symbol;
   --font-monospace: Consolas,Liberation Mono,Menlo,monospace;
 
-  --color-bg: oklch(22.35% 0.025 284.82);
+  --color-bg: oklch(22.35% 0.012 284.82);
   --color-bg2: oklch(0% 0 0 / 0.12);
   --color-bg3: oklch(0% 0 0 / 0.2);
-  --color-header: oklch(25.35% 0.038 306);
-  --color-header2: oklch(23.82% 0.044 274.24);
+  --color-header: oklch(25.35% 0.014 306);
+  --color-header2: oklch(23.82% 0.010 274.24);
   --color-highlight: oklch(100% 0 0);
-  --color-highlight2: oklch(100% 0 0 / 0.05);
-  --color-fg: oklch(91.18% 0.019 331.41);
-  --color-fg2: oklch(81.47% 0.038 331.41);
-  --color-fg3: oklch(32.65% 0.034 331.41);
-  --color-accent: oklch(75.29% 0.169 313);
-  --color-accent2: oklch(57.94% 0.119 313);
+  --color-highlight2: oklch(100% 0 0 / 0.04);
+  --color-fg: oklch(91.18% 0.009 331.41);
+  --color-fg2: oklch(81.47% 0.018 331.41);
+  --color-fg3: oklch(32.65% 0.024 331.41);
+  --color-accent: oklch(75.29% 0.079 313);
+  --color-accent2: oklch(57.94% 0.059 313);
 }
 
 body {
@@ -36,11 +36,11 @@ body::-webkit-scrollbar {
 }
 
 body::-webkit-scrollbar-track {
-  background-color: oklch(23.82% 0.044 274.24);
+  background-color: oklch(23.82% 0.014 274.24);
 }
 
 body::-webkit-scrollbar-thumb {
-  background-color: oklch(32.65% 0.034 331.41);
+  background-color: oklch(32.65% 0.024 331.41);
 }
 
 ::selection {
@@ -60,7 +60,7 @@ body > header a {
 
 article {
   margin: auto;
-  max-width: calc(var(--unit) * 98);
+  max-width: calc(var(--unit) * 108);
   margin-block-end: calc(1em * var(--line) * 3);
   padding: 0 calc(1em * var(--line) / 3);
   hyphens: auto;
@@ -88,22 +88,29 @@ hr {
 }
 
 h1 {
-  --s: 7;
+  --s: 6;
   font-weight: inherit;
   text-align: center;
   font-size: calc(var(--unit) * var(--s));
-  padding-block-start: calc(1em * var(--line) * 2 / var(--s) * var(--v));
-  margin-block-end: calc(1em * var(--line) * 2 / var(--s) * 1);
+  padding-block-start: calc(1em * var(--line) * 1 / var(--s) * var(--v));
+  margin-block-end: calc(1em * var(--line) * 1 / var(--s) * 1);
 }
 
-h1 > svg {
-  --s: calc(1em * 3 / 4);
-  width: var(--s);
-  height: var(--s);
+.logo {
+  --s: 6;
+  padding-block-start: calc(1em * var(--line) * 3 / var(--s) * var(--v));
+}
+
+.logo svg {
+  display: block;
+  --s: 7;
+  width: calc(var(--unit) * var(--s));
+  height: calc(var(--unit) * var(--s));
+  margin-inline: auto;
 }
 
 h2 {
-  --s: 5;
+  --s: 4;
   font-size: calc(var(--unit) * var(--s));
   font-style: italic;
   margin-block-start: calc(1em * var(--line) * 2 / var(--s));
@@ -156,6 +163,7 @@ pre {
   color: var(--color-fg);
   box-shadow: 0 -1px 0 var(--color-bg3);
   border-radius: var(--br);
+  margin-block-start: calc(1em * var(--line) * -1 / 2);
 }
 
 .install:last-of-type {
@@ -178,7 +186,6 @@ ul > li, ol > li {
 
 .container {
   container: features / inline-size;
-  width: calc(100% * 5 / 6);
   margin: 0 auto;
 }
 
@@ -233,12 +240,12 @@ ul > li, ol > li {
 }
 
 .hljs span { color: var(--f); }
-.hljs-property { --f: oklch(73.24% 0.072 241.41); }
-.hljs-comment { --f: oklch(44.71% 0.041 333.53); }
+.hljs-property { --f: oklch(73.24% 0.042 241.41); }
+.hljs-comment { --f: oklch(44.71% 0.031 333.53); }
 .hljs-params { --f: oklch(82.06% 0.11 358.94); }
-.hljs-title { --f: oklch(78.24% 0.072 147.18); }
-.hljs-function { --f: oklch(74.71% 0.116 238.24); }
-.hljs-number { --f: oklch(78.53% 0.119 48.71); }
-.hljs-keyword { --f: oklch(75.88% 0.107 331.41); }
+.hljs-title { --f: oklch(78.24% 0.052 147.18); }
+.hljs-function { --f: oklch(74.71% 0.086 238.24); }
+.hljs-number { --f: oklch(78.53% 0.089 48.71); }
+.hljs-keyword { --f: oklch(75.88% 0.087 331.41); }
 .hljs-attr { --f: oklch(76.76% 0.053 299.65); }
 .hljs-string { --f: oklch(79.71% 0.044 97.41); }

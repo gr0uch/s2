@@ -17,14 +17,16 @@
 <script src="./root.mjs" type="module"></script>
 <header>
   <article>
-    <h1><svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><use href="./s2.svg#s2-logo" class="hljs-title"></use></svg> s2-engine</h1>
+    <div class="logo">
+      <svg viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg"><use href="./s2.svg#s2-logo" class="hljs-title"></use></svg>
+    </div>
+    <h1>s2-engine</h1>
     <nav>
       <a href="#concepts">Concepts</a>
       <a href="#api-reference">API reference</a>
       <a href="https://github.com/gr0uch/s2" rel="external">Repository</a>
     </nav>
-
-    <p class="tagline">s2 is a template engine that can be easily embedded on any page, since it's toolless. It augments logic-less templates with reactive programming.</p>
+    <p class="tagline">s2 is a template engine that can be easily embedded on any page, since it's toolless. It combines logic-less templates with reactive programming, and is a successor to <a href="https://github.com/knockout/knockout">Knockout</a> or <a href="https://github.com/emberjs/ember.js">Ember</a> with superior ergonomics and <a href="https://krausest.github.io/js-framework-benchmark/current.html">performance</a>.</p>
     <p class="tagline">Import it directly via CDN:</p>
     <pre class="install"><code>import bind from "https://esm.run/s2-engine";</code></pre>
     <p class="tagline">Get it from <code>npm</code>:</p>
@@ -44,19 +46,23 @@
 <h2 id="concepts">Concepts</h2>
 
 <h3 id="reactive-templating">Reactive Templating</h3>
-<p>s2 is old school templating with a new twist: reactive programming. The template only updates what changed in data. There are no methods to call to update state or re-render, one can simply mutate data.</p>
+<p>s2 is old school templating with a new twist: reactive programming. The template only updates what changed in data. There are no methods to call to update state or re-render, one can simply mutate data. This makes it handy for building Single Page Applications (SPA), or adding islands of interactivity, using mainly template literals and Plain Old JavaScript Objects (POJO).</p>
 <pre><code>// s2 embraces JS Proxy
 proxy.count++; // will only update parts of a template
 
+// later on in the template...
+const template = html`&lt;p&gt;Count: {{count}}&lt;/p&gt;`;
+
 // contrived React example
 setState((count) => count + 1); // will re-render entire component w/ children
+
 </code></pre>
-<p>There are some restrictions as well: templates may not inline code, this inherently makes it safer. It resembles <a href="https://mustache.github.io/">Mustache</a>, <a href="https://www.smarty.net/">Smarty</a>, and other server-side templating.</p>
+<p>Templates may not inline executable code, which inherently makes templates safe.</p>
 
 <hr>
 
 <h3 id="view-model">The View Model</h3>
-<p>There is a one-to-one binding from a view model instance to an element in a template. A consequence of this is that the view model resembles the shape of the actual DOM tree. An array of objects correspond to DOM elements ordered by index, a plain object can only correspond to one DOM element, and arrays of primitive values are invalid.</p>
+<p>There is a one-to-one binding from a view model instance to an element in a template. A consequence of this is that the view model resembles the shape of the actual DOM tree. An array of objects correspond to DOM elements ordered by index, a plain object can only correspond to one DOM element, and arrays of primitive values are invalid (but valid when using <code>observable</code> in the next section).</p>
 <p>For example, the following view model and template:</p>
 <pre><code>import bind, { html } from "https://esm.run/s2-engine";
 
@@ -86,9 +92,12 @@ document.body.appendChild(fragment);</code></pre>
 <p>Computed properties allow the view model to be derived from data. Computed properties are functions on a computed object that may re-run when observable data changes. Using observables allows the data to be decoupled from the view. For example, the same example above with computeds:</p>
 <pre><code>import bind, { observable, computed, html } from "https://esm.run/s2-engine";
 
+// passing the second argument, `observable({ ... }, true)` will enable
+// nested updates, such as `source.items[i]` to be reactive.
 const source = observable({
   items: ["A", "B", "C"],
 });
+
 const viewModel = computed({
   items() { // will re-run when source.items is overwritten
     return source.items.map((text) => {
@@ -106,19 +115,20 @@ const template = html`
 
 const [proxy, fragment] = bind(viewModel, template);
 document.body.appendChild(fragment);</code></pre>
-<p>Computed objects can be composed by returning computed objects from computed properties. They can also be composed as the input to an observable:</p>
+<p>A useful pattern of composition is to pass a computed as the input to an observable:</p>
 <pre><code>const source = observable({
   number: 3,
 });
 const derived = observable(computed({
   square: () => Math.pow(source.number, 2), // will be 9
 }));</code></pre>
+<p>Computed objects can be composed by returning computed objects from computed properties. This can be done mostly as an optimization to minimize the amount of work done in a single computed property.</p>
 
 <hr>
 
 <h3 id="server-side-rendering">Server-side Rendering</h3>
 <p>A DOM implementation is recommended, for example, <a href="https://github.com/WebReflection/linkedom">linkedom</a>. One just needs to create a window object and assign it as <code>bind.window = window</code> and also <code>parseMustache.window = window</code> when using Mustache.</p>
-<p>One can <em>almost</em> use Mustache.js as a drop-in renderer, with some caveats: Mustache will try to execute functions in data, so to avoid that, the data needs to be rid of functions first. Passing data into <code>JSON.parse(JSON.stringify(...))</code> should remove all non-serializable data, but cloning the object with only serializable data is recommended. Also, the custom extensions will not work.</p>
+<p>One can <em>almost</em> use Mustache.js as a drop-in renderer, with some caveats: Mustache will try to execute functions in data, so to avoid that, the data needs to be rid of functions first. Passing data into <code>JSON.parse(JSON.stringify(...))</code> should remove all non-serializable data, but cloning the object with only serializable data is recommended. Also, the custom extensions in s2 will not work.</p>
 <hr>
 
 <h2 id="api-reference">API reference</h2>
@@ -135,7 +145,7 @@ const derived = observable(computed({
 <p>These can be assigned as properties on the default function. They are mainly for development purposes, or enabling advanced use cases.</p>
 <ul>
   <li><code>bind.shouldUnmountRoot</code>: disabled by default, but can be enabled. This will automatically call unmount when the DOM nodes mapped to an object are removed. This should be disabled if you need to keep updating nodes that may be removed and appended later.</li>
-  <li><code>bind.isDeferred</code> (experimental): this will defer setting proxy values as a microtask. This might be preferable if there is significant blocking in between updates. However, it can break functionality in case there are updates that depend on a previous update in the same tick.</li>
+  <li><code>bind.isDeferred</code> (experimental): this will defer setting proxy values as a microtask. This might be preferable if there is significant blocking in between updates. However, it can break functionality in case there are updates that depend on a previous update in the same tick. As long as the view model is not read for updates (i.e. if only observable/computed is used) then this should be safe.</li>
   <li><code>bind.window</code>: set a different global object for server-side rendering.</li>
   <li><code>bind.debug</code>: use comment nodes and turn on messages in the console. Warning: has a performance impact.</li>
 </ul>
